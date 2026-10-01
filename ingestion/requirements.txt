@@ -1,0 +1,6 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+jsonschema>=4.22
+# Chon MOT trong hai, bo comment sau khi quyet dinh engine luu tru:
+# elasticsearch>=8.13        # hoac opensearch-py>=2.6
+# clickhouse-connect>=0.7

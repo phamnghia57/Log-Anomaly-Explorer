@@ -1,0 +1,4 @@
+httpx>=0.27
+# Them thu vien clustering/thong ke khi can, vi du:
+# scikit-learn>=1.4
+# numpy>=1.26

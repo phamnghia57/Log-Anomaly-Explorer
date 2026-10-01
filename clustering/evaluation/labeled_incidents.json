@@ -1,0 +1,13 @@
+{
+  "$comment": "GitHub evidence: labeled incidents. Moi phan tu la mot su co THAT (thuong tao ra bang demo-app /simulate-error) da duoc con nguoi xac nhan, dung lam ground-truth cho precision_recall.py.",
+  "incidents": [
+    {
+      "incident_id": "example-001",
+      "window_from": "2026-10-01T09:00:00Z",
+      "window_to": "2026-10-01T09:10:00Z",
+      "service": "demo-web",
+      "description": "TODO: vi du - tiem loi qua /simulate-error?rate=0.8 trong 10 phut de tao mot incident that",
+      "expected_cluster_signature": "TODO: dien signature cum loi tuong ung sau khi chay clustering"
+    }
+  ]
+}

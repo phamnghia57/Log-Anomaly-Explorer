@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/phamnghia57/Log-Anomaly-Explorer/docs/contracts/log-schema.json",
+  "title": "StructuredLog",
+  "description": "Hop dong du lieu giua demo-app (Manh) va ingestion (Minh). Moi log gui len endpoint /ingest phai khop schema nay.",
+  "type": "object",
+  "required": ["timestamp", "level", "service", "trace_id", "span_id", "message"],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601, UTC. Vi du: 2026-10-01T09:30:00Z"
+    },
+    "level": {
+      "type": "string",
+      "enum": ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"]
+    },
+    "service": {
+      "type": "string",
+      "description": "Ten service sinh log, vi du: demo-web, demo-mobile-api"
+    },
+    "trace_id": {
+      "type": "string",
+      "description": "Lay tu OpenTelemetry context cua request dang xu ly"
+    },
+    "span_id": {
+      "type": "string",
+      "description": "Lay tu OpenTelemetry context cua span hien tai"
+    },
+    "request_id": {
+      "type": "string",
+      "description": "Tuy chon - id request o tang ung dung, neu khac trace_id"
+    },
+    "message": {
+      "type": "string",
+      "description": "Noi dung log / thong diep loi"
+    },
+    "stack_trace": {
+      "type": ["string", "null"],
+      "description": "Tuy chon - dung lam dau vao cho clustering (Nam)"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Tuy chon - cac truong OTel bo sung: span duration_ms, http.status_code, http.route, ..."
+    }
+  },
+  "additionalProperties": false
+}
