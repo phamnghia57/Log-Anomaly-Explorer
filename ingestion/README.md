@@ -5,16 +5,16 @@ Nhận structured log từ demo-app, validate schema, ghi vào kho dữ liệu. 
 ## Trách nhiệm
 
 - [ ] Chọn **một** trong Elasticsearch/OpenSearch hoặc ClickHouse, cài đặt `LogStore` thật trong `src/storage.py` (đang là `InMemoryLogStore` tạm thời)
-- [ ] Thiết kế index/table cho `StructuredLog` (theo [`log-schema.json`](../docs/contracts/log-schema.json))
+- [ ] Thiết kế index/table cho `StructuredLog` (theo [`log-schema.json`](../docs/architect/contracts/log-schema.json))
 - [ ] Hoàn thiện quarantine: nơi lưu log sai schema (hiện chỉ lưu trong bộ nhớ, `write_quarantine`)
 - [ ] Lên lịch chạy `src/retention.py` định kỳ (cron/scheduler) — số ngày lưu lấy từ biến môi trường `RETENTION_DAYS`, **không hardcode**
 - [ ] Viết load test tầng ingestion trong `../load-tests/`
 
 ## Hợp đồng đang tuân theo
 
-- Input: `POST /ingest` nhận log theo [`log-schema.json`](../docs/contracts/log-schema.json)
+- Input: `POST /ingest` nhận log theo [`log-schema.json`](../docs/architect/contracts/log-schema.json)
 - Output: phục vụ `search()` cho Nghĩa, phục vụ đọc log thô cho Nam (clustering đọc theo `log_ids`)
-- Chi tiết request/response: [`api-contract.md`](../docs/contracts/api-contract.md)
+- Chi tiết request/response: [`api-contract.md`](../docs/architect/contracts/api-contract.md)
 
 ## Chạy thử
 

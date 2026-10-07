@@ -18,7 +18,7 @@ ALERT_WEBHOOK_URL = os.environ.get("ALERT_WEBHOOK_URL", "")
 def check_and_alert(cluster: dict) -> bool:
     """Neu cluster['score'] > ANOMALY_THRESHOLD: gui alert va cap nhat status.
 
-    Tra ve True neu da gui alert. Payload gui di xem docs/contracts/api-contract.md.
+    Tra ve True neu da gui alert. Payload gui di xem docs/architect/contracts/api-contract.md.
     """
     if cluster["score"] <= ANOMALY_THRESHOLD:
         cluster["status"] = "normal" if cluster["score"] == 0 else "anomalous"

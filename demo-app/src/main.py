@@ -32,7 +32,7 @@ app = FastAPI(title="Log Anomaly Explorer - Demo App")
 
 
 def emit_log(level: str, message: str, stack_trace: str | None = None) -> None:
-    """Sinh mot structured log dung theo docs/contracts/log-schema.json va gui ve Ingestion.
+    """Sinh mot structured log dung theo docs/architect/contracts/log-schema.json va gui ve Ingestion.
 
     TODO (Manh): thay trace_id/span_id gia bang get_current_trace_context() that.
     """

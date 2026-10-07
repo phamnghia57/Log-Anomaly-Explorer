@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 
 
 def compute_anomaly_score(signature: str, logs: list[dict], baseline_rate: float) -> dict:
-    """Tra ve mot ClusterRecord (dung theo docs/contracts/cluster-record.schema.json).
+    """Tra ve mot ClusterRecord (dung theo docs/architect/contracts/cluster-record.schema.json).
 
     `baseline_rate`: tan suat binh thuong (so loi/khoang thoi gian) cho signature nay,
     lay tu lich su. Placeholder o day chi tinh ty le giua so luong thuc te va baseline.

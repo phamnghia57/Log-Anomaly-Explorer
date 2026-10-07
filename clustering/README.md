@@ -13,7 +13,7 @@
 ## Hợp đồng đang tuân theo
 
 - Input: đọc log đã lưu từ Ingestion (Minh)
-- Output: ghi `ClusterRecord` theo [`cluster-record.schema.json`](../docs/contracts/cluster-record.schema.json), Nghĩa đọc để phục vụ Incident View
+- Output: ghi `ClusterRecord` theo [`cluster-record.schema.json`](../docs/architect/contracts/cluster-record.schema.json), Nghĩa đọc để phục vụ Incident View
 
 ## Evidence sở hữu
 

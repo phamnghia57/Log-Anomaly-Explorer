@@ -21,7 +21,7 @@ class LogStore:
         raise NotImplementedError
 
     def write_quarantine(self, log: dict, errors: list[str]) -> None:
-        """Log sai schema - luu rieng, KHONG vao index chinh (xem docs/contracts/api-contract.md)."""
+        """Log sai schema - luu rieng, KHONG vao index chinh (xem docs/architect/contracts/api-contract.md)."""
         raise NotImplementedError
 
     def search(self, *, service: str | None = None, trace_id: str | None = None,

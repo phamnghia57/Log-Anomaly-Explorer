@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/phamnghia57/Log-Anomaly-Explorer/docs/contracts/log-schema.json",
+  "$id": "https://github.com/phamnghia57/Log-Anomaly-Explorer/docs/architect/contracts/log-schema.json",
   "title": "StructuredLog",
   "description": "Hop dong du lieu giua demo-app (Manh) va ingestion (Minh). Moi log gui len endpoint /ingest phai khop schema nay.",
   "type": "object",

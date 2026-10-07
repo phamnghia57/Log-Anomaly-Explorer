@@ -21,6 +21,6 @@ def get_current_trace_context() -> dict:
     """Tra ve {"trace_id": ..., "span_id": ...} cua request dang xu ly.
 
     Dung de dinh kem vao moi structured log truoc khi gui ve /ingest,
-    dung theo docs/contracts/log-schema.json.
+    dung theo docs/architect/contracts/log-schema.json.
     """
     raise NotImplementedError("Manh: lay trace context tu OpenTelemetry tai day")

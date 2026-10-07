@@ -14,7 +14,7 @@ OpenTelemetry (instrumentation) · Python (toàn bộ service) · Elasticsearch/
 
 ## Kiến trúc
 
-![Sơ đồ hệ thống](docs/architecture-sod.png)
+![Sơ đồ hệ thống](docs/architect/architecture-sod.png)
 
 3 luồng chính: **(1)** demo-app sinh structured log có `trace_id` → ingestion validate & lưu trữ; **(2)** job nền nhóm lỗi tương tự, tính anomaly score, phát alert khi vượt ngưỡng; **(3)** search tra cứu log thô theo field, incident view hiển thị chi tiết cụm kèm trace/request liên quan.
 
@@ -33,9 +33,9 @@ Mỗi module có `README.md` riêng ghi rõ: việc cần làm (checklist), hợ
 
 ## Cấu trúc dữ liệu (đổi phải báo cả nhóm)
 
-- [`docs/contracts/log-schema.json`](docs/contracts/log-schema.json) — định dạng structured log (demo-app → ingestion)
-- [`docs/contracts/cluster-record.schema.json`](docs/contracts/cluster-record.schema.json) — định dạng cụm + anomaly score (clustering → query-api)
-- [`docs/contracts/api-contract.md`](docs/contracts/api-contract.md) — endpoint `/ingest`, `/search`, `/clusters`, `/clusters/{id}`
+- [`docs/architect/contracts/log-schema.json`](docs/architect/contracts/log-schema.json) — định dạng structured log (demo-app → ingestion)
+- [`docs/architect/contracts/cluster-record.schema.json`](docs/architect/contracts/cluster-record.schema.json) — định dạng cụm + anomaly score (clustering → query-api)
+- [`docs/architect/contracts/api-contract.md`](docs/architect/contracts/api-contract.md) — endpoint `/ingest`, `/search`, `/clusters`, `/clusters/{id}`
 
 
 ## Bắt đầu nhanh (từng module)
@@ -59,10 +59,10 @@ Xem `README.md` trong mỗi thư mục để biết cổng (port) và cách ch�
 | Labeled incidents | `clustering/evaluation/labeled_incidents.json` | Nam |
 | Precision/recall | `clustering/evaluation/precision_recall.py` | Nam |
 | Load test | `load-tests/` | Minh (ingestion), Nghĩa (end-to-end) |
-| Runbook | `docs/runbook.md` | Nghĩa |
+| Runbook | `docs/task/runbook.md` | Nghĩa |
 
 ## Quy ước làm việc
 
-1. Không sửa `docs/contracts/` một mình — báo cả nhóm trước khi đổi.
+1. Không sửa `docs/architect/contracts/` một mình — báo cả nhóm trước khi đổi.
 2. Mỗi module làm trên nhánh riêng, PR vào `main`, nhóm trưởng (Nghĩa) review trước khi merge.
 3. Trước khi code logic thật, mỗi module nên chạy được tối thiểu (`uvicorn ... --reload`) — khung đã dựng sẵn để đảm bảo điều này ngay từ đầu.

@@ -11,7 +11,7 @@
 
 ## Hợp đồng đang tuân theo
 
-Mọi log gửi đi qua `POST {INGESTION_URL}/ingest` phải đúng [`docs/contracts/log-schema.json`](../docs/contracts/log-schema.json).
+Mọi log gửi đi qua `POST {INGESTION_URL}/ingest` phải đúng [`docs/contracts/log-schema.json`](../docs/architect/contracts/log-schema.json).
 
 ## Chạy thử
 
