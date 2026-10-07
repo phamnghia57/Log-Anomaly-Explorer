@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/phamnghia57/Log-Anomaly-Explorer/docs/contracts/cluster-record.schema.json",
+  "$id": "https://github.com/phamnghia57/Log-Anomaly-Explorer/docs/architect/contracts/cluster-record.schema.json",
   "title": "ClusterRecord",
   "description": "Hop dong du lieu giua clustering (Nam) va query-api / incident view (Nghia). Moi cum loi sau khi cham diem bat thuong duoc luu theo dinh dang nay.",
   "type": "object",

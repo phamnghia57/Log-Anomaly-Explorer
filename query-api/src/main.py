@@ -3,7 +3,7 @@ Query & Incident API - Nghia.
 
 Search log + Incident View (chi tiet cum + lien ket trace/request).
 Dung chung storage cua Ingestion (Minh) va cluster data cua
-Clustering (Nam) - xem docs/contracts/api-contract.md.
+Clustering (Nam) - xem docs/architect/contracts/api-contract.md.
 
 Chay thu (voi du lieu gia tam thoi, chua noi that voi Minh/Nam):
     pip install -r query-api/requirements.txt

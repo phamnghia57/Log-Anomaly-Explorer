@@ -1,7 +1,7 @@
 """
 Ingestion Service - Minh.
 
-Nhan structured log tu demo-app, validate theo docs/contracts/log-schema.json,
+Nhan structured log tu demo-app, validate theo docs/architect/contracts/log-schema.json,
 ghi vao kho du lieu (hoac quarantine neu sai schema).
 
 Chay thu:
