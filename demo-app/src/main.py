@@ -14,8 +14,10 @@ from __future__ import annotations
 
 import os
 import random
+import time
 import traceback
 from datetime import datetime, timezone
+from typing import Literal
 
 import httpx
 from fastapi import FastAPI, HTTPException
@@ -27,21 +29,14 @@ INGESTION_URL = os.environ.get("INGESTION_URL", "http://localhost:8000/ingest")
 
 app = FastAPI(title="Log Anomaly Explorer - Demo App")
 
-# TODO (Manh): bo comment khi da cau hinh xong OpenTelemetry SDK that
-# setup_telemetry(SERVICE_NAME)
+setup_telemetry(SERVICE_NAME, app)
+
+# Dung chung 1 client de tai su dung ket noi toi Ingestion (nhanh hon httpx.post moi lan).
+_http = httpx.Client(timeout=2.0)
 
 
 def emit_log(level: str, message: str, stack_trace: str | None = None) -> None:
-    """Sinh mot structured log dung theo docs/architect/contracts/log-schema.json va gui ve Ingestion.
-
-    TODO (Manh): thay trace_id/span_id gia bang get_current_trace_context() that.
-    """
-    try:
-        trace_ctx = get_current_trace_context()
-    except NotImplementedError:
-        # Placeholder cho den khi OpenTelemetry duoc cau hinh that.
-        trace_ctx = {"trace_id": "TODO-trace-id", "span_id": "TODO-span-id"}
-
+    trace_ctx = get_current_trace_context()
     payload = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "level": level,
@@ -52,7 +47,7 @@ def emit_log(level: str, message: str, stack_trace: str | None = None) -> None:
         "stack_trace": stack_trace,
     }
     try:
-        httpx.post(INGESTION_URL, json=payload, timeout=2.0)
+        _http.post(INGESTION_URL, json=payload)
     except httpx.HTTPError:
         # Khong de loi gui log lam sap ung dung demo.
         pass
@@ -70,8 +65,18 @@ def list_items() -> dict:
     return {"items": ["item-1", "item-2", "item-3"]}
 
 
+@app.get("/api/mobile/items")
+def list_mobile_items() -> dict:
+    """Endpoint happy-path mo phong client mobile."""
+    emit_log("INFO", "Listed items successfully (mobile client)")
+    return {"items": ["item-1", "item-2", "item-3"], "client": "mobile"}
+
+
 @app.get("/simulate-error")
-def simulate_error(rate: float = 0.3) -> dict:
+def simulate_error(
+    rate: float = 0.3,
+    fault: Literal["downstream", "timeout"] = "downstream",
+) -> dict:
     """Fault injection co chu dich.
 
     Goi endpoint nay lap lai (vd. bang load-tests/locustfile.py) voi `rate` khac nhau
@@ -79,8 +84,19 @@ def simulate_error(rate: float = 0.3) -> dict:
       - GitHub evidence "fault injection"
       - Du lieu dau vao cho "labeled incidents" (Nam tu gan nhan
         giai doan nay la mot incident that trong qua trinh danh gia precision/recall)
+
+    `fault=downstream` tao loi 500; `fault=timeout` mo phong downstream timeout
+    va tra ve 504. Ca hai truong hop van gui structured log hop le.
     """
     if random.random() < rate:
+        if fault == "timeout":
+            try:
+                time.sleep(0.1)
+                raise TimeoutError("Simulated downstream timeout")
+            except TimeoutError:
+                emit_log("ERROR", "Simulated downstream timeout", stack_trace=traceback.format_exc())
+                raise HTTPException(status_code=504, detail="Simulated downstream timeout")
+
         try:
             raise RuntimeError("Simulated downstream failure")
         except RuntimeError:
