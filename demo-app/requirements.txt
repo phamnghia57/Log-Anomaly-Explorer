@@ -4,3 +4,4 @@ httpx>=0.27
 opentelemetry-api>=1.24
 opentelemetry-sdk>=1.24
 opentelemetry-exporter-otlp>=1.24
+opentelemetry-instrumentation-fastapi>=0.39
