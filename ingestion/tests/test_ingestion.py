@@ -3,10 +3,10 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from fastapi.testclient import TestClient
 
-from src import main
-from src.retention import run_retention
-from src.storage import InMemoryLogStore, OpenSearchLogStore, StorageError
-from src.validator import validate_log
+from ingestion.src import main
+from ingestion.src.retention import run_retention
+from ingestion.src.storage import InMemoryLogStore, OpenSearchLogStore, StorageError
+from ingestion.src.validator import validate_log
 
 
 def iso(delta_hours=0):
