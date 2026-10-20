@@ -1,0 +1,542 @@
+[
+  {
+    "at": "2026-10-20T05:07:31.208372+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:07:31.335750+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:07:31.493507+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:07:31.603307+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:07:31.664980+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:07:31.730074+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:08:01.181107+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:08:01.246775+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:08:01.311837+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:08:01.384101+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:08:01.445906+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:08:01.510751+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:08:31.123931+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:08:31.190006+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:08:31.254059+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:08:31.398411+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:08:31.513054+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:08:31.598153+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:08:31.672544+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:08:31.737321+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:08:31.803455+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:08:31.881629+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:08:31.952923+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:08:32.018683+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:08:32.081374+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:08:32.185019+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:08:32.261080+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:08:32.336943+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:08:32.423473+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:08:32.489159+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:08:32.566021+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:08:32.656748+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:08:32.721277+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:08:32.821661+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:08:33.121326+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:08:33.217240+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:08:33.308498+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:08:33.392218+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:08:33.458761+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:08:33.526993+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:08:33.593400+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:08:33.670578+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:08:33.738746+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:08:33.801633+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:08:33.867998+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:08:33.935374+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:08:34.000937+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:08:34.065338+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:09:16.309421+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:09:16.377586+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:09:16.443418+00:00",
+    "params": {
+      "platform": "web",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  },
+  {
+    "at": "2026-10-20T05:09:16.512717+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "value",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 422
+  },
+  {
+    "at": "2026-10-20T05:09:16.587577+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "connection",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 502
+  },
+  {
+    "at": "2026-10-20T05:09:16.652243+00:00",
+    "params": {
+      "platform": "mobile-api",
+      "fault": "runtime",
+      "rate": 1,
+      "seed": 1
+    },
+    "status": 500
+  }
+]

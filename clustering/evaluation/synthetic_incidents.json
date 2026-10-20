@@ -1,0 +1,11 @@
+{
+  "source": "synthetic fixture, not verified production or fault-injection evidence",
+  "incidents": [{
+    "incident_id": "synthetic-payment-spike",
+    "window_from": "2026-10-01T09:02:00Z",
+    "window_to": "2026-10-01T09:03:00Z",
+    "service": "demo-web",
+    "description": "Synthetic spike: 2 errors per minute baseline, then 8 errors.",
+    "expected_cluster_signature": "Payment timeout for order <NUM>"
+  }]
+}

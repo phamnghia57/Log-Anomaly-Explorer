@@ -1,0 +1,38 @@
+[
+  {
+    "cluster_id": "1983a8d0b733cfad",
+    "score": 5.0,
+    "service": "demo-web",
+    "first_seen": "2026-10-20T05:08:31.057590+00:00"
+  },
+  {
+    "cluster_id": "ea0458d260b36a00",
+    "score": 5.0,
+    "service": "demo-web",
+    "first_seen": "2026-10-20T05:08:31.602119+00:00"
+  },
+  {
+    "cluster_id": "62df1ba01c138dd1",
+    "score": 5.0,
+    "service": "demo-web",
+    "first_seen": "2026-10-20T05:08:32.021689+00:00"
+  },
+  {
+    "cluster_id": "7fd3a3db677a5138",
+    "score": 5.0,
+    "service": "demo-mobile-api",
+    "first_seen": "2026-10-20T05:08:32.491858+00:00"
+  },
+  {
+    "cluster_id": "35e5ab14415f274a",
+    "score": 5.0,
+    "service": "demo-mobile-api",
+    "first_seen": "2026-10-20T05:08:33.219453+00:00"
+  },
+  {
+    "cluster_id": "e395e422348e53c0",
+    "score": 5.0,
+    "service": "demo-mobile-api",
+    "first_seen": "2026-10-20T05:08:33.673486+00:00"
+  }
+]

@@ -1,0 +1,53 @@
+{
+  "source": "real local demo-app fault injection",
+  "incidents": [
+    {
+      "incident_id": "20261020050649-web-value",
+      "service": "demo-web",
+      "window_from": "2026-10-20T05:08:30+00:00",
+      "window_to": "2026-10-20T05:09:00+00:00",
+      "expected_cluster_signature": "Simulated validation failure: required item data is invalid",
+      "description": "Real local fault injection: platform=web, fault=value, rate=1, seed=1; baseline 1/window then 6/window."
+    },
+    {
+      "incident_id": "20261020050649-web-connection",
+      "service": "demo-web",
+      "window_from": "2026-10-20T05:08:30+00:00",
+      "window_to": "2026-10-20T05:09:00+00:00",
+      "expected_cluster_signature": "Simulated connection failure: downstream dependency unreachable",
+      "description": "Real local fault injection: platform=web, fault=connection, rate=1, seed=1; baseline 1/window then 6/window."
+    },
+    {
+      "incident_id": "20261020050649-web-runtime",
+      "service": "demo-web",
+      "window_from": "2026-10-20T05:08:30+00:00",
+      "window_to": "2026-10-20T05:09:00+00:00",
+      "expected_cluster_signature": "Simulated runtime failure",
+      "description": "Real local fault injection: platform=web, fault=runtime, rate=1, seed=1; baseline 1/window then 6/window."
+    },
+    {
+      "incident_id": "20261020050649-mobile-api-value",
+      "service": "demo-mobile-api",
+      "window_from": "2026-10-20T05:08:30+00:00",
+      "window_to": "2026-10-20T05:09:00+00:00",
+      "expected_cluster_signature": "Simulated validation failure: required item data is invalid",
+      "description": "Real local fault injection: platform=mobile-api, fault=value, rate=1, seed=1; baseline 1/window then 6/window."
+    },
+    {
+      "incident_id": "20261020050649-mobile-api-connection",
+      "service": "demo-mobile-api",
+      "window_from": "2026-10-20T05:08:30+00:00",
+      "window_to": "2026-10-20T05:09:00+00:00",
+      "expected_cluster_signature": "Simulated connection failure: downstream dependency unreachable",
+      "description": "Real local fault injection: platform=mobile-api, fault=connection, rate=1, seed=1; baseline 1/window then 6/window."
+    },
+    {
+      "incident_id": "20261020050649-mobile-api-runtime",
+      "service": "demo-mobile-api",
+      "window_from": "2026-10-20T05:08:30+00:00",
+      "window_to": "2026-10-20T05:09:00+00:00",
+      "expected_cluster_signature": "Simulated runtime failure",
+      "description": "Real local fault injection: platform=mobile-api, fault=runtime, rate=1, seed=1; baseline 1/window then 6/window."
+    }
+  ]
+}
