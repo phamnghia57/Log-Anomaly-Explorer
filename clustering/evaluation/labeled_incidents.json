@@ -50,6 +50,5 @@
       "description": "Real local fault injection: platform=mobile-api, fault=runtime, rate=1, seed=1; baseline 1/window then 6/window."
     }
   ],
-  "source": "Controlled real local demo-app fault injection; labels derived from known injection parameters, available for team review.",
-  "evidence": "integration/20261020050649/report.json"
+  "source": "Controlled real local demo-app fault injection; labels derived from known injection parameters, available for team review."
 }

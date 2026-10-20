@@ -68,7 +68,7 @@ def compute_anomaly_score(
     return {
         "cluster_id": make_cluster_id(service, signature),
         "signature": signature,
-        "score": round(score, 3),
+        "score": score,
         "log_ids": [log["log_id"] for log in logs if log.get("log_id")],
         "trace_ids": sorted({log["trace_id"] for log in logs if log.get("trace_id")}),
         "first_seen": stamped[0][1] if stamped else now_iso,
