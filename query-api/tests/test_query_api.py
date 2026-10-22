@@ -105,22 +105,12 @@ class TestSearch:
         trang2 = client.get("/search", params={"limit": 2, "offset": 2}).json()["results"]
         assert {l["trace_id"] for l in trang1}.isdisjoint({l["trace_id"] for l in trang2})
 
-    def test_log_tra_ve_HIEN_CHUA_CO_log_id(self):
-        """GAP DA PHAT HIEN (2026-10-22, qua chinh test nay): LogStore cua
-        Minh khong gan `log_id` vao document (OpenSearch de id o `_id`,
-        in-memory luu nguyen dict), nen log tra ve khong co truong nay.
-
-        Hau qua: Incident View (/clusters/{id}) se khong doi chieu duoc
-        `log_ids` cua ClusterRecord sang log cu the. Nam da phai tu va trong
-        code cua minh ({**hit["_source"], "log_id": hit["_id"]}) - dau hieu
-        cho thay cho sua dung la o LogStore, khong phai moi nguoi tu va.
-
-        Test nay ghi lai HANH VI HIEN TAI (khong phai hanh vi mong muon). Khi
-        Minh sua, test se do -> cap nhat lai, khong de lang le bo sot.
-        """
+    def test_log_tra_ve_co_log_id(self):
+        """LogStore gan `log_id` luc DOC (khong luu luc ghi), nen Incident View
+        doi chieu duoc `log_ids` cua ClusterRecord sang log cu the."""
         write("1")
         results = client.get("/search").json()["results"]
-        assert "log_id" not in results[0]
+        assert results[0]["log_id"] == "1"
 
     def test_limit_vuot_nguong_cho_phep_tra_422(self):
         resp = client.get("/search", params={"limit": 10_000})
