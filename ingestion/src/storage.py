@@ -31,7 +31,9 @@ class LogStore:
     def search(self, *, service: str | None = None, trace_id: str | None = None,
                query: str | None = None, time_from: str | None = None,
                time_to: str | None = None, limit: int = 100, offset: int = 0) -> list[dict]:
-        """Dung boi Nghia (GET /search). Tra ve log moi nhat truoc."""
+        """Dung boi Nghia (GET /search). Tra ve log moi nhat truoc.
+
+        Moi log tra ve co them truong `log_id` (gan luc DOC, khong luu o write_log)."""
         raise NotImplementedError
 
     def search_with_total(self, **filters: Any) -> tuple[list[dict], int]:
@@ -40,7 +42,9 @@ class LogStore:
         return hits, len(hits)
 
     def get_logs(self, log_ids: list[str]) -> list[dict]:
-        """Tra log thô theo `log_ids` (Nam: cluster-record; Nghia: Incident View)."""
+        """Tra log thô theo `log_ids` (Nam: cluster-record; Nghia: Incident View).
+
+        Moi log tra ve co them truong `log_id` (gan luc DOC, khong luu o write_log)."""
         raise NotImplementedError
 
     def delete_older_than(self, cutoff_iso: str) -> int:
@@ -87,6 +91,11 @@ QUARANTINE_MAPPING: dict = {
         "log": {"type": "object", "enabled": False},
     },
 }
+
+
+def _with_log_id(log: dict, log_id: str) -> dict:
+    """Ban sao cua `log` kem `log_id` - chi gan luc DOC, khong sua dict goc / document da luu."""
+    return {**log, "log_id": log_id}
 
 
 def _iso_utc_now() -> str:
@@ -207,7 +216,7 @@ class OpenSearchLogStore(LogStore):
             raise StorageError(f"search failed: {exc}") from exc
         total = resp["hits"]["total"]
         total = total["value"] if isinstance(total, dict) else int(total)
-        return [h["_source"] for h in resp["hits"]["hits"]], total
+        return [_with_log_id(h["_source"], h["_id"]) for h in resp["hits"]["hits"]], total
 
     def search(self, **filters: Any) -> list[dict]:
         return self.search_with_total(**filters)[0]
@@ -219,7 +228,7 @@ class OpenSearchLogStore(LogStore):
             resp = self.client.mget(index=self.log_index, body={"ids": list(log_ids)})
         except Exception as exc:  # noqa: BLE001
             raise StorageError(f"get_logs failed: {exc}") from exc
-        return [d["_source"] for d in resp["docs"] if d.get("found")]
+        return [_with_log_id(d["_source"], d["_id"]) for d in resp["docs"] if d.get("found")]
 
     def delete_older_than(self, cutoff_iso: str) -> int:
         try:
@@ -255,7 +264,8 @@ class InMemoryLogStore(LogStore):
         return datetime.fromisoformat(value.replace("Z", "+00:00"))
 
     def search_with_total(self, **filters: Any) -> tuple[list[dict], int]:
-        results = list(self._logs.values())
+        # Gan log_id luc doc (ban sao) - khong sua dict dang luu trong self._logs
+        results = [_with_log_id(log, log_id) for log_id, log in self._logs.items()]
         if filters.get("service"):
             results = [l for l in results if l.get("service") == filters["service"]]
         if filters.get("trace_id"):
@@ -279,7 +289,7 @@ class InMemoryLogStore(LogStore):
         return self.search_with_total(**filters)[0]
 
     def get_logs(self, log_ids: list[str]) -> list[dict]:
-        return [self._logs[i] for i in log_ids if i in self._logs]
+        return [_with_log_id(self._logs[i], i) for i in log_ids if i in self._logs]
 
     def delete_older_than(self, cutoff_iso: str) -> int:
         cutoff = self._ts(cutoff_iso)

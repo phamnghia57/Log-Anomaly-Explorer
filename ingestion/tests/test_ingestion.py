@@ -87,7 +87,19 @@ def test_retention_deletes_old(client):
 def test_get_logs_by_ids():
     s = InMemoryLogStore()
     s.write_log("x", make_log())
-    assert len(s.get_logs(["x", "missing"])) == 1
+    got = s.get_logs(["x", "missing"])
+    assert len(got) == 1 and got[0]["log_id"] == "x"
+
+
+def test_inmemory_log_id_attached_on_read_not_on_write():
+    s = InMemoryLogStore()
+    s.write_log("x", make_log())
+    assert "log_id" not in s._logs["x"]  # khong gan luc ghi
+    assert s.search()[0]["log_id"] == "x"
+    hits, _ = s.search_with_total()
+    assert hits[0]["log_id"] == "x"
+    assert s.get_logs(["x"])[0]["log_id"] == "x"
+    assert "log_id" not in s._logs["x"]  # doc xong van khong ban document goc
 
 
 def test_validator_ok():
@@ -107,10 +119,10 @@ class FakeClient:
     def index(self, **kw): self.calls.append(("index", kw))
     def search(self, **kw):
         self.calls.append(("search", kw))
-        return {"hits": {"total": {"value": 7}, "hits": [{"_source": {"message": "m"}}]}}
+        return {"hits": {"total": {"value": 7}, "hits": [{"_id": "h1", "_source": {"message": "m"}}]}}
     def mget(self, **kw):
         self.calls.append(("mget", kw))
-        return {"docs": [{"found": True, "_source": {"a": 1}}, {"found": False}]}
+        return {"docs": [{"_id": "a", "found": True, "_source": {"a": 1}}, {"_id": "b", "found": False}]}
     def delete_by_query(self, **kw):
         self.calls.append(("dbq", kw)); return {"deleted": 3}
     def ping(self): return True
@@ -130,13 +142,16 @@ def test_opensearch_store_requests():
 
     hits, total = s.search_with_total(service="a", trace_id="t", query="boom",
                                       time_from="2026-01-01T00:00:00+00:00", limit=10)
-    assert (hits, total) == ([{"message": "m"}], 7)
+    assert (hits, total) == ([{"message": "m", "log_id": "h1"}], 7)
     body = c.calls[-1][1]["body"]
     assert {"term": {"service": "a"}} in body["query"]["bool"]["filter"]
     assert {"term": {"trace_id": "t"}} in body["query"]["bool"]["filter"]
     assert body["sort"] == [{"timestamp": {"order": "desc"}}] and body["size"] == 10
 
-    assert s.get_logs(["a", "b"]) == [{"a": 1}]
+    assert s.get_logs(["a", "b"]) == [{"a": 1, "log_id": "a"}]
+    # write_log khong gan log_id vao body da ghi
+    s.write_log("id2", {"message": "y"})
+    assert "log_id" not in c.calls[-1][1]["body"]
     assert s.delete_older_than("2026-01-01T00:00:00+00:00") == 3
     assert c.calls[-1][1]["body"]["query"]["range"]["timestamp"]["lt"].startswith("2026")
 
