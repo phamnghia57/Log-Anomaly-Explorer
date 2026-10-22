@@ -1,4 +1,5 @@
-"""Test cho query-api: /health va /search (da noi vao LogStore that cua Minh).
+"""Test cho query-api: /health, /search (LogStore cua Minh) va /clusters*
+(ClusterStore cua Nam).
 
 Dung STORAGE_BACKEND=memory (xem conftest.py) nen khong can OpenSearch.
 Import bang importlib vi ten thu muc "query-api" co dau "-", khong dung duoc
@@ -124,3 +125,119 @@ class TestSearch:
 
         monkeypatch.setattr(main.store, "search_with_total", boom)
         assert client.get("/search").status_code == 503
+
+
+class FakeClusterStore:
+    """Thay OpenSearchStore that cua Nam trong test - giu dung chu ky da cong bo
+    trong clustering/src/storage.py (list_clusters/get_cluster)."""
+
+    def __init__(self, records=None):
+        self.records = list(records or [])
+        self.calls = []
+
+    def list_clusters(self, *, status=None, since=None, limit=100, offset=0):
+        self.calls.append({"status": status, "since": since, "limit": limit, "offset": offset})
+        if status is not None and status not in {"normal", "anomalous", "alerted"}:
+            raise ValueError("Invalid cluster status")
+        results = [r for r in self.records if status is None or r["status"] == status]
+        return results[offset:offset + limit]
+
+    def get_cluster(self, cluster_id):
+        self.calls.append({"get": cluster_id})
+        return next((r for r in self.records if r["cluster_id"] == cluster_id), None)
+
+
+def test_fake_khop_chu_ky_that_cua_clustering():
+    """FakeClusterStore phai khop chu ky that cua clustering/src/storage.py.
+
+    Neu Nam doi chu ky (doi ten tham so, bo tham so...) ma fake khong doi theo,
+    cac test duoi se van xanh trong khi chay that thi vo - test nay bat duoc
+    dieu do ngay.
+    """
+    import inspect
+
+    from clustering.src.storage import OpenSearchStore
+
+    for name in ("list_clusters", "get_cluster"):
+        that = inspect.signature(getattr(OpenSearchStore, name))
+        gia = inspect.signature(getattr(FakeClusterStore, name))
+        assert that == gia, f"{name}: that={that} khac fake={gia}"
+
+
+def record(cluster_id="c1", status="alerted", **over) -> dict:
+    base = {"cluster_id": cluster_id, "signature": "simulated failure in checkout",
+            "score": 3.2, "log_ids": [], "trace_ids": ["t1"],
+            "first_seen": iso(hours_ago=1), "last_seen": iso(), "status": status}
+    base.update(over)
+    return base
+
+
+@pytest.fixture
+def clusters(monkeypatch):
+    """cluster_store la bien module (co the la None khi chay memory backend),
+    nen test gan thang vao module - giong cach main.store duoc thay o tren."""
+    fake = FakeClusterStore()
+    monkeypatch.setattr(main, "cluster_store", fake)
+    return fake
+
+
+class TestListClusters:
+    def test_tra_ve_cum_tu_cluster_store(self, clusters):
+        clusters.records = [record("c1"), record("c2", status="normal")]
+        body = client.get("/clusters").json()
+        assert body["total"] == 2
+        assert {c["cluster_id"] for c in body["clusters"]} == {"c1", "c2"}
+
+    def test_loc_theo_status(self, clusters):
+        clusters.records = [record("c1", status="alerted"), record("c2", status="normal")]
+        body = client.get("/clusters", params={"status": "alerted"}).json()
+        assert [c["cluster_id"] for c in body["clusters"]] == ["c1"]
+
+    def test_status_khong_hop_le_tra_400(self, clusters):
+        resp = client.get("/clusters", params={"status": "khong-ton-tai"})
+        assert resp.status_code == 400
+
+    def test_khong_truyen_since_thi_mac_dinh_theo_retention(self, clusters):
+        client.get("/clusters")
+        since = clusters.calls[-1]["since"]
+        assert since is not None
+        nguong = datetime.now(timezone.utc) - timedelta(days=main.DEFAULT_CLUSTER_WINDOW_DAYS)
+        assert abs((datetime.fromisoformat(since) - nguong).total_seconds()) < 60
+
+    def test_since_sai_dinh_dang_tra_400(self, clusters):
+        assert client.get("/clusters", params={"since": "hom qua"}).status_code == 400
+
+    def test_cluster_store_chua_san_sang_tra_503(self, monkeypatch):
+        """Chay voi STORAGE_BACKEND=memory thi khong tao duoc OpenSearchStore -
+        /clusters* phai bao 503 ro rang, khong duoc lam sap ca service."""
+        monkeypatch.setattr(main, "cluster_store", None)
+        assert client.get("/clusters").status_code == 503
+        assert client.get("/health").status_code == 200  # /health van song
+        assert client.get("/search").status_code == 200  # /search van song
+
+
+class TestGetCluster:
+    def test_khong_ton_tai_tra_404(self, clusters):
+        assert client.get("/clusters/khong-co").status_code == 404
+
+    def test_dien_day_du_logs_tu_log_ids(self, clusters):
+        """Day la Incident View: tra `log_ids` cua ClusterRecord ve LogStore."""
+        write("log-1")
+        write("log-2")
+        write("log-khac")
+        clusters.records = [record("c1", log_ids=["log-1", "log-2"])]
+
+        body = client.get("/clusters/c1").json()
+        assert body["cluster_id"] == "c1"
+        assert {l["log_id"] for l in body["logs"]} == {"log-1", "log-2"}
+
+    def test_log_ids_rong_tra_logs_rong(self, clusters):
+        clusters.records = [record("c1", log_ids=[])]
+        assert client.get("/clusters/c1").json()["logs"] == []
+
+    def test_log_id_khong_con_ton_tai_thi_bo_qua(self, clusters):
+        """Log het han retention bi xoa -> cum van xem duoc, chi thieu log do."""
+        write("log-1")
+        clusters.records = [record("c1", log_ids=["log-1", "da-bi-xoa"])]
+        logs = client.get("/clusters/c1").json()["logs"]
+        assert [l["log_id"] for l in logs] == ["log-1"]

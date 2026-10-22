@@ -17,13 +17,13 @@ ghi vao, neu khong se doc mot kho rong khac):
 
     STORAGE_BACKEND=memory uvicorn query-api.src.main:app --reload --port 8002
 
-Trang thai: /health va /search da noi vao du lieu THAT. /clusters va
-/clusters/{id} van la mock - cho Nam hoan thien phan doc ClusterRecord
-(`list_clusters`/`get_cluster`) trong clustering/src/storage.py.
+Cum bat thuong doc tu clustering.src.storage.OpenSearchStore (Nam) - cung
+mot index `clusters` ma worker cua Nam ghi vao.
 """
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timedelta, timezone
 
 from fastapi import FastAPI, HTTPException, Query
@@ -32,13 +32,39 @@ from fastapi.responses import JSONResponse
 from ingestion.src import config
 from ingestion.src.storage import LogStore, StorageError, build_store
 
+logger = logging.getLogger("query-api")
+
 app = FastAPI(title="Log Anomaly Explorer - Query & Incident API")
 
 # Mot ket noi dung chung cho ca process, giong cach ingestion/src/main.py lam.
 store: LogStore = build_store()
 
+
+def _build_cluster_store():
+    """ClusterStore cua Nam, hoac None khi chua dung duoc.
+
+    OpenSearchStore yeu cau STORAGE_BACKEND=opensearch (xem
+    clustering/src/storage.py), nen o che do dev `STORAGE_BACKEND=memory` no
+    se khong tao duoc. Khi do tra None de /health va /search VAN chay binh
+    thuong, chi rieng /clusters* bao 503 - thay vi lam sap ca service.
+    """
+    try:
+        from clustering.src.storage import OpenSearchStore
+
+        return OpenSearchStore()
+    except Exception as exc:
+        logger.warning("Chua doc duoc cum (%s: %s) - /clusters* se tra 503", type(exc).__name__, exc)
+        return None
+
+
+cluster_store = _build_cluster_store()
+
 # api-contract.md: "from"/"to" mac dinh 24h gan nhat.
 DEFAULT_WINDOW_HOURS = 24
+# api-contract.md - GET /clusters: "since mac dinh theo retention hien hanh".
+# Dung chung RETENTION_DAYS voi ingestion vi do la chinh sach dang ap dung cho
+# log lam nen cho cum.
+DEFAULT_CLUSTER_WINDOW_DAYS = config.RETENTION_DAYS
 
 
 @app.exception_handler(StorageError)
@@ -100,33 +126,51 @@ def search(
     return {"total": total, "results": results}
 
 
-# TODO (Nghia): 2 endpoint duoi van la mock - chua noi duoc vi
-# clustering/src/storage.py (Nam) hien moi co write_cluster, chua co ham doc
-# (list_clusters/get_cluster). Noi vao ngay khi PR cua Nam merge.
-_MOCK_CLUSTERS: dict[str, dict] = {
-    "example-cluster-1": {
-        "cluster_id": "example-cluster-1",
-        "score": 3.2,
-        "status": "alerted",
-        "logs": [],
-        "trace_ids": ["abc123"],
-    }
-}
+def _require_cluster_store():
+    if cluster_store is None:
+        raise HTTPException(
+            status_code=503,
+            detail="cluster store chua san sang (can STORAGE_BACKEND=opensearch va OpenSearch dang chay)",
+        )
+    return cluster_store
 
 
 @app.get("/clusters")
-def list_clusters(status: str | None = None):
-    results = list(_MOCK_CLUSTERS.values())
-    if status:
-        results = [c for c in results if c["status"] == status]
+def list_clusters(
+    status: str | None = None,
+    since: str | None = None,
+    limit: int = Query(default=config.DEFAULT_SEARCH_LIMIT, ge=1, le=config.MAX_SEARCH_LIMIT),
+    offset: int = Query(default=0, ge=0),
+):
+    """Danh sach cum bat thuong, doc tu ClusterRecord that cua Nam.
+
+    Khong truyen `since` thi mac dinh lay theo retention hien hanh
+    (RETENTION_DAYS), dung theo api-contract.md.
+    """
+    clusters = _require_cluster_store()
+    start = _parse_dt(since, "since")
+    if start is None:
+        start = (datetime.now(timezone.utc) - timedelta(days=DEFAULT_CLUSTER_WINDOW_DAYS)).isoformat()
+
+    try:
+        results = clusters.list_clusters(status=status, since=start, limit=limit, offset=offset)
+    except ValueError as exc:  # status khong hop le -> loi cua nguoi goi, khong phai 500
+        raise HTTPException(status_code=400, detail=str(exc)) from None
     return {"total": len(results), "clusters": results}
 
 
 @app.get("/clusters/{cluster_id}")
 def get_cluster(cluster_id: str):
-    cluster = _MOCK_CLUSTERS.get(cluster_id)
+    """Incident View: chi tiet cum + log goc da gay ra no.
+
+    `logs` duoc dien bang cach tra `log_ids` cua ClusterRecord ve LogStore -
+    moi log kem `log_id` (xem ingestion/src/storage.py::_with_log_id) de doi
+    chieu duoc voi `log_ids`.
+    """
+    clusters = _require_cluster_store()
+    cluster = clusters.get_cluster(cluster_id)
     if not cluster:
         raise HTTPException(status_code=404, detail="cluster not found")
-    # TODO (Nghia): dien day du "logs" bang store.get_logs(cluster["log_ids"]) -
-    # day chinh la Incident View. Cho ClusterRecord that cua Nam.
-    return cluster
+
+    logs = store.get_logs(cluster.get("log_ids", []))
+    return {**cluster, "logs": logs}

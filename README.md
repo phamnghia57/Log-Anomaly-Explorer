@@ -51,6 +51,41 @@ uvicorn src.main:app --reload --port 8000
 
 Xem `README.md` trong mỗi thư mục để biết cổng (port) và cách chạy cụ thể.
 
+**Lưu ý**: `clustering` và `query-api` import trực tiếp `ingestion.src.storage` (dùng chung một kho dữ liệu, không gọi HTTP qua lại), nên hai module này phải chạy **từ thư mục gốc repo**:
+
+```bash
+uvicorn query-api.src.main:app --reload --port 8002
+python -m clustering.src.worker
+```
+
+## Chạy cả hệ thống bằng Docker
+
+Toàn bộ pipeline (OpenSearch + 4 service) đóng gói trong [`docker-compose.yml`](docker-compose.yml):
+
+```bash
+docker compose up -d --build
+docker compose ps                 # doi tat ca "healthy"
+```
+
+Kiểm tra nhanh:
+
+```bash
+curl http://localhost:8000/health                      # ingestion
+curl http://localhost:8001/health                      # demo-app
+curl http://localhost:8002/health                      # query-api
+curl "http://localhost:8001/simulate-error?fault=runtime&rate=1"   # tao loi that
+curl "http://localhost:8002/search?limit=5"            # tim log
+curl "http://localhost:8002/clusters"                  # cum bat thuong
+```
+
+Mọi cổng, tên index và tham số đều cấu hình qua biến môi trường — `cp .env.example .env` rồi sửa. Không bắt buộc có `.env`, mọi biến đều có mặc định hợp lý.
+
+| Tình huống | Cách xử lý |
+|---|---|
+| Cổng 8000-8002 đã bị dịch vụ khác chiếm | Đặt `INGESTION_PORT` / `DEMO_APP_PORT` / `QUERY_API_PORT` trong `.env` |
+| Máy chủ ít RAM | Giảm `OPENSEARCH_HEAP` (ví dụ `256m`) |
+| Đã có sẵn OpenSearch khác | Đặt `OPENSEARCH_URL`, và đổi `LOG_INDEX`/`CLUSTER_INDEX` nếu cần tách dữ liệu |
+
 ## GitHub evidence bắt buộc
 
 | Evidence | Vị trí | Phụ trách |
