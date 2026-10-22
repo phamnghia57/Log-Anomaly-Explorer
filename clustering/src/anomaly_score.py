@@ -1,10 +1,4 @@
-"""
-Tinh Anomaly Score cho tung cum loi.
-
-TODO (Nam): thay placeholder (so sanh dem don gian) bang so sanh
-voi baseline tan suat lich su that (vd. trung binh truot / do lech chuan
-theo khung gio, hoac mo hinh thong ke phuc tap hon).
-"""
+"""Compute anomaly scores against historical window frequencies."""
 
 from __future__ import annotations
 
@@ -46,7 +40,7 @@ def compute_anomaly_score(
     """Tra ve mot ClusterRecord (dung theo docs/architect/contracts/cluster-record.schema.json).
 
     `baseline_rate`: tan suat binh thuong (so loi/khoang thoi gian) cho signature nay,
-    lay tu lich su. Placeholder o day chi tinh ty le giua so luong thuc te va baseline.
+    lay tu lich su; score la do lech duong chia cho do lech chuan hieu dung.
     """
     if not logs or any(not math.isfinite(v) or v < 0 for v in (baseline_rate, baseline_std)) or not math.isfinite(min_std) or min_std <= 0:
         raise ValueError("Nonempty logs, finite nonnegative baseline and positive min_std required")

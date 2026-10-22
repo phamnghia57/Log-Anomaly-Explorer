@@ -1,40 +1,37 @@
-"""OpenSearch adapter. Only ClusterRecord fields are written to the clusters index."""
+"""Cluster storage using ingestion's configured OpenSearch client."""
 import os
-from urllib.parse import quote
-import httpx
+
+from ingestion.src.storage import OpenSearchLogStore, StorageError, build_store
 
 
 class OpenSearchStore:
-    def __init__(self):
-        user = os.getenv("OPENSEARCH_USER", "")
-        self.client = httpx.Client(
-            base_url=os.getenv("OPENSEARCH_URL", "http://localhost:9200").rstrip("/"),
-            auth=(user, os.getenv("OPENSEARCH_PASSWORD", "")) if user else None,
-            verify=os.getenv("OPENSEARCH_VERIFY_CERTS", "false").lower() == "true",
-            timeout=30,
-        )
-        self.logs = quote(os.getenv("LOG_INDEX", "logs"), safe="")
-        self.clusters = quote(os.getenv("CLUSTER_INDEX", "clusters"), safe="")
-
-    def request(self, method, path, **kwargs):
-        response = self.client.request(method, path, **kwargs)
-        response.raise_for_status()
-        return response.json()
+    def __init__(self, log_store=None):
+        self.log_store = log_store if log_store is not None else build_store()
+        if not isinstance(self.log_store, OpenSearchLogStore):
+            raise ValueError("Clustering requires STORAGE_BACKEND=opensearch")
+        self.client = self.log_store.client
+        self.logs = self.log_store.log_index
+        self.clusters = os.getenv("CLUSTER_INDEX", "clusters")
 
     def ensure_ready(self):
-        response = self.client.head(f"/{self.clusters}")
-        if response.status_code != 404:
-            response.raise_for_status()
-            return
+        self.log_store.ensure_ready()
         fields = {name: {"type": "keyword"} for name in
                   ("cluster_id", "signature", "log_ids", "trace_ids", "status")}
         fields.update(score={"type": "double"}, first_seen={"type": "date"}, last_seen={"type": "date"})
-        self.request("PUT", f"/{self.clusters}", json={"mappings": {"dynamic": "strict", "properties": fields}})
+        try:
+            if not self.client.indices.exists(index=self.clusters):
+                self.client.indices.create(index=self.clusters, body={
+                    "settings": self.log_store._settings(),
+                    "mappings": {"dynamic": "strict", "properties": fields},
+                })
+        except Exception as exc:
+            if "resource_already_exists_exception" not in str(exc):
+                raise StorageError(f"cannot prepare clusters: {exc}") from exc
 
     def read_logs(self, start, end):
         scroll_id = None
         try:
-            page = self.request("POST", f"/{self.logs}/_search", params={"scroll": "2m"}, json={
+            page = self.client.search(index=self.logs, scroll="2m", body={
                 "size": 1000, "sort": ["_doc"], "query": {"bool": {"filter": [
                     {"range": {"timestamp": {"gte": start, "lt": end}}},
                     {"terms": {"level": ["ERROR", "FATAL"]}},
@@ -51,15 +48,46 @@ class OpenSearchStore:
                     yield {**hit["_source"], "log_id": hit["_id"]}
                 if not scroll_id:
                     raise RuntimeError("Search did not return scroll ID")
-                page = self.request("POST", "/_search/scroll", json={"scroll": "2m", "scroll_id": scroll_id})
+                page = self.client.scroll(scroll="2m", scroll_id=scroll_id)
         finally:
             if scroll_id:
-                self.client.request("DELETE", "/_search/scroll", json={"scroll_id": [scroll_id]})
+                self.client.clear_scroll(body={"scroll_id": [scroll_id]})
 
     def write_cluster(self, record):
-        # Latest observed window per stable service/signature ID; upsert is idempotent.
-        self.request("PUT", f"/{self.clusters}/_doc/{record['cluster_id']}", json=record,
-                     params={"refresh": "wait_for"})
+        """Upsert the latest window for a stable cluster ID."""
+        try:
+            self.client.index(index=self.clusters, id=record["cluster_id"],
+                              body=record, refresh="wait_for")
+        except Exception as exc:
+            raise StorageError(f"write_cluster failed: {exc}") from exc
+
+    def list_clusters(self, *, status=None, since=None, limit=100, offset=0):
+        """Return records by last_seen descending; since includes that instant."""
+        if limit < 1 or offset < 0:
+            raise ValueError("limit must be positive and offset nonnegative")
+        filters = []
+        if status is not None:
+            if status not in {"normal", "anomalous", "alerted"}:
+                raise ValueError("Invalid cluster status")
+            filters.append({"term": {"status": status}})
+        if since is not None:
+            filters.append({"range": {"last_seen": {"gte": since}}})
+        body = {"query": {"bool": {"filter": filters}} if filters else {"match_all": {}},
+                "sort": [{"last_seen": "desc"}, {"cluster_id": "asc"}],
+                "size": limit, "from": offset}
+        try:
+            response = self.client.search(index=self.clusters, body=body)
+        except Exception as exc:
+            raise StorageError(f"list_clusters failed: {exc}") from exc
+        return [hit["_source"] for hit in response["hits"]["hits"]]
+
+    def get_cluster(self, cluster_id):
+        """Return a ClusterRecord, or None when the ID does not exist."""
+        try:
+            response = self.client.get(index=self.clusters, id=cluster_id, ignore=[404])
+        except Exception as exc:
+            raise StorageError(f"get_cluster failed: {exc}") from exc
+        return response["_source"] if response.get("found") else None
 
     def close(self):
         self.client.close()

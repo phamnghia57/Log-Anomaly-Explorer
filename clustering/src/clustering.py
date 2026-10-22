@@ -1,10 +1,4 @@
-"""
-Nhom cac loi tuong tu (clustering).
-
-TODO (Nam): thay the thuat toan placeholder (group theo message nguyen van)
-bang mot cach nhom thuc su (vd. chuan hoa message roi hash, hoac dung similarity
-tren stack_trace/message qua TF-IDF + clustering).
-"""
+"""Group errors by service and normalized message."""
 
 from __future__ import annotations
 import hashlib
@@ -29,18 +23,14 @@ ClusterKey = tuple[str, str]
 
 def normalize_message(message: str) -> str:
     """Bien message thanh template: bo gia tri dong, giu phan co dinh."""
-    text = (message or "").strip()
+    text = (message or "").strip().lower()
     for pattern, placeholder in _PATTERNS:
         text = pattern.sub(placeholder, text)
     return re.sub(r"\s+", " ", text)
 
 
 def _signature(log: dict) -> str:
-    """Dac trung dung de nhom. Placeholder: dung nguyen message.
-
-    TODO: chuan hoa (bo so, bo id dong) truoc khi group, de hai loi
-    "User 123 not found" va "User 456 not found" duoc nhom chung.
-    """
+    """Normalize dynamic values before grouping."""
     return normalize_message(log.get("message", ""))
 
 def _service(log: dict) -> str:

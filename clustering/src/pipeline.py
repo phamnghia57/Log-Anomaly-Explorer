@@ -6,7 +6,8 @@ from .clustering import group_similar_errors
 from .anomaly_score import _parse_ts, baseline_from_history, compute_anomaly_score
 
 
-def analyze(logs, window_to, *, window_seconds=60, history_windows=30, threshold=2.0):
+def analyze(logs, window_to, *, window_seconds=60, history_windows=30, threshold=2.0,
+            augmenter=None):
     """Use [end-window, end); baseline contains preceding equal windows including zeros.
 
     Input must cover the full baseline interval. Missing history is treated as zero;
@@ -30,8 +31,22 @@ def analyze(logs, window_to, *, window_seconds=60, history_windows=30, threshold
         elif history_start <= timestamp < start:
             historical.append(log)
     history = group_similar_errors(historical)
+    current_groups = group_similar_errors(current)
+    if augmenter is not None:
+        combined = {key: list(items) for key, items in history.items()}
+        for key, items in current_groups.items():
+            combined.setdefault(key, []).extend(items)
+        mapping = augmenter.map_groups(combined)
+
+        def remap(groups):
+            merged = {}
+            for key, items in groups.items():
+                merged.setdefault(mapping[key], []).extend(items)
+            return merged
+
+        history, current_groups = remap(history), remap(current_groups)
     result = []
-    for key, items in group_similar_errors(current).items():
+    for key, items in current_groups.items():
         service, signature = key
         counts = [0] * history_windows
         for log in history.get(key, []):

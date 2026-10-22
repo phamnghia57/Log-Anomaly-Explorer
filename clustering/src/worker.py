@@ -1,4 +1,4 @@
-"""Run from clustering/: python -m src.worker [--once] [--window-to ISO8601]."""
+"""Run from repository root: python -m clustering.src.worker [--once] [--window-to ISO8601]."""
 import argparse
 import logging
 import os
@@ -9,6 +9,7 @@ from .alert import check_and_alert, get_threshold
 from .anomaly_score import _parse_ts
 from .pipeline import analyze
 from .storage import OpenSearchStore
+from .ml_augment import TfidfAugmenter
 
 
 def main():
@@ -22,6 +23,14 @@ def main():
     if seconds <= 0 or history < 1 or lag < 0:
         parser.error("WINDOW_SECONDS > 0, HISTORY_WINDOWS >= 1, INGESTION_LAG_SECONDS >= 0 required")
     logging.basicConfig(level=logging.INFO)
+    augmenter = None
+    if os.getenv("ML_AUGMENT_ENABLED", "true").lower() in {"true", "1", "yes"}:
+        augmenter = TfidfAugmenter(
+            os.getenv("ML_STATE_PATH", "clustering/data/ml_templates.json"),
+            threshold=float(os.getenv("ML_SIMILARITY_THRESHOLD", "0.9")),
+            margin=float(os.getenv("ML_SIMILARITY_MARGIN", "0.05")),
+            max_templates=int(os.getenv("ML_MAX_TEMPLATES", "2000")),
+        )
     store = OpenSearchStore()
     try:
         store.ensure_ready()
@@ -32,7 +41,7 @@ def main():
             start = end - timedelta(seconds=seconds * (history + 1))
             logs = list(store.read_logs(start.isoformat(), end.isoformat()))
             records = analyze(logs, end.isoformat(), window_seconds=seconds,
-                              history_windows=history, threshold=get_threshold())
+                              history_windows=history, threshold=get_threshold(), augmenter=augmenter)
             for service, record in records:
                 store.write_cluster(record)
                 check_and_alert(record, service)

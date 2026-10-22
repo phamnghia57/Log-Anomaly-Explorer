@@ -1,9 +1,4 @@
-"""
-Alert dispatcher.
-
-TODO (Nam): cau hinh ANOMALY_THRESHOLD va ALERT_WEBHOOK_URL that,
-va goi check_and_alert() sau moi lan compute_anomaly_score().
-"""
+"""Dispatch alerts using configured thresholds and webhook cooldown."""
 
 from __future__ import annotations
 
@@ -72,7 +67,6 @@ def check_and_alert(cluster: dict, service: str = "") -> bool:
 
     webhook = get_webhook_url()
     if not webhook:
-        # Chua cau hinh webhook - de lai TODO thay vi fail am tham.
         # Chua cau hinh webhook: giu "anomalous" (chua gui), khong gia vo da gui.
         logger.warning("ALERT_WEBHOOK_URL chua cau hinh - cum %s vuot nguong nhung chua gui alert", cluster_id)
         return False
