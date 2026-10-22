@@ -1,0 +1,128 @@
+# Stack deploy day du cho Log Anomaly Explorer - phan "deploy len Web" do
+# Nghia phu trach.
+#
+# Gop toan bo pipeline that: OpenSearch (kho du lieu) + 4 service Python
+# (ingestion, demo-app, clustering worker, query-api).
+#
+# Chay tu THU MUC GOC repo (can Docker + Docker Compose plugin):
+#   docker compose up -d --build
+#
+# Moi cong/ten index/tham so deu doc tu bien moi truong, xem .env.example.
+# Tao .env tu file do neu can doi (vd. cong 8000-8002 da bi dich vu khac
+# tren may chiem, hoac muon tro vao mot OpenSearch co san thay vi dung
+# OpenSearch trong stack nay).
+#
+# Khac voi ingestion/docker-compose.yml (chi dung OpenSearch, phuc vu dev
+# rieng le module ingestion) - file nay la stack DEPLOY day du.
+
+services:
+  opensearch:
+    image: opensearchproject/opensearch:2.17.1
+    environment:
+      - discovery.type=single-node
+      - DISABLE_SECURITY_PLUGIN=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms${OPENSEARCH_HEAP:-512m} -Xmx${OPENSEARCH_HEAP:-512m}"
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+    # KHONG publish port 9200 ra host: day la kho du lieu noi bo, chi
+    # ingestion/clustering/query-api (cung mang docker) duoc truy cap.
+
+  ingestion:
+    build:
+      context: .
+      dockerfile: ingestion/Dockerfile
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    environment:
+      OPENSEARCH_URL: ${OPENSEARCH_URL:-http://opensearch:9200}
+      LOG_INDEX: ${LOG_INDEX:-logs}
+      QUARANTINE_INDEX: ${QUARANTINE_INDEX:-logs-quarantine}
+      RETENTION_DAYS: ${RETENTION_DAYS:-30}
+      RETENTION_INTERVAL_SECONDS: ${RETENTION_INTERVAL_SECONDS:-3600}
+    ports:
+      - "${INGESTION_PORT:-8000}:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen('http://localhost:8000/health')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  demo-app:
+    build:
+      context: .
+      dockerfile: demo-app/Dockerfile
+    depends_on:
+      ingestion:
+        condition: service_healthy
+    environment:
+      INGESTION_URL: http://ingestion:8000/ingest
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    ports:
+      - "${DEMO_APP_PORT:-8001}:8001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen('http://localhost:8001/health')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  clustering:
+    build:
+      context: .
+      dockerfile: clustering/Dockerfile
+    depends_on:
+      ingestion:
+        condition: service_healthy
+    environment:
+      OPENSEARCH_URL: ${OPENSEARCH_URL:-http://opensearch:9200}
+      LOG_INDEX: ${LOG_INDEX:-logs}
+      CLUSTER_INDEX: ${CLUSTER_INDEX:-clusters}
+      WINDOW_SECONDS: ${WINDOW_SECONDS:-60}
+      HISTORY_WINDOWS: ${HISTORY_WINDOWS:-30}
+      INGESTION_LAG_SECONDS: ${INGESTION_LAG_SECONDS:-10}
+      ANOMALY_THRESHOLD: ${ANOMALY_THRESHOLD:-2.0}
+      ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL:-}
+      ML_AUGMENT_ENABLED: ${ML_AUGMENT_ENABLED:-true}
+    volumes:
+      # State cua ML augment (template -> signature dai dien): giu qua restart
+      # de cluster_id on dinh, xem clustering/README.md muc "ML augment".
+      - clustering-data:/app/clustering/data
+    restart: unless-stopped
+    # Job nen (khong phai HTTP service) - khong co port/healthcheck.
+
+  query-api:
+    build:
+      context: .
+      dockerfile: query-api/Dockerfile
+    depends_on:
+      ingestion:
+        condition: service_healthy
+    environment:
+      OPENSEARCH_URL: ${OPENSEARCH_URL:-http://opensearch:9200}
+      LOG_INDEX: ${LOG_INDEX:-logs}
+      CLUSTER_INDEX: ${CLUSTER_INDEX:-clusters}
+      RETENTION_DAYS: ${RETENTION_DAYS:-30}
+    ports:
+      - "${QUERY_API_PORT:-8002}:8002"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen('http://localhost:8002/health')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  opensearch-data:
+  clustering-data:

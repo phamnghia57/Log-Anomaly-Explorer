@@ -8,6 +8,8 @@ venv/
 # Env / secrets
 .env
 .env.*
+# ... tru file mau (khong chua bi mat, can commit de nguoi khac biet cau hinh gi)
+!.env.example
 
 # OS / editor
 .DS_Store

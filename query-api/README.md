@@ -5,8 +5,8 @@ Search log + Incident View (chi tiết cụm + liên kết trace/request). Cũng
 ## Trách nhiệm
 
 - [x] Nối `GET /search` sang `LogStore` thật của Minh (import thẳng `ingestion.src.storage`)
-- [ ] Nối `GET /clusters`, `GET /clusters/{id}` sang dữ liệu `ClusterRecord` thật của Nam (hiện là mock tĩnh) — **đang chờ** Nam bổ sung hàm đọc (`list_clusters`/`get_cluster`) vào `clustering/src/storage.py`
-- [ ] Điền đầy đủ `logs` trong response `/clusters/{id}` bằng cách tra `log_ids` → `LogStore` — đây chính là Incident View
+- [x] Nối `GET /clusters`, `GET /clusters/{id}` sang `ClusterRecord` thật của Nam (`clustering.src.storage.OpenSearchStore`)
+- [x] Điền đầy đủ `logs` trong response `/clusters/{id}` bằng cách tra `log_ids` → `LogStore` — đây chính là Incident View
 - [ ] Giữ đồng bộ 3 hợp đồng trong `docs/architect/contracts/` khi có thay đổi, thông báo cả nhóm
 - [ ] Review PR của Mạnh/Minh/Nam, gỡ xung đột tích hợp
 - [ ] Hoàn thiện `docs/task/runbook.md` và chạy load test end-to-end trong `../load-tests/`
@@ -33,12 +33,25 @@ nếu không sẽ đọc một kho rỗng khác:
 STORAGE_BACKEND=memory uvicorn query-api.src.main:app --reload --port 8002
 ```
 
-Endpoint: `GET /health`, `GET /search` (`service`, `trace_id`, `q`, `from`, `to`, `limit`,
-`offset`; mặc định 24h gần nhất, `total` không bị cắt bởi `limit`).
+Endpoint:
+
+| Endpoint | Tham số | Ghi chú |
+|---|---|---|
+| `GET /health` | — | `503 degraded` khi mất kết nối kho dữ liệu |
+| `GET /search` | `service`, `trace_id`, `q`, `from`, `to`, `limit`, `offset` | Mặc định 24h gần nhất; `total` không bị cắt bởi `limit` |
+| `GET /clusters` | `status`, `since`, `limit`, `offset` | Mặc định `since` theo `RETENTION_DAYS` |
+| `GET /clusters/{id}` | — | Incident View: cụm + `logs` tra từ `log_ids` |
 
 ```bash
 curl "http://localhost:8002/search?service=demo-web&q=timeout&limit=20"
+curl "http://localhost:8002/clusters?status=alerted"
+curl "http://localhost:8002/clusters/<cluster_id>"
 ```
+
+**Lưu ý về `/clusters*`**: đọc cụm qua `clustering.src.storage.OpenSearchStore` (Nam), mà
+lớp này **bắt buộc `STORAGE_BACKEND=opensearch`**. Khi chạy `STORAGE_BACKEND=memory`,
+`/health` và `/search` vẫn hoạt động bình thường, riêng `/clusters*` trả `503` kèm lý do rõ
+ràng — không làm sập cả service.
 
 Test: `pip install -r query-api/requirements-dev.txt && cd query-api && pytest`
 
