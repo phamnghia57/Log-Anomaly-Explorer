@@ -1,3 +1,7 @@
 fastapi>=0.110
 uvicorn[standard]>=0.29
 httpx>=0.27
+# query-api import thang ingestion.src.storage (xem src/main.py), nen can
+# luon driver cua backend that ma LogStore dung.
+opensearch-py>=2.6
+jsonschema>=4.22
