@@ -1,0 +1,67 @@
+# CI: chay test tu dong cho moi module khi co Pull Request vao main.
+#
+# Vi sao chay RIENG tung module (mot job cho moi module) thay vi mot lenh
+# pytest chung cho ca repo:
+#   1. Dung voi kien truc hien tai - moi module co requirements.txt rieng
+#      (xem README.md goc), job nay chi cai dung phu thuoc cua module do.
+#   2. Tranh dung ten module: demo-app va ingestion deu co package ten "src".
+#      Chay chung mot tien trinh pytest se khien Python nho nham "src" cua
+#      module nay sang module kia (da do thuc te: ingestion/tests bi import
+#      nham demo-app/src/main.py). Moi job la mot tien trinh rieng nen khong
+#      bao gio dung nhau.
+#
+# Module chua co thu muc tests/ se duoc BO QUA (khong bao fail), de nguoi
+# chua viet test kip khong bi chan merge.
+
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: test ${{ matrix.module }}
+    runs-on: ubuntu-latest
+    strategy:
+      # fail-fast: false de mot module hong khong huy ket qua cac module con lai
+      fail-fast: false
+      matrix:
+        module: [demo-app, ingestion, clustering, query-api]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Kiem tra module co test chua
+        id: check
+        run: |
+          if compgen -G "${{ matrix.module }}/tests/test_*.py" > /dev/null; then
+            echo "has_tests=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_tests=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Bo qua::${{ matrix.module }} chua co test nao trong tests/"
+          fi
+        shell: bash
+
+      - name: Cai dependencies
+        if: steps.check.outputs.has_tests == 'true'
+        working-directory: ${{ matrix.module }}
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements-dev.txt ]; then
+            pip install -r requirements-dev.txt
+          else
+            # Chua co requirements-dev.txt: cai phu thuoc chinh + pytest
+            pip install -r requirements.txt pytest
+          fi
+
+      - name: Chay pytest
+        if: steps.check.outputs.has_tests == 'true'
+        working-directory: ${{ matrix.module }}
+        run: python -m pytest -v
