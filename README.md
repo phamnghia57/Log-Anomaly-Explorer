@@ -66,3 +66,4 @@ Xem `README.md` trong mỗi thư mục để biết cổng (port) và cách ch�
 1. Không sửa `docs/architect/contracts/` một mình — báo cả nhóm trước khi đổi.
 2. Mỗi module làm trên nhánh riêng, PR vào `main`, nhóm trưởng (Nghĩa) review trước khi merge.
 3. Trước khi code logic thật, mỗi module nên chạy được tối thiểu (`uvicorn ... --reload`) — khung đã dựng sẵn để đảm bảo điều này ngay từ đầu.
+4. Mỗi PR vào `main` sẽ được CI chạy test tự động ([`.github/workflows/tests.yml`](.github/workflows/tests.yml)) — xem kết quả ngay trong PR trước khi review. CI chạy **riêng từng module** (`cd <module> && pytest`), đúng cách mỗi người vẫn chạy local; module chưa có `tests/` thì được bỏ qua, không bị chặn merge.
