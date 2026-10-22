@@ -4,4 +4,7 @@ httpx>=0.27
 opentelemetry-api>=1.24
 opentelemetry-sdk>=1.24
 opentelemetry-exporter-otlp>=1.24
-opentelemetry-instrumentation-fastapi>=0.39
+# "b0" co chu dich: opentelemetry-instrumentation-fastapi chua bao gio phat
+# hanh ban final (chi 0.xbN), neu khong co marker prerelease ngay trong
+# specifier thi pip tu choi, bao "khong tim thay ban nao khop".
+opentelemetry-instrumentation-fastapi>=0.39b0
