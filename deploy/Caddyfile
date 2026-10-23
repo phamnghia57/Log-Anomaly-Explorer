@@ -35,7 +35,17 @@
 		reverse_proxy demo-app:8001
 	}
 
+	# /jaeger/* -> Jaeger UI, de nut "Xem trace tren Jaeger" cua web/ hoat
+	# dong duoc tu trang Vercel (HTTPS). Dung "handle" (KHONG phai
+	# "handle_path"): Jaeger duoc cau hinh QUERY_BASE_PATH=/jaeger (xem
+	# docker-compose.yml) nen tu no can nhan duong dan CON NGUYEN tien to
+	# "/jaeger" - cat mat tien to se lam sai route/asset noi bo cua UI do.
+	@jaeger path /jaeger*
+	handle @jaeger {
+		reverse_proxy jaeger:16686
+	}
+
 	handle {
-		respond "Log Anomaly Explorer - xem /health, /search, /clusters, /clusters/{id}, /demo/*" 200
+		respond "Log Anomaly Explorer - xem /health, /search, /clusters, /clusters/{id}, /demo/*, /jaeger/*" 200
 	}
 }
