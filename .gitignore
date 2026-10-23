@@ -17,6 +17,8 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Load test output
+# Load test output (vd. moi lan tu chay thu local) - tru file duoc commit
+# lam bang chung chinh thuc trong load-tests/README.md
 load-tests/*.csv
 load-tests/*.html
+!load-tests/ket-qua-load-test_stats.csv
