@@ -70,7 +70,7 @@ def health() -> dict:
     return {"status": "ok", "service": SERVICE_NAME}
 
 
-Fault = Literal["value", "connection", "runtime", "downstream", "timeout"]
+Fault = Literal["value", "connection", "runtime", "downstream", "timeout", "bad_schema"]
 
 
 def _fault_is_triggered(rate: float, seed: int | None) -> bool:
@@ -83,6 +83,26 @@ def _inject_fault(
     *,
     platform: Literal["web", "mobile-api"],
 ) -> None:
+    if fault == "bad_schema":
+        message = "Simulated ingestion schema validation failure"
+        trace_ctx = get_current_trace_context()
+        payload = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "level": "CRITICAL",  # Co chu dich: khong thuoc enum trong log-schema.json.
+            "service": MOBILE_SERVICE_NAME if platform == "mobile-api" else SERVICE_NAME,
+            "trace_id": trace_ctx["trace_id"],
+            "span_id": trace_ctx["span_id"],
+            "message": message,
+            "stack_trace": None,
+            "metadata": {"platform": platform, "error_type": "bad_schema"},
+        }
+        try:
+            _http.post(INGESTION_URL, json=payload)
+        except httpx.HTTPError:
+            # Best-effort nhu emit_log(), nhung gui truc tiep payload sai schema.
+            pass
+        raise HTTPException(status_code=502, detail=message)
+
     if fault == "value":
         message = "Simulated validation failure: required item data is invalid"
         emit_log("ERROR", message, platform=platform, error_type="value")

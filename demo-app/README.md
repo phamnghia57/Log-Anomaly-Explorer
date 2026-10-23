@@ -11,7 +11,7 @@
 
 ## Hợp đồng đang tuân theo
 
-Mọi log gửi đi qua `POST {INGESTION_URL}/ingest` phải đúng [`docs/contracts/log-schema.json`](../docs/architect/contracts/log-schema.json).
+Log thông thường gửi đi qua `POST {INGESTION_URL}` phải đúng [`docs/contracts/log-schema.json`](../docs/architect/contracts/log-schema.json). Fault `bad_schema` là ngoại lệ có chủ đích để kiểm tra validation của ingestion.
 
 ## Chạy thử
 
@@ -26,15 +26,21 @@ uvicorn src.main:app --reload --port 8001
 
 Các fault được hỗ trợ:
 
-- `value` — dữ liệu nghiệp vụ không hợp lệ, trả HTTP 422.
-- `connection` — kết nối downstream bị từ chối, trả HTTP 502.
-- `runtime` — lỗi thực thi có kiểm soát, trả HTTP 500.
-- `timeout` — timeout tương thích ngược, trả HTTP 504 và được gắn nhãn `runtime`.
-- `downstream` — fault tương thích ngược, trả HTTP 500 và được gắn nhãn `runtime`.
+| Fault | Mục đích / hành vi | HTTP demo-app | HTTP ingestion dự kiến |
+|---|---|---|---|
+| `value` | Dữ liệu nghiệp vụ không hợp lệ | 422 | 202 |
+| `connection` | Kết nối downstream bị từ chối | 502 | 202 |
+| `runtime` | Lỗi thực thi có kiểm soát | 500 | 202 |
+| `timeout` | Timeout tương thích ngược, gắn nhãn `runtime` | 504 | 202 |
+| `downstream` | Fault tương thích ngược, gắn nhãn `runtime` | 500 | 202 |
+| `bad_schema` | Giả lập lỗi schema validation của ingestion: gửi trực tiếp payload log sai schema (`level="CRITICAL"`) tới `INGESTION_URL`, không qua `emit_log()` | 502 | 400 (object sai schema, theo [API contract](../docs/architect/contracts/api-contract.md)) |
+
+Với `bad_schema`, demo-app luôn trả HTTP 502 sau khi thử gửi log, bất kể ingestion
+chấp nhận, từ chối payload hay gặp lỗi kết nối/timeout.
 
 `rate` nằm trong khoảng `0` đến `1`: `0` tắt fault, `1` luôn kích hoạt, giá trị giữa
 hai mức này lấy mẫu theo xác suất. Dùng `seed` để tái lập một lần gọi trong test.
-Không truyền `fault` thì endpoint item luôn là baseline. Mọi fault đều gửi log đúng
+Không truyền `fault` thì endpoint item luôn là baseline. Các fault ngoài `bad_schema` đều gửi log đúng
 [`log-schema.json`](../docs/architect/contracts/log-schema.json); platform được ghi trong
 `metadata.platform` và error type trong `metadata.error_type` (`baseline` cho request
 không bị lỗi). Fault `connection` là lỗi kết nối được tạo trực tiếp trong app, không
@@ -68,10 +74,10 @@ thúc, endpoint, fault, rate và seed cùng trace IDs từ ingestion để dùng
 
 ### Coverage matrix
 
-| Platform | value | connection | runtime |
-|---|---|---|---|
-| web | Tested: 422 | Tested: 502 | Tested: 500 |
-| mobile-api | Tested: 422 | Tested: 502 | Tested: 500 |
+| Platform | value | connection | runtime | bad_schema |
+|---|---|---|---|---|
+| web | Tested: 422 | Tested: 502 | Tested: 500 | Tested: 502 |
+| mobile-api | Tested: 422 | Tested: 502 | Tested: 500 | Tested: 502 |
 
 Chạy test tự động từ thư mục `demo-app`:
 
