@@ -121,6 +121,13 @@ curl https://20-1-2-3.sslip.io/health               # phai tra ve {"status":"ok"
 ```
 `https://20-1-2-3.sslip.io` chính là giá trị đặt cho `VITE_API_BASE_URL` trên Vercel.
 
+Jaeger UI cũng được route qua cùng domain tại `/jaeger` (xem `@jaeger` trong `deploy/Caddyfile`
+và `QUERY_BASE_PATH=/jaeger` trong `docker-compose.yml`):
+```bash
+curl -sI https://20-1-2-3.sslip.io/jaeger    # phai tra 200, khong phai 404
+```
+`https://20-1-2-3.sslip.io/jaeger` chính là giá trị đặt cho `VITE_JAEGER_URL` trên Vercel.
+
 ## Evidence sở hữu
 
 Phần của checklist "Search, Incident view" (MVP bắt buộc, xem `README.md` gốc) — UI thật

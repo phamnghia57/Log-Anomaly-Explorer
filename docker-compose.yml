@@ -74,6 +74,10 @@ services:
       # Gioi han so trace giu trong RAM - VM nho, tranh phinh RAM khong gioi
       # han khi demo chay nhieu ngay (trace cu nhat bi day ra khi day).
       MEMORY_MAX_TRACES: ${JAEGER_MAX_TRACES:-20000}
+      # Phuc vu UI duoi tien to "/jaeger" (khop voi route @jaeger trong
+      # deploy/Caddyfile) de nut "Xem trace tren Jaeger" cua web/ goi duoc
+      # qua HTTPS cung domain voi query-api, khong can mo them port/subdomain.
+      QUERY_BASE_PATH: /jaeger
     ports:
       - "${JAEGER_UI_PORT:-16686}:16686"
     restart: unless-stopped
