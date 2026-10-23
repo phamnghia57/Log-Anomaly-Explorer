@@ -59,6 +59,28 @@ services:
       timeout: 5s
       retries: 5
 
+  jaeger:
+    # :latest (khong ghim phien ban cu the): khong co mang tu moi truong dev
+    # de xac nhan tag so cu the nao dang ton tai that tren Docker Hub luc nay -
+    # doan sai se lam `docker compose up` loi ngay buoc pull. Neu can ghim
+    # phien ban cho on dinh lau dai, kiem tra tag that tren Docker Hub roi
+    # thay vao day.
+    image: jaegertracing/all-in-one:latest
+    environment:
+      # Nhan OTLP (gRPC :4317, HTTP :4318) truc tiep - khong can OTel Collector
+      # rieng, ban Jaeger nay da ho tro OTLP native.
+      COLLECTOR_OTLP_ENABLED: "true"
+      SPAN_STORAGE_TYPE: memory
+      # Gioi han so trace giu trong RAM - VM nho, tranh phinh RAM khong gioi
+      # han khi demo chay nhieu ngay (trace cu nhat bi day ra khi day).
+      MEMORY_MAX_TRACES: ${JAEGER_MAX_TRACES:-20000}
+    ports:
+      - "${JAEGER_UI_PORT:-16686}:16686"
+    restart: unless-stopped
+    # Khong co healthcheck rieng: demo-app van chay binh thuong neu Jaeger
+    # chua san sang, span chi bi mat (xem BatchSpanProcessor trong
+    # demo-app/src/telemetry.py - gui nen theo lo, loi khong lam sap app).
+
   demo-app:
     build:
       context: .
@@ -68,7 +90,10 @@ services:
         condition: service_healthy
     environment:
       INGESTION_URL: http://ingestion:8000/ingest
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      # OTLPSpanExporter() trong demo-app/src/telemetry.py khong truyen
+      # endpoint tuong minh - tu doc bien chuan nay cua OTel SDK roi tu them
+      # "/v1/traces", khop dung OTLP/HTTP receiver cua Jaeger o tren.
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://jaeger:4318}
     ports:
       - "${DEMO_APP_PORT:-8001}:8001"
     restart: unless-stopped
@@ -123,6 +148,32 @@ services:
       timeout: 5s
       retries: 5
 
+  gateway:
+    # Cong vao HTTPS duy nhat ra Internet - BAT BUOC de frontend deploy tren
+    # Vercel goi duoc backend nay (Vercel phuc vu qua HTTPS, trinh duyet chan
+    # Mixed Content neu goi sang backend HTTP thuan). Xem deploy/Caddyfile.
+    #
+    # Dung port 80/443 (ACME HTTP-01 challenge cua Let's Encrypt bat buoc dung
+    # dung 2 port nay, khong doi duoc) - neu may chu dang co stack khac cung
+    # chiem port nay, phai tat gateway cua stack do truoc (vd.
+    # `docker compose stop gateway` trong thu muc stack do) - xem
+    # web/README.md muc "Deploy len Vercel".
+    image: caddy:2.8-alpine
+    depends_on:
+      - query-api
+      - demo-app
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    environment:
+      PUBLIC_ADDRESS: ${PUBLIC_ADDRESS:-:80}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    restart: unless-stopped
+
 volumes:
   opensearch-data:
   clustering-data:
+  caddy-data:

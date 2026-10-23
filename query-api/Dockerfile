@@ -3,7 +3,7 @@
 # Build tu THU MUC GOC repo vi query-api/src/main.py import thang
 # `ingestion.src.storage` (log cua Minh) va `clustering.src.storage`
 # (cum cua Nam):
-#   docker build -f query-api/Dockerfile -t prj2-query-api .
+#   docker build -f query-api/Dockerfile -t log-anomaly-query-api .
 
 FROM python:3.11-slim
 

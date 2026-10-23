@@ -3,7 +3,7 @@
 # Build tu THU MUC GOC repo (khong phai tu trong ingestion/), vi
 # ingestion/src/validator.py doc docs/architect/contracts/log-schema.json
 # theo duong dan tuong doi tinh tu goc repo luc chay:
-#   docker build -f ingestion/Dockerfile -t prj2-ingestion .
+#   docker build -f ingestion/Dockerfile -t log-anomaly-ingestion .
 # (docker-compose.yml o goc repo da cau hinh dung context nay)
 
 FROM python:3.11-slim
