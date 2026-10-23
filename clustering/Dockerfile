@@ -3,7 +3,7 @@
 # Khong phai HTTP service: chay vong lap nen (xem src/worker.py).
 # Build tu THU MUC GOC repo vi clustering/src/storage.py import thang
 # `ingestion.src.storage` (dung chung ket noi/cau hinh OpenSearch voi Minh):
-#   docker build -f clustering/Dockerfile -t prj2-clustering .
+#   docker build -f clustering/Dockerfile -t log-anomaly-clustering .
 
 FROM python:3.11-slim
 

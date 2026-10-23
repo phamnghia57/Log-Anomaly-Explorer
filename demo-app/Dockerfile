@@ -1,7 +1,7 @@
 # Demo App (Manh) - image deploy.
 #
 # Build tu THU MUC GOC repo cho nhat quan voi 3 Dockerfile con lai:
-#   docker build -f demo-app/Dockerfile -t prj2-demo-app .
+#   docker build -f demo-app/Dockerfile -t log-anomaly-demo-app .
 
 FROM python:3.11-slim
 

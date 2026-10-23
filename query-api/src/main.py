@@ -27,6 +27,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from ingestion.src import config
@@ -35,6 +36,15 @@ from ingestion.src.storage import LogStore, StorageError, build_store
 logger = logging.getLogger("query-api")
 
 app = FastAPI(title="Log Anomaly Explorer - Query & Incident API")
+
+# API chi doc (GET), khong co auth o MVP nay - mo CORS de frontend (web/,
+# deploy Vercel - domain khac hoan toan voi backend) goi truc tiep duoc.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
 
 # Mot ket noi dung chung cho ca process, giong cach ingestion/src/main.py lam.
 store: LogStore = build_store()

@@ -26,6 +26,7 @@ OpenTelemetry (instrumentation) · Python (toàn bộ service) · Elasticsearch/
 | [`ingestion/`](ingestion/) | Minh | Ingestion | Load test (ingestion) |
 | [`clustering/`](clustering/) | Nam | Clustering/anomaly score, Alert | Labeled incidents, Precision/recall |
 | [`query-api/`](query-api/) | Nghĩa (nhóm trưởng) | Search, Incident view | Runbook, Load test (end-to-end) |
+| [`web/`](web/) | Nghĩa (nhóm trưởng) | UI thật (Dashboard, Search, Incident View), liên kết trace sang Jaeger | — |
 | [`load-tests/`](load-tests/) | Minh + Nghĩa (dùng chung) | — | Load test |
 | [`docs/`](docs/) | Cả nhóm | — | — |
 
@@ -60,7 +61,7 @@ python -m clustering.src.worker
 
 ## Chạy cả hệ thống bằng Docker
 
-Toàn bộ pipeline (OpenSearch + 4 service) đóng gói trong [`docker-compose.yml`](docker-compose.yml):
+Toàn bộ pipeline (OpenSearch + 4 service + Jaeger) đóng gói trong [`docker-compose.yml`](docker-compose.yml):
 
 ```bash
 docker compose up -d --build
@@ -78,11 +79,25 @@ curl "http://localhost:8002/search?limit=5"            # tim log
 curl "http://localhost:8002/clusters"                  # cum bat thuong
 ```
 
+Mở `http://localhost:16686` (Jaeger UI) — sau khi bắn vài request qua `demo-app`, sẽ thấy trace
+thật trong dropdown Service → chọn `demo-web`/`demo-mobile-api` → Find Traces. UI ở `web/` cũng
+có nút "Xem trace trên Jaeger" bấm thẳng tới đúng trace (xem `web/README.md` mục "Tracing / Jaeger").
+
+Chạy UI thật (tách biệt, không nằm trong Docker stack — xem [`web/README.md`](web/README.md)):
+
+```bash
+cd web
+npm install
+cp .env.example .env.local
+npm run dev                       # http://localhost:5173
+```
+
 Mọi cổng, tên index và tham số đều cấu hình qua biến môi trường — `cp .env.example .env` rồi sửa. Không bắt buộc có `.env`, mọi biến đều có mặc định hợp lý.
 
 | Tình huống | Cách xử lý |
 |---|---|
 | Cổng 8000-8002 đã bị dịch vụ khác chiếm | Đặt `INGESTION_PORT` / `DEMO_APP_PORT` / `QUERY_API_PORT` trong `.env` |
+| Cổng 16686 (Jaeger UI) đã bị chiếm | Đặt `JAEGER_UI_PORT` trong `.env` |
 | Máy chủ ít RAM | Giảm `OPENSEARCH_HEAP` (ví dụ `256m`) |
 | Đã có sẵn OpenSearch khác | Đặt `OPENSEARCH_URL`, và đổi `LOG_INDEX`/`CLUSTER_INDEX` nếu cần tách dữ liệu |
 

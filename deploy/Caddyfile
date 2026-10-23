@@ -1,0 +1,41 @@
+# Caddyfile - cong vao duy nhat ra Internet cho Log Anomaly Explorer (Nghia).
+#
+# PUBLIC_ADDRESS (xem docker-compose.yml + .env.example):
+#   - Mac dinh ":80" - chi HTTP thuan (dung khi chua co domain/sslip.io, hoac
+#     dev/test cuc bo). KHONG dung duoc cho frontend Vercel: Vercel phuc vu
+#     qua HTTPS, trinh duyet se chan Mixed Content neu goi sang backend HTTP
+#     thuan.
+#   - Dat thanh mot domain hoac host sslip.io (vd. "1-2-3-4.sslip.io" voi
+#     1.2.3.4 la IP may chu) de Caddy TU DONG xin & gia han chung chi HTTPS
+#     (Let's Encrypt) qua port 80 (ACME HTTP-01 challenge) + 443 - khong can
+#     cau hinh gi them.
+#
+# LUU Y QUAN TRONG: port 80/443 chi co the bi chiem boi MOT tien trinh tai
+# mot thoi diem. Neu may chu dang co dich vu khac cung dung 2 port nay, phai
+# giai phong truoc khi gateway nay khoi dong duoc - xem web/README.md muc
+# "Deploy len Vercel".
+
+{$PUBLIC_ADDRESS} {
+	# GET /health, /search, /clusters, /clusters/{id} - Query & Incident API (Nghia)
+	@query path /health /search* /clusters*
+	handle @query {
+		reverse_proxy query-api:8002
+	}
+
+	# Swagger UI / OpenAPI tu sinh cua query-api - xem & test API qua trinh
+	# duyet, dung chung cong voi phan con lai.
+	@api-docs path /docs /redoc /openapi.json
+	handle @api-docs {
+		reverse_proxy query-api:8002
+	}
+
+	# /demo/* -> Demo App (Manh), vd. /demo/simulate-error - tien goi tu xa de
+	# tao du lieu demo ma khong can SSH vao VM.
+	handle_path /demo/* {
+		reverse_proxy demo-app:8001
+	}
+
+	handle {
+		respond "Log Anomaly Explorer - xem /health, /search, /clusters, /clusters/{id}, /demo/*" 200
+	}
+}
