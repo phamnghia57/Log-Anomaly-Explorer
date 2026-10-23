@@ -1,0 +1,542 @@
+[
+  {
+    "window": 0,
+    "platform": "web",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 0,
+    "platform": "web",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 0,
+    "platform": "web",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 0,
+    "platform": "web",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 0,
+    "platform": "web",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 0,
+    "platform": "mobile-api",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 0,
+    "platform": "mobile-api",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 0,
+    "platform": "mobile-api",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 0,
+    "platform": "mobile-api",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 0,
+    "platform": "mobile-api",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 1,
+    "platform": "web",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 1,
+    "platform": "web",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 1,
+    "platform": "web",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 1,
+    "platform": "web",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 1,
+    "platform": "web",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 1,
+    "platform": "mobile-api",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 1,
+    "platform": "mobile-api",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 1,
+    "platform": "mobile-api",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 1,
+    "platform": "mobile-api",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 1,
+    "platform": "mobile-api",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "web",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 2,
+    "platform": "mobile-api",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 3,
+    "platform": "web",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 3,
+    "platform": "web",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 3,
+    "platform": "web",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 3,
+    "platform": "web",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 3,
+    "platform": "web",
+    "fault": "downstream",
+    "http_status": 500
+  },
+  {
+    "window": 3,
+    "platform": "mobile-api",
+    "fault": "value",
+    "http_status": 422
+  },
+  {
+    "window": 3,
+    "platform": "mobile-api",
+    "fault": "connection",
+    "http_status": 502
+  },
+  {
+    "window": 3,
+    "platform": "mobile-api",
+    "fault": "runtime",
+    "http_status": 500
+  },
+  {
+    "window": 3,
+    "platform": "mobile-api",
+    "fault": "timeout",
+    "http_status": 504
+  },
+  {
+    "window": 3,
+    "platform": "mobile-api",
+    "fault": "downstream",
+    "http_status": 500
+  }
+]
