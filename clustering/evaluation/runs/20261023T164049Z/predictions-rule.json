@@ -1,0 +1,382 @@
+[
+  {
+    "cluster_id": "a78b058d489d25cb",
+    "signature": "simulated validation failure: required item data is invalid",
+    "score": 5.0,
+    "log_ids": [
+      "f1c4bb5a-f2f8-4ed8-84b7-b5ccaab55f41",
+      "07f8465b-9afa-4bec-9f2e-b24e37f2961c",
+      "43a8284a-1b3f-4a7e-87fa-353987290f4c",
+      "7e651192-b568-4cfe-b7ec-a009555bae5f",
+      "9f84ed07-f41f-44dc-ad72-f534d41ae28e",
+      "8c05a4b8-3f2d-4b8e-a9ec-84eb58f6a677"
+    ],
+    "trace_ids": [
+      "00ca73c061b66b22193cc8f06410f6cd",
+      "4a15f9bd169e7dfea7380b957a54b5b7",
+      "5cf0e66f6ebea5eebd2eb92bf7bf9ce2",
+      "c5b21f52d3704833d211c0d867460441",
+      "d6fb764e71e7d54827a2719612d453b9",
+      "e7029829b252dc630673ef636058b09f"
+    ],
+    "first_seen": "2026-10-23T16:41:49.899792+00:00",
+    "last_seen": "2026-10-23T16:41:50.256242+00:00",
+    "status": "anomalous"
+  },
+  {
+    "cluster_id": "d096e58268883c9d",
+    "signature": "simulated connection failure: downstream dependency unreachable",
+    "score": 5.0,
+    "log_ids": [
+      "6bbfea09-a130-433a-ab80-3b706217b780",
+      "23b40d22-dcde-4ffb-9ea9-b3662458e58b",
+      "359357b8-9846-43f8-8066-f58c49610b34",
+      "508f503f-a931-43fb-864d-b57a05d47c7f",
+      "5d414e0b-6198-4efe-86a8-f880c0da4909",
+      "e15e6f15-c196-49ee-bf72-6f0a6a071be5"
+    ],
+    "trace_ids": [
+      "8b31d2dd96fd7965481321ea3d0bcf52",
+      "b3ce69f50d3332971bc4469afa36dbfb",
+      "d5f0c7b46dc8622c4f516e28f0d24f03",
+      "e0e7ea93cfccf048ff539d30f93a1595",
+      "ee7fc5871fa2eef9ff74207e422a3cdc",
+      "ff96a1ae1e9b394da81874fa6ce60773"
+    ],
+    "first_seen": "2026-10-23T16:41:50.324004+00:00",
+    "last_seen": "2026-10-23T16:41:50.704462+00:00",
+    "status": "anomalous"
+  },
+  {
+    "cluster_id": "bca2eea604629975",
+    "signature": "simulated runtime failure",
+    "score": 5.0,
+    "log_ids": [
+      "2b979038-67f4-4206-9e6d-58a7f0037c64",
+      "22495854-3a01-4667-980a-bd7c28cf2f0d",
+      "af2d4d96-5caa-4fb4-9ff5-dbc49de5a882",
+      "39223094-8e16-4e86-96a3-02894ff9a5f0",
+      "1c63a775-31d7-473a-b985-2933fd3c9e69",
+      "41967d9d-26e7-4665-a593-627c0ce657c5"
+    ],
+    "trace_ids": [
+      "0603ae23f6ea1036cf96425aef9a3b8f",
+      "304ee1c57af146ca396898d6743fb0d5",
+      "31f5ad68f049992a02c06d4b0178a384",
+      "34e18691c39e4d0e052fa5d219079491",
+      "7ace521ce8b8a4cd04af07f2659642e7",
+      "c4acd298d9e0d84785ec50d0760fc85d"
+    ],
+    "first_seen": "2026-10-23T16:41:50.800951+00:00",
+    "last_seen": "2026-10-23T16:41:51.167918+00:00",
+    "status": "anomalous"
+  },
+  {
+    "cluster_id": "bc2fad362a48590a",
+    "signature": "simulated downstream timeout",
+    "score": 5.0,
+    "log_ids": [
+      "2f2cb51d-c854-4d66-b367-02aef4e48991",
+      "bacfb44d-5e01-48b0-ba63-24ed2a666015",
+      "0555da44-f19e-498f-971d-e97594e09350",
+      "3b712d50-8222-4174-a086-8d54505d579e",
+      "e0280edf-1559-4827-9971-e51b49fad4db",
+      "91bcc59a-f4e1-4f0f-9e82-35d84ff99605"
+    ],
+    "trace_ids": [
+      "6a84e33c6e7ee5eca2537b5ec8f9af12",
+      "7498ebde5f0fff6fd0e16adc787ac660",
+      "a61bdc1a535476724de134fb27b8e01e",
+      "ad07729840efa4c7ef3eb20fa93abfac",
+      "b02c3e1543e16e03c253d9270d9b7b62",
+      "e039e6c43d00a8cb125f958681f07688"
+    ],
+    "first_seen": "2026-10-23T16:41:51.334399+00:00",
+    "last_seen": "2026-10-23T16:41:52.497952+00:00",
+    "status": "anomalous"
+  },
+  {
+    "cluster_id": "583498fff9a5c679",
+    "signature": "simulated downstream failure",
+    "score": 5.0,
+    "log_ids": [
+      "9eeaa39a-2f34-4eaf-983d-9e684372670f",
+      "bacbaa06-ebd9-44cc-b386-ce87ea6477df",
+      "02dbb7f2-3f56-4a8b-b00b-0eb9fad221c8",
+      "fb730e6f-b003-499d-a053-427ede650481",
+      "24d08a71-4475-4acd-98df-33940cfb8e02",
+      "d9ad4993-0f4e-42a9-b60e-a56267ca870b"
+    ],
+    "trace_ids": [
+      "070f0e82d8d990dc5c37e1749805dae7",
+      "2097af08b58329e03e3186ad1a38204a",
+      "326dd4c43444ed47dadf8c071e49294d",
+      "6aed6666bdae443be719fada6f98bb1d",
+      "a68c25e668bd1abae3b0f9995d17b5b8",
+      "cb54388e7d6acfc420a60af097f4c3b3"
+    ],
+    "first_seen": "2026-10-23T16:41:52.581038+00:00",
+    "last_seen": "2026-10-23T16:41:52.952979+00:00",
+    "status": "anomalous"
+  },
+  {
+    "cluster_id": "81f54b4957bcd13c",
+    "signature": "simulated validation failure: required item data is invalid",
+    "score": 5.0,
+    "log_ids": [
+      "de41cc75-dc9e-40a1-8dfe-3ebd01334a4c",
+      "ecba856a-fccd-4f68-8e05-347647208954",
+      "94b23ee3-0ad5-41aa-b96e-712d58faf1a4",
+      "8d28a714-df3e-442c-a977-2afc9b487f7f",
+      "b4e28a8f-a244-4fc2-ac25-58759f626ec0",
+      "baea29b6-3c1a-4f63-8f37-241717337804"
+    ],
+    "trace_ids": [
+      "441076e27048a3a9197f817f8a2aae52",
+      "60a5d194b17ecbb0c0c749b88d1a8f18",
+      "8f13cf4781b579602c8c99a102a7d1d6",
+      "b870db91f4903262e6ce685271db0d95",
+      "c090a3b3d7fefd89c160c1b6e2085c8b",
+      "c6f38f8fb58eca04cec1f310ee19ccbe"
+    ],
+    "first_seen": "2026-10-23T16:41:53.064040+00:00",
+    "last_seen": "2026-10-23T16:41:53.513261+00:00",
+    "status": "anomalous"
+  },
+  {
+    "cluster_id": "7c80bdafee46259f",
+    "signature": "simulated connection failure: downstream dependency unreachable",
+    "score": 5.0,
+    "log_ids": [
+      "24f4f1a5-53c0-4b30-98f7-00dff730472e",
+      "b82ef5d4-a0e3-433b-8948-81ce81c4b1e2",
+      "f3bd5dce-78d6-4c6a-b3d6-c0278be3d0e1",
+      "47b3f0d4-10c2-47a8-bcd4-017f359f768d",
+      "51b4a30a-5197-4992-9f65-6817f0c260d1",
+      "549e6b4c-0622-48ec-bbfe-27e2b7fbbf0a"
+    ],
+    "trace_ids": [
+      "3d9dc2064c5b6d27766d26ddaf2dc3fa",
+      "68c2fe405e0be96b8cf97e4c1656c813",
+      "948d05880c44c7aaad2caab3ae250ff9",
+      "98285ba759f975c9134ff36195ab743e",
+      "f4b6c09010caaeb33c05b25cb38bc156",
+      "fb07433e404ea48c0efef206df170b46"
+    ],
+    "first_seen": "2026-10-23T16:41:53.581596+00:00",
+    "last_seen": "2026-10-23T16:41:53.957797+00:00",
+    "status": "anomalous"
+  },
+  {
+    "cluster_id": "10fb5402a2b5dde1",
+    "signature": "simulated runtime failure",
+    "score": 5.0,
+    "log_ids": [
+      "99e88d88-2127-49be-b32d-e5c547d1c339",
+      "c33f6b6c-dd78-44c1-b47b-465e6b289bd9",
+      "1e26b8d9-7203-4099-985e-cc3ed6267132",
+      "d068c5d9-42d5-464c-a6da-c8a6d9c3739e",
+      "df49b540-0b61-492a-8d0e-cff786136c3f",
+      "80ebd146-f683-46cf-9d05-aa96b96b1822"
+    ],
+    "trace_ids": [
+      "22364bb0e13595b75751c4e310b7d140",
+      "3fb333f5118ccb16ec78b1b2b59f7efe",
+      "52cfe11524a3850eb3f2fa4f58f0f890",
+      "cd956a4e67bfd0ba4845207fed13b1e8",
+      "d7c2da3dfb31e5e4e17ec65a0ee0a9eb",
+      "f3a34b198b649e4556a6dfdd6d804fe2"
+    ],
+    "first_seen": "2026-10-23T16:41:54.035871+00:00",
+    "last_seen": "2026-10-23T16:41:54.578279+00:00",
+    "status": "anomalous"
+  },
+  {
+    "cluster_id": "50bc2ae687c58466",
+    "signature": "simulated downstream timeout",
+    "score": 5.0,
+    "log_ids": [
+      "0f8e634e-d962-49bd-a9e9-f3f88b4ab171",
+      "568e1c8f-58ce-46f2-84d7-9f68040bc600",
+      "c6fa17d7-d9ec-4d95-8d87-ed17009f7270",
+      "ff5ce659-0883-4f62-b5ee-e7071f4908f6",
+      "1cb34a62-1dcd-41cf-bc18-77321064dc0f",
+      "f67ec103-1c88-465e-a64c-372e856eab56"
+    ],
+    "trace_ids": [
+      "15498ae33787dbe0ed3294a78915dfc7",
+      "552229d6e38804692430fe33c15b3eab",
+      "6b8567656c0cc007bee5dbb38d09aed4",
+      "802cd5c2c3a0c0102e04b34da9760e3e",
+      "92603dbbb70e6019d300116005bfaefc",
+      "c03a7006c4b6c95805ea9fbc2b75bcd6"
+    ],
+    "first_seen": "2026-10-23T16:41:54.741946+00:00",
+    "last_seen": "2026-10-23T16:41:55.659487+00:00",
+    "status": "anomalous"
+  },
+  {
+    "cluster_id": "2fe0cedcde244855",
+    "signature": "simulated downstream failure",
+    "score": 5.0,
+    "log_ids": [
+      "51a7824c-eb4b-4fac-8dd6-0840d02f5482",
+      "b22a3301-09c7-4459-b6bc-6d37901638a6",
+      "c190c6d4-328d-45bd-9e85-38b0655bb78e",
+      "252cbbbe-858b-44f2-91eb-ec5d6c478e23",
+      "716d31a0-529d-4643-8b98-cce19132950f",
+      "9eca7103-6bb5-4e44-a44c-2e3ee4796472"
+    ],
+    "trace_ids": [
+      "020480f81d2850743186e817d249005c",
+      "2108eccecf3ee6251bedc138d2167389",
+      "4a814d8f58b7b026709660047142e7d4",
+      "526939a8343fabb04248f234638d0848",
+      "5652b6ae1abf6f85253dd3d5ccc13148",
+      "b64f8cf96ea9c482654580f3e4ad0116"
+    ],
+    "first_seen": "2026-10-23T16:41:55.723896+00:00",
+    "last_seen": "2026-10-23T16:41:56.118463+00:00",
+    "status": "anomalous"
+  },
+  {
+    "cluster_id": "a78b058d489d25cb",
+    "signature": "simulated validation failure: required item data is invalid",
+    "score": 0.0,
+    "log_ids": [
+      "d3b1820a-ff7f-469c-83de-c1093a25e2ec"
+    ],
+    "trace_ids": [
+      "c1718acd9c5107ab9beac200ff22d9ae"
+    ],
+    "first_seen": "2026-10-23T16:42:20.017989+00:00",
+    "last_seen": "2026-10-23T16:42:20.017989+00:00",
+    "status": "normal"
+  },
+  {
+    "cluster_id": "d096e58268883c9d",
+    "signature": "simulated connection failure: downstream dependency unreachable",
+    "score": 0.0,
+    "log_ids": [
+      "bb10f7a2-4183-4eba-be4b-c1f88f037441"
+    ],
+    "trace_ids": [
+      "618c9b387970928664f0e3c9fafa54f2"
+    ],
+    "first_seen": "2026-10-23T16:42:20.084537+00:00",
+    "last_seen": "2026-10-23T16:42:20.084537+00:00",
+    "status": "normal"
+  },
+  {
+    "cluster_id": "bca2eea604629975",
+    "signature": "simulated runtime failure",
+    "score": 0.0,
+    "log_ids": [
+      "af553b59-c8ec-4ae4-9b5f-038672eff1a2"
+    ],
+    "trace_ids": [
+      "aac080a91a433f2c9afdb5f2544849e4"
+    ],
+    "first_seen": "2026-10-23T16:42:20.155326+00:00",
+    "last_seen": "2026-10-23T16:42:20.155326+00:00",
+    "status": "normal"
+  },
+  {
+    "cluster_id": "bc2fad362a48590a",
+    "signature": "simulated downstream timeout",
+    "score": 0.0,
+    "log_ids": [
+      "84420187-0ecc-4137-8a5b-5477ffa2c813"
+    ],
+    "trace_ids": [
+      "72a75059d08adb575df964ea3f6c8d1b"
+    ],
+    "first_seen": "2026-10-23T16:42:20.368087+00:00",
+    "last_seen": "2026-10-23T16:42:20.368087+00:00",
+    "status": "normal"
+  },
+  {
+    "cluster_id": "583498fff9a5c679",
+    "signature": "simulated downstream failure",
+    "score": 0.0,
+    "log_ids": [
+      "75e01354-0674-48d3-8d6b-2074e8f741fe"
+    ],
+    "trace_ids": [
+      "519efe468426027aec2d70553999fac0"
+    ],
+    "first_seen": "2026-10-23T16:42:20.467556+00:00",
+    "last_seen": "2026-10-23T16:42:20.467556+00:00",
+    "status": "normal"
+  },
+  {
+    "cluster_id": "81f54b4957bcd13c",
+    "signature": "simulated validation failure: required item data is invalid",
+    "score": 0.0,
+    "log_ids": [
+      "c319a53d-ac7e-4f08-8d23-0e9ea6bc4dd1"
+    ],
+    "trace_ids": [
+      "22b75fd77967816195df48f6e33f8814"
+    ],
+    "first_seen": "2026-10-23T16:42:20.531251+00:00",
+    "last_seen": "2026-10-23T16:42:20.531251+00:00",
+    "status": "normal"
+  },
+  {
+    "cluster_id": "7c80bdafee46259f",
+    "signature": "simulated connection failure: downstream dependency unreachable",
+    "score": 0.0,
+    "log_ids": [
+      "758adb64-ad94-4c13-ab31-4ee61d7f63f9"
+    ],
+    "trace_ids": [
+      "65fd439e68769bd3fea5e2882929c299"
+    ],
+    "first_seen": "2026-10-23T16:42:20.622150+00:00",
+    "last_seen": "2026-10-23T16:42:20.622150+00:00",
+    "status": "normal"
+  },
+  {
+    "cluster_id": "10fb5402a2b5dde1",
+    "signature": "simulated runtime failure",
+    "score": 0.0,
+    "log_ids": [
+      "81b9c034-ba21-4a44-900a-b0434b7f828d"
+    ],
+    "trace_ids": [
+      "a26ad26fc025a28a8b627833cadf7110"
+    ],
+    "first_seen": "2026-10-23T16:42:20.726200+00:00",
+    "last_seen": "2026-10-23T16:42:20.726200+00:00",
+    "status": "normal"
+  },
+  {
+    "cluster_id": "50bc2ae687c58466",
+    "signature": "simulated downstream timeout",
+    "score": 0.0,
+    "log_ids": [
+      "6d018d64-ff46-4b47-b76d-d2175486b0ae"
+    ],
+    "trace_ids": [
+      "3ca24f506faa047bd6ddf817a61a1f41"
+    ],
+    "first_seen": "2026-10-23T16:42:20.895554+00:00",
+    "last_seen": "2026-10-23T16:42:20.895554+00:00",
+    "status": "normal"
+  },
+  {
+    "cluster_id": "2fe0cedcde244855",
+    "signature": "simulated downstream failure",
+    "score": 0.0,
+    "log_ids": [
+      "2a613b04-c504-42ac-b856-c9063814fb21"
+    ],
+    "trace_ids": [
+      "69ac5e6031f652183863cde777bf0244"
+    ],
+    "first_seen": "2026-10-23T16:42:20.991516+00:00",
+    "last_seen": "2026-10-23T16:42:20.991516+00:00",
+    "status": "normal"
+  }
+]

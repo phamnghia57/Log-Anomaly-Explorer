@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "services": {
+    "demo-mobile-api": {
+      "simulated connection failure: downstream dependency unreachable": "simulated connection failure: downstream dependency unreachable",
+      "simulated downstream failure": "simulated downstream failure",
+      "simulated downstream timeout": "simulated downstream timeout",
+      "simulated runtime failure": "simulated runtime failure",
+      "simulated validation failure: required item data is invalid": "simulated validation failure: required item data is invalid"
+    },
+    "demo-web": {
+      "simulated connection failure: downstream dependency unreachable": "simulated connection failure: downstream dependency unreachable",
+      "simulated downstream failure": "simulated downstream failure",
+      "simulated downstream timeout": "simulated downstream timeout",
+      "simulated runtime failure": "simulated runtime failure",
+      "simulated validation failure: required item data is invalid": "simulated validation failure: required item data is invalid"
+    }
+  }
+}

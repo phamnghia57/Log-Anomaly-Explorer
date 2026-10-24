@@ -1,0 +1,75 @@
+{
+  "source": "Known live fault injection parameters; pending team review",
+  "incidents": [
+    {
+      "incident_id": "20261023T164049Z-web-value",
+      "service": "demo-web",
+      "window_from": "2026-10-23T16:41:49.818523+00:00",
+      "window_to": "2026-10-23T16:42:19.818523+00:00",
+      "expected_cluster_signature": "Simulated validation failure: required item data is invalid"
+    },
+    {
+      "incident_id": "20261023T164049Z-web-connection",
+      "service": "demo-web",
+      "window_from": "2026-10-23T16:41:49.818523+00:00",
+      "window_to": "2026-10-23T16:42:19.818523+00:00",
+      "expected_cluster_signature": "Simulated connection failure: downstream dependency unreachable"
+    },
+    {
+      "incident_id": "20261023T164049Z-web-runtime",
+      "service": "demo-web",
+      "window_from": "2026-10-23T16:41:49.818523+00:00",
+      "window_to": "2026-10-23T16:42:19.818523+00:00",
+      "expected_cluster_signature": "Simulated runtime failure"
+    },
+    {
+      "incident_id": "20261023T164049Z-web-timeout",
+      "service": "demo-web",
+      "window_from": "2026-10-23T16:41:49.818523+00:00",
+      "window_to": "2026-10-23T16:42:19.818523+00:00",
+      "expected_cluster_signature": "Simulated downstream timeout"
+    },
+    {
+      "incident_id": "20261023T164049Z-web-downstream",
+      "service": "demo-web",
+      "window_from": "2026-10-23T16:41:49.818523+00:00",
+      "window_to": "2026-10-23T16:42:19.818523+00:00",
+      "expected_cluster_signature": "Simulated downstream failure"
+    },
+    {
+      "incident_id": "20261023T164049Z-mobile-api-value",
+      "service": "demo-mobile-api",
+      "window_from": "2026-10-23T16:41:49.818523+00:00",
+      "window_to": "2026-10-23T16:42:19.818523+00:00",
+      "expected_cluster_signature": "Simulated validation failure: required item data is invalid"
+    },
+    {
+      "incident_id": "20261023T164049Z-mobile-api-connection",
+      "service": "demo-mobile-api",
+      "window_from": "2026-10-23T16:41:49.818523+00:00",
+      "window_to": "2026-10-23T16:42:19.818523+00:00",
+      "expected_cluster_signature": "Simulated connection failure: downstream dependency unreachable"
+    },
+    {
+      "incident_id": "20261023T164049Z-mobile-api-runtime",
+      "service": "demo-mobile-api",
+      "window_from": "2026-10-23T16:41:49.818523+00:00",
+      "window_to": "2026-10-23T16:42:19.818523+00:00",
+      "expected_cluster_signature": "Simulated runtime failure"
+    },
+    {
+      "incident_id": "20261023T164049Z-mobile-api-timeout",
+      "service": "demo-mobile-api",
+      "window_from": "2026-10-23T16:41:49.818523+00:00",
+      "window_to": "2026-10-23T16:42:19.818523+00:00",
+      "expected_cluster_signature": "Simulated downstream timeout"
+    },
+    {
+      "incident_id": "20261023T164049Z-mobile-api-downstream",
+      "service": "demo-mobile-api",
+      "window_from": "2026-10-23T16:41:49.818523+00:00",
+      "window_to": "2026-10-23T16:42:19.818523+00:00",
+      "expected_cluster_signature": "Simulated downstream failure"
+    }
+  ]
+}

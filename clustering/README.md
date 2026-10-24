@@ -8,7 +8,7 @@
 - [x] Hoàn thiện cách tính baseline tần suất + anomaly score trong `src/anomaly_score.py`
 - [ ] Cấu hình `ANOMALY_THRESHOLD` và `ALERT_WEBHOOK_URL` cho `src/alert.py`
 - [ ] Phối hợp với Mạnh: dùng `/simulate-error` để tạo các giai đoạn bất thường có kiểm soát, rồi điền vào `evaluation/labeled_incidents.json`
-- [ ] Chạy `evaluation/precision_recall.py` để có số liệu precision/recall thật, không chỉ chạy trên dữ liệu rỗng
+- [x] Chạy `evaluation/precision_recall.py` trên dữ liệu fault injection mới (kết quả bên dưới)
 
 ## Hợp đồng đang tuân theo
 
@@ -52,6 +52,53 @@ giảm dần; `since` lọc `last_seen >= since`. ID không tồn tại trả v�
 Dùng `store.log_store.get_logs(record['log_ids'])` để lấy log cho Incident View.
 
 ## Đánh giá
+
+### Đợt dữ liệu mới ngày 23/10/2026
+
+Đã gọi demo-app từ source hiện tại tại commit
+`462989449e0b0abf6d0c38ccb541ea2efa055f12`, qua ingestion vào OpenSearch,
+rồi replay `pipeline.analyze` và chạy `evaluation/precision_recall.py`.
+Đây là lần tạo dữ liệu mới, không dùng lại log hay predictions ngày 20/10.
+
+| Phương án | Precision | Recall | TP | FP | FN |
+|---|---:|---:|---:|---:|---:|
+| Rule-only | 1,000 (100%) | 1,000 (100%) | 10 | 0 | 0 |
+| Rule + ML | 1,000 (100%) | 1,000 (100%) | 10 | 0 | 0 |
+
+Nguồn: index `pr-fresh-logs`, 90 ERROR được xác nhận lưu đủ so với 90 request
+fault injection. Hai platform `web`/`mobile-api`, mỗi platform chạy năm fault
+`value`, `connection`, `runtime`, `timeout`, `downstream`; HTTP status được kiểm
+tra theo từng fault. Nhãn có 10 incident dựa trên tham số injection, cần nhóm
+review; đây là log thật từ demo local, không phải dữ liệu production.
+
+Cấu hình: cửa sổ 30 giây, hai cửa sổ baseline, threshold 2,0. Mỗi tổ hợp
+service/fault có 1 lỗi/cửa sổ baseline, 6 lỗi trong burst, 1 lỗi khi phục hồi.
+Đo trên cả cửa sổ burst và phục hồi; mỗi phương án có 20 ClusterRecord,
+10 anomalous và 10 normal. Script chỉ tính anomalous/alerted mặc định;
+không gửi webhook và không đo alert delivery. ML dùng state mới, giữ giữa hai
+cửa sổ đánh giá, similarity 0,9, margin 0,05, max templates 2.000.
+Runtime image local `log-clustering-benchmark:local` (Python 3.13.17,
+scikit-learn 1.7.2), source hiện tại được mount vào container.
+
+Bằng chứng: [runs/20261023T164049Z](evaluation/runs/20261023T164049Z/), gồm
+`logs.json`, `requests.json`, `labels.json`, `config.json`, `ml-state.json`,
+`predictions-rule.json`, `predictions-ml.json` và hai file `metrics-*.json`.
+Thời gian trong file dùng UTC; run ID là thời điểm bắt đầu baseline.
+Để tính lại metrics từ thư mục gốc, sau khi cài requirements:
+
+```powershell
+python -B -m clustering.evaluation.precision_recall --predictions clustering/evaluation/runs/20261023T164049Z/predictions-rule.json --labels clustering/evaluation/runs/20261023T164049Z/labels.json
+python -B -m clustering.evaluation.precision_recall --predictions clustering/evaluation/runs/20261023T164049Z/predictions-ml.json --labels clustering/evaluation/runs/20261023T164049Z/labels.json
+```
+
+Harness tạo dữ liệu: `evaluation/fresh_run.py`, chạy trong mạng Docker có
+`opensearch`, `pr-eval-ingestion:8000`, `pr-eval-demo:8001`; ingestion phải dùng
+`LOG_INDEX=pr-fresh-logs`. Harness kiểm tra HTTP, giới hạn thời gian mỗi cửa sổ,
+độ đầy đủ của log rồi xuất nhãn/predictions vào thư mục run mới.
+
+Kết quả xác nhận phát hiện burst có kiểm soát; mẫu nhỏ, message cố định và chỉ
+một cửa sổ phục hồi nên chưa đủ kết luận chất lượng production hoặc ML tốt hơn
+rule-only. Không so trực tiếp với kết quả 92% của project/bộ dữ liệu khác.
 
 Chạy từ thư mục gốc repository:
 

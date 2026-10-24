@@ -1,0 +1,1262 @@
+[
+  {
+    "timestamp": "2026-10-23T16:40:50.218415+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "be9a0e487f173cd76b79e9da56bfb6c6",
+    "span_id": "042dd9b25acbe5ab",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "web",
+      "error_type": "value"
+    },
+    "log_id": "dac4a238-fa8e-4df5-8609-1b77a3d25ce7"
+  },
+  {
+    "timestamp": "2026-10-23T16:40:50.676152+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "f7b38a6a3976b93269c6a31b4dae5898",
+    "span_id": "a3c0bfea7de3b264",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "connection"
+    },
+    "log_id": "79ade3cb-66f2-4847-93f3-0ef5ce1d68e3"
+  },
+  {
+    "timestamp": "2026-10-23T16:40:50.764235+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "2a80bb9fa341d7224d574aa5189c7ffa",
+    "span_id": "29c16be9c9dd1007",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "0f109d08-2456-4dcc-92dd-e7766fd875ef"
+  },
+  {
+    "timestamp": "2026-10-23T16:40:50.950272+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "603d52d61ac5809291a860353d4cec10",
+    "span_id": "956b234bb81e7a02",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "70fe6117-5fa8-460c-8593-99d50b22758d"
+  },
+  {
+    "timestamp": "2026-10-23T16:40:51.045003+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "5b354dbe55cd6504c5b7c9df9ea0c491",
+    "span_id": "042402ee4093b40d",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "79b26c59-22ba-401c-89ea-e2df16ca5d4a"
+  },
+  {
+    "timestamp": "2026-10-23T16:40:51.156383+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "c507730139f7bffe74da1697d390170d",
+    "span_id": "a947c3f9d20ff87e",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "value"
+    },
+    "log_id": "809f7c3c-4ff4-4bf7-a140-6c122d297cc9"
+  },
+  {
+    "timestamp": "2026-10-23T16:40:51.257663+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "8f5f0682326a1f948fffbe0e8e790702",
+    "span_id": "dd2971d39009d42a",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "connection"
+    },
+    "log_id": "d5a1d8b3-f49d-4d70-b59f-bc11ecf7607f"
+  },
+  {
+    "timestamp": "2026-10-23T16:40:51.346653+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "e7855d0168594f1a3c2334b2330cee1f",
+    "span_id": "388bc7effa043ce0",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "5aabb950-ef0e-4621-8867-b501f84a6903"
+  },
+  {
+    "timestamp": "2026-10-23T16:40:51.589566+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "b5ae687f105f1327797cb1b182935a3e",
+    "span_id": "a92dfd24a021cbfc",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "b0e182d6-4269-4def-b654-f33f91e4083c"
+  },
+  {
+    "timestamp": "2026-10-23T16:40:51.670006+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "cc46704bf747db4217a4fae5cf6c9a8b",
+    "span_id": "156551a5e0d49322",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "becef3a5-6fd7-4691-bb13-a20cffbb5894"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:19.971798+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "dceea3a98749a451abb9f829db659ef4",
+    "span_id": "c7be6c2e1571b327",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "web",
+      "error_type": "value"
+    },
+    "log_id": "fa3ec44d-645b-4767-886a-e55b4f9ff8cc"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:20.058976+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "0b821e00049c1077b3c0df308cde0b73",
+    "span_id": "5c4dbaccf0391f56",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "connection"
+    },
+    "log_id": "d92ab059-d3e2-488c-a97f-17f53f830ff9"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:20.124618+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "4a301521d44df5c052ced9002066603e",
+    "span_id": "6db8e8e22906b510",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "d34f29fa-1c2e-4d63-b750-903c5f3af7c6"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:20.337474+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "9912493cf5c668cb23fad3c0b39a1b4f",
+    "span_id": "71c371366409260a",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "ae02358a-b3e6-4ce9-bf62-ee26009e8e2e"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:20.415587+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "7c58590b85211a566d05f48e3a51fe49",
+    "span_id": "d343909988281433",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "84c5ca97-3e13-4570-9a86-56c4f8c60df7"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:20.566351+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "8be41f2d323a4f438eb5260c9597f960",
+    "span_id": "30ad87fc0b46eb48",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "value"
+    },
+    "log_id": "964d3364-a793-41a8-9d5c-653f3ed071ad"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:20.653148+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "062776f2dacf300b25600ecb18f7f35f",
+    "span_id": "9ae98e2c2356519a",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "connection"
+    },
+    "log_id": "6f7b0544-eb36-4e41-a642-49445922fcf1"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:20.742241+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "5331ec9b2fac5fb61c576fae1ab60008",
+    "span_id": "f6dd844ad1669589",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "80ef36ab-b2fb-43a1-abbc-f087c3486d2e"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:20.906611+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "f478d79b6d2d383d3ca80ecddc90907b",
+    "span_id": "97a72f6ee64b3035",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "8a9a96d5-d387-4109-8a86-83210a836abd"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:21.004432+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "6e5ef637a6cd7dce6cd7ddbbdb36777d",
+    "span_id": "a49f579f3ce0383a",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "4e89bf06-f75c-4218-9146-0618e8b952c9"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:49.899792+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "d6fb764e71e7d54827a2719612d453b9",
+    "span_id": "671dca2cbbc37db2",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "web",
+      "error_type": "value"
+    },
+    "log_id": "f1c4bb5a-f2f8-4ed8-84b7-b5ccaab55f41"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:49.981874+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "c5b21f52d3704833d211c0d867460441",
+    "span_id": "e9c3c31517ec8659",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "web",
+      "error_type": "value"
+    },
+    "log_id": "07f8465b-9afa-4bec-9f2e-b24e37f2961c"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:50.043045+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "00ca73c061b66b22193cc8f06410f6cd",
+    "span_id": "51760a89fd9e6113",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "web",
+      "error_type": "value"
+    },
+    "log_id": "43a8284a-1b3f-4a7e-87fa-353987290f4c"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:50.107529+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "e7029829b252dc630673ef636058b09f",
+    "span_id": "c392024517ee1f00",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "web",
+      "error_type": "value"
+    },
+    "log_id": "7e651192-b568-4cfe-b7ec-a009555bae5f"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:50.184892+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "5cf0e66f6ebea5eebd2eb92bf7bf9ce2",
+    "span_id": "238e81e9e900ddb7",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "web",
+      "error_type": "value"
+    },
+    "log_id": "9f84ed07-f41f-44dc-ad72-f534d41ae28e"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:50.256242+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "4a15f9bd169e7dfea7380b957a54b5b7",
+    "span_id": "638fad5e11154ac7",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "web",
+      "error_type": "value"
+    },
+    "log_id": "8c05a4b8-3f2d-4b8e-a9ec-84eb58f6a677"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:50.324004+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "b3ce69f50d3332971bc4469afa36dbfb",
+    "span_id": "5c66facf431e11f2",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "connection"
+    },
+    "log_id": "6bbfea09-a130-433a-ab80-3b706217b780"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:50.395766+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "e0e7ea93cfccf048ff539d30f93a1595",
+    "span_id": "2b8a80e05a836c40",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "connection"
+    },
+    "log_id": "23b40d22-dcde-4ffb-9ea9-b3662458e58b"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:50.489450+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "8b31d2dd96fd7965481321ea3d0bcf52",
+    "span_id": "e24ce0b43ebdcc26",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "connection"
+    },
+    "log_id": "359357b8-9846-43f8-8066-f58c49610b34"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:50.560413+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "d5f0c7b46dc8622c4f516e28f0d24f03",
+    "span_id": "df7626c72cad16ef",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "connection"
+    },
+    "log_id": "508f503f-a931-43fb-864d-b57a05d47c7f"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:50.638945+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "ee7fc5871fa2eef9ff74207e422a3cdc",
+    "span_id": "6422df8f5fde865c",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "connection"
+    },
+    "log_id": "5d414e0b-6198-4efe-86a8-f880c0da4909"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:50.704462+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "ff96a1ae1e9b394da81874fa6ce60773",
+    "span_id": "f90325ade65e3a6d",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "connection"
+    },
+    "log_id": "e15e6f15-c196-49ee-bf72-6f0a6a071be5"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:50.800951+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "c4acd298d9e0d84785ec50d0760fc85d",
+    "span_id": "7ecef4bbd2f18870",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "2b979038-67f4-4206-9e6d-58a7f0037c64"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:50.863741+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "0603ae23f6ea1036cf96425aef9a3b8f",
+    "span_id": "4fdd3a865833d69a",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "22495854-3a01-4667-980a-bd7c28cf2f0d"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:50.935177+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "34e18691c39e4d0e052fa5d219079491",
+    "span_id": "a279f6800772102c",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "af2d4d96-5caa-4fb4-9ff5-dbc49de5a882"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:51.021931+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "304ee1c57af146ca396898d6743fb0d5",
+    "span_id": "b0c5fe5a6e9bc448",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "39223094-8e16-4e86-96a3-02894ff9a5f0"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:51.100026+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "31f5ad68f049992a02c06d4b0178a384",
+    "span_id": "1009f68ffb68fae7",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "1c63a775-31d7-473a-b985-2933fd3c9e69"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:51.167918+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "7ace521ce8b8a4cd04af07f2659642e7",
+    "span_id": "40d6a455046c739d",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "41967d9d-26e7-4665-a593-627c0ce657c5"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:51.334399+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "e039e6c43d00a8cb125f958681f07688",
+    "span_id": "823c4ec13275b1c5",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "2f2cb51d-c854-4d66-b367-02aef4e48991"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:51.499873+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "6a84e33c6e7ee5eca2537b5ec8f9af12",
+    "span_id": "f700ad9ead95d623",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "bacfb44d-5e01-48b0-ba63-24ed2a666015"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:51.877348+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "a61bdc1a535476724de134fb27b8e01e",
+    "span_id": "db9446abb1278a21",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "0555da44-f19e-498f-971d-e97594e09350"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:52.161065+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "ad07729840efa4c7ef3eb20fa93abfac",
+    "span_id": "3dae0f05e7fe7f08",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "3b712d50-8222-4174-a086-8d54505d579e"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:52.325900+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "b02c3e1543e16e03c253d9270d9b7b62",
+    "span_id": "4f14af82885e9ebd",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "e0280edf-1559-4827-9971-e51b49fad4db"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:52.497952+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "7498ebde5f0fff6fd0e16adc787ac660",
+    "span_id": "27be972aff9bf8e0",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "91bcc59a-f4e1-4f0f-9e82-35d84ff99605"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:52.581038+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "a68c25e668bd1abae3b0f9995d17b5b8",
+    "span_id": "db99ed4193db4583",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "9eeaa39a-2f34-4eaf-983d-9e684372670f"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:52.642184+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "070f0e82d8d990dc5c37e1749805dae7",
+    "span_id": "48ca16919ef1c329",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "bacbaa06-ebd9-44cc-b386-ce87ea6477df"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:52.718156+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "326dd4c43444ed47dadf8c071e49294d",
+    "span_id": "b35db9e5cb136c84",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "02dbb7f2-3f56-4a8b-b00b-0eb9fad221c8"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:52.818478+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "2097af08b58329e03e3186ad1a38204a",
+    "span_id": "cbc511563bdbf9f6",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "fb730e6f-b003-499d-a053-427ede650481"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:52.885192+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "cb54388e7d6acfc420a60af097f4c3b3",
+    "span_id": "3dfa4cfd7d283b59",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "24d08a71-4475-4acd-98df-33940cfb8e02"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:52.952979+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "6aed6666bdae443be719fada6f98bb1d",
+    "span_id": "547fffa01124897e",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "d9ad4993-0f4e-42a9-b60e-a56267ca870b"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:53.064040+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "60a5d194b17ecbb0c0c749b88d1a8f18",
+    "span_id": "21af66205f868a1d",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "value"
+    },
+    "log_id": "de41cc75-dc9e-40a1-8dfe-3ebd01334a4c"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:53.182729+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "c6f38f8fb58eca04cec1f310ee19ccbe",
+    "span_id": "5cbf035a1cde8971",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "value"
+    },
+    "log_id": "ecba856a-fccd-4f68-8e05-347647208954"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:53.302065+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "b870db91f4903262e6ce685271db0d95",
+    "span_id": "e392fabdba02fcb7",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "value"
+    },
+    "log_id": "94b23ee3-0ad5-41aa-b96e-712d58faf1a4"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:53.376119+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "c090a3b3d7fefd89c160c1b6e2085c8b",
+    "span_id": "5a0b0390c6fd2fd5",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "value"
+    },
+    "log_id": "8d28a714-df3e-442c-a977-2afc9b487f7f"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:53.446814+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "8f13cf4781b579602c8c99a102a7d1d6",
+    "span_id": "53106cf6e4f3bde8",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "value"
+    },
+    "log_id": "b4e28a8f-a244-4fc2-ac25-58759f626ec0"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:53.513261+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "441076e27048a3a9197f817f8a2aae52",
+    "span_id": "32bc82e24cd5fc94",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "value"
+    },
+    "log_id": "baea29b6-3c1a-4f63-8f37-241717337804"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:53.581596+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "98285ba759f975c9134ff36195ab743e",
+    "span_id": "a87bd27ae0e54e69",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "connection"
+    },
+    "log_id": "24f4f1a5-53c0-4b30-98f7-00dff730472e"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:53.664687+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "f4b6c09010caaeb33c05b25cb38bc156",
+    "span_id": "96ff6004b768f8a4",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "connection"
+    },
+    "log_id": "b82ef5d4-a0e3-433b-8948-81ce81c4b1e2"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:53.732025+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "fb07433e404ea48c0efef206df170b46",
+    "span_id": "9f7def8295d21d6f",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "connection"
+    },
+    "log_id": "f3bd5dce-78d6-4c6a-b3d6-c0278be3d0e1"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:53.812480+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "68c2fe405e0be96b8cf97e4c1656c813",
+    "span_id": "0fe78e34bab524c9",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "connection"
+    },
+    "log_id": "47b3f0d4-10c2-47a8-bcd4-017f359f768d"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:53.881993+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "948d05880c44c7aaad2caab3ae250ff9",
+    "span_id": "eb67b98e0c0454e3",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "connection"
+    },
+    "log_id": "51b4a30a-5197-4992-9f65-6817f0c260d1"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:53.957797+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "3d9dc2064c5b6d27766d26ddaf2dc3fa",
+    "span_id": "9d183e04c10c3ffe",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "connection"
+    },
+    "log_id": "549e6b4c-0622-48ec-bbfe-27e2b7fbbf0a"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:54.035871+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "d7c2da3dfb31e5e4e17ec65a0ee0a9eb",
+    "span_id": "395ba8c69ccaf8c1",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "99e88d88-2127-49be-b32d-e5c547d1c339"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:54.152463+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "22364bb0e13595b75751c4e310b7d140",
+    "span_id": "2caefdf22ca06531",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "c33f6b6c-dd78-44c1-b47b-465e6b289bd9"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:54.296514+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "cd956a4e67bfd0ba4845207fed13b1e8",
+    "span_id": "e0c9e1246b87338b",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "1e26b8d9-7203-4099-985e-cc3ed6267132"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:54.416474+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "3fb333f5118ccb16ec78b1b2b59f7efe",
+    "span_id": "6ae1ec0da5cd6ae6",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "d068c5d9-42d5-464c-a6da-c8a6d9c3739e"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:54.483844+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "f3a34b198b649e4556a6dfdd6d804fe2",
+    "span_id": "1dd6fd691b27021f",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "df49b540-0b61-492a-8d0e-cff786136c3f"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:54.578279+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "52cfe11524a3850eb3f2fa4f58f0f890",
+    "span_id": "a494dbca5b8a28fc",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "80ebd146-f683-46cf-9d05-aa96b96b1822"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:54.741946+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "552229d6e38804692430fe33c15b3eab",
+    "span_id": "b06b2bc68f46ca10",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "0f8e634e-d962-49bd-a9e9-f3f88b4ab171"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:54.928840+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "15498ae33787dbe0ed3294a78915dfc7",
+    "span_id": "9c18ba29d45a0153",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "568e1c8f-58ce-46f2-84d7-9f68040bc600"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:55.109412+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "6b8567656c0cc007bee5dbb38d09aed4",
+    "span_id": "9a3f53d978b6785f",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "c6fa17d7-d9ec-4d95-8d87-ed17009f7270"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:55.281441+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "92603dbbb70e6019d300116005bfaefc",
+    "span_id": "f381f66ba7b0c9b2",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "ff5ce659-0883-4f62-b5ee-e7071f4908f6"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:55.460556+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "802cd5c2c3a0c0102e04b34da9760e3e",
+    "span_id": "c515a9a5f82f028b",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "1cb34a62-1dcd-41cf-bc18-77321064dc0f"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:55.659487+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "c03a7006c4b6c95805ea9fbc2b75bcd6",
+    "span_id": "f6bb3609a2f7ddf8",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "f67ec103-1c88-465e-a64c-372e856eab56"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:55.723896+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "020480f81d2850743186e817d249005c",
+    "span_id": "cfcfd9959d48a509",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "51a7824c-eb4b-4fac-8dd6-0840d02f5482"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:55.809367+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "4a814d8f58b7b026709660047142e7d4",
+    "span_id": "9c34810b76d4a966",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "b22a3301-09c7-4459-b6bc-6d37901638a6"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:55.885961+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "5652b6ae1abf6f85253dd3d5ccc13148",
+    "span_id": "e6552a24ef833c75",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "c190c6d4-328d-45bd-9e85-38b0655bb78e"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:55.973397+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "526939a8343fabb04248f234638d0848",
+    "span_id": "147fcc8e30ed029a",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "252cbbbe-858b-44f2-91eb-ec5d6c478e23"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:56.051582+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "2108eccecf3ee6251bedc138d2167389",
+    "span_id": "afe7ce88bafd0d2c",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "716d31a0-529d-4643-8b98-cce19132950f"
+  },
+  {
+    "timestamp": "2026-10-23T16:41:56.118463+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "b64f8cf96ea9c482654580f3e4ad0116",
+    "span_id": "c4667ea2dfd90ce3",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "9eca7103-6bb5-4e44-a44c-2e3ee4796472"
+  },
+  {
+    "timestamp": "2026-10-23T16:42:20.017989+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "c1718acd9c5107ab9beac200ff22d9ae",
+    "span_id": "a253c30f5740e993",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "web",
+      "error_type": "value"
+    },
+    "log_id": "d3b1820a-ff7f-469c-83de-c1093a25e2ec"
+  },
+  {
+    "timestamp": "2026-10-23T16:42:20.084537+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "618c9b387970928664f0e3c9fafa54f2",
+    "span_id": "7b728f4d8061c9a1",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "connection"
+    },
+    "log_id": "bb10f7a2-4183-4eba-be4b-c1f88f037441"
+  },
+  {
+    "timestamp": "2026-10-23T16:42:20.155326+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "aac080a91a433f2c9afdb5f2544849e4",
+    "span_id": "3a9165cef7a383ae",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "af553b59-c8ec-4ae4-9b5f-038672eff1a2"
+  },
+  {
+    "timestamp": "2026-10-23T16:42:20.368087+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "72a75059d08adb575df964ea3f6c8d1b",
+    "span_id": "9b4cf8e2187dd72a",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "84420187-0ecc-4137-8a5b-5477ffa2c813"
+  },
+  {
+    "timestamp": "2026-10-23T16:42:20.467556+00:00",
+    "level": "ERROR",
+    "service": "demo-web",
+    "trace_id": "519efe468426027aec2d70553999fac0",
+    "span_id": "936c592b5bc50d82",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "web",
+      "error_type": "runtime"
+    },
+    "log_id": "75e01354-0674-48d3-8d6b-2074e8f741fe"
+  },
+  {
+    "timestamp": "2026-10-23T16:42:20.531251+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "22b75fd77967816195df48f6e33f8814",
+    "span_id": "c11d926376978326",
+    "message": "Simulated validation failure: required item data is invalid",
+    "stack_trace": null,
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "value"
+    },
+    "log_id": "c319a53d-ac7e-4f08-8d23-0e9ea6bc4dd1"
+  },
+  {
+    "timestamp": "2026-10-23T16:42:20.622150+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "65fd439e68769bd3fea5e2882929c299",
+    "span_id": "82c01c54385b5b4a",
+    "message": "Simulated connection failure: downstream dependency unreachable",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "connection"
+    },
+    "log_id": "758adb64-ad94-4c13-ab31-4ee61d7f63f9"
+  },
+  {
+    "timestamp": "2026-10-23T16:42:20.726200+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "a26ad26fc025a28a8b627833cadf7110",
+    "span_id": "0bd9c2ece8b1eafd",
+    "message": "Simulated runtime failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated runtime failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "81b9c034-ba21-4a44-900a-b0434b7f828d"
+  },
+  {
+    "timestamp": "2026-10-23T16:42:20.895554+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "3ca24f506faa047bd6ddf817a61a1f41",
+    "span_id": "7db52aecccc92db2",
+    "message": "Simulated downstream timeout",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "6d018d64-ff46-4b47-b76d-d2175486b0ae"
+  },
+  {
+    "timestamp": "2026-10-23T16:42:20.991516+00:00",
+    "level": "ERROR",
+    "service": "demo-mobile-api",
+    "trace_id": "69ac5e6031f652183863cde777bf0244",
+    "span_id": "35ee6c69714979c0",
+    "message": "Simulated downstream failure",
+    "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 116, in _inject_fault\n    raise RuntimeError(\nRuntimeError: Simulated downstream failure\n",
+    "metadata": {
+      "platform": "mobile-api",
+      "error_type": "runtime"
+    },
+    "log_id": "2a613b04-c504-42ac-b856-c9063814fb21"
+  }
+]
