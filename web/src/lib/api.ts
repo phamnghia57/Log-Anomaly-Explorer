@@ -106,3 +106,20 @@ export function listClusters(params: { status?: ClusterStatus | ""; since?: stri
 export function getCluster(clusterId: string) {
   return getJson<ClusterRecord>(`/clusters/${encodeURIComponent(clusterId)}`);
 }
+
+// ClusterHistoryPoint - docs/architect/contracts/cluster-history-schema.json
+// (xu huong anomaly score theo thoi gian cua 1 cum, khac ClusterRecord.score
+// o tren - chi 1 diem hien tai). points co the rong: cum ton tai nhung
+// clustering chua ghi history.
+export interface ClusterHistoryPoint {
+  cluster_id: string;
+  score: number;
+  status: ClusterStatus;
+  recorded_at: string;
+}
+
+export function getClusterHistory(clusterId: string) {
+  return getJson<{ cluster_id: string; points: ClusterHistoryPoint[] }>(
+    `/clusters/${encodeURIComponent(clusterId)}/history`,
+  );
+}

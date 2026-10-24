@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useCluster } from "@/lib/queries";
+import { useCluster, useClusterHistory } from "@/lib/queries";
 import { formatDateTime } from "@/lib/format";
 import { getJaegerTraceUrl } from "@/lib/api";
 import { AppShell } from "@/components/layout/AppShell";
@@ -13,12 +13,20 @@ import { ArrowLeft, ExternalLink, GitBranch } from "lucide-react";
 
 const TRACE_PREVIEW_COUNT = 40;
 
+// Tach rieng chunk ECharts, cung ly do voi AnomalyScoreChart o DashboardPage.
+const ClusterScoreHistoryChart = lazy(() =>
+  import("@/components/incident/ClusterScoreHistoryChart").then((m) => ({
+    default: m.ClusterScoreHistoryChart,
+  })),
+);
+
 export function ClusterDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [showAllTraces, setShowAllTraces] = useState(false);
 
   const { data: cluster, isLoading, isError, error } = useCluster(id);
+  const { data: history } = useClusterHistory(id);
 
   return (
     <AppShell title="Incident View">
@@ -122,6 +130,17 @@ export function ClusterDetailPage() {
                 )}
               </CardContent>
             </Card>
+
+            {history && history.points.length > 0 && (
+              <div className="rounded-xl border bg-card p-4">
+                <h2 className="mb-3 text-sm font-semibold text-muted-foreground">
+                  Xu hướng anomaly score
+                </h2>
+                <Suspense fallback={<Skeleton className="h-40" />}>
+                  <ClusterScoreHistoryChart points={history.points} />
+                </Suspense>
+              </div>
+            )}
 
             <section>
               <h2 className="mb-3 text-sm font-semibold text-muted-foreground">Log trong cụm</h2>

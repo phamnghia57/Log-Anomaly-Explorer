@@ -1,5 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { type ClusterStatus, type SearchParams, getCluster, listClusters, searchLogs } from "./api";
+import {
+  type ClusterStatus,
+  type SearchParams,
+  getCluster,
+  getClusterHistory,
+  listClusters,
+  searchLogs,
+} from "./api";
 
 export function useClusters(status: ClusterStatus | "") {
   return useQuery({
@@ -13,6 +20,14 @@ export function useCluster(clusterId: string | undefined) {
   return useQuery({
     queryKey: ["cluster", clusterId],
     queryFn: () => getCluster(clusterId as string),
+    enabled: Boolean(clusterId),
+  });
+}
+
+export function useClusterHistory(clusterId: string | undefined) {
+  return useQuery({
+    queryKey: ["cluster-history", clusterId],
+    queryFn: () => getClusterHistory(clusterId as string),
     enabled: Boolean(clusterId),
   });
 }

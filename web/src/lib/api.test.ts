@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiError, getCluster, getJaegerTraceUrl, listClusters, searchLogs } from "./api";
+import { ApiError, getCluster, getClusterHistory, getJaegerTraceUrl, listClusters, searchLogs } from "./api";
 
 describe("query-api client", () => {
   const fetchMock = vi.fn();
@@ -56,6 +56,18 @@ describe("query-api client", () => {
     const error = await getCluster("does-not-exist").catch((e) => e);
     expect(error).toBeInstanceOf(ApiError);
     expect(error).toMatchObject({ status: 404 });
+  });
+
+  it("getClusterHistory: goi dung endpoint /clusters/{id}/history", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ cluster_id: "c1", points: [] }), { status: 200 }),
+    );
+
+    const body = await getClusterHistory("c1");
+
+    const calledUrl = new URL(fetchMock.mock.calls[0][0] as string);
+    expect(calledUrl.pathname).toBe("/clusters/c1/history");
+    expect(body).toEqual({ cluster_id: "c1", points: [] });
   });
 
   it("nem ApiError (status 0) khi fetch that bai hoan toan (vd. backend sap/mixed content)", async () => {

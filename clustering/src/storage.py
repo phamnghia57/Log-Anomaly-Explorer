@@ -12,6 +12,7 @@ class OpenSearchStore:
         self.client = self.log_store.client
         self.logs = self.log_store.log_index
         self.clusters = os.getenv("CLUSTER_INDEX", "clusters")
+        self.history = os.getenv("HISTORY_INDEX", "cluster-history")
 
     def ensure_ready(self):
         self.log_store.ensure_ready()
@@ -27,6 +28,20 @@ class OpenSearchStore:
         except Exception as exc:
             if "resource_already_exists_exception" not in str(exc):
                 raise StorageError(f"cannot prepare clusters: {exc}") from exc
+
+        # cluster-history-schema.json: 1 diem/chu ky/cum, KHONG upsert (khac
+        # `clusters` o tren) - dung ve xu huong score theo thoi gian.
+        history_fields = {"cluster_id": {"type": "keyword"}, "status": {"type": "keyword"},
+                           "score": {"type": "double"}, "recorded_at": {"type": "date"}}
+        try:
+            if not self.client.indices.exists(index=self.history):
+                self.client.indices.create(index=self.history, body={
+                    "settings": self.log_store._settings(),
+                    "mappings": {"dynamic": "strict", "properties": history_fields},
+                })
+        except Exception as exc:
+            if "resource_already_exists_exception" not in str(exc):
+                raise StorageError(f"cannot prepare cluster-history: {exc}") from exc
 
     def read_logs(self, start, end):
         scroll_id = None
@@ -88,6 +103,26 @@ class OpenSearchStore:
         except Exception as exc:
             raise StorageError(f"get_cluster failed: {exc}") from exc
         return response["_source"] if response.get("found") else None
+
+    def list_history(self, cluster_id, *, since=None, limit=100):
+        """Return ClusterHistoryPoint[] for one cluster, oldest first (chart order).
+
+        Read-only side of cluster-history-schema.json. The write side (one point
+        appended per clustering cycle) is Nam's part, not implemented here yet -
+        an empty list is a valid result until that lands.
+        """
+        if limit < 1:
+            raise ValueError("limit must be positive")
+        filters = [{"term": {"cluster_id": cluster_id}}]
+        if since is not None:
+            filters.append({"range": {"recorded_at": {"gte": since}}})
+        body = {"query": {"bool": {"filter": filters}},
+                "sort": [{"recorded_at": "asc"}], "size": limit}
+        try:
+            response = self.client.search(index=self.history, body=body)
+        except Exception as exc:
+            raise StorageError(f"list_history failed: {exc}") from exc
+        return [hit["_source"] for hit in response["hits"]["hits"]]
 
     def close(self):
         self.client.close()
