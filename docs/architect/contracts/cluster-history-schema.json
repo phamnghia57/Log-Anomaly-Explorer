@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/phamnghia57/Log-Anomaly-Explorer/docs/architect/contracts/cluster-history-schema.json",
+  "title": "ClusterHistoryPoint",
+  "description": "Hop dong giua clustering (Nam, ben ghi) va query-api / UI xu huong (Nghia, ben doc). Khac voi cluster-record.schema.json (ban ghi 'hien tai' cua mot cum, upsert theo cluster_id): moi lan pipeline tinh diem bat thuong cho mot cum (moi chu ky WINDOW_SECONDS), THEM MOI (khong upsert) mot ClusterHistoryPoint - dung de ve bieu do xu huong score theo thoi gian. Khong doi/dung lai cluster-record.schema.json.",
+  "type": "object",
+  "required": ["cluster_id", "score", "status", "recorded_at"],
+  "properties": {
+    "cluster_id": {
+      "type": "string",
+      "description": "Phai khop voi ClusterRecord.cluster_id tuong ung (xem cluster-record.schema.json)"
+    },
+    "score": {
+      "type": "number",
+      "description": "Anomaly score tai chu ky nay - cung cong thuc voi ClusterRecord.score"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["normal", "anomalous", "alerted"],
+      "description": "Trang thai cum tai chu ky nay (xem cluster-record.schema.json muc status)"
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "window_to cua chu ky clustering luc tinh diem nay - dung lam truc thoi gian khi ve bieu do"
+    }
+  },
+  "additionalProperties": false
+}

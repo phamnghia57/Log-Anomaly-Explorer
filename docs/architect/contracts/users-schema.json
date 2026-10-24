@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/phamnghia57/Log-Anomaly-Explorer/docs/architect/contracts/users-schema.json",
+  "title": "AdminUser",
+  "description": "THIET KE - chua co code tuong ung. Hop dong cho index moi `users` trong OpenSearch sieng co (khong them database moi), phuc vu tinh nang Auth (xem api-contract.md muc 'Auth'). Chi dung cho dang nhap admin, KHONG co public signup.",
+  "type": "object",
+  "required": ["username", "password_hash", "role", "created_at"],
+  "properties": {
+    "username": {
+      "type": "string",
+      "description": "Dinh danh duy nhat, dung lam document _id trong index `users`"
+    },
+    "password_hash": {
+      "type": "string",
+      "description": "Hash (vi du bcrypt), KHONG BAO GIO luu plaintext password"
+    },
+    "role": {
+      "type": "string",
+      "enum": ["admin"],
+      "description": "Chi co 1 vai tro o ban dau - de ngo mo rong sau nay (vd. 'viewer')"
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "last_login_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Tuy chon - cap nhat moi lan POST /auth/login thanh cong"
+    }
+  },
+  "additionalProperties": false
+}

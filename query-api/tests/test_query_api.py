@@ -134,6 +134,7 @@ class FakeClusterStore:
     def __init__(self, records=None):
         self.records = list(records or [])
         self.calls = []
+        self.history_points: dict[str, list[dict]] = {}
 
     def list_clusters(self, *, status=None, since=None, limit=100, offset=0):
         self.calls.append({"status": status, "since": since, "limit": limit, "offset": offset})
@@ -145,6 +146,12 @@ class FakeClusterStore:
     def get_cluster(self, cluster_id):
         self.calls.append({"get": cluster_id})
         return next((r for r in self.records if r["cluster_id"] == cluster_id), None)
+
+    def list_history(self, cluster_id, *, since=None, limit=100):
+        self.calls.append({"history": cluster_id, "since": since, "limit": limit})
+        if limit < 1:
+            raise ValueError("limit must be positive")
+        return list(self.history_points.get(cluster_id, []))
 
 
 def test_fake_khop_chu_ky_that_cua_clustering():
@@ -158,7 +165,7 @@ def test_fake_khop_chu_ky_that_cua_clustering():
 
     from clustering.src.storage import OpenSearchStore
 
-    for name in ("list_clusters", "get_cluster"):
+    for name in ("list_clusters", "get_cluster", "list_history"):
         that = inspect.signature(getattr(OpenSearchStore, name))
         gia = inspect.signature(getattr(FakeClusterStore, name))
         assert that == gia, f"{name}: that={that} khac fake={gia}"
@@ -241,3 +248,48 @@ class TestGetCluster:
         clusters.records = [record("c1", log_ids=["log-1", "da-bi-xoa"])]
         logs = client.get("/clusters/c1").json()["logs"]
         assert [l["log_id"] for l in logs] == ["log-1"]
+
+
+class TestClusterHistory:
+    """GET /clusters/{id}/history - xu huong score theo thoi gian (cluster-history-schema.json)."""
+
+    def test_tra_ve_cac_diem_cua_dung_cum(self, clusters):
+        clusters.records = [record("c1")]
+        clusters.history_points["c1"] = [
+            {"cluster_id": "c1", "score": 1.0, "status": "normal", "recorded_at": iso(hours_ago=2)},
+            {"cluster_id": "c1", "score": 5.0, "status": "anomalous", "recorded_at": iso(hours_ago=1)},
+        ]
+
+        body = client.get("/clusters/c1/history").json()
+        assert body["cluster_id"] == "c1"
+        assert [p["score"] for p in body["points"]] == [1.0, 5.0]
+
+    def test_cum_khong_ton_tai_tra_404(self, clusters):
+        assert client.get("/clusters/khong-co/history").status_code == 404
+
+    def test_chua_co_history_tra_points_rong(self, clusters):
+        """cum ton tai nhung Nam chua ghi history - points rong la hop le, khong phai loi."""
+        clusters.records = [record("c1")]
+        body = client.get("/clusters/c1/history").json()
+        assert body["points"] == []
+
+    def test_khong_truyen_since_thi_mac_dinh_theo_retention(self, clusters):
+        clusters.records = [record("c1")]
+        client.get("/clusters/c1/history")
+        since = next(c for c in clusters.calls if "history" in c)["since"]
+        nguong = datetime.now(timezone.utc) - timedelta(days=main.DEFAULT_CLUSTER_WINDOW_DAYS)
+        assert abs((datetime.fromisoformat(since) - nguong).total_seconds()) < 60
+
+    def test_since_sai_dinh_dang_tra_400(self, clusters):
+        clusters.records = [record("c1")]
+        resp = client.get("/clusters/c1/history", params={"since": "hom qua"})
+        assert resp.status_code == 400
+
+    def test_limit_vuot_nguong_cho_phep_tra_422(self, clusters):
+        clusters.records = [record("c1")]
+        resp = client.get("/clusters/c1/history", params={"limit": 10_000})
+        assert resp.status_code == 422
+
+    def test_cluster_store_chua_san_sang_tra_503(self, monkeypatch):
+        monkeypatch.setattr(main, "cluster_store", None)
+        assert client.get("/clusters/c1/history").status_code == 503

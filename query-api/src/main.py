@@ -184,3 +184,31 @@ def get_cluster(cluster_id: str):
 
     logs = store.get_logs(cluster.get("log_ids", []))
     return {**cluster, "logs": logs}
+
+
+@app.get("/clusters/{cluster_id}/history")
+def get_cluster_history(
+    cluster_id: str,
+    since: str | None = None,
+    limit: int = Query(default=100, ge=1, le=1000),
+):
+    """Xu huong anomaly score theo thoi gian cua MOT cum (bieu do), khac
+    GET /clusters/{cluster_id} (chi 1 diem hien tai).
+
+    Doc tu index `cluster-history` qua clusters.list_history() (Nghia chuan
+    bi truoc) - xem docs/architect/contracts/cluster-history-schema.json.
+    `points` rong la hop le: cum ton tai nhung Nam chua trien khai phan ghi.
+    """
+    clusters = _require_cluster_store()
+    if clusters.get_cluster(cluster_id) is None:
+        raise HTTPException(status_code=404, detail="cluster not found")
+
+    start = _parse_dt(since, "since")
+    if start is None:
+        start = (datetime.now(timezone.utc) - timedelta(days=DEFAULT_CLUSTER_WINDOW_DAYS)).isoformat()
+
+    try:
+        points = clusters.list_history(cluster_id, since=start, limit=limit)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+    return {"cluster_id": cluster_id, "points": points}
