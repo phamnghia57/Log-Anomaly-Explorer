@@ -76,6 +76,10 @@ def check_and_alert(cluster: dict, service: str = "") -> bool:
         "score": cluster["score"],
         "service": service,
         "first_seen": cluster["first_seen"],
+        # Mot trace dai dien cua cum, de kenh nhan alert ghep duoc link mo
+        # thang trace do tren Jaeger (/jaeger/trace/{trace_id}). Luon co key
+        # (null khi cum khong co trace nao) de template ben nhan khong vo.
+        "trace_id": next(iter(cluster.get("trace_ids") or []), None),
     }
     try:
         response = httpx.post(webhook, json=payload, timeout=3.0)

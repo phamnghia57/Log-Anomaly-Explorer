@@ -58,6 +58,30 @@ describe("query-api client", () => {
     expect(error).toMatchObject({ status: 404 });
   });
 
+  it("getCluster: gui logs_limit khi can tai them log", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ cluster_id: "c1", logs: [], logs_total: 250 }), { status: 200 }),
+    );
+
+    await getCluster("c1", { logsLimit: 200 });
+
+    const calledUrl = new URL(fetchMock.mock.calls[0][0] as string);
+    expect(calledUrl.pathname).toBe("/clusters/c1");
+    expect(calledUrl.searchParams.get("logs_limit")).toBe("200");
+  });
+
+  it("getCluster: khong gui logs_limit/logs_offset khi khong truyen", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ cluster_id: "c1", logs: [] }), { status: 200 }),
+    );
+
+    await getCluster("c1");
+
+    const calledUrl = new URL(fetchMock.mock.calls[0][0] as string);
+    expect(calledUrl.searchParams.has("logs_limit")).toBe(false);
+    expect(calledUrl.searchParams.has("logs_offset")).toBe(false);
+  });
+
   it("getClusterHistory: goi dung endpoint /clusters/{id}/history", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ cluster_id: "c1", points: [] }), { status: 200 }),

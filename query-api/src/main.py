@@ -29,9 +29,12 @@ from datetime import datetime, timedelta, timezone
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from ingestion.src import config
 from ingestion.src.storage import LogStore, StorageError, build_store
+
+from .telemetry import setup_telemetry
 
 logger = logging.getLogger("query-api")
 
@@ -45,6 +48,20 @@ app.add_middleware(
     allow_methods=["GET"],
     allow_headers=["*"],
 )
+
+# Pillar thu 3 cua observability (sau Logs o OpenSearch va Traces o Jaeger):
+# METRICS. Expose /metrics dang Prometheus voi bo so RED (Rate/Errors/Duration)
+# cho tung route: http_requests_total, http_request_duration_seconds.
+# Nhan `handler` dung TEMPLATE route ("/clusters/{cluster_id}") chu khong phai
+# duong dan that, nen khong no cardinality theo tung cluster_id.
+#
+# /metrics CO Y KHONG duoc route ra ngoai qua gateway (xem deploy/Caddyfile:
+# chi mo /health, /search*, /clusters*, /docs) - so lieu van hanh chi nen doc
+# tu trong mang noi bo, khong phoi ra Internet.
+Instrumentator().instrument(app).expose(app, include_in_schema=False)
+
+# Trace cho chinh query-api (khong chi demo-app) - xem src/telemetry.py.
+setup_telemetry(app)
 
 # Mot ket noi dung chung cho ca process, giong cach ingestion/src/main.py lam.
 store: LogStore = build_store()
@@ -170,20 +187,31 @@ def list_clusters(
 
 
 @app.get("/clusters/{cluster_id}")
-def get_cluster(cluster_id: str):
+def get_cluster(
+    cluster_id: str,
+    logs_limit: int = Query(default=config.DEFAULT_SEARCH_LIMIT, ge=1, le=config.MAX_SEARCH_LIMIT),
+    logs_offset: int = Query(default=0, ge=0),
+):
     """Incident View: chi tiet cum + log goc da gay ra no.
 
     `logs` duoc dien bang cach tra `log_ids` cua ClusterRecord ve LogStore -
     moi log kem `log_id` (xem ingestion/src/storage.py::_with_log_id) de doi
     chieu duoc voi `log_ids`.
+
+    `logs` duoc PHAN TRANG (`logs_limit`/`logs_offset`): mot cum co the gom
+    hang tram log, tra het trong mot response lam endpoint nay cham nhat toan
+    he thong (do duoc: median 530ms, p99 1.7s - xem load-tests/README.md).
+    `logs_total` la tong so log_ids cua cum, khong bi cat boi `logs_limit`,
+    de UI biet con bao nhieu log chua tai.
     """
     clusters = _require_cluster_store()
     cluster = clusters.get_cluster(cluster_id)
     if not cluster:
         raise HTTPException(status_code=404, detail="cluster not found")
 
-    logs = store.get_logs(cluster.get("log_ids", []))
-    return {**cluster, "logs": logs}
+    log_ids = cluster.get("log_ids", [])
+    logs = store.get_logs(log_ids[logs_offset:logs_offset + logs_limit])
+    return {**cluster, "logs": logs, "logs_total": len(log_ids)}
 
 
 @app.get("/clusters/{cluster_id}/history")

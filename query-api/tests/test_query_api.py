@@ -246,8 +246,70 @@ class TestGetCluster:
         """Log het han retention bi xoa -> cum van xem duoc, chi thieu log do."""
         write("log-1")
         clusters.records = [record("c1", log_ids=["log-1", "da-bi-xoa"])]
-        logs = client.get("/clusters/c1").json()["logs"]
-        assert [l["log_id"] for l in logs] == ["log-1"]
+        body = client.get("/clusters/c1").json()
+        assert [l["log_id"] for l in body["logs"]] == ["log-1"]
+        # logs_total dem theo log_ids cua cum, khong theo so log con doc duoc
+        assert body["logs_total"] == 2
+
+
+class TestGetClusterLogsPagination:
+    """`logs` trong Incident View duoc phan trang - cum hang tram log khong
+    con tra het trong mot response (xem load-tests/README.md)."""
+
+    def _cum_nhieu_log(self, clusters, total=250):
+        ids = []
+        for i in range(total):
+            write(f"log-{i:03d}")
+            ids.append(f"log-{i:03d}")
+        clusters.records = [record("c1", log_ids=ids)]
+        return ids
+
+    def test_mac_dinh_chi_tra_mot_trang(self, clusters):
+        self._cum_nhieu_log(clusters, total=250)
+        body = client.get("/clusters/c1").json()
+        assert len(body["logs"]) == main.config.DEFAULT_SEARCH_LIMIT
+        assert body["logs_total"] == 250  # tong khong bi cat boi limit
+
+    def test_offset_lay_trang_tiep_theo_khong_trung_lap(self, clusters):
+        self._cum_nhieu_log(clusters, total=250)
+        trang1 = client.get("/clusters/c1", params={"logs_limit": 10, "logs_offset": 0}).json()
+        trang2 = client.get("/clusters/c1", params={"logs_limit": 10, "logs_offset": 10}).json()
+
+        ids1 = {l["log_id"] for l in trang1["logs"]}
+        ids2 = {l["log_id"] for l in trang2["logs"]}
+        assert len(ids1) == len(ids2) == 10
+        assert ids1.isdisjoint(ids2)
+
+    def test_offset_vuot_qua_tong_tra_logs_rong(self, clusters):
+        self._cum_nhieu_log(clusters, total=5)
+        body = client.get("/clusters/c1", params={"logs_offset": 999}).json()
+        assert body["logs"] == []
+        assert body["logs_total"] == 5
+
+    def test_logs_limit_vuot_nguong_cho_phep_tra_422(self, clusters):
+        clusters.records = [record("c1")]
+        assert client.get("/clusters/c1", params={"logs_limit": 10_000}).status_code == 422
+
+
+class TestMetrics:
+    """Pillar thu 3 cua observability: Metrics dang Prometheus (xem src/main.py)."""
+
+    def test_tra_ve_dinh_dang_prometheus_voi_bo_so_red(self):
+        resp = client.get("/metrics")
+        assert resp.status_code == 200
+        assert "text/plain" in resp.headers["content-type"]
+        assert "http_requests_total" in resp.text             # Rate + Errors (co nhan status)
+        assert "http_request_duration_seconds" in resp.text   # Duration
+
+    def test_nhan_handler_la_template_route_khong_phai_duong_dan_that(self, clusters):
+        """Neu nhan `handler` dung duong dan that thi moi cluster_id lai tao mot
+        time series rieng -> no cardinality, Prometheus phinh bo nho."""
+        clusters.records = [record("c1")]
+        client.get("/clusters/c1")
+
+        text = client.get("/metrics").text
+        assert 'handler="/clusters/{cluster_id}"' in text
+        assert "/clusters/c1" not in text
 
 
 class TestClusterHistory:

@@ -118,6 +118,7 @@ services:
       OPENSEARCH_URL: ${OPENSEARCH_URL:-http://opensearch:9200}
       LOG_INDEX: ${LOG_INDEX:-logs}
       CLUSTER_INDEX: ${CLUSTER_INDEX:-clusters}
+      HISTORY_INDEX: ${HISTORY_INDEX:-cluster-history}
       WINDOW_SECONDS: ${WINDOW_SECONDS:-60}
       HISTORY_WINDOWS: ${HISTORY_WINDOWS:-30}
       INGESTION_LAG_SECONDS: ${INGESTION_LAG_SECONDS:-10}
@@ -142,7 +143,11 @@ services:
       OPENSEARCH_URL: ${OPENSEARCH_URL:-http://opensearch:9200}
       LOG_INDEX: ${LOG_INDEX:-logs}
       CLUSTER_INDEX: ${CLUSTER_INDEX:-clusters}
+      HISTORY_INDEX: ${HISTORY_INDEX:-cluster-history}
       RETENTION_DAYS: ${RETENTION_DAYS:-30}
+      # Trace cho chinh query-api (query-api/src/telemetry.py) - de xem endpoint
+      # nao cua UI cham tren Jaeger, khong chi co trace cua demo-app.
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://jaeger:4318}
     ports:
       - "${QUERY_API_PORT:-8002}:8002"
     restart: unless-stopped

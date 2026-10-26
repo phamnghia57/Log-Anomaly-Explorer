@@ -16,10 +16,12 @@ export function useClusters(status: ClusterStatus | "") {
   });
 }
 
-export function useCluster(clusterId: string | undefined) {
+export function useCluster(clusterId: string | undefined, logsLimit?: number) {
   return useQuery({
-    queryKey: ["cluster", clusterId],
-    queryFn: () => getCluster(clusterId as string),
+    // logsLimit nam trong queryKey: doi so log can tai thi phai fetch lai,
+    // khong duoc dung lai cache cua trang nho hon.
+    queryKey: ["cluster", clusterId, logsLimit],
+    queryFn: () => getCluster(clusterId as string, { logsLimit }),
     enabled: Boolean(clusterId),
   });
 }
