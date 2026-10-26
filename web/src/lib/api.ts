@@ -50,6 +50,9 @@ export interface ClusterRecord {
   last_seen: string;
   status: ClusterStatus;
   logs?: StructuredLog[];
+  // Tong so log_ids cua cum, khong bi cat boi logs_limit - de biet con bao
+  // nhieu log chua tai (GET /clusters/{id} phan trang `logs`).
+  logs_total?: number;
 }
 
 export class ApiError extends Error {
@@ -103,8 +106,11 @@ export function listClusters(params: { status?: ClusterStatus | ""; since?: stri
   });
 }
 
-export function getCluster(clusterId: string) {
-  return getJson<ClusterRecord>(`/clusters/${encodeURIComponent(clusterId)}`);
+export function getCluster(clusterId: string, params?: { logsLimit?: number; logsOffset?: number }) {
+  return getJson<ClusterRecord>(`/clusters/${encodeURIComponent(clusterId)}`, {
+    logs_limit: params?.logsLimit?.toString(),
+    logs_offset: params?.logsOffset?.toString(),
+  });
 }
 
 // ClusterHistoryPoint - docs/architect/contracts/cluster-history-schema.json

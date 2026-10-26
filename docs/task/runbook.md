@@ -5,8 +5,11 @@
 
 ## Khi nhận được Alert
 
-1. **Nhận alert** (webhook) — nội dung gồm `cluster_id`, `score`, `service`, `first_seen`
-   (xem payload chuẩn trong `docs/architect/contracts/api-contract.md` mục "Alert").
+1. **Nhận alert** (webhook) — nội dung gồm `cluster_id`, `score`, `service`, `first_seen` và
+   `trace_id` (một trace đại diện của cụm; xem payload chuẩn trong
+   `docs/architect/contracts/api-contract.md` mục "Alert"). Nếu kênh nhận alert đã cấu hình link
+   từ `trace_id` thì bấm thẳng vào đó để xem ngay một request lỗi cụ thể trên Jaeger, không cần
+   qua bước 2–3.
 2. **Mở Incident View**: `GET /clusters/{cluster_id}` (hoặc trang `/clusters/:id` trên UI) để xem
    signature, score, danh sách log liên quan.
 3. **Lần theo trace/request**: bấm icon ↗ cạnh một `trace_id` bất kỳ trong Incident View để mở

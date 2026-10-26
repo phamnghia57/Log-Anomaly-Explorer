@@ -43,6 +43,11 @@ Danh sách cụm bất thường, đọc từ dữ liệu do Nam ghi theo [`clus
 ### `GET /clusters/{cluster_id}`
 Chi tiết một cụm — dùng cho Incident View.
 
+| Query param | Kiểu | Ghi chú |
+|---|---|---|
+| `logs_limit` | int | Số log trả về mỗi trang. Mặc định 100, tối đa 1000 |
+| `logs_offset` | int | Mặc định 0 |
+
 Response:
 ```json
 {
@@ -50,9 +55,16 @@ Response:
   "score": 0.0,
   "status": "anomalous",
   "logs": [ /* StructuredLog[] theo log-schema.json, tra ve tu log_ids */ ],
+  "logs_total": 0,
   "trace_ids": ["..."]
 }
 ```
+
+`logs` được **phân trang** — một cụm có thể gồm hàng trăm log, trả hết trong một response làm
+endpoint này chậm nhất hệ thống (đo thật: median 530ms, p99 1.7s — xem `load-tests/README.md`).
+`logs_total` là tổng số `log_ids` của cụm (không bị cắt bởi `logs_limit`), để UI biết còn bao
+nhiêu log chưa tải. Lưu ý `len(logs)` có thể **nhỏ hơn** số lượng yêu cầu nếu log trong trang đó
+đã bị retention xoá.
 
 ### `GET /clusters/{cluster_id}/history`
 Lịch sử anomaly score theo thời gian của **một cụm** — dùng vẽ biểu đồ xu hướng trong Incident
@@ -85,8 +97,13 @@ ví dụ trước khi Nam triển khai phần ghi).
 Khi `score > ngưỡng`, Clustering service tự gọi webhook/email cấu hình sẵn — **không** đi qua query-api. Payload tối thiểu:
 
 ```json
-{ "cluster_id": "...", "score": 0.0, "service": "...", "first_seen": "..." }
+{ "cluster_id": "...", "score": 0.0, "service": "...", "first_seen": "...", "trace_id": "..." }
 ```
+
+`trace_id` là **một trace đại diện** của cụm (phần tử đầu trong `trace_ids` của
+[`cluster-record.schema.json`](./cluster-record.schema.json)), để kênh nhận alert ghép được link
+mở thẳng trace đó trên Jaeger: `https://<domain>/jaeger/trace/<trace_id>`. Key **luôn có mặt**,
+giá trị `null` khi cụm không có trace nào — bên nhận không cần xử lý trường hợp thiếu key.
 
 ## Auth (dự kiến — CHỈ thiết kế, chưa implement)
 

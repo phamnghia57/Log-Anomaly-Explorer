@@ -12,6 +12,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, ExternalLink, GitBranch } from "lucide-react";
 
 const TRACE_PREVIEW_COUNT = 40;
+// Khop mac dinh `logs_limit` cua GET /clusters/{id} (api-contract.md).
+const LOGS_PAGE_SIZE = 100;
+// Tran `logs_limit` cua API - xin qua muc nay API tra 422, nen phai chan o day.
+const LOGS_MAX = 1000;
 
 // Tach rieng chunk ECharts, cung ly do voi AnomalyScoreChart o DashboardPage.
 const ClusterScoreHistoryChart = lazy(() =>
@@ -24,8 +28,9 @@ export function ClusterDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [showAllTraces, setShowAllTraces] = useState(false);
+  const [logsLimit, setLogsLimit] = useState(LOGS_PAGE_SIZE);
 
-  const { data: cluster, isLoading, isError, error } = useCluster(id);
+  const { data: cluster, isLoading, isError, error, isFetching } = useCluster(id, logsLimit);
   const { data: history } = useClusterHistory(id);
 
   return (
@@ -143,11 +148,42 @@ export function ClusterDetailPage() {
             )}
 
             <section>
-              <h2 className="mb-3 text-sm font-semibold text-muted-foreground">Log trong cụm</h2>
+              <h2 className="mb-3 text-sm font-semibold text-muted-foreground">
+                Log trong cụm
+                {cluster.logs_total !== undefined && (
+                  <span className="ml-1 font-normal">
+                    ({cluster.logs?.length ?? 0}/{cluster.logs_total})
+                  </span>
+                )}
+              </h2>
               <LogTable
                 logs={cluster.logs ?? []}
                 onTraceClick={(traceId) => navigate(`/search?trace_id=${encodeURIComponent(traceId)}`)}
               />
+
+              {cluster.logs_total !== undefined && cluster.logs_total > logsLimit && (
+                <div className="mt-3 flex justify-center">
+                  {logsLimit < LOGS_MAX ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={isFetching}
+                      onClick={() =>
+                        setLogsLimit((current) => Math.min(current + LOGS_PAGE_SIZE, LOGS_MAX))
+                      }
+                    >
+                      {isFetching
+                        ? "Đang tải…"
+                        : `Tải thêm ${Math.min(LOGS_PAGE_SIZE, cluster.logs_total - logsLimit)} log`}
+                    </Button>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Đã tải tối đa {LOGS_MAX} log — lọc tiếp bằng trang Search nếu cần xem phần
+                      còn lại.
+                    </p>
+                  )}
+                </div>
+              )}
             </section>
           </>
         )}
