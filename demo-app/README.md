@@ -45,6 +45,12 @@ Cả ba dùng cùng `trace_id`, mỗi span có `span_id` riêng. Log "Checkout s
 payment. Log vẫn tuân thủ schema hiện tại. Payment là endpoint mô phỏng trong cùng app,
 không cần thêm service/container; không thực hiện thanh toán bên ngoài.
 
+`parent.span_id` của payment CLIENT phải bằng `span_id` của checkout SERVER;
+`parent.span_id` của payment SERVER phải bằng `span_id` của payment CLIENT. Phía payment
+coi parent là remote vì context được đọc từ HTTP headers. Nếu checkout nhận `traceparent`
+hợp lệ từ caller, cả luồng tiếp tục trace đó và giữ `tracestate`. Instrumentation có thể
+sinh thêm span ASGI send/receive bên cạnh ba span nghiệp vụ trên.
+
 `PAYMENT_URL` mặc định là `http://127.0.0.1:8001/payment`, tương thích Docker hiện có
 (cổng nội bộ luôn là 8001, kể cả khi đổi `DEMO_APP_PORT` trên host). Nếu chạy uvicorn ở
 cổng khác, đặt `PAYMENT_URL` tới cổng đó trước khi khởi động. Lời gọi có timeout 2 giây;
@@ -54,8 +60,42 @@ timeout trả 504, lỗi HTTP/kết nối trả 502, kèm structured error log v
 Invoke-RestMethod -Method Post http://127.0.0.1:8001/checkout
 ```
 
-Khi có `OTEL_EXPORTER_OTLP_ENDPOINT` (đã cấu hình trong Docker Compose), mở Jaeger,
-chọn service `demo-web`, tìm operation `POST /checkout` để xem cây span trên.
+#### Xem trace trên Jaeger
+
+Từ thư mục gốc repo, khởi động các service cần cho demo (Docker Compose tự khởi động
+ingestion và OpenSearch theo dependencies):
+
+```bash
+docker compose up -d --build demo-app jaeger
+```
+
+Đợi `demo-app` healthy, gọi `POST /checkout` như trên, rồi mở
+[Jaeger UI](http://localhost:16686/jaeger/). Chọn **Service → demo-web**,
+**Operation → POST /checkout**, **Find Traces**, rồi mở trace mới nhất. Kiểm tra cây
+SERVER checkout → CLIENT payment → SERVER payment và các ID/parent đã mô tả. Các span
+có thể xuất hiện sau vài giây vì exporter gửi theo batch. Nếu đổi `JAEGER_UI_PORT` hoặc
+`DEMO_APP_PORT`, thay cổng host trong URL Jaeger hoặc lệnh gọi checkout tương ứng.
+
+Để tìm đúng một trace và kiểm tra W3C propagation từ caller, có thể dùng PowerShell
+với trace ID mới cho mỗi lần chạy:
+
+```powershell
+$traceId = [guid]::NewGuid().ToString("N")
+$parentSpanId = [guid]::NewGuid().ToString("N").Substring(0, 16)
+Invoke-RestMethod -Method Post http://127.0.0.1:8001/checkout -Headers @{
+    traceparent = "00-$traceId-$parentSpanId-01"
+    tracestate = "demo=checkout"
+}
+"http://localhost:16686/jaeger/trace/$traceId"
+```
+
+Mở URL được in ra; cả ba span phải mang `$traceId`. Parent ngoài app trong ví dụ này
+chỉ được biểu diễn bằng header, không có span upstream tương ứng được export.
+
+Docker Compose đã đặt `OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318` cho demo-app.
+Nếu chạy uvicorn trực tiếp và dùng Jaeger với cổng OTLP HTTP đã publish, đặt biến này
+trỏ tới địa chỉ OTLP HTTP mà tiến trình uvicorn truy cập được trước khi khởi động.
+Compose hiện chỉ publish cổng UI của Jaeger, không publish cổng OTLP ra host.
 Không cấu hình exporter thì vẫn tạo trace context và log, nhưng không gửi span tới Jaeger.
 
 Các fault được hỗ trợ:
@@ -115,11 +155,36 @@ thúc, endpoint, fault, rate và seed cùng trace IDs từ ingestion để dùng
 
 Chạy test tự động từ thư mục `demo-app`:
 
-`venv\Scripts\python.exe -m pytest -q`
+```powershell
+venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+venv\Scripts\python.exe -m pytest -q
+```
 
-`tests/test_nested_tracing.py` chạy uvicorn trên cổng TCP tạm, gọi checkout/payment qua
-HTTP thật và thu span bằng in-memory exporter. Test kiểm tra cùng trace, parent-child,
-W3C context từ request ngoài, schema log, lỗi downstream và loại trừ `/health`.
+`tests/test_nested_tracing.py` dùng in-memory exporter, không cần Jaeger, ingestion,
+OpenSearch hoặc Docker đang chạy:
+
+- Unit tests dùng `httpx.MockTransport` chuyển HTTP request tới endpoint payment qua
+  `TestClient`. Context cục bộ được xóa trước khi chuyển request, nên payment phải
+  extract context từ headers. Test kiểm tra payload, `traceparent` chứa đúng ID của
+  CLIENT span (không phải ID của checkout SERVER), `tracestate`, parent remote,
+  trace/span IDs và schema log.
+- Hai integration cases giữ lời gọi TCP thật qua uvicorn trên cổng tạm, kiểm tra cả
+  trace mới và trace kế thừa caller. Không cần một server ngoài nào.
+- Lỗi kết nối, connect/read timeout và HTTP 400/503 được mock để kiểm tra HTTP 502/504,
+  error log, exception event và trạng thái lỗi của client span.
+- Sau checkout, test cả sáu fault trên web/mobile, gồm `bad_schema`, để kiểm tra fault
+  vẫn hoạt động và log gắn với trace request mới. Các regression tests gốc trong
+  `tests/test_fault_injection.py` tiếp tục kiểm tra seed/rate, legacy faults và payload
+  sai schema có chủ đích. `/health` vẫn không tạo span.
+
+Chỉ chạy các tracing tests dùng mock transport (bỏ hai cases TCP):
+
+```powershell
+venv\Scripts\python.exe -m pytest tests/test_nested_tracing.py -q -k "not traced_app"
+```
+
+Các test xác minh span được tạo/export trong bộ nhớ, không xác minh giao diện Jaeger
+hoặc khả năng kết nối OTLP khi deploy; dùng walkthrough ở trên cho bước kiểm tra đó.
 
 ## Evidence sở hữu
 
