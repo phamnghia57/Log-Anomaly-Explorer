@@ -6,8 +6,8 @@
 
 - [x] Hoàn thiện thuật toán nhóm lỗi trong `src/clustering.py` (chuẩn hoá giá trị động và hoa/thường)
 - [x] Hoàn thiện cách tính baseline tần suất + anomaly score trong `src/anomaly_score.py`
-- [ ] Cấu hình `ANOMALY_THRESHOLD` và `ALERT_WEBHOOK_URL` cho `src/alert.py`
-- [ ] Phối hợp với Mạnh: dùng `/simulate-error` để tạo các giai đoạn bất thường có kiểm soát, rồi điền vào `evaluation/labeled_incidents.json`
+- [x] Cấu hình `ANOMALY_THRESHOLD` và `ALERT_WEBHOOK_URL` cho `src/alert.py` — đã test gửi alert thật (xem "Evidence sở hữu")
+- [x] Phối hợp với Mạnh: dùng `/simulate-error` để tạo các giai đoạn bất thường có kiểm soát, rồi điền vào `evaluation/labeled_incidents.json`
 - [x] Chạy `evaluation/precision_recall.py` trên dữ liệu fault injection mới (kết quả bên dưới)
 
 ## Hợp đồng đang tuân theo
@@ -19,6 +19,16 @@
 
 - **Labeled incidents**: `evaluation/labeled_incidents.json` — mỗi sự cố thật được gán nhãn thủ công, thường tạo ra từ fault injection của Mạnh
 - **Precision/recall**: `evaluation/precision_recall.py` — đo trên labeled incidents ở trên
+- **Alert webhook (gửi thật)**: `ALERT_WEBHOOK_URL` trỏ sang một Custom Webhook trên Make.com,
+  nối tiếp sang Gmail — đã test và **nhận được email thật** khi một cụm vượt
+  `ANOMALY_THRESHOLD` (`check_and_alert()` trong `src/alert.py` chỉ đặt `status="alerted"` sau
+  khi webhook trả 2xx; thất bại thì giữ `"anomalous"` để chu kỳ sau tự gửi lại — không có log
+  "thành công" riêng, im lặng là đúng). Cooldown `ALERT_COOLDOWN_SECONDS` (mặc định 600s) tránh
+  báo lại cùng một cụm liên tục.
+  Payload có `trace_id` đại diện của cụm (phần tử đầu `trace_ids`, xem
+  [`api-contract.md`](../docs/architect/contracts/api-contract.md) mục "Alert") để email ghép
+  được link mở thẳng trace đó trên Jaeger, không chỉ báo số liệu khô. Chi tiết quy trình nhận
+  alert/xử lý: [`../docs/task/runbook.md`](../docs/task/runbook.md) mục "Khi nhận được Alert".
 
 ## Chạy module
 
