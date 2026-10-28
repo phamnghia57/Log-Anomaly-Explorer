@@ -6,6 +6,12 @@ import App from "./App";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import "./index.css";
+import { AUTH_STORAGE_KEY, restoreSession } from "@/lib/auth";
+
+restoreSession();
+window.addEventListener("storage", (event) => {
+  if (event.key === AUTH_STORAGE_KEY || event.key === null) restoreSession();
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {

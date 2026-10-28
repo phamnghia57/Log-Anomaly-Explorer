@@ -21,6 +21,8 @@ frontend (không có API route/BFF).
 
 ## Tính năng
 
+- **Đăng nhập admin** (`/login`) — form username/password, loading, lỗi đăng nhập/kết nối,
+  lưu phiên tập trung và chuyển tới Dashboard khi thành công.
 - **Dashboard** (`/`) — thống kê nhanh (tổng cụm, alerted, anomalous, score cao nhất), biểu đồ
   top 10 cụm theo anomaly score, danh sách cụm dạng card (lọc theo status).
 - **Incident View** (`/clusters/:id`) — chi tiết cụm (score, signature, first/last seen), toàn bộ
@@ -32,11 +34,48 @@ frontend (không có API route/BFF).
 
 ## Hợp đồng đang tuân theo
 
-Gọi trực tiếp 3 endpoint của `query-api`: `GET /search`, `GET /clusters`, `GET /clusters/{id}`
+Gọi `POST /auth/login` và các query endpoints `GET /search`, `GET /clusters`, `GET /clusters/{id}`
 — xem [`../docs/architect/contracts/api-contract.md`](../docs/architect/contracts/api-contract.md).
 Types trong [`src/lib/api.ts`](src/lib/api.ts) khớp với
 [`log-schema.json`](../docs/architect/contracts/log-schema.json) và
 [`cluster-record.schema.json`](../docs/architect/contracts/cluster-record.schema.json).
+
+## Đăng nhập và lưu phiên
+
+Mở `/login`, nhập tài khoản admin đã seed trong OpenSearch (xem
+[`query-api/README.md`](../query-api/README.md)). Form gửi JSON tới
+`${VITE_API_BASE_URL}/auth/login`, dùng cùng cấu hình API base URL với dashboard.
+Backend cần `JWT_SECRET` riêng và admin đã seed; không có signup hoặc credentials mặc định.
+Nếu đi qua reverse proxy, proxy phải route `POST /auth/login` tới query-api. Gateway Caddy
+hiện chưa có route login; cập nhật gateway thuộc bước tích hợp sau. Dev có thể gọi trực tiếp
+cổng query-api.
+
+Thành công: đọc `token`/`expires_at`, lưu qua `src/lib/auth.ts` (Zustand), xóa query cache cũ
+và chuyển tới `/` bằng React Router với `replace`. Client API chung đính kèm Bearer token
+cho query requests để dashboard tải được dữ liệu sau đăng nhập. Không đổi layout dashboard.
+
+Module auth chỉ lưu `{ token, expires_at }` dưới key `log-anomaly-explorer.auth` trong
+localStorage; không lưu username/password. Mật khẩu chỉ ở form/request trong bộ nhớ và được
+xóa khỏi form sau mỗi lần gửi. Response lỗi không được lưu; lỗi credentials hiển thị chung,
+không đưa chi tiết backend vào UI. Form có thông báo riêng cho lỗi mạng/dịch vụ không sẵn sàng.
+
+Phiên còn hạn được restore khi reload/mở lại trình duyệt. Hết hạn được xóa bằng timer và
+kiểm tra lại trước API request; `/login` hiển thị thông báo đăng nhập lại. API trả 401 sẽ
+xóa phiên bị từ chối; 401 của request cũ không xóa phiên mới vừa đăng nhập. Thay đổi storage
+giữa các tab được đồng bộ. Nếu browser chặn storage/hết quota, phiên chỉ tồn tại trong
+memory đến khi reload. Dữ liệu persisted hỏng/hết hạn được loại bỏ.
+
+**Tradeoff bảo mật:** localStorage tiện restore phiên nhưng JavaScript cùng origin có thể
+đọc token; XSS có thể đánh cắp nó, và dữ liệu storage không phải nguồn đáng tin cậy. Đây là
+tradeoff của client Bearer JWT hiện tại. [OWASP khuyến cáo tránh lưu session identifier
+trong localStorage](https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html#local-storage);
+cookie HttpOnly giảm khả năng script đọc token nhưng cần thiết kế lại cơ chế cookie/BFF
+và CSRF ở backend. Chưa chuyển sang cơ chế đó trong bước này. Dùng HTTPS khi deploy,
+không log token/password, không đưa `JWT_SECRET` vào biến `VITE_*`. Expiry ở client chỉ hỗ trợ
+UX; backend vẫn phải kiểm tra signature/role/expiration cho mọi query được bảo vệ.
+
+Bước này chưa thêm global route guard, logout UI hay tự điều hướng toàn app khi 401.
+Mở `/login` trực tiếp khi cần đăng nhập lại; enforcement truy cập dữ liệu nằm ở backend.
 
 ## Tracing / Jaeger
 
@@ -58,7 +97,8 @@ thời gian xử lý thật của từng request và liên kết đúng 1-1 vớ
 
 Cần `query-api` đang chạy thật (xem `docker-compose.yml` ở gốc repo hoặc
 `query-api/README.md`), vì CORS trên `query-api` đã mở sẵn cho frontend gọi trực tiếp
-(`allow_origins=["*"]`, chỉ cho `GET` — xem `query-api/src/main.py`).
+(`allow_origins=["*"]`, cho `GET`, `POST` và preflight với header Authorization — xem
+`query-api/src/main.py`).
 
 ```bash
 # Từ thư mục gốc repo, dựng backend thật (gồm cả Jaeger):
@@ -66,7 +106,8 @@ docker compose up -d --build
 
 cd web
 npm install
-cp .env.example .env.local      # VITE_API_BASE_URL=http://localhost:9002 (mặc định)
+cp .env.example .env.local
+# Sua VITE_API_BASE_URL khop cong backend: Compose mac dinh http://localhost:8002.
 npm run dev                      # http://localhost:5173
 ```
 
@@ -74,10 +115,17 @@ npm run dev                      # http://localhost:5173
 
 ```bash
 npm run test          # unit test (Vitest + RTL) - mock fetch, khong can backend
+npm run test:e2e -- e2e/login.spec.ts  # login E2E: mock API, khong can backend
 npm run test:e2e      # E2E (Playwright) - CAN backend that dang chay + it nhat 1 cluster co san
 npm run lint           # oxlint
 npm run build          # type-check (tsc) + production build
 ```
+
+Login tests kiểm tra thành công/redirect, loading và chống gửi lặp, lỗi credentials/network,
+session expired, persistence chỉ có token/expiry, restore và Bearer headers. Browser tests
+chạy Chrome theo cấu hình có sẵn, kiểm tra cả mobile và reload. Build đã bao gồm typecheck
+(`tsc -b`); có thể chạy riêng `npx tsc -b`. Dùng Node tương thích engine trong package-lock
+(Vitest hiện hỗ trợ Node `^22.12`, `^24` hoặc `>=26`).
 
 ## Deploy lên Vercel
 

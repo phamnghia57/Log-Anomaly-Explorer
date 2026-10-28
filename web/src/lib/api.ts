@@ -5,6 +5,11 @@
 // docs/task/deployment.md) la 2 noi deploy khac nhau, nen base URL luon cau
 // hinh qua bien moi truong (VITE_API_BASE_URL), khong hardcode.
 
+import {
+  clearSession, getSession, isAuthSession, SESSION_EXPIRED_MESSAGE, useAuthStore,
+  type AuthSession,
+} from "./auth";
+
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)
   ?.replace(/\/$/, "") || "http://localhost:9002";
 
@@ -64,6 +69,33 @@ export class ApiError extends Error {
   }
 }
 
+export async function loginAdmin(username: string, password: string): Promise<AuthSession> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+      cache: "no-store",
+    });
+  } catch {
+    throw new ApiError("Không kết nối được máy chủ. Vui lòng kiểm tra kết nối và thử lại.", 0);
+  }
+  if (!res.ok) {
+    throw new ApiError(
+      res.status >= 500
+        ? "Dịch vụ đăng nhập tạm thời không khả dụng. Vui lòng thử lại."
+        : "Đăng nhập không thành công. Vui lòng kiểm tra tên đăng nhập và mật khẩu.",
+      res.status,
+    );
+  }
+  const body: unknown = await res.json().catch(() => null);
+  if (!isAuthSession(body)) {
+    throw new ApiError("Không thể hoàn tất đăng nhập. Vui lòng thử lại.", 502);
+  }
+  return { token: body.token, expires_at: body.expires_at };
+}
+
 async function getJson<T>(path: string, params?: Record<string, string | undefined>): Promise<T> {
   const url = new URL(`${API_BASE_URL}${path}`);
   for (const [key, value] of Object.entries(params ?? {})) {
@@ -71,13 +103,22 @@ async function getJson<T>(path: string, params?: Record<string, string | undefin
   }
 
   let res: Response;
+  const session = getSession();
   try {
-    res = await fetch(url.toString());
+    res = await fetch(url.toString(), session
+      ? { headers: { Authorization: `Bearer ${session.token}` } }
+      : undefined);
   } catch {
     throw new ApiError(
       `Khong ket noi duoc toi API (${API_BASE_URL}). Kiem tra VITE_API_BASE_URL va backend co dang chay khong.`,
       0,
     );
+  }
+  if (res.status === 401) {
+    // Response cua request cu khong duoc xoa session moi vua dang nhap.
+    if (session && getSession()?.token === session.token) clearSession("expired");
+    throw new ApiError(useAuthStore.getState().status === "expired"
+      ? SESSION_EXPIRED_MESSAGE : "Vui lòng đăng nhập để xem dữ liệu.", 401);
   }
   if (!res.ok) {
     const body = await res.text().catch(() => "");
