@@ -30,3 +30,12 @@ def require_jwt_secret() -> str:
     if JWT_SECRET is None or not JWT_SECRET.strip():
         raise ValueError("JWT_SECRET must be set for authentication")
     return JWT_SECRET
+
+
+def require_admin_seed_credentials() -> tuple[str, str]:
+    """Seed la lenh tuong minh: bat buoc co ca hai credentials, khong log gia tri."""
+    if ADMIN_SEED_USERNAME is None or not ADMIN_SEED_USERNAME.strip():
+        raise ValueError("ADMIN_SEED_USERNAME must be set for admin seeding")
+    if ADMIN_SEED_PASSWORD is None or not ADMIN_SEED_PASSWORD.strip():
+        raise ValueError("ADMIN_SEED_PASSWORD must be set for admin seeding")
+    return ADMIN_SEED_USERNAME, ADMIN_SEED_PASSWORD

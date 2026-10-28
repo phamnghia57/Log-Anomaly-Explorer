@@ -80,14 +80,15 @@ Test: `pip install -r query-api/requirements-dev.txt && cd query-api && pytest`
 ## Chuẩn bị cấu hình JWT admin
 
 `src/config.py` đọc cấu hình auth từ environment khi import, theo cách cấu hình hiện có
-của ingestion. Cấu hình này thuộc query-api; không thêm database hay OpenSearch client mới.
-User sẽ dùng index riêng trên OpenSearch hiện có theo `users-schema.json`.
+của ingestion. User repository dùng client từ `ingestion.src.storage.build_store()` hoặc
+`OpenSearchLogStore` truyền vào, giữ nguyên URL, credentials, TLS, timeout và shard settings
+hiện có. User dùng index riêng trên cùng OpenSearch theo `users-schema.json`.
 
 - `JWT_SECRET`: không có mặc định. `require_jwt_secret()` báo lỗi khi thiếu, rỗng hoặc
   chỉ có khoảng trắng; code authentication ở bước sau phải gọi hàm này trước khi dùng JWT.
 - `JWT_EXPIRY_SECONDS`: số nguyên dương, mặc định `3600`; giá trị không hợp lệ báo lỗi.
-- `ADMIN_SEED_USERNAME`, `ADMIN_SEED_PASSWORD`: credentials tùy chọn cho bước seed admin
-  lần đầu sau này; không có tài khoản/mật khẩu mặc định và không log các giá trị này.
+- `ADMIN_SEED_USERNAME`, `ADMIN_SEED_PASSWORD`: bắt buộc khi chạy lệnh seed admin;
+  không có tài khoản/mật khẩu mặc định và không log các giá trị này.
 - `USERS_INDEX`: mặc định `users`, không chấp nhận tên rỗng.
 
 Docker Compose truyền năm biến trên vào query-api; `.env.example` chỉ chứa giá trị trống
@@ -95,9 +96,50 @@ cho secret và seed credentials. Đặt giá trị thật trong môi trường t
 đã được Git ignore. Khi chạy uvicorn trực tiếp, export biến vào môi trường tiến trình;
 module config không tự đọc `.env`.
 
-Bước này chỉ chuẩn bị config và validation: chưa tạo user/index, chưa seed admin,
-chưa thêm login endpoint, phát/kiểm tra JWT hay bảo vệ route. Các route hiện tại tiếp tục
-hoạt động như trước khi chưa đặt secret. Không có thay đổi frontend hoặc frozen contracts.
+## Seed admin bằng lệnh riêng
+
+Nạp `ADMIN_SEED_USERNAME` và `ADMIN_SEED_PASSWORD` vào environment từ nguồn bí mật của bạn.
+Không đưa password vào command arguments, file được Git theo dõi hoặc log. Khi chạy trực
+tiếp, cần `STORAGE_BACKEND=opensearch` và OpenSearch hiện có phải truy cập được qua
+`OPENSEARCH_URL` cùng các biến `OPENSEARCH_*` của ingestion. Không hỗ trợ lưu user vào memory.
+
+Từ thư mục gốc repo, sau khi cài dependencies:
+
+```bash
+python -m pip install -r query-api/requirements.txt
+python -m query-api.src.seed_admin
+```
+
+Với Docker Compose, điền credentials vào `.env` đã được Git ignore hoặc environment,
+đảm bảo OpenSearch đang chạy, rồi build lại image và chạy one-off command:
+
+```bash
+docker compose build query-api
+docker compose run --rm --no-deps query-api python -m query-api.src.seed_admin
+```
+
+Lệnh tạo `USERS_INDEX` nếu thiếu, dùng strict mapping với đúng các field trong schema.
+Admin mới có `username`, `password_hash`, `role="admin"`, `created_at` UTC; `last_login_at`
+chưa được ghi vì chưa có login. Document `_id` chính là username. Password được hash
+bằng [argon2-cffi PasswordHasher](https://argon2-cffi.readthedocs.io/en/stable/howto.html)
+(Argon2id, salt ngẫu nhiên); chỉ hash được lưu trong `_source`, không index hash để tìm kiếm.
+
+Chỉ lệnh trên mới seed; không tự chạy khi API khởi động. Nếu account đã tồn tại, lệnh
+báo `Existing account preserved; no changes made.` và giữ nguyên hash, role, timestamps,
+kể cả khi environment chứa password mới. Ghi bằng OpenSearch `_create` để hai tiến trình
+seed đồng thời cũng không ghi đè nhau. Đây không phải lệnh reset/rotate password.
+
+Exit code `0`: tạo mới hoặc giữ account hiện có. Exit code `1`: thiếu credentials,
+backend không hợp lệ, lỗi hashing hoặc OpenSearch; thông báo không in password/chi tiết
+response. Thiếu credentials được kiểm tra trước mọi thao tác storage. Seed không phát JWT
+nên không yêu cầu `JWT_SECRET`; authentication ở bước sau vẫn bắt buộc có secret riêng.
+
+Chạy tests từ `query-api/`: `python -m pytest -q`. Tests dùng OpenSearch mock và Argon2
+thật, kiểm tra schema, create-only, seed lặp, bảo toàn account cũ, race conditions, cấu hình
+thiếu, lỗi storage, cleanup và thông báo CLI không chứa password. Không cần live cluster.
+
+Bước này chưa thêm login, public registration, phát/kiểm tra JWT hay bảo vệ route.
+Không có thay đổi frontend hoặc frozen contracts.
 
 ## Evidence sở hữu
 
