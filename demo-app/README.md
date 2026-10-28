@@ -8,6 +8,7 @@
 - [x] Hoàn thiện `emit_log()` trong `src/main.py` để dùng trace context thật thay vì placeholder
 - [x] Thêm endpoint giả lập cho luồng mobile (`/api/mobile/items`)
 - [x] Mở rộng fault injection cho web và mobile với value, connection, runtime
+- [x] Luồng checkout → payment qua HTTP thật, truyền W3C trace context để tạo nested spans
 
 ## Hợp đồng đang tuân theo
 
@@ -23,6 +24,39 @@ uvicorn src.main:app --reload --port 8001
 - `GET /api/items` — baseline web; hỗ trợ `fault`, `rate` và `seed`
 - `GET /api/mobile/items` — baseline mobile-api; hỗ trợ `fault`, `rate` và `seed`
 - `GET /simulate-error` — fault injection dùng chung; hỗ trợ `fault`, `rate`, `seed`
+- `POST /checkout` — giả lập checkout và gọi HTTP tới `/payment`
+- `POST /payment` — giả lập chấp nhận thanh toán VND (body có `amount` nguyên dương)
+
+### Nested tracing: checkout → payment
+
+`POST /checkout` gửi thanh toán mẫu `{"amount": 100000, "currency": "VND"}` bằng HTTP thật.
+FastAPI instrumentation hiện có tạo server span cho mỗi endpoint. Checkout tạo thêm một
+client span quanh lời gọi payment và inject W3C `traceparent`/`tracestate`; instrumentation
+ở payment tự extract context đó. Trong Jaeger, các span nối thành:
+
+```text
+POST /checkout (SERVER)
+└── POST /payment (CLIENT)
+    └── POST /payment (SERVER)
+```
+
+Cả ba dùng cùng `trace_id`, mỗi span có `span_id` riêng. Log "Checkout started" và
+"Checkout completed" thuộc server span checkout; log "Payment approved" thuộc server span
+payment. Log vẫn tuân thủ schema hiện tại. Payment là endpoint mô phỏng trong cùng app,
+không cần thêm service/container; không thực hiện thanh toán bên ngoài.
+
+`PAYMENT_URL` mặc định là `http://127.0.0.1:8001/payment`, tương thích Docker hiện có
+(cổng nội bộ luôn là 8001, kể cả khi đổi `DEMO_APP_PORT` trên host). Nếu chạy uvicorn ở
+cổng khác, đặt `PAYMENT_URL` tới cổng đó trước khi khởi động. Lời gọi có timeout 2 giây;
+timeout trả 504, lỗi HTTP/kết nối trả 502, kèm structured error log và client span lỗi.
+
+```powershell
+Invoke-RestMethod -Method Post http://127.0.0.1:8001/checkout
+```
+
+Khi có `OTEL_EXPORTER_OTLP_ENDPOINT` (đã cấu hình trong Docker Compose), mở Jaeger,
+chọn service `demo-web`, tìm operation `POST /checkout` để xem cây span trên.
+Không cấu hình exporter thì vẫn tạo trace context và log, nhưng không gửi span tới Jaeger.
 
 Các fault được hỗ trợ:
 
@@ -82,6 +116,11 @@ thúc, endpoint, fault, rate và seed cùng trace IDs từ ingestion để dùng
 Chạy test tự động từ thư mục `demo-app`:
 
 `venv\Scripts\python.exe -m pytest -q`
+
+`tests/test_nested_tracing.py` chạy uvicorn trên cổng TCP tạm, gọi checkout/payment qua
+HTTP thật và thu span bằng in-memory exporter. Test kiểm tra cùng trace, parent-child,
+W3C context từ request ngoài, schema log, lỗi downstream và loại trừ `/health`.
+
 ## Evidence sở hữu
 
 **Fault injection** — ghi lại rõ: cách bật/tắt, tham số điều khiển (`rate`), và log/script đã dùng để tạo ra các giai đoạn bất thường dùng cho `clustering/evaluation/labeled_incidents.json`.

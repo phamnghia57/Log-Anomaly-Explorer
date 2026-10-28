@@ -21,12 +21,16 @@ from typing import Literal
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query
+from opentelemetry import trace
+from opentelemetry.propagate import inject
+from pydantic import BaseModel, Field
 
 from .telemetry import get_current_trace_context, setup_telemetry
 
 SERVICE_NAME = "demo-web"
 MOBILE_SERVICE_NAME = "demo-mobile-api"
 INGESTION_URL = os.environ.get("INGESTION_URL", "http://localhost:8000/ingest")
+PAYMENT_URL = os.environ.get("PAYMENT_URL", "http://127.0.0.1:8001/payment")
 
 app = FastAPI(title="Log Anomaly Explorer - Demo App")
 
@@ -34,6 +38,9 @@ setup_telemetry(SERVICE_NAME, app)
 
 # Dung chung 1 client de tai su dung ket noi toi Ingestion (nhanh hon httpx.post moi lan).
 _http = httpx.Client(timeout=2.0)
+# Payment dung HTTP that toi cung app; khong di qua proxy cua moi truong.
+_payment_http = httpx.Client(timeout=2.0, trust_env=False)
+_tracer = trace.get_tracer(__name__)
 
 
 def emit_log(
@@ -68,6 +75,52 @@ def emit_log(
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok", "service": SERVICE_NAME}
+
+
+class PaymentRequest(BaseModel):
+    amount: int = Field(gt=0)
+    currency: Literal["VND"] = "VND"
+
+
+@app.post("/payment")
+def payment(request: PaymentRequest) -> dict:
+    """Mo phong xu ly thanh toan trong server span nhan tu traceparent."""
+    emit_log("INFO", "Payment approved")
+    return {"status": "approved", "amount": request.amount, "currency": request.currency}
+
+
+@app.post("/checkout")
+def checkout() -> dict:
+    """Checkout goi payment qua HTTP, cung trace nhung khac span."""
+    emit_log("INFO", "Checkout started")
+    try:
+        with _tracer.start_as_current_span(
+            "POST /payment",
+            kind=trace.SpanKind.CLIENT,
+            attributes={"http.method": "POST", "http.url": PAYMENT_URL},
+        ) as span:
+            headers = {}
+            # Truyen context cua CLIENT span; FastAPI instrumentation tu extract
+            # o /payment de tao SERVER span con, giu nguyen trace_id.
+            inject(headers)
+            response = _payment_http.post(
+                PAYMENT_URL,
+                json={"amount": 100000, "currency": "VND"},
+                headers=headers,
+            )
+            span.set_attribute("http.status_code", response.status_code)
+            response.raise_for_status()
+    except httpx.TimeoutException:
+        message = "Checkout failed: payment timed out"
+        emit_log("ERROR", message, stack_trace=traceback.format_exc(), error_type="timeout")
+        raise HTTPException(status_code=504, detail=message)
+    except httpx.HTTPError:
+        message = "Checkout failed: payment unavailable"
+        emit_log("ERROR", message, stack_trace=traceback.format_exc(), error_type="downstream")
+        raise HTTPException(status_code=502, detail=message)
+
+    emit_log("INFO", "Checkout completed")
+    return {"status": "completed", "payment": response.json()}
 
 
 Fault = Literal["value", "connection", "runtime", "downstream", "timeout", "bad_schema"]
