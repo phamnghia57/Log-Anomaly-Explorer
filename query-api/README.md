@@ -77,6 +77,28 @@ ràng — không làm sập cả service.
 
 Test: `pip install -r query-api/requirements-dev.txt && cd query-api && pytest`
 
+## Chuẩn bị cấu hình JWT admin
+
+`src/config.py` đọc cấu hình auth từ environment khi import, theo cách cấu hình hiện có
+của ingestion. Cấu hình này thuộc query-api; không thêm database hay OpenSearch client mới.
+User sẽ dùng index riêng trên OpenSearch hiện có theo `users-schema.json`.
+
+- `JWT_SECRET`: không có mặc định. `require_jwt_secret()` báo lỗi khi thiếu, rỗng hoặc
+  chỉ có khoảng trắng; code authentication ở bước sau phải gọi hàm này trước khi dùng JWT.
+- `JWT_EXPIRY_SECONDS`: số nguyên dương, mặc định `3600`; giá trị không hợp lệ báo lỗi.
+- `ADMIN_SEED_USERNAME`, `ADMIN_SEED_PASSWORD`: credentials tùy chọn cho bước seed admin
+  lần đầu sau này; không có tài khoản/mật khẩu mặc định và không log các giá trị này.
+- `USERS_INDEX`: mặc định `users`, không chấp nhận tên rỗng.
+
+Docker Compose truyền năm biến trên vào query-api; `.env.example` chỉ chứa giá trị trống
+cho secret và seed credentials. Đặt giá trị thật trong môi trường triển khai hoặc `.env`
+đã được Git ignore. Khi chạy uvicorn trực tiếp, export biến vào môi trường tiến trình;
+module config không tự đọc `.env`.
+
+Bước này chỉ chuẩn bị config và validation: chưa tạo user/index, chưa seed admin,
+chưa thêm login endpoint, phát/kiểm tra JWT hay bảo vệ route. Các route hiện tại tiếp tục
+hoạt động như trước khi chưa đặt secret. Không có thay đổi frontend hoặc frozen contracts.
+
 ## Evidence sở hữu
 
 - **Runbook**: [`../docs/task/runbook.md`](../docs/task/runbook.md)

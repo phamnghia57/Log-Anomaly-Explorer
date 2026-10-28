@@ -145,6 +145,12 @@ services:
       CLUSTER_INDEX: ${CLUSTER_INDEX:-clusters}
       HISTORY_INDEX: ${HISTORY_INDEX:-cluster-history}
       RETENTION_DAYS: ${RETENTION_DAYS:-30}
+      # Cau hinh auth (chua bat login/route guard); khong co secret mac dinh.
+      JWT_SECRET: ${JWT_SECRET:-}
+      JWT_EXPIRY_SECONDS: ${JWT_EXPIRY_SECONDS:-3600}
+      ADMIN_SEED_USERNAME: ${ADMIN_SEED_USERNAME:-}
+      ADMIN_SEED_PASSWORD: ${ADMIN_SEED_PASSWORD:-}
+      USERS_INDEX: ${USERS_INDEX:-users}
       # Trace cho chinh query-api (query-api/src/telemetry.py) - de xem endpoint
       # nao cua UI cham tren Jaeger, khong chi co trace cua demo-app.
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://jaeger:4318}
