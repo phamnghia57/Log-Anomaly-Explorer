@@ -36,7 +36,9 @@ Mỗi module có `README.md` riêng ghi rõ: việc cần làm (checklist), hợ
 
 - [`docs/architect/contracts/log-schema.json`](docs/architect/contracts/log-schema.json) — định dạng structured log (demo-app → ingestion)
 - [`docs/architect/contracts/cluster-record.schema.json`](docs/architect/contracts/cluster-record.schema.json) — định dạng cụm + anomaly score (clustering → query-api)
-- [`docs/architect/contracts/api-contract.md`](docs/architect/contracts/api-contract.md) — endpoint `/ingest`, `/search`, `/clusters`, `/clusters/{id}`
+- [`docs/architect/contracts/api-contract.md`](docs/architect/contracts/api-contract.md) — endpoint `/ingest`, `/search`, `/clusters`, `/clusters/{id}`, `/clusters/{id}/history`
+- [`docs/architect/contracts/cluster-history-schema.json`](docs/architect/contracts/cluster-history-schema.json) — lịch sử anomaly score theo thời gian (clustering → query-api), dùng vẽ biểu đồ xu hướng
+- [`docs/architect/contracts/users-schema.json`](docs/architect/contracts/users-schema.json) — tài khoản admin cho tính năng Auth (**thiết kế, chưa có code tương ứng**)
 
 
 ## Bắt đầu nhanh (từng module)
