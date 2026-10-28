@@ -43,6 +43,7 @@ Endpoint:
 | `GET /clusters/{id}` | `logs_limit`, `logs_offset` | Incident View: cụm + `logs` tra từ `log_ids`, **có phân trang** (`logs_total` = tổng số log của cụm) |
 | `GET /clusters/{id}/history` | `since`, `limit` | Xu hướng anomaly score theo thời gian (index `cluster-history`) |
 | `GET /metrics` | — | Metrics dạng Prometheus, **không** route ra Internet qua gateway |
+| `POST /auth/login` | JSON `username`, `password` | Đăng nhập admin, trả JWT và `expires_at` |
 
 ```bash
 curl "http://localhost:8002/search?service=demo-web&q=timeout&limit=20"
@@ -84,8 +85,8 @@ của ingestion. User repository dùng client từ `ingestion.src.storage.build_
 `OpenSearchLogStore` truyền vào, giữ nguyên URL, credentials, TLS, timeout và shard settings
 hiện có. User dùng index riêng trên cùng OpenSearch theo `users-schema.json`.
 
-- `JWT_SECRET`: không có mặc định. `require_jwt_secret()` báo lỗi khi thiếu, rỗng hoặc
-  chỉ có khoảng trắng; code authentication ở bước sau phải gọi hàm này trước khi dùng JWT.
+- `JWT_SECRET`: không có mặc định. Login/JWT utilities từ chối secret thiếu, rỗng, chỉ có
+  khoảng trắng hoặc ngắn hơn 32 bytes UTF-8. Cung cấp secret ngẫu nhiên từ môi trường triển khai.
 - `JWT_EXPIRY_SECONDS`: số nguyên dương, mặc định `3600`; giá trị không hợp lệ báo lỗi.
 - `ADMIN_SEED_USERNAME`, `ADMIN_SEED_PASSWORD`: bắt buộc khi chạy lệnh seed admin;
   không có tài khoản/mật khẩu mặc định và không log các giá trị này.
@@ -119,8 +120,8 @@ docker compose run --rm --no-deps query-api python -m query-api.src.seed_admin
 ```
 
 Lệnh tạo `USERS_INDEX` nếu thiếu, dùng strict mapping với đúng các field trong schema.
-Admin mới có `username`, `password_hash`, `role="admin"`, `created_at` UTC; `last_login_at`
-chưa được ghi vì chưa có login. Document `_id` chính là username. Password được hash
+Admin mới có `username`, `password_hash`, `role="admin"`, `created_at` UTC; seed không đặt
+`last_login_at`. Document `_id` chính là username. Password được hash
 bằng [argon2-cffi PasswordHasher](https://argon2-cffi.readthedocs.io/en/stable/howto.html)
 (Argon2id, salt ngẫu nhiên); chỉ hash được lưu trong `_source`, không index hash để tìm kiếm.
 
@@ -132,14 +133,56 @@ seed đồng thời cũng không ghi đè nhau. Đây không phải lệnh reset
 Exit code `0`: tạo mới hoặc giữ account hiện có. Exit code `1`: thiếu credentials,
 backend không hợp lệ, lỗi hashing hoặc OpenSearch; thông báo không in password/chi tiết
 response. Thiếu credentials được kiểm tra trước mọi thao tác storage. Seed không phát JWT
-nên không yêu cầu `JWT_SECRET`; authentication ở bước sau vẫn bắt buộc có secret riêng.
+nên không yêu cầu `JWT_SECRET`; login/JWT vẫn bắt buộc có secret riêng.
 
 Chạy tests từ `query-api/`: `python -m pytest -q`. Tests dùng OpenSearch mock và Argon2
 thật, kiểm tra schema, create-only, seed lặp, bảo toàn account cũ, race conditions, cấu hình
 thiếu, lỗi storage, cleanup và thông báo CLI không chứa password. Không cần live cluster.
 
-Bước này chưa thêm login, public registration, phát/kiểm tra JWT hay bảo vệ route.
-Không có thay đổi frontend hoặc frozen contracts.
+## Đăng nhập admin và JWT
+
+`POST /auth/login` nhận JSON `{"username": "...", "password": "..."}`. API đọc user theo
+username từ `USERS_INDEX` bằng repository dùng chung client OpenSearch của log store,
+verify Argon2 hash và chỉ cho account có `role="admin"` đăng nhập. Không seed/tạo index
+hay cập nhật account trong request login. Backend `memory` không hỗ trợ đăng nhập.
+
+Thành công trả `{"token": "<JWT>", "expires_at": "<ISO-8601 UTC>"}`, với header
+`Cache-Control: no-store`. JWT ký bằng HS256 và `JWT_SECRET`, chứa `sub` (username),
+`role="admin"`, `exp`; thời hạn lấy từ `JWT_EXPIRY_SECONDS` (mặc định 3600 giây).
+`expires_at` và `exp` biểu diễn đúng cùng thời điểm hết hạn, không có leeway.
+
+Sai username/password trả `401 {"detail": "Invalid username or password"}` giống nhau.
+Username không tồn tại vẫn chạy verify với dummy hash để không bỏ qua chi phí Argon2.
+Thiếu/không dùng được secret trả `503 Authentication unavailable`; OpenSearch/index users
+không sẵn sàng trả `503 User storage unavailable`, không đưa chi tiết lỗi storage vào response.
+
+Ví dụ PowerShell dùng credentials đã nạp vào environment, gọi trực tiếp cổng query-api:
+
+```powershell
+$body = @{
+    username = $env:ADMIN_SEED_USERNAME
+    password = $env:ADMIN_SEED_PASSWORD
+} | ConvertTo-Json
+$login = Invoke-RestMethod -Method Post http://localhost:8002/auth/login `
+    -ContentType "application/json" -Body $body
+$login.expires_at
+```
+
+Giữ `$login.token` trong bộ nhớ để dùng ở bước tích hợp sau; không in token/password/secret
+vào log. Đổi cổng URL nếu `QUERY_API_PORT` khác mặc định. Gateway route cho `/auth/login`
+và frontend chưa được cập nhật ở bước này.
+
+`src/tokens.py::decode_access_token()` luôn verify signature với allowlist cố định `["HS256"]`,
+yêu cầu đủ `sub`, `role`, `exp`, kiểm tra admin role và expiration. Không lấy algorithm từ
+token header; token unsigned, algorithm khác, sai signature, thiếu claim hoặc hết hạn bị từ chối.
+Xem [PyJWT API](https://pyjwt.readthedocs.io/en/stable/api.html).
+
+Tests trong `tests/test_admin_login.py` mock OpenSearch, dùng Argon2/PyJWT thật và clock
+cố định để kiểm tra login, claims/lifetime, expiration boundary, signature/algorithm rejection,
+cấu hình thiếu/sai, lỗi storage và bảo mật log. Không cần live cluster hoặc sleep để đợi JWT hết hạn.
+
+Các route đọc dữ liệu hiện tại chưa yêu cầu JWT. Chưa thêm signup/registration/password reset,
+route guard hoặc frontend authentication; frozen contracts được giữ nguyên.
 
 ## Evidence sở hữu
 

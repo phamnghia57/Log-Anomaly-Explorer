@@ -32,20 +32,21 @@ from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from ingestion.src import config
-from ingestion.src.storage import LogStore, StorageError, build_store
+from ingestion.src.storage import LogStore, OpenSearchLogStore, StorageError, build_store
 
+from .auth import router as auth_router
 from .telemetry import setup_telemetry
+from .users import UserRepository
 
 logger = logging.getLogger("query-api")
 
 app = FastAPI(title="Log Anomaly Explorer - Query & Incident API")
 
-# API chi doc (GET), khong co auth o MVP nay - mo CORS de frontend (web/,
-# deploy Vercel - domain khac hoan toan voi backend) goi truc tiep duoc.
+# API doc log (GET) va login JSON (POST) - frontend deploy khac domain backend.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
@@ -65,6 +66,9 @@ setup_telemetry(app)
 
 # Mot ket noi dung chung cho ca process, giong cach ingestion/src/main.py lam.
 store: LogStore = build_store()
+# Dung lai client hien co; memory backend chi ho tro cac route doc/dev, khong login.
+app.state.user_repository = UserRepository(store) if isinstance(store, OpenSearchLogStore) else None
+app.include_router(auth_router)
 
 
 def _build_cluster_store():
