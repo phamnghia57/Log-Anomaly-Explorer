@@ -25,10 +25,15 @@ def iso(hours_ago: float = 0) -> str:
 
 
 @pytest.fixture(autouse=True)
-def _reset_store():
+def _reset_store(admin_auth):
     """store la bien module dung chung ca process -> don giua cac test."""
     main.store._logs.clear()
-    yield
+    original_headers = client.headers.copy()
+    client.headers.update(admin_auth)
+    try:
+        yield
+    finally:
+        client.headers = original_headers
 
 
 def write(log_id: str, **over) -> None:

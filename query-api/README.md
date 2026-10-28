@@ -35,6 +35,9 @@ STORAGE_BACKEND=memory uvicorn query-api.src.main:app --reload --port 8002
 
 Endpoint:
 
+Các route `/search` và `/clusters*` bên dưới yêu cầu JWT admin trong header
+`Authorization: Bearer <token>`. `/health` và `/auth/login` không yêu cầu JWT.
+
 | Endpoint | Tham số | Ghi chú |
 |---|---|---|
 | `GET /health` | — | `503 degraded` khi mất kết nối kho dữ liệu |
@@ -46,10 +49,11 @@ Endpoint:
 | `POST /auth/login` | JSON `username`, `password` | Đăng nhập admin, trả JWT và `expires_at` |
 
 ```bash
-curl "http://localhost:8002/search?service=demo-web&q=timeout&limit=20"
-curl "http://localhost:8002/clusters?status=alerted"
-curl "http://localhost:8002/clusters/<cluster_id>?logs_limit=50"
-curl "http://localhost:8002/clusters/<cluster_id>/history"
+# TOKEN la JWT nhan tu POST /auth/login (xem vi du PowerShell ben duoi).
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:8002/search?service=demo-web&q=timeout&limit=20"
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:8002/clusters?status=alerted"
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:8002/clusters/<cluster_id>?logs_limit=50"
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:8002/clusters/<cluster_id>/history"
 curl "http://localhost:8002/metrics"
 ```
 
@@ -73,8 +77,9 @@ biết được thời gian đó tiêu ở đâu thay vì chỉ đoán.
 
 **Lưu ý về `/clusters*`**: đọc cụm qua `clustering.src.storage.OpenSearchStore` (Nam), mà
 lớp này **bắt buộc `STORAGE_BACKEND=opensearch`**. Khi chạy `STORAGE_BACKEND=memory`,
-`/health` và `/search` vẫn hoạt động bình thường, riêng `/clusters*` trả `503` kèm lý do rõ
-ràng — không làm sập cả service.
+`/health` vẫn public; `/search` hoạt động khi có JWT admin hợp lệ. Với cùng JWT đó,
+`/clusters*` trả `503` kèm lý do rõ ràng — không làm sập cả service. Guard JWT vẫn áp dụng
+trong memory mode; mode này không hỗ trợ login/seed admin.
 
 Test: `pip install -r query-api/requirements-dev.txt && cd query-api && pytest`
 
@@ -166,9 +171,11 @@ $body = @{
 $login = Invoke-RestMethod -Method Post http://localhost:8002/auth/login `
     -ContentType "application/json" -Body $body
 $login.expires_at
+$headers = @{ Authorization = "Bearer $($login.token)" }
+Invoke-RestMethod "http://localhost:8002/search?limit=5" -Headers $headers
 ```
 
-Giữ `$login.token` trong bộ nhớ để dùng ở bước tích hợp sau; không in token/password/secret
+Giữ `$login.token` trong bộ nhớ và đính kèm ở header; không in token/password/secret
 vào log. Đổi cổng URL nếu `QUERY_API_PORT` khác mặc định. Gateway route cho `/auth/login`
 và frontend chưa được cập nhật ở bước này.
 
@@ -181,8 +188,32 @@ Tests trong `tests/test_admin_login.py` mock OpenSearch, dùng Argon2/PyJWT th�
 cố định để kiểm tra login, claims/lifetime, expiration boundary, signature/algorithm rejection,
 cấu hình thiếu/sai, lỗi storage và bảo mật log. Không cần live cluster hoặc sleep để đợi JWT hết hạn.
 
-Các route đọc dữ liệu hiện tại chưa yêu cầu JWT. Chưa thêm signup/registration/password reset,
-route guard hoặc frontend authentication; frozen contracts được giữ nguyên.
+## Bảo vệ Query API
+
+`src/auth.py::require_admin()` là dependency dùng lại được, được gắn riêng vào bốn route:
+`GET /search`, `GET /clusters`, `GET /clusters/{cluster_id}` và
+`GET /clusters/{cluster_id}/history`. Dependency đọc Bearer token từ `Authorization`, gọi
+JWT utility để kiểm tra signature, HS256 allowlist, expiration, đủ claims và role admin.
+Không chấp nhận token qua query string. Response thành công và query parameters giữ nguyên.
+
+Thiếu header/token, sai scheme, JWT malformed, sai signature, hết hạn, thiếu/sai claims
+hoặc role khác admin đều trả `401 {"detail": "Invalid or missing authentication token"}`,
+kèm `WWW-Authenticate: Bearer`. Lỗi bị chặn trước khi đọc log/cluster storage. Nếu server
+không cấu hình được JWT, request có token trả `503 Authentication unavailable`; không có
+fallback bỏ qua auth.
+
+`GET /health` và `POST /auth/login` vẫn public, kể cả khi request kèm Bearer token không hợp lệ.
+CORS middleware xử lý OPTIONS preflight trước dependency; frontend được phép gửi header
+`Authorization` cho GET và JSON login POST. Response 401 cũng có CORS headers để frontend
+đọc status và xử lý đăng nhập lại.
+
+`tests/test_query_auth.py` kiểm tra các trường hợp từ chối trên từng route, không gọi storage
+khi bị chặn, response với token admin, query-string token, CORS/preflight và cấu hình JWT lỗi.
+Các regression tests trong `tests/test_query_api.py` dùng JWT ký thật để tiếp tục kiểm tra
+filters, pagination, response và lỗi storage; không override dependency để bỏ qua auth.
+
+Chưa thêm signup/registration/password reset hoặc frontend authentication. Gateway login
+routing và frontend là các bước tích hợp sau; frozen contracts được giữ nguyên.
 
 ## Evidence sở hữu
 

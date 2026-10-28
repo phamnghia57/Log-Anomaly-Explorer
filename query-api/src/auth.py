@@ -1,19 +1,40 @@
-"""JSON admin login; cac route doc du lieu chua duoc bao ve o buoc nay."""
+"""JSON admin login va dependency bao ve cac route query bang JWT."""
 
 import secrets
 
+import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, SecretStr, StrictStr
 
 from ingestion.src.storage import StorageError
 
 from .passwords import hash_password, verify_password
-from .tokens import JWTConfigurationError, create_access_token, jwt_settings
+from .tokens import JWTConfigurationError, create_access_token, decode_access_token, jwt_settings
 from .users import UserRepository
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 # Username khong ton tai van verify mot hash that, tranh bo qua buoc hash ton thoi gian.
 _DUMMY_HASH = hash_password(secrets.token_urlsafe(32))
+_bearer = HTTPBearer(auto_error=False)
+
+
+def require_admin(
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
+) -> dict:
+    """Verify JWT truoc khi query storage; missing/malformed token deu tra 401."""
+    unauthorized = HTTPException(
+        status_code=401, detail="Invalid or missing authentication token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    if credentials is None:
+        raise unauthorized
+    try:
+        return decode_access_token(credentials.credentials)
+    except jwt.InvalidTokenError:
+        raise unauthorized from None
+    except JWTConfigurationError:
+        raise HTTPException(status_code=503, detail="Authentication unavailable") from None
 
 
 class LoginRequest(BaseModel):

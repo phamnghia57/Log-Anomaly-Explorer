@@ -229,11 +229,19 @@ def test_browser_preflight_allows_json_login(login_app):
     assert "POST" in response.headers["access-control-allow-methods"]
 
 
-def test_existing_read_routes_stay_public(login_app):
-    app, _, _, _ = login_app
+def test_health_and_login_remain_public_while_search_requires_token(login_app):
+    app, _, credentials, _ = login_app
 
+    # Bearer khong hop le cung khong duoc chan cac route public.
+    invalid_header = {"Authorization": "Bearer invalid"}
     assert app.get("/health").status_code == 200
-    assert app.get("/search").status_code == 200
+    assert app.get("/health", headers=invalid_header).status_code == 200
+    login = app.post("/auth/login", json=credentials, headers=invalid_header)
+    assert login.status_code == 200
+    assert app.get("/search").status_code == 401
+    assert app.get("/search", headers={
+        "Authorization": f"Bearer {login.json()['token']}"
+    }).status_code == 200
 
 
 @pytest.mark.parametrize("path", ["/auth/register", "/auth/signup", "/auth/reset-password"])

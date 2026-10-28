@@ -26,7 +26,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timedelta, timezone
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
@@ -34,7 +34,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from ingestion.src import config
 from ingestion.src.storage import LogStore, OpenSearchLogStore, StorageError, build_store
 
-from .auth import router as auth_router
+from .auth import require_admin, router as auth_router
 from .telemetry import setup_telemetry
 from .users import UserRepository
 
@@ -130,7 +130,7 @@ def health():
     return JSONResponse(status_code=200 if ok else 503, content=body)
 
 
-@app.get("/search")
+@app.get("/search", dependencies=[Depends(require_admin)])
 def search(
     service: str | None = None,
     trace_id: str | None = None,
@@ -166,7 +166,7 @@ def _require_cluster_store():
     return cluster_store
 
 
-@app.get("/clusters")
+@app.get("/clusters", dependencies=[Depends(require_admin)])
 def list_clusters(
     status: str | None = None,
     since: str | None = None,
@@ -190,7 +190,7 @@ def list_clusters(
     return {"total": len(results), "clusters": results}
 
 
-@app.get("/clusters/{cluster_id}")
+@app.get("/clusters/{cluster_id}", dependencies=[Depends(require_admin)])
 def get_cluster(
     cluster_id: str,
     logs_limit: int = Query(default=config.DEFAULT_SEARCH_LIMIT, ge=1, le=config.MAX_SEARCH_LIMIT),
@@ -218,7 +218,7 @@ def get_cluster(
     return {**cluster, "logs": logs, "logs_total": len(log_ids)}
 
 
-@app.get("/clusters/{cluster_id}/history")
+@app.get("/clusters/{cluster_id}/history", dependencies=[Depends(require_admin)])
 def get_cluster_history(
     cluster_id: str,
     since: str | None = None,
