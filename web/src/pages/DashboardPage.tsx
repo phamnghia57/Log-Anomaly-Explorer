@@ -21,10 +21,13 @@ export function DashboardPage() {
   const [range, setRange] = useState<TimeRangeKey>("24h");
   const [autoRefreshMs, setAutoRefreshMs] = useState<number | false>(30_000);
 
-  const { data, isLoading, isFetching, isError, error, refetch } = useClusters(
-    sinceFromRange(range),
-    autoRefreshMs,
-  );
+  // QUAN TRONG: khong goi sinceFromRange(range) truc tiep trong than ham render.
+  // No doc Date.now() nen moi lan render ra 1 chuoi ISO khac nhau -> queryKey
+  // cua useClusters doi lien tuc -> React Query coi la query moi moi lan,
+  // bao giai refetch vo han, UI ket o loading mai (da gap that, xem commit
+  // nay). useMemo khoa `since` lai, chi tinh lai khi NGUOI DUNG doi `range`.
+  const since = useMemo(() => sinceFromRange(range), [range]);
+  const { data, isLoading, isFetching, isError, error, refetch } = useClusters(since, autoRefreshMs);
 
   // Loc hien thi theo status o client (data da tai day du trong khoang thoi
   // gian). StatusFacets van nhan `data.clusters` CHUA LOC de dem dung so
