@@ -129,3 +129,58 @@ export function getClusterHistory(clusterId: string) {
     `/clusters/${encodeURIComponent(clusterId)}/history`,
   );
 }
+
+// AssistantMessage - docs/architect/contracts/assistant-conversation-schema.json.
+// role="tool" chi xuat hien khi AI tu goi tool de dieu tra truoc khi tra loi -
+// UI nen hien thi khac voi tin nhan user/assistant (vd. dong "dang tra cuu...").
+export type AssistantRole = "user" | "assistant" | "tool";
+
+export interface AssistantToolCall {
+  id: string;
+  name: string;
+  arguments: string;
+}
+
+export interface AssistantMessage {
+  role: AssistantRole;
+  content: string | null;
+  created_at: string;
+  tool_calls?: AssistantToolCall[];
+  tool_call_id?: string;
+  name?: string;
+}
+
+export interface AssistantConversation {
+  cluster_id: string;
+  messages: AssistantMessage[];
+}
+
+export function getAssistantConversation(clusterId: string) {
+  return getJson<AssistantConversation>(
+    `/assistant/clusters/${encodeURIComponent(clusterId)}/conversation`,
+  );
+}
+
+export async function sendAssistantMessage(
+  clusterId: string, message: string,
+): Promise<AssistantConversation> {
+  const url = `${API_BASE_URL}/assistant/clusters/${encodeURIComponent(clusterId)}/conversation/messages`;
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+  } catch {
+    throw new ApiError(
+      `Khong ket noi duoc toi API (${API_BASE_URL}). Kiem tra VITE_API_BASE_URL va backend co dang chay khong.`,
+      0,
+    );
+  }
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new ApiError(body || `API tra ve loi ${res.status}`, res.status);
+  }
+  return (await res.json()) as AssistantConversation;
+}

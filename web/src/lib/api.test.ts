@@ -1,5 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiError, getCluster, getClusterHistory, getJaegerTraceUrl, listClusters, searchLogs } from "./api";
+import {
+  ApiError,
+  getAssistantConversation,
+  getCluster,
+  getClusterHistory,
+  getJaegerTraceUrl,
+  listClusters,
+  searchLogs,
+  sendAssistantMessage,
+} from "./api";
 
 describe("query-api client", () => {
   const fetchMock = vi.fn();
@@ -98,6 +107,47 @@ describe("query-api client", () => {
     fetchMock.mockRejectedValueOnce(new TypeError("Failed to fetch"));
 
     await expect(searchLogs({})).rejects.toMatchObject({ status: 0 });
+  });
+
+  it("getAssistantConversation: goi dung endpoint, tra ve messages rong khi chua hoi lan nao", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ cluster_id: "c1", messages: [] }), { status: 200 }),
+    );
+
+    const body = await getAssistantConversation("c1");
+
+    const calledUrl = new URL(fetchMock.mock.calls[0][0] as string);
+    expect(calledUrl.pathname).toBe("/assistant/clusters/c1/conversation");
+    expect(body).toEqual({ cluster_id: "c1", messages: [] });
+  });
+
+  it("sendAssistantMessage: POST dung body JSON, tra ve toan bo hoi thoai moi", async () => {
+    const conversation = {
+      cluster_id: "c1",
+      messages: [
+        { role: "user", content: "Loi nay la gi?", created_at: "2026-10-29T00:00:00Z" },
+        { role: "assistant", content: "De xuat: ...", created_at: "2026-10-29T00:00:01Z" },
+      ],
+    };
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(conversation), { status: 200 }));
+
+    const body = await sendAssistantMessage("c1", "Loi nay la gi?");
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(new URL(url as string).pathname).toBe("/assistant/clusters/c1/conversation/messages");
+    expect(init).toMatchObject({ method: "POST" });
+    expect(JSON.parse((init as RequestInit).body as string)).toEqual({ message: "Loi nay la gi?" });
+    expect(body).toEqual(conversation);
+  });
+
+  it("sendAssistantMessage: nem ApiError voi status 503 khi thieu OPENAI_API_KEY", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response("AI Assistant chua duoc cau hinh", { status: 503 }),
+    );
+
+    const error = await sendAssistantMessage("c1", "hi").catch((e) => e);
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({ status: 503 });
   });
 });
 

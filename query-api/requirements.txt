@@ -17,3 +17,10 @@ opentelemetry-exporter-otlp>=1.24
 # hanh ban final (chi 0.xbN), neu khong co marker prerelease ngay trong
 # specifier thi pip tu choi, bao "khong tim thay ban nao khop".
 opentelemetry-instrumentation-fastapi>=0.39b0
+
+# AI Assistant (xem src/assistant/, README.md muc "AI Assistant").
+openai>=1.50,<2
+# langfuse>=5 yeu cau Python >=3.11 (khop python:3.11-slim trong Dockerfile).
+# Dung wrapper "langfuse.openai" (drop-in thay the openai.OpenAI) de tu dong
+# trace chi phi/do tre/token, khong doi logic goi OpenAI.
+langfuse>=5,<6

@@ -1,10 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   type SearchParams,
+  getAssistantConversation,
   getCluster,
   getClusterHistory,
   listClusters,
   searchLogs,
+  sendAssistantMessage,
 } from "./api";
 
 export function useClusters(since?: string, refetchIntervalMs: number | false = 30_000) {
@@ -41,5 +43,25 @@ export function useSearchLogs(params: SearchParams, enabled: boolean) {
     queryKey: ["search", params],
     queryFn: () => searchLogs(params),
     enabled,
+  });
+}
+
+export function useAssistantConversation(clusterId: string | undefined) {
+  return useQuery({
+    queryKey: ["assistant-conversation", clusterId],
+    queryFn: () => getAssistantConversation(clusterId as string),
+    enabled: Boolean(clusterId),
+  });
+}
+
+export function useSendAssistantMessage(clusterId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (message: string) => sendAssistantMessage(clusterId, message),
+    // Ghi thang vao cache thay vi invalidate+refetch: response da la TOAN BO
+    // hoi thoai moi nhat (xem api-contract.md), khong can goi lai GET.
+    onSuccess: (conversation) => {
+      queryClient.setQueryData(["assistant-conversation", clusterId], conversation);
+    },
   });
 }
