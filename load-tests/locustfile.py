@@ -22,11 +22,16 @@ Chay rieng mot nhom:
 
 from __future__ import annotations
 
+import logging
 import os
 import random
+import re
 from datetime import datetime, timezone
 
 from locust import HttpUser, between, task
+from locust.exception import StopUser
+
+logger = logging.getLogger(__name__)
 
 INGESTION_HOST = os.environ.get("INGESTION_HOST", "http://localhost:8000")
 QUERY_API_HOST = os.environ.get("QUERY_API_HOST", "http://localhost:8002")
@@ -108,6 +113,37 @@ class QueryUser(HttpUser):
 
     def on_start(self):
         self.cluster_ids: list[str] = []
+        self.client.headers.pop("Authorization", None)
+        username = os.environ.get("QUERY_API_USERNAME")
+        password = os.environ.get("QUERY_API_PASSWORD")
+        if not username or not username.strip() or not password or not password.strip():
+            logger.error("QueryUser requires QUERY_API_USERNAME and QUERY_API_PASSWORD; stopping user.")
+            raise StopUser()
+
+        failure = None
+        token = None
+        with self.client.post("/auth/login", json={"username": username, "password": password},
+                              name="POST /auth/login", catch_response=True) as response:
+            if response.status_code != 200:
+                failure = f"Query API login failed (HTTP {response.status_code}); stopping user."
+            else:
+                try:
+                    body = response.json()
+                except ValueError:
+                    body = None
+                token = body.get("token") if isinstance(body, dict) else None
+                # Chi kiem tra shape JWT ky; khong dua JWT_SECRET vao load-test client.
+                if (not isinstance(token, str)
+                        or not re.fullmatch(r"[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+", token)):
+                    failure = "Query API login returned an invalid JWT response; stopping user."
+            if failure:
+                response.failure(failure)
+
+        # Thoat context truoc StopUser de login that bai van duoc ghi vao Locust statistics.
+        if failure:
+            logger.error(failure)
+            raise StopUser()
+        self.client.headers["Authorization"] = f"Bearer {token}"
 
     @task(5)
     def search_logs(self):
