@@ -105,27 +105,46 @@ Khi `score > ngưỡng`, Clustering service tự gọi webhook/email cấu hình
 mở thẳng trace đó trên Jaeger: `https://<domain>/jaeger/trace/<trace_id>`. Key **luôn có mặt**,
 giá trị `null` khi cụm không có trace nào — bên nhận không cần xử lý trường hợp thiếu key.
 
-## Auth (dự kiến — CHỈ thiết kế, chưa implement)
+## Auth (đã triển khai)
 
-> Mục này chỉ là **contract/thiết kế** để người nhận việc Auth code theo, tránh mỗi người tự
-> đoán 1 kiểu. Chưa có code nào tương ứng — xem `docs/architect/contracts/users-schema.json`.
+> Đã triển khai trong [Query API](../../../query-api/src/auth.py),
+> [JWT utilities](../../../query-api/src/tokens.py) và [web](../../../web/src/App.tsx).
+> Mô tả dưới đây đồng bộ với code hiện có; giữ nguyên cấu trúc request/response đã thống nhất.
 
 - **Phạm vi**: chỉ đăng nhập (login), **không có public signup**. Tài khoản admin được seed sẵn
-  (qua biến môi trường lúc khởi động, hoặc tạo tay 1 lần qua script) — không expose
-  `POST /auth/register` ra public.
-- **Lưu trữ**: 1 index mới `users` trong OpenSearch sẵn có (không thêm database/container mới).
-  Document shape: xem [`users-schema.json`](./users-schema.json).
+  bằng lệnh riêng `python -m query-api.src.seed_admin`, đọc credentials từ environment;
+  không tự seed khi API khởi động. Không có `POST /auth/register`, signup hoặc password-reset API.
+- **Lưu trữ**: index `users` (cấu hình qua `USERS_INDEX`) trong OpenSearch sẵn có, không thêm
+  database/container. Document shape theo [`users-schema.json`](./users-schema.json), dùng
+  username làm document ID và lưu `password_hash` Argon2id, không lưu plaintext password.
 - **`POST /auth/login`**
-  - Request: `{ "username": "...", "password": "..." }`
-  - Response 200: `{ "token": "<JWT>", "expires_at": "..." }`
-  - Response 401: sai username/password — không phân biệt rõ sai cái nào (tránh dò username).
-- **JWT claims tối thiểu**: `sub` (username), `role` (hiện tại chỉ có `"admin"`), `exp`.
-  Ký bằng secret đọc từ env `JWT_SECRET` (bắt buộc set khi deploy, không có default).
-- **Áp dụng JWT**: các route cần bảo vệ (`GET /search`, `GET /clusters`, `GET /clusters/{id}`,
-  `GET /clusters/{id}/history`) yêu cầu header `Authorization: Bearer <token>`. `GET /health`
-  **không** yêu cầu auth (dùng cho health check hạ tầng). Thiếu/sai token → 401.
-- **Phía `web/`**: 1 trang `/login`, lưu token (ví dụ `localStorage`), đính kèm header
+  - Request JSON: `{ "username": "...", "password": "..." }`
+  - Response 200: `{ "token": "<JWT>", "expires_at": "..." }`, với `expires_at` là ISO-8601 UTC
+    cùng thời điểm với claim `exp`; response có `Cache-Control: no-store`.
+  - Response 401: `{ "detail": "Invalid username or password" }` cho sai username/password
+    hoặc account không hợp lệ — không phân biệt rõ sai cái nào (tránh dò username).
+  - JSON/fields không hợp lệ trả 422 với `detail="Invalid login request"`, không echo input.
+    Cấu hình JWT hoặc user storage không sẵn sàng trả 503 với thông báo chung.
+- **JWT claims**: `sub` là username, `role="admin"`, `exp` là Unix timestamp (giây).
+  Ký và verify bằng HS256 với allowlist cố định; yêu cầu đủ ba claims, kiểm tra signature,
+  role admin và expiration. Không chấp nhận unsigned token/algorithm khác hoặc token hết hạn.
+  Secret đọc từ env `JWT_SECRET` (bắt buộc, ít nhất 32 bytes UTF-8, không có fallback).
+  Lifetime lấy từ `JWT_EXPIRY_SECONDS`, mặc định `3600` giây, không có expiry leeway.
+- **Áp dụng JWT**: `GET /search`, `GET /clusters`, `GET /clusters/{cluster_id}` và
+  `GET /clusters/{cluster_id}/history` có dependency `require_admin`, yêu cầu header
+  `Authorization: Bearer <token>`. Không nhận token qua query string. Thiếu, malformed, sai
+  signature/claims/role hoặc hết hạn → 401 với `WWW-Authenticate: Bearer`. Query parameters
+  và cấu trúc response thành công giữ nguyên.
+- **Public**: `GET /health` và `POST /auth/login` không yêu cầu JWT; CORS OPTIONS preflight
+  cho GET/POST và Authorization/Content-Type cũng không yêu cầu JWT. `/metrics` không gắn
+  guard nhưng chỉ dành cho mạng nội bộ, không được gateway proxy ra Internet. Các route
+  tài liệu tự sinh `/docs`, `/docs/oauth2-redirect`, `/redoc`, `/openapi.json` vẫn không gắn JWT.
+- **Phía `web/`**: trang `/login` lưu `{token, expires_at}` trong module auth/localStorage,
+  không lưu password; đính kèm header
   `Authorization` ở tầng client chung (`web/src/lib/api.ts`), redirect về `/login` khi API trả
-  401. Route còn lại trong `web/` yêu cầu đã đăng nhập (route guard).
-- **Env cần thêm khi implement**: `JWT_SECRET`, `JWT_EXPIRY_SECONDS` (gợi ý mặc định `3600`),
-  `ADMIN_SEED_USERNAME`, `ADMIN_SEED_PASSWORD` (chỉ dùng lúc seed lần đầu, không log lại).
+  401 hoặc session hết hạn. Dashboard, Search và Incident View yêu cầu đăng nhập (route guard).
+  Logout xóa session/cache ở client; không thu hồi JWT đã phát trước `exp`. Backend vẫn là
+  nơi quyết định quyền truy cập, không dựa vào frontend guard.
+- **Env hiện có**: `JWT_SECRET`, `JWT_EXPIRY_SECONDS` (mặc định `3600`), `USERS_INDEX`
+  (mặc định `users`), `ADMIN_SEED_USERNAME`, `ADMIN_SEED_PASSWORD` (chỉ dùng khi seed, không log).
+  Hướng dẫn chạy/seed: [triển khai auth](../../task/auth-deployment.md).
