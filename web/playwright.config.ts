@@ -4,6 +4,7 @@ import { defineConfig, devices } from "@playwright/test";
 // can E2E_ADMIN_USERNAME/PASSWORD va it nhat 1 cluster (xem web/README.md).
 export default defineConfig({
   testDir: "./e2e",
+  testIgnore: "**/integration/**",
   fullyParallel: true,
   reporter: "html",
   use: {

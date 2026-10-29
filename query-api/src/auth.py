@@ -4,6 +4,8 @@ import secrets
 
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi.exceptions import RequestValidationError
+from fastapi.routing import APIRoute
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, SecretStr, StrictStr
 
@@ -13,7 +15,22 @@ from .passwords import hash_password, verify_password
 from .tokens import JWTConfigurationError, create_access_token, decode_access_token, jwt_settings
 from .users import UserRepository
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+
+class SanitizedAuthRoute(APIRoute):
+    def get_route_handler(self):
+        original = super().get_route_handler()
+
+        async def handle(request: Request):
+            try:
+                return await original(request)
+            except RequestValidationError:
+                # FastAPI mac dinh echo input trong 422, co the chua plaintext password.
+                raise HTTPException(status_code=422, detail="Invalid login request") from None
+
+        return handle
+
+
+router = APIRouter(prefix="/auth", tags=["auth"], route_class=SanitizedAuthRoute)
 # Username khong ton tai van verify mot hash that, tranh bo qua buoc hash ton thoi gian.
 _DUMMY_HASH = hash_password(secrets.token_urlsafe(32))
 _bearer = HTTPBearer(auto_error=False)

@@ -176,8 +176,10 @@ Invoke-RestMethod "http://localhost:8002/search?limit=5" -Headers $headers
 ```
 
 Giữ `$login.token` trong bộ nhớ và đính kèm ở header; không in token/password/secret
-vào log. Đổi cổng URL nếu `QUERY_API_PORT` khác mặc định. Gateway route cho `/auth/login`
-và frontend chưa được cập nhật ở bước này.
+vào log. Đổi cổng URL nếu `QUERY_API_PORT` khác mặc định. Gateway đã proxy chính xác
+`/auth/login` (POST và OPTIONS) tới query-api; không strip Authorization của query requests.
+Frontend có `/login`, guard và logout. Request login sai shape/JSON trả
+`422 {"detail":"Invalid login request"}`, không echo lại input có thể chứa mật khẩu.
 
 `src/tokens.py::decode_access_token()` luôn verify signature với allowlist cố định `["HS256"]`,
 yêu cầu đủ `sub`, `role`, `exp`, kiểm tra admin role và expiration. Không lấy algorithm từ
@@ -212,8 +214,35 @@ khi bị chặn, response với token admin, query-string token, CORS/preflight 
 Các regression tests trong `tests/test_query_api.py` dùng JWT ký thật để tiếp tục kiểm tra
 filters, pagination, response và lỗi storage; không override dependency để bỏ qua auth.
 
-Chưa thêm signup/registration/password reset hoặc frontend authentication. Gateway login
-routing và frontend là các bước tích hợp sau; frozen contracts được giữ nguyên.
+Không có signup/registration/password reset. Frontend xóa session/cache khi logout, hết hạn
+hoặc gặp 401; logout không thu hồi JWT ở server. JWT đã phát còn dùng được tới `exp`;
+đổi role/xóa user không vô hiệu token đã phát ngay lập tức. Chưa có refresh/revocation,
+rate limiting/lockout cho login, issuer/audience claims hoặc MFA. CORS hiện cho mọi origin,
+không dùng cookie credentials; CORS không thay thế xác thực/ủy quyền.
+
+Hướng dẫn secret an toàn, Compose/gateway, seed, kiểm tra protected APIs và các giới hạn:
+[`docs/task/auth-deployment.md`](../docs/task/auth-deployment.md). Không đổi frozen contracts
+hoặc schema phản hồi thành công của API hiện có.
+
+## Kiểm thử tích hợp auth
+
+`python -m pytest -q` chạy tất cả tests Query API. `test_auth_integration.py` nối cùng một
+mock client OpenSearch qua repository, seed, Argon2, login/JWT và cả bốn protected routes;
+đối chiếu users/log/cluster với frozen JSON schemas và kiểm tra response hiện có. Các test
+khác kiểm tra lỗi storage, CORS/OPTIONS, thiếu/sai/hết hạn token và password không bị echo
+trong 422/log. Không cần live OpenSearch hoặc Jaeger cho suite này.
+
+Browser integration có API HTTP thật trên loopback, chỉ mock OpenSearch client. Cài Python
+dependencies, đưa Python của venv vào PATH, rồi chạy từ `web/`:
+
+```bash
+npm run test:auth-integration -- --reporter=line
+```
+
+Lệnh dùng `python -m query-api.tests.auth_test_server` (test-only, không có trong image vì
+`.dockerignore` loại `tests/`). Harness sinh credentials/secret tạm trong bộ nhớ, seed CLI
+hai lần, bind `127.0.0.1:8023`; Vite ở `127.0.0.1:5174`. Playwright tự dừng cả hai sau test.
+Không dùng test harness cho deploy, không xác minh persistence/mapping/TLS với cluster thật.
 
 ## Evidence sở hữu
 

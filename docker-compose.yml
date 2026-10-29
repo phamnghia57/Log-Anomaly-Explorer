@@ -145,7 +145,7 @@ services:
       CLUSTER_INDEX: ${CLUSTER_INDEX:-clusters}
       HISTORY_INDEX: ${HISTORY_INDEX:-cluster-history}
       RETENTION_DAYS: ${RETENTION_DAYS:-30}
-      # Cau hinh auth (chua bat login/route guard); khong co secret mac dinh.
+      # Login/query routes bat JWT admin; khong co secret mac dinh. /health public.
       JWT_SECRET: ${JWT_SECRET:-}
       JWT_EXPIRY_SECONDS: ${JWT_EXPIRY_SECONDS:-3600}
       ADMIN_SEED_USERNAME: ${ADMIN_SEED_USERNAME:-}

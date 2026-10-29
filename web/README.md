@@ -46,9 +46,9 @@ Mở `/login`, nhập tài khoản admin đã seed trong OpenSearch (xem
 [`query-api/README.md`](../query-api/README.md)). Form gửi JSON tới
 `${VITE_API_BASE_URL}/auth/login`, dùng cùng cấu hình API base URL với dashboard.
 Backend cần `JWT_SECRET` riêng và admin đã seed; không có signup hoặc credentials mặc định.
-Nếu đi qua reverse proxy, proxy phải route `POST /auth/login` tới query-api. Gateway Caddy
-hiện chưa có route login; cập nhật gateway thuộc bước tích hợp sau. Dev có thể gọi trực tiếp
-cổng query-api.
+Gateway Caddy proxy `POST /auth/login` và OPTIONS cùng với query routes tới query-api.
+Dev có thể gọi trực tiếp cổng query-api. Xem quy trình đầy đủ tại
+[`docs/task/auth-deployment.md`](../docs/task/auth-deployment.md).
 
 Thành công: đọc `token`/`expires_at`, lưu qua `src/lib/auth.ts` (Zustand), xóa query cache cũ
 và quay lại trang được yêu cầu bằng React Router với `replace` (mặc định `/`). Guard bảo vệ
@@ -133,6 +133,7 @@ npm run dev                      # http://localhost:5173
 ```bash
 npm run test          # unit test (Vitest + RTL) - mock fetch, khong can backend
 npm run test:e2e -- e2e/login.spec.ts e2e/auth.spec.ts  # mock API, khong can backend
+npm run test:auth-integration -- --reporter=line     # HTTP API that, chi mock OpenSearch
 # Cac spec dashboard/incident can backend + cluster that va env
 # E2E_ADMIN_USERNAME/E2E_ADMIN_PASSWORD cua admin da seed (khong commit credentials).
 npm run test:e2e      # spec dung backend that duoc skip neu thieu credentials
@@ -146,6 +147,28 @@ logout/xóa cache và navigation. Browser tests chạy Chrome theo cấu hình c
 cả mobile, reload và đăng xuất giữa hai tab. Build đã bao gồm typecheck
 (`tsc -b`); có thể chạy riêng `npx tsc -b`. Dùng Node tương thích engine trong package-lock
 (Vitest hiện hỗ trợ Node `^22.12`, `^24` hoặc `>=26`).
+
+`test:auth-integration` cần Python của venv Query API trên PATH (dependencies từ
+`query-api/requirements-dev.txt`) và Chrome theo cấu hình hiện có. Hai process riêng được
+Playwright quản lý tại `127.0.0.1:8023` (FastAPI) và `127.0.0.1:5174` (web), không dùng lại
+server đang chạy. Test tự sinh secret/credentials tạm, gọi seed CLI hai lần, đăng nhập qua
+UI thật, verify JWT, gọi cả bốn query endpoints, kiểm tra CORS, 401, expiry và logout. Không
+mock fetch/login ở browser; chỉ client OpenSearch trong API được mock. Trace/video tắt để
+không ghi request credentials. Test không tạo database/container hay dùng dữ liệu triển khai.
+Đây chưa phải evidence cho OpenSearch hoặc gateway HTTPS thật.
+
+Ví dụ PowerShell từ repo root sau khi đã cài dependencies:
+
+```powershell
+$env:PATH = "$PWD/query-api/.venv/Scripts;$env:PATH"
+Set-Location web
+npm run test:auth-integration -- --reporter=line
+```
+
+Trên Linux/macOS, activate venv Query API trước khi chạy npm. Các E2E cần backend thật dùng
+`E2E_ADMIN_USERNAME`/`E2E_ADMIN_PASSWORD` từ environment, không có credentials mặc định;
+tránh lưu/chia sẻ Playwright traces chứa tài khoản thật. Không cần hai biến này cho suite
+integration riêng vì nó tạo credentials tạm.
 
 ## Deploy lên Vercel
 

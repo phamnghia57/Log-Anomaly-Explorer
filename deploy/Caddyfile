@@ -16,8 +16,8 @@
 # "Deploy len Vercel".
 
 {$PUBLIC_ADDRESS} {
-	# GET /health, /search, /clusters, /clusters/{id} - Query & Incident API (Nghia)
-	@query path /health /search* /clusters*
+	# Query API, gom POST/OPTIONS /auth/login; giu nguyen Authorization khi proxy.
+	@query path /health /auth/login /search* /clusters*
 	handle @query {
 		reverse_proxy query-api:8002
 	}

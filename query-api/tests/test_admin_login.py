@@ -216,6 +216,24 @@ def test_login_requires_both_json_fields(login_app, missing):
     storage.get.assert_not_called()
 
 
+@pytest.mark.parametrize("invalid", ["missing_username", "wrong_username_type", "invalid_json"])
+def test_validation_errors_never_echo_passwords(login_app, invalid, caplog):
+    app, storage, credentials, _ = login_app
+    if invalid == "invalid_json":
+        response = app.post("/auth/login", content='{"password":"' + credentials["password"],
+                            headers={"Content-Type": "application/json"})
+    else:
+        body = {"password": credentials["password"]}
+        if invalid == "wrong_username_type":
+            body["username"] = 123
+        response = app.post("/auth/login", json=body)
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Invalid login request"}
+    assert credentials["password"] not in response.text + caplog.text
+    storage.get.assert_not_called()
+
+
 def test_browser_preflight_allows_json_login(login_app):
     app, _, _, _ = login_app
 
