@@ -25,20 +25,26 @@ frontend (không có API route/BFF).
   lưu phiên tập trung, quay lại trang đang mở sau đăng nhập và menu quản trị/đăng xuất.
 - **Dashboard** (`/`) — thống kê nhanh (tổng cụm, alerted, anomalous, score cao nhất), biểu đồ
   top 10 cụm theo anomaly score, danh sách cụm dạng card (lọc theo status).
-- **Incident View** (`/clusters/:id`) — chi tiết cụm (score, signature, first/last seen), toàn bộ
-  log liên quan (bảng ảo hoá, click 1 dòng mở Dialog xem stack trace/metadata), danh sách
-  trace — click 1 trace nhảy sang Search đã lọc sẵn, **hoặc bấm icon ↗ cạnh trace để mở thẳng
-  distributed trace đó trên Jaeger** (xem mục "Tracing / Jaeger" bên dưới).
+- **Incident View** (`/clusters/:id`) — chi tiết cụm (score, signature, first/last seen), biểu đồ
+  **xu hướng anomaly score theo thời gian** (khi cụm đã có ≥ 2 điểm lịch sử), toàn bộ log liên
+  quan (bảng ảo hoá, **phân trang** qua nút "Tải thêm log" — cụm hàng trăm log không tải hết một
+  lần, xem `GET /clusters/{id}` mục `logs_limit`/`logs_offset`/`logs_total`), click 1 dòng mở
+  Dialog xem stack trace/metadata, danh sách trace — click 1 trace nhảy sang Search đã lọc sẵn,
+  **hoặc bấm icon ↗ cạnh trace để mở thẳng distributed trace đó trên Jaeger** (xem mục
+  "Tracing / Jaeger" bên dưới).
 - **Search log** (`/search`) — lọc theo `service`, `trace_id`, từ khoá, thời gian; đồng bộ 2 chiều
   với URL (`?trace_id=...`) để có thể deep-link/chia sẻ link kết quả.
 
 ## Hợp đồng đang tuân theo
 
-Gọi `POST /auth/login` và các query endpoints `GET /search`, `GET /clusters`, `GET /clusters/{id}`
-— xem [`../docs/architect/contracts/api-contract.md`](../docs/architect/contracts/api-contract.md).
+Gọi `POST /auth/login` và các query endpoints `GET /search`, `GET /clusters`,
+`GET /clusters/{id}` (phân trang `logs` qua `logs_limit`/`logs_offset`) và
+`GET /clusters/{id}/history` (dữ liệu chart xu hướng) — xem
+[`../docs/architect/contracts/api-contract.md`](../docs/architect/contracts/api-contract.md).
 Types trong [`src/lib/api.ts`](src/lib/api.ts) khớp với
-[`log-schema.json`](../docs/architect/contracts/log-schema.json) và
-[`cluster-record.schema.json`](../docs/architect/contracts/cluster-record.schema.json).
+[`log-schema.json`](../docs/architect/contracts/log-schema.json),
+[`cluster-record.schema.json`](../docs/architect/contracts/cluster-record.schema.json) và
+[`cluster-history-schema.json`](../docs/architect/contracts/cluster-history-schema.json).
 
 ## Đăng nhập và lưu phiên
 

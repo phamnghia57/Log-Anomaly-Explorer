@@ -8,8 +8,8 @@ Search log + Incident View (chi tiết cụm + liên kết trace/request). Cũng
 - [x] Nối `GET /clusters`, `GET /clusters/{id}` sang `ClusterRecord` thật của Nam (`clustering.src.storage.OpenSearchStore`)
 - [x] Điền đầy đủ `logs` trong response `/clusters/{id}` bằng cách tra `log_ids` → `LogStore` — đây chính là Incident View
 - [ ] Giữ đồng bộ 3 hợp đồng trong `docs/architect/contracts/` khi có thay đổi, thông báo cả nhóm
-- [ ] Review PR của Mạnh/Minh/Nam, gỡ xung đột tích hợp
-- [ ] Hoàn thiện `docs/task/runbook.md` và chạy load test end-to-end trong `../load-tests/`
+- [x] Review PR của Mạnh/Minh/Nam, gỡ xung đột tích hợp
+- [x] Hoàn thiện `docs/task/runbook.md` và chạy load test end-to-end trong `../load-tests/`
 
 ## Hợp đồng đang tuân theo
 
