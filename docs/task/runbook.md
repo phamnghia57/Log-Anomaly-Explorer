@@ -10,8 +10,11 @@
    `docs/architect/contracts/api-contract.md` mục "Alert"). Nếu kênh nhận alert đã cấu hình link
    từ `trace_id` thì bấm thẳng vào đó để xem ngay một request lỗi cụ thể trên Jaeger, không cần
    qua bước 2–3.
-2. **Mở Incident View**: `GET /clusters/{cluster_id}` (hoặc trang `/clusters/:id` trên UI) để xem
-   signature, score, danh sách log liên quan.
+2. **Mở Incident View**: đăng nhập web tại `/login` bằng tài khoản admin được cấp quyền,
+   rồi mở `/clusters/{cluster_id}` với ID trong alert (route UI `/clusters/:id`) để xem
+   signature, score và danh sách log liên quan. Chi tiết được tải từ `GET /clusters/{cluster_id}`.
+   Nếu mở link khi chưa đăng nhập, web chuyển tới `/login` và quay lại Incident View sau
+   khi đăng nhập thành công.
 3. **Lần theo trace/request**: bấm icon ↗ cạnh một `trace_id` bất kỳ trong Incident View để mở
    trace thật trên Jaeger (`/jaeger/trace/{trace_id}`) — xem span nào trong request thực sự chậm
    hoặc lỗi, không chỉ đoán qua message.
