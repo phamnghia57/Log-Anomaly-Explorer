@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import {
-  type ClusterStatus,
   type SearchParams,
   getCluster,
   getClusterHistory,
@@ -8,11 +7,14 @@ import {
   searchLogs,
 } from "./api";
 
-export function useClusters(status: ClusterStatus | "") {
+export function useClusters(since?: string, refetchIntervalMs: number | false = 30_000) {
+  // Khong loc `status` o day: Dashboard can danh sach DAY DU trong khoang
+  // thoi gian de tinh dung so dem facet theo tung status (StatusFacets),
+  // loc hien thi lam o phia component goi (client-side, du lieu nho).
   return useQuery({
-    queryKey: ["clusters", status],
-    queryFn: () => listClusters({ status }),
-    refetchInterval: 30_000, // du lieu "song" - cum co the doi status/score giua cac lan clustering chay
+    queryKey: ["clusters", since],
+    queryFn: () => listClusters({ since }),
+    refetchInterval: refetchIntervalMs, // du lieu "song" - cum co the doi status/score giua cac lan clustering chay
   });
 }
 
