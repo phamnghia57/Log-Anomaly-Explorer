@@ -29,7 +29,8 @@ frontend (không có API route/BFF).
   lần, xem `GET /clusters/{id}` mục `logs_limit`/`logs_offset`/`logs_total`), click 1 dòng mở
   Dialog xem stack trace/metadata, danh sách trace — click 1 trace nhảy sang Search đã lọc sẵn,
   **hoặc bấm icon ↗ cạnh trace để mở thẳng distributed trace đó trên Jaeger** (xem mục
-  "Tracing / Jaeger" bên dưới).
+  "Tracing / Jaeger" bên dưới), và panel **"Điều tra với AI Assistant"** — hỏi đáp về nguyên
+  nhân/cách sửa, AI tự tra cứu dữ liệu thật (xem `query-api/README.md` mục "AI Assistant").
 - **Search log** (`/search`) — lọc theo `service`, `trace_id`, từ khoá, thời gian; đồng bộ 2 chiều
   với URL (`?trace_id=...`) để có thể deep-link/chia sẻ link kết quả.
 

@@ -24,6 +24,12 @@ const ClusterScoreHistoryChart = lazy(() =>
   })),
 );
 
+// Panel AI Assistant - tach rieng chunk vi khong phai ai cung mo, khong can
+// tai cung luc voi phan con lai cua Incident View.
+const AssistantPanel = lazy(() =>
+  import("@/components/incident/AssistantPanel").then((m) => ({ default: m.AssistantPanel })),
+);
+
 export function ClusterDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -185,6 +191,10 @@ export function ClusterDetailPage() {
                 </div>
               )}
             </section>
+
+            <Suspense fallback={<Skeleton className="h-[28rem]" />}>
+              <AssistantPanel clusterId={cluster.cluster_id} />
+            </Suspense>
           </>
         )}
       </div>
