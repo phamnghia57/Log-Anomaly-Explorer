@@ -17,7 +17,9 @@
 
 {$PUBLIC_ADDRESS} {
 	# Query API, gom POST/OPTIONS /auth/login; giu nguyen Authorization khi proxy.
-	@query path /health /auth/login /search* /clusters*
+	# /assistant* - AI Assistant (GET conversation, POST message), xem
+	# query-api/src/assistant/router.py.
+	@query path /health /auth/login /search* /clusters* /assistant*
 	handle @query {
 		reverse_proxy query-api:8002
 	}
@@ -46,6 +48,6 @@
 	}
 
 	handle {
-		respond "Log Anomaly Explorer - xem /health, /search, /clusters, /clusters/{id}, /demo/*, /jaeger/*" 200
+		respond "Log Anomaly Explorer - xem /health, /search, /clusters, /clusters/{id}, /assistant/*, /demo/*, /jaeger/*" 200
 	}
 }

@@ -97,9 +97,10 @@ export async function loginAdmin(username: string, password: string): Promise<Au
 }
 
 // Client chi nhan cac duong dan Query API, khong nhan URL tuy y/URL Jaeger.
-type QueryPath = "/search" | "/clusters" | `/clusters/${string}`;
+type QueryPath = "/search" | "/clusters" | `/clusters/${string}`
+  | `/assistant/clusters/${string}/conversation` | `/assistant/clusters/${string}/conversation/messages`;
 
-async function getJson<T>(path: QueryPath, params?: Record<string, string | undefined>, signal?: AbortSignal): Promise<T> {
+async function queryJson<T>(path: QueryPath, params?: Record<string, string | undefined>, signal?: AbortSignal, payload?: Record<string, unknown>): Promise<T> {
   const url = new URL(`${API_BASE_URL}${path}`);
   const base = new URL(API_BASE_URL);
   // Khong cho dot-segment trong ID thoat ra endpoint/base path da cau hinh.
@@ -116,7 +117,8 @@ async function getJson<T>(path: QueryPath, params?: Record<string, string | unde
     ? SESSION_EXPIRED_MESSAGE : "Vui lòng đăng nhập để xem dữ liệu.", 401);
   try {
     res = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${session.token}` },
+      headers: { Authorization: `Bearer ${session.token}`, ...(payload ? { "Content-Type": "application/json" } : {}) },
+      ...(payload ? { method: "POST", body: JSON.stringify(payload) } : {}),
       signal, cache: "no-store", credentials: "omit", redirect: "error",
     });
   } catch (cause) {
@@ -152,18 +154,18 @@ export interface SearchParams {
 }
 
 export function searchLogs(params: SearchParams, signal?: AbortSignal) {
-  return getJson<{ total: number; results: StructuredLog[] }>("/search", params, signal);
+  return queryJson<{ total: number; results: StructuredLog[] }>("/search", params, signal);
 }
 
 export function listClusters(params: { status?: ClusterStatus | ""; since?: string }, signal?: AbortSignal) {
-  return getJson<{ total: number; clusters: ClusterRecord[] }>("/clusters", {
+  return queryJson<{ total: number; clusters: ClusterRecord[] }>("/clusters", {
     status: params.status || undefined,
     since: params.since,
   }, signal);
 }
 
 export function getCluster(clusterId: string, params?: { logsLimit?: number; logsOffset?: number }, signal?: AbortSignal) {
-  return getJson<ClusterRecord>(`/clusters/${encodeURIComponent(clusterId)}`, {
+  return queryJson<ClusterRecord>(`/clusters/${encodeURIComponent(clusterId)}`, {
     logs_limit: params?.logsLimit?.toString(),
     logs_offset: params?.logsOffset?.toString(),
   }, signal);
@@ -181,8 +183,49 @@ export interface ClusterHistoryPoint {
 }
 
 export function getClusterHistory(clusterId: string, signal?: AbortSignal) {
-  return getJson<{ cluster_id: string; points: ClusterHistoryPoint[] }>(
+  return queryJson<{ cluster_id: string; points: ClusterHistoryPoint[] }>(
     `/clusters/${encodeURIComponent(clusterId)}/history`,
     undefined, signal,
+  );
+}
+
+// AssistantMessage - docs/architect/contracts/assistant-conversation-schema.json.
+// role="tool" chi xuat hien khi AI tu goi tool de dieu tra truoc khi tra loi -
+// UI nen hien thi khac voi tin nhan user/assistant (vd. dong "dang tra cuu...").
+export type AssistantRole = "user" | "assistant" | "tool";
+
+export interface AssistantToolCall {
+  id: string;
+  name: string;
+  arguments: string;
+}
+
+export interface AssistantMessage {
+  role: AssistantRole;
+  content: string | null;
+  created_at: string;
+  tool_calls?: AssistantToolCall[];
+  tool_call_id?: string;
+  name?: string;
+}
+
+export interface AssistantConversation {
+  cluster_id: string;
+  messages: AssistantMessage[];
+}
+
+export function getAssistantConversation(clusterId: string, signal?: AbortSignal) {
+  return queryJson<AssistantConversation>(
+    `/assistant/clusters/${encodeURIComponent(clusterId)}/conversation`,
+    undefined, signal,
+  );
+}
+
+export function sendAssistantMessage(
+  clusterId: string, message: string,
+): Promise<AssistantConversation> {
+  return queryJson<AssistantConversation>(
+    `/assistant/clusters/${encodeURIComponent(clusterId)}/conversation/messages`,
+    undefined, undefined, { message },
   );
 }

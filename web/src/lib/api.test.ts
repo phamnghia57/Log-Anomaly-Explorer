@@ -1,5 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { API_BASE_URL, ApiError, getCluster, getClusterHistory, getJaegerTraceUrl, listClusters, loginAdmin, searchLogs } from "./api";
+import {
+  API_BASE_URL,
+  ApiError,
+  getAssistantConversation,
+  getCluster,
+  getClusterHistory,
+  getJaegerTraceUrl,
+  listClusters,
+  loginAdmin,
+  searchLogs,
+  sendAssistantMessage,
+} from "./api";
 import { AUTH_STORAGE_KEY, clearSession, getSession, saveSession, useAuthStore } from "./auth";
 
 describe("query-api client", () => {
@@ -102,6 +113,47 @@ describe("query-api client", () => {
 
     await expect(searchLogs({})).rejects.toMatchObject({ status: 0 });
   });
+
+  it("getAssistantConversation: goi dung endpoint, tra ve messages rong khi chua hoi lan nao", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ cluster_id: "c1", messages: [] }), { status: 200 }),
+    );
+
+    const body = await getAssistantConversation("c1");
+
+    const calledUrl = new URL(fetchMock.mock.calls[0][0] as string);
+    expect(calledUrl.pathname).toBe("/assistant/clusters/c1/conversation");
+    expect(body).toEqual({ cluster_id: "c1", messages: [] });
+  });
+
+  it("sendAssistantMessage: POST dung body JSON, tra ve toan bo hoi thoai moi", async () => {
+    const conversation = {
+      cluster_id: "c1",
+      messages: [
+        { role: "user", content: "Loi nay la gi?", created_at: "2026-10-29T00:00:00Z" },
+        { role: "assistant", content: "De xuat: ...", created_at: "2026-10-29T00:00:01Z" },
+      ],
+    };
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(conversation), { status: 200 }));
+
+    const body = await sendAssistantMessage("c1", "Loi nay la gi?");
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(new URL(url as string).pathname).toBe("/assistant/clusters/c1/conversation/messages");
+    expect(init).toMatchObject({ method: "POST" });
+    expect(JSON.parse((init as RequestInit).body as string)).toEqual({ message: "Loi nay la gi?" });
+    expect(body).toEqual(conversation);
+  });
+
+  it("sendAssistantMessage: nem ApiError voi status 503 khi thieu OPENAI_API_KEY", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response("AI Assistant chua duoc cau hinh", { status: 503 }),
+    );
+
+    const error = await sendAssistantMessage("c1", "hi").catch((e) => e);
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({ status: 503 });
+  });
 });
 
 describe("admin login and authenticated API requests", () => {
@@ -201,6 +253,8 @@ describe("admin login and authenticated API requests", () => {
     ["/clusters", () => listClusters({})],
     ["/clusters/c1", () => getCluster("c1")],
     ["/clusters/c1/history", () => getClusterHistory("c1")],
+    ["/assistant/clusters/c1/conversation", () => getAssistantConversation("c1")],
+    ["/assistant/clusters/c1/conversation/messages", () => sendAssistantMessage("c1", "Investigate")],
   ])("sends Bearer auth only to the configured protected endpoint %s", async (path, request) => {
     const current = session();
     saveSession(current);
@@ -209,7 +263,7 @@ describe("admin login and authenticated API requests", () => {
     await request();
 
     expect(fetchMock).toHaveBeenCalledWith(`${API_BASE_URL}${path}`, expect.objectContaining({
-      headers: { Authorization: `Bearer ${current.token}` },
+      headers: expect.objectContaining({ Authorization: `Bearer ${current.token}` }),
       cache: "no-store", credentials: "omit", redirect: "error",
     }));
   });
@@ -221,6 +275,20 @@ describe("admin login and authenticated API requests", () => {
     await loginAdmin("test-admin", "test-password");
 
     expect(fetchMock.mock.calls[0][1].headers).toEqual({ "Content-Type": "application/json" });
+  });
+
+  it.each([
+    () => getAssistantConversation("c1"),
+    () => sendAssistantMessage("c1", "Investigate"),
+  ])("clears a rejected Assistant session through the shared authenticated client", async (request) => {
+    saveSession(session());
+    fetchMock.mockResolvedValueOnce(new Response("Unauthorized", { status: 401 }));
+
+    await expect(request()).rejects.toMatchObject({ status: 401 });
+
+    expect(getSession()).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEY)).toBeNull();
+    expect(useAuthStore.getState().status).toBe("expired");
   });
 
   it("does not fetch when anonymous or expired", async () => {

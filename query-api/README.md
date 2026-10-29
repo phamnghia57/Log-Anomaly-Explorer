@@ -47,6 +47,8 @@ Các route `/search` và `/clusters*` bên dưới yêu cầu JWT admin trong he
 | `GET /clusters/{id}/history` | `since`, `limit` | Xu hướng anomaly score theo thời gian (index `cluster-history`) |
 | `GET /metrics` | — | Metrics dạng Prometheus, **không** route ra Internet qua gateway |
 | `POST /auth/login` | JSON `username`, `password` | Đăng nhập admin, trả JWT và `expires_at` |
+| `GET /assistant/clusters/{id}/conversation` | — | Hội thoại điều tra với AI Assistant (xem mục riêng bên dưới) |
+| `POST /assistant/clusters/{id}/conversation/messages` | body `{"message": "..."}` | Gửi câu hỏi cho AI Assistant |
 
 ```bash
 # TOKEN la JWT nhan tu POST /auth/login (xem vi du PowerShell ben duoi).
@@ -243,6 +245,36 @@ Lệnh dùng `python -m query-api.tests.auth_test_server` (test-only, không có
 `.dockerignore` loại `tests/`). Harness sinh credentials/secret tạm trong bộ nhớ, seed CLI
 hai lần, bind `127.0.0.1:8023`; Vite ở `127.0.0.1:5174`. Playwright tự dừng cả hai sau test.
 Không dùng test harness cho deploy, không xác minh persistence/mapping/TLS với cluster thật.
+
+## AI Assistant
+
+Hỗ trợ điều tra & đề xuất cách sửa cho một cụm lỗi — mô phỏng theo
+[Elastic Observability AI Assistant](https://www.elastic.co/docs/solutions/observability/ai/observability-ai-assistant),
+thu gọn cho tài nguyên hiện tại: thay vì knowledge base dạng embedding (ELSER/E5, cần node ML
+riêng), AI tự gọi lại **dữ liệu thật đã có sẵn** qua function calling (xem `src/assistant/tools.py`:
+`get_cluster_history`, `search_related_logs`, `list_active_clusters`) trước khi trả lời — không
+bịa đặt dựa trên 1 đoạn text tĩnh.
+
+- **Model**: OpenAI `gpt-4o-mini` (đổi qua `OPENAI_MODEL`). **Bắt buộc** tự điền `OPENAI_API_KEY`
+  thật vào `.env` (không commit) — thiếu key thì `/assistant/*` trả `503`, các endpoint khác
+  **không** bị ảnh hưởng.
+- **Theo dõi chi phí/độ trễ/token**: qua [Langfuse](https://jp.cloud.langfuse.com) — tự động,
+  không cần đổi code gọi OpenAI (dùng `langfuse.openai.OpenAI`, drop-in thay `openai.OpenAI`).
+  Để trống `LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY` thì assistant vẫn chạy bình thường, chỉ
+  không gửi trace đi.
+- **Lưu hội thoại**: 1 conversation/cụm, index `assistant-conversations` (xem
+  [`assistant-conversation-schema.json`](../docs/architect/contracts/assistant-conversation-schema.json)).
+  Mở lại Incident View vẫn thấy lại câu hỏi/trả lời cũ.
+- **Bảo vệ chi phí**: `ASSISTANT_MAX_TOOL_ROUNDS` (mặc định 5) giới hạn số vòng AI tự gọi tool
+  trong 1 lượt chat, tránh vòng lặp không điểm dừng.
+- Hai route `/assistant/*` được gắn `Depends(require_admin)` khi include router trong `main.py`,
+  giống các query routes, vì đây là dữ liệu log/stack trace nội bộ và gọi API có phí.
+
+```bash
+curl -X POST "http://localhost:8002/assistant/clusters/<cluster_id>/conversation/messages" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"message": "Lỗi này do đâu, cách sửa thế nào?"}'
+```
 
 ## Evidence sở hữu
 

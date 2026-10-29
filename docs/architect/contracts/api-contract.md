@@ -148,3 +148,45 @@ giá trị `null` khi cụm không có trace nào — bên nhận không cần x
 - **Env hiện có**: `JWT_SECRET`, `JWT_EXPIRY_SECONDS` (mặc định `3600`), `USERS_INDEX`
   (mặc định `users`), `ADMIN_SEED_USERNAME`, `ADMIN_SEED_PASSWORD` (chỉ dùng khi seed, không log).
   Hướng dẫn chạy/seed: [triển khai auth](../../task/auth-deployment.md).
+- **AI Assistant**: hai route GET/POST ở mục dưới cũng dùng `Depends(require_admin)` và
+  `Authorization: Bearer <token>` vì đọc log/stack trace nội bộ và gọi API có phí.
+
+## AI Assistant (Nghĩa) — dựa theo Elastic Observability AI Assistant, thu gọn cho tài nguyên hiện tại
+
+Hỗ trợ điều tra & đề xuất cách sửa cho một cụm lỗi — dùng OpenAI (model `gpt-4o-mini`) với
+function calling để AI tự tra cứu dữ liệu thật thay vì chỉ trả lời dựa trên 1 đoạn text tĩnh.
+Hai endpoint dưới đây yêu cầu JWT admin giống các Query API routes; thiếu/sai/hết hạn token
+trả 401 trước khi đọc dữ liệu hoặc gọi OpenAI.
+
+### `GET /assistant/clusters/{cluster_id}/conversation`
+Hội thoại điều tra hiện có của một cụm — 1 conversation/cụm (không phải nhiều thread). Trả
+`messages: []` nếu chưa ai hỏi AI về cụm này lần nào (không phải lỗi).
+
+Response:
+```json
+{ "cluster_id": "...", "messages": [ { "role": "user|assistant|tool", "content": "...", "created_at": "..." } ] }
+```
+
+### `POST /assistant/clusters/{cluster_id}/conversation/messages`
+Gửi 1 tin nhắn, AI có thể tự gọi tool để điều tra thêm trước khi trả lời. Trả về **toàn bộ** hội
+thoại đã lưu sau lượt này (không chỉ tin nhắn mới).
+
+- Request: `{ "message": "..." }`
+- Response 200: giống response của `GET` ở trên.
+- Response 404: `cluster_id` không tồn tại.
+- Response 503: thiếu `OPENAI_API_KEY`, hoặc kho hội thoại/cụm chưa sẵn sàng
+  (`STORAGE_BACKEND=memory`).
+- Response 502: lỗi gọi OpenAI (timeout, quota, …) — không làm sập service.
+
+Dữ liệu lưu theo [`assistant-conversation-schema.json`](./assistant-conversation-schema.json),
+index `assistant-conversations` (env `ASSISTANT_CONVERSATIONS_INDEX`).
+
+**Tool AI có thể tự gọi** (chỉ đọc, xem `query-api/src/assistant/tools.py`): `get_cluster_history`
+(xu hướng score của cụm đang hỏi), `search_related_logs` (log khác liên quan, mặc định 24h gần
+nhất), `list_active_clusters` (cụm khác đang bất thường cùng lúc — kiểm tra lan sang service
+khác). Giới hạn `ASSISTANT_MAX_TOOL_ROUNDS` vòng gọi tool/lượt chat (mặc định 5) để bảo vệ chi
+phí OpenAI và độ trễ.
+
+**Theo dõi chi phí/độ trễ**: qua Langfuse (`LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY`, miền
+`https://jp.cloud.langfuse.com`) — tự động, không cần đổi code gọi OpenAI (dùng wrapper
+`langfuse.openai`). Để trống 2 key thì assistant vẫn chạy bình thường, chỉ không gửi trace.

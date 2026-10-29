@@ -35,6 +35,8 @@ from ingestion.src import config
 from ingestion.src.storage import LogStore, OpenSearchLogStore, StorageError, build_store
 
 from .auth import require_admin, router as auth_router
+from .assistant.router import router as assistant_router
+from .assistant.storage import ConversationRepository
 from .telemetry import setup_telemetry
 from .users import UserRepository
 
@@ -42,7 +44,7 @@ logger = logging.getLogger("query-api")
 
 app = FastAPI(title="Log Anomaly Explorer - Query & Incident API")
 
-# API doc log (GET) va login JSON (POST) - frontend deploy khac domain backend.
+# API doc log (GET), login va Assistant JSON (POST) - frontend khac domain backend.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -89,6 +91,32 @@ def _build_cluster_store():
 
 
 cluster_store = _build_cluster_store()
+
+
+def _build_conversation_repository():
+    """Kho hoi thoai AI Assistant, hoac None khi chua dung duoc (giong
+    _build_cluster_store o tren) - /assistant/* se tra 503 thay vi lam sap
+    ca service."""
+    try:
+        from ingestion.src.storage import OpenSearchLogStore
+
+        if not isinstance(store, OpenSearchLogStore):
+            raise ValueError("Assistant conversation storage requires STORAGE_BACKEND=opensearch")
+        repository = ConversationRepository(store)
+        repository.ensure_ready()
+        return repository
+    except Exception as exc:
+        logger.warning("Chua dung duoc kho hoi thoai AI Assistant (%s: %s) - /assistant/* se tra 503",
+                       type(exc).__name__, exc)
+        return None
+
+
+# app.state (khong phai bien module) de router trong assistant/ truy cap duoc
+# ma khong tao vong import voi main.py.
+app.state.store = store
+app.state.cluster_store = cluster_store
+app.state.assistant_conversations = _build_conversation_repository()
+app.include_router(assistant_router, dependencies=[Depends(require_admin)])
 
 # api-contract.md: "from"/"to" mac dinh 24h gan nhat.
 DEFAULT_WINDOW_HOURS = 24

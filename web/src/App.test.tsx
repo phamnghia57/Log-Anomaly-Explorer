@@ -81,7 +81,8 @@ describe("frontend authentication integration", () => {
     const user = userEvent.setup();
 
     expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeVisible();
-    await waitFor(() => expect(queryClient.getQueryData(["clusters", ""])).toEqual({ total: 0, clusters: [] }));
+    await waitFor(() => expect(queryClient.getQueriesData({ queryKey: ["clusters"] }).map(([, data]) => data))
+      .toEqual([{ total: 0, clusters: [] }]));
     expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe(`Bearer ${current.token}`);
     expect(screen.getByRole("button", { name: "Menu quản trị" })).toBeVisible();
     expect(screen.queryByRole("link", { name: "Đăng nhập" })).not.toBeInTheDocument();

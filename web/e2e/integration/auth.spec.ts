@@ -72,7 +72,7 @@ test("real API rejects expired/invalid JWTs and its 401 clears the browser sessi
   await page.addInitScript(({ key, token }) => localStorage.setItem(key, JSON.stringify({
     token, expires_at: new Date(Date.now() + 3_600_000).toISOString(),
   })), { key: STORAGE_KEY, token: expired });
-  const rejection = page.waitForResponse((response) => response.url() === `${API}/clusters` && response.status() === 401);
+  const rejection = page.waitForResponse((response) => new URL(response.url()).pathname === "/clusters" && response.status() === 401);
   await page.goto("/");
   await rejection;
   await expect(page).toHaveURL("/login");

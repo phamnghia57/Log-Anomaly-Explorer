@@ -9,7 +9,7 @@ test("login persists a session, redirects to dashboard and restores it after rel
     expect(route.request().postDataJSON()).toEqual({ username: "test-admin", password: "test-password" });
     await route.fulfill({ json: session, headers: { "Access-Control-Allow-Origin": "*" } });
   });
-  await page.route("**/clusters", async (route) => {
+  await page.route(/\/clusters(?:\?.*)?$/, async (route) => {
     expect(route.request().headers()["authorization"]).toBe(`Bearer ${session.token}`);
     authenticatedQueries += 1;
     await route.fulfill({ json: { total: 0, clusters: [] }, headers: { "Access-Control-Allow-Origin": "*" } });

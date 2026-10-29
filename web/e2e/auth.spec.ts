@@ -14,7 +14,7 @@ test("deep link returns after login, navigation works, and logout blocks history
     expect(route.request().headers().authorization).toBe(`Bearer ${current.token}`);
     return route.fulfill({ json: { total: 0, results: [] }, headers: cors });
   });
-  await page.route("**/clusters", (route) => route.fulfill({ json: { total: 0, clusters: [] }, headers: cors }));
+  await page.route(/\/clusters(?:\?.*)?$/, (route) => route.fulfill({ json: { total: 0, clusters: [] }, headers: cors }));
   await page.goto("/search?trace_id=abc#results");
   await expect(page).toHaveURL("/login");
   expect(searches).toBe(0);
@@ -41,7 +41,7 @@ test("deep link returns after login, navigation works, and logout blocks history
 test("401 clears auth, redirects to login, and a failed login stays on the form", async ({ page }) => {
   await page.addInitScript(({ key, current }) => localStorage.setItem(key, JSON.stringify(current)), { key: STORAGE_KEY, current: session() });
   let queries = 0;
-  await page.route("**/clusters", (route) => {
+  await page.route(/\/clusters(?:\?.*)?$/, (route) => {
     queries++;
     return route.fulfill({ status: 401, json: { detail: "Unauthorized" }, headers: cors });
   });

@@ -31,7 +31,8 @@ frontend (không có API route/BFF).
   lần, xem `GET /clusters/{id}` mục `logs_limit`/`logs_offset`/`logs_total`), click 1 dòng mở
   Dialog xem stack trace/metadata, danh sách trace — click 1 trace nhảy sang Search đã lọc sẵn,
   **hoặc bấm icon ↗ cạnh trace để mở thẳng distributed trace đó trên Jaeger** (xem mục
-  "Tracing / Jaeger" bên dưới).
+  "Tracing / Jaeger" bên dưới), và panel **"Điều tra với AI Assistant"** — hỏi đáp về nguyên
+  nhân/cách sửa, AI tự tra cứu dữ liệu thật (xem `query-api/README.md` mục "AI Assistant").
 - **Search log** (`/search`) — lọc theo `service`, `trace_id`, từ khoá, thời gian; đồng bộ 2 chiều
   với URL (`?trace_id=...`) để có thể deep-link/chia sẻ link kết quả.
 
@@ -63,8 +64,8 @@ dữ liệu. Return destination chỉ chấp nhận các route nội bộ đã b
 chấp nhận URL bên ngoài hoặc `/login` để tránh open redirect và vòng lặp. Admin còn phiên
 hợp lệ mở `/login` sẽ được chuyển về trang được yêu cầu hoặc Dashboard.
 
-Client chung trong `src/lib/api.ts` chỉ gắn `Authorization: Bearer <token>` cho bốn Query API
-endpoints được bảo vệ dưới `VITE_API_BASE_URL`. Login không gắn token; link Jaeger mở riêng,
+Client chung trong `src/lib/api.ts` gắn `Authorization: Bearer <token>` cho bốn Query API
+endpoints và hai Assistant endpoints được bảo vệ dưới `VITE_API_BASE_URL`. Login không gắn token; link Jaeger mở riêng,
 không đi qua client này. Query requests không dùng HTTP cache/cookie và không theo redirect
 HTTP để tránh gửi token sang route/service ngoài phạm vi. AbortSignal từ TanStack Query được
 truyền tới fetch. Lỗi mạng/5xx hiển thị như trước; không xóa phiên chỉ vì mất kết nối.

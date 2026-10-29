@@ -1,18 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  type ClusterStatus,
   type SearchParams,
+  getAssistantConversation,
   getCluster,
   getClusterHistory,
   listClusters,
   searchLogs,
+  sendAssistantMessage,
 } from "./api";
 
-export function useClusters(status: ClusterStatus | "") {
+export function useClusters(since?: string, refetchIntervalMs: number | false = 30_000) {
+  // Khong loc `status` o day: Dashboard can danh sach DAY DU trong khoang
+  // thoi gian de tinh dung so dem facet theo tung status (StatusFacets),
+  // loc hien thi lam o phia component goi (client-side, du lieu nho).
   return useQuery({
-    queryKey: ["clusters", status],
-    queryFn: ({ signal }) => listClusters({ status }, signal),
-    refetchInterval: 30_000, // du lieu "song" - cum co the doi status/score giua cac lan clustering chay
+    queryKey: ["clusters", since],
+    queryFn: ({ signal }) => listClusters({ since }, signal),
+    refetchInterval: refetchIntervalMs, // du lieu "song" - cum co the doi status/score giua cac lan clustering chay
   });
 }
 
@@ -39,5 +43,25 @@ export function useSearchLogs(params: SearchParams, enabled: boolean) {
     queryKey: ["search", params],
     queryFn: ({ signal }) => searchLogs(params, signal),
     enabled,
+  });
+}
+
+export function useAssistantConversation(clusterId: string | undefined) {
+  return useQuery({
+    queryKey: ["assistant-conversation", clusterId],
+    queryFn: ({ signal }) => getAssistantConversation(clusterId as string, signal),
+    enabled: Boolean(clusterId),
+  });
+}
+
+export function useSendAssistantMessage(clusterId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (message: string) => sendAssistantMessage(clusterId, message),
+    // Ghi thang vao cache thay vi invalidate+refetch: response da la TOAN BO
+    // hoi thoai moi nhat (xem api-contract.md), khong can goi lai GET.
+    onSuccess: (conversation) => {
+      queryClient.setQueryData(["assistant-conversation", clusterId], conversation);
+    },
   });
 }
