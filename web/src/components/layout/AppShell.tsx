@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { AdminMenu } from "@/components/auth/AdminMenu";
 
 export function AppShell({ title, children }: { title: ReactNode; children: ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export function AppShell({ title, children }: { title: ReactNode; children: Reac
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <h1 className="text-sm font-medium text-foreground">{title}</h1>
+          <div className="ml-auto"><AdminMenu /></div>
         </header>
         <div className="flex-1 overflow-auto p-4 sm:p-6">{children}</div>
       </SidebarInset>

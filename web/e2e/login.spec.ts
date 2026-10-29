@@ -24,11 +24,13 @@ test("login persists a session, redirects to dashboard and restores it after rel
 
   await expect(page).toHaveURL("/");
   await expect(page.getByRole("heading", { name: "Dashboard", exact: true })).toBeVisible();
-  await expect.poll(() => authenticatedQueries).toBe(1);
+  // StrictMode + AbortSignal co the huy mount dau va fetch lai trong dev.
+  await expect.poll(() => authenticatedQueries).toBeGreaterThanOrEqual(1);
+  const queriesBeforeReload = authenticatedQueries;
   expect(await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), STORAGE_KEY)).toEqual(session);
   await page.reload();
   await expect(page.getByRole("heading", { name: "Dashboard", exact: true })).toBeVisible();
-  await expect.poll(() => authenticatedQueries).toBe(2);
+  await expect.poll(() => authenticatedQueries).toBeGreaterThan(queriesBeforeReload);
 });
 
 test("mobile login shows a generic failure and keeps passwords out of storage", async ({ page }, testInfo) => {

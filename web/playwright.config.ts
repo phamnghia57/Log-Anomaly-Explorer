@@ -1,9 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// E2E chay voi backend thuc (VITE_API_BASE_URL trong .env.local) - khong
-// mock API, xem web/README.md muc "Test". Can co du lieu that (it nhat 1
-// cluster) de cac test duoi day pass - chay demo-app/scripts/trigger_fault_window.py
-// hoac goi GET /demo/simulate-error truoc khi chay.
+// login/auth specs mock API. Dashboard/incident specs dung backend thuc,
+// can E2E_ADMIN_USERNAME/PASSWORD va it nhat 1 cluster (xem web/README.md).
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,

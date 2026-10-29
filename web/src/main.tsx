@@ -6,17 +6,15 @@ import App from "./App";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import "./index.css";
-import { AUTH_STORAGE_KEY, restoreSession } from "@/lib/auth";
+import { restoreSession } from "@/lib/auth";
+import { ApiError } from "@/lib/api";
 
 restoreSession();
-window.addEventListener("storage", (event) => {
-  if (event.key === AUTH_STORAGE_KEY || event.key === null) restoreSession();
-});
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
+      retry: (failureCount, error) => !(error instanceof ApiError && error.status === 401) && failureCount < 1,
       staleTime: 10_000,
     },
   },

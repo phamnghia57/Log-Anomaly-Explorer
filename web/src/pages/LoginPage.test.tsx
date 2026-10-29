@@ -14,15 +14,17 @@ describe("admin login page", () => {
   const fetchMock = vi.fn();
   const session = () => ({ token: "test-token", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
 
-  function renderLogin() {
+  function renderLogin(from?: unknown) {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     queryClient.setQueryData(["previous-private-data"], { private: true });
     render(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={["/login"]}>
+        <MemoryRouter initialEntries={[{ pathname: "/login", state: { from } }]}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<h1>Dashboard</h1>} />
+            <Route path="/search" element={<h1>Search log</h1>} />
+            <Route path="/clusters/:id" element={<h1>Incident</h1>} />
           </Routes>
         </MemoryRouter>
       </QueryClientProvider>,
@@ -100,6 +102,22 @@ describe("admin login page", () => {
     expect(screen.getByRole("button", { name: "Đăng nhập" })).toBeEnabled();
     expect(screen.getByLabelText("Mật khẩu")).toHaveValue("");
     expect(getSession()).toBeNull();
+  });
+
+  it.each([
+    ["/search?trace_id=abc#results", "Search log"],
+    ["/clusters/c1", "Incident"],
+    ["//external.example", "Dashboard"],
+    ["https://external.example", "Dashboard"],
+    ["/login", "Dashboard"],
+  ])("returns to a safe protected page after login: %s", async (from, heading) => {
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(session())));
+    const { user } = renderLogin(from);
+    await fillForm(user);
+
+    await user.click(screen.getByRole("button", { name: "Đăng nhập" }));
+
+    expect(await screen.findByRole("heading", { name: heading })).toBeVisible();
   });
 
   it("uses a generic error for invalid credentials and removes any previous session", async () => {

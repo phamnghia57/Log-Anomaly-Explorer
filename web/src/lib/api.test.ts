@@ -6,10 +6,12 @@ describe("query-api client", () => {
   const fetchMock = vi.fn();
 
   beforeEach(() => {
+    saveSession({ token: "test-token", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
     vi.stubGlobal("fetch", fetchMock);
   });
 
   afterEach(() => {
+    clearSession();
     fetchMock.mockReset();
     vi.unstubAllGlobals();
   });
@@ -166,10 +168,10 @@ describe("admin login and authenticated API requests", () => {
 
     await searchLogs({});
 
-    expect(fetchMock.mock.calls[0][1]).toEqual({ headers: { Authorization: `Bearer ${current.token}` } });
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({ headers: { Authorization: `Bearer ${current.token}` } });
   });
 
-  it("clears a rejected session on 401 without redirecting globally", async () => {
+  it("clears a rejected session on 401 so the router can redirect", async () => {
     saveSession(session());
     fetchMock.mockResolvedValueOnce(new Response("Unauthorized", { status: 401 }));
 
@@ -192,6 +194,91 @@ describe("admin login and authenticated API requests", () => {
     await request;
 
     expect(getSession()).toEqual(newer);
+  });
+
+  it.each([
+    ["/search", () => searchLogs({})],
+    ["/clusters", () => listClusters({})],
+    ["/clusters/c1", () => getCluster("c1")],
+    ["/clusters/c1/history", () => getClusterHistory("c1")],
+  ])("sends Bearer auth only to the configured protected endpoint %s", async (path, request) => {
+    const current = session();
+    saveSession(current);
+    fetchMock.mockResolvedValueOnce(new Response("{}"));
+
+    await request();
+
+    expect(fetchMock).toHaveBeenCalledWith(`${API_BASE_URL}${path}`, expect.objectContaining({
+      headers: { Authorization: `Bearer ${current.token}` },
+      cache: "no-store", credentials: "omit", redirect: "error",
+    }));
+  });
+
+  it("never attaches an existing token to the public login request", async () => {
+    saveSession(session());
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(session())));
+
+    await loginAdmin("test-admin", "test-password");
+
+    expect(fetchMock.mock.calls[0][1].headers).toEqual({ "Content-Type": "application/json" });
+  });
+
+  it("does not fetch when anonymous or expired", async () => {
+    await expect(searchLogs({})).rejects.toMatchObject({ status: 401 });
+    saveSession(session());
+    vi.spyOn(Date, "now").mockReturnValue(Date.now() + 3_600_001);
+    try {
+      await expect(listClusters({})).rejects.toMatchObject({ status: 401 });
+      expect(getSession()).toBeNull();
+      expect(fetchMock).not.toHaveBeenCalled();
+    } finally {
+      vi.restoreAllMocks();
+    }
+  });
+
+  it.each(["..", "."])("rejects cluster IDs that normalize outside the protected endpoint: %s", async (id) => {
+    saveSession(session());
+
+    await expect(getCluster(id)).rejects.toMatchObject({ status: 400 });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps URL-like cluster IDs on the configured API, never the external service", async () => {
+    saveSession(session());
+    fetchMock.mockResolvedValueOnce(new Response("{}"));
+
+    await getCluster("https://external.example/collect");
+
+    const url = new URL(fetchMock.mock.calls[0][0]);
+    expect(url.origin).toBe(new URL(API_BASE_URL).origin);
+    expect(url.pathname).toContain("/clusters/https%3A%2F%2Fexternal.example%2Fcollect");
+  });
+
+  it("does not return data from a request that finishes after logout", async () => {
+    saveSession(session());
+    let finish!: (response: Response) => void;
+    fetchMock.mockReturnValueOnce(new Promise<Response>((resolve) => { finish = resolve; }));
+    const request = searchLogs({});
+    clearSession();
+
+    finish(new Response(JSON.stringify({ results: ["private"] })));
+
+    await expect(request).rejects.toMatchObject({ status: 401 });
+  });
+
+  it("passes cancellation through to fetch without changing AbortError to a network error", async () => {
+    saveSession(session());
+    const controller = new AbortController();
+    const aborted = new DOMException("Aborted", "AbortError");
+    fetchMock.mockImplementationOnce((_url, options) => new Promise((_resolve, reject) => {
+      options.signal.addEventListener("abort", () => reject(aborted));
+    }));
+    const request = searchLogs({}, controller.signal);
+
+    controller.abort();
+
+    await expect(request).rejects.toBe(aborted);
+    expect(fetchMock.mock.calls[0][1].signal).toBe(controller.signal);
   });
 });
 

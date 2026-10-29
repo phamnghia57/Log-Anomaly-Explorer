@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { Activity, LoaderCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { ApiError, loginAdmin } from "@/lib/api";
 import {
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { safeReturnTo } from "@/lib/auth-navigation";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Vui lòng nhập tên đăng nhập."),
@@ -22,6 +23,8 @@ type LoginValues = z.infer<typeof loginSchema>;
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = safeReturnTo((location.state as { from?: unknown } | null)?.from);
   const queryClient = useQueryClient();
   const status = useAuthStore((state) => state.status);
   const [error, setError] = useState("");
@@ -38,7 +41,7 @@ export function LoginPage() {
     try {
       const session = await loginAdmin(values.username, values.password);
       saveSession(session);
-      navigate("/", { replace: true });
+      navigate(returnTo, { replace: true });
     } catch (cause) {
       if (cause instanceof SessionExpiredError) setError(SESSION_EXPIRED_MESSAGE);
       else if (cause instanceof ApiError) setError(cause.message);
