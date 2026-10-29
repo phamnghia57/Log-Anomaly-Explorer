@@ -1,0 +1,166 @@
+============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-9.1.1, pluggy-1.6.0 -- D:\Nam_4\Software Technology\SE-Project\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: D:\Nam_4\Software Technology\Log-Anomaly-Explorer\ingestion
+plugins: anyio-4.15.1, hypothesis-6.168.5, locust-2.46.0, cov-7.1.0
+collecting ... collected 7 items
+
+tests/test_bulk_ingest.py::test_bulk_accepts_all_valid_logs_and_they_are_searchable FAILED [ 14%]
+tests/test_bulk_ingest.py::test_bulk_mixed_batch_quarantines_invalid_without_losing_valid_records FAILED [ 28%]
+tests/test_bulk_ingest.py::test_bulk_persistence_failure_never_reported_as_accepted FAILED [ 42%]
+tests/test_bulk_ingest.py::test_bulk_rejects_empty_batch FAILED          [ 57%]
+tests/test_bulk_ingest.py::test_bulk_rejects_batch_over_max_size FAILED  [ 71%]
+tests/test_bulk_ingest.py::test_single_ingest_unaffected_by_bulk_feature PASSED [ 85%]
+tests/test_bulk_ingest.py::test_property_valid_records_never_lost_regardless_of_batch_composition FAILED [100%]
+
+================================== FAILURES ===================================
+__________ test_bulk_accepts_all_valid_logs_and_they_are_searchable ___________
+
+client = <starlette.testclient.TestClient object at 0x0000016C27F937F0>
+
+    def test_bulk_accepts_all_valid_logs_and_they_are_searchable(client):
+        logs = [make_log(trace_id=f"t{i}") for i in range(5)]
+        r = client.post("/ingest/bulk", json={"logs": logs})
+>       assert r.status_code == 207
+E       assert 404 == 207
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+tests\test_bulk_ingest.py:49: AssertionError
+___ test_bulk_mixed_batch_quarantines_invalid_without_losing_valid_records ____
+
+client = <starlette.testclient.TestClient object at 0x0000016C28283AC0>
+
+    def test_bulk_mixed_batch_quarantines_invalid_without_losing_valid_records(client):
+        """AC2 (cot loi cua change request): 1 ban ghi loi KHONG duoc lam mat cac ban ghi hop le khac."""
+        logs = [
+            make_log(trace_id="ok-1"),
+            {"level": "ERROR"},  # thieu required fields -> sai schema
+            make_log(trace_id="ok-2"),
+            make_log(timestamp="not-a-date", trace_id="ok-3"),  # timestamp hong -> sai schema
+            make_log(trace_id="ok-4"),
+        ]
+        r = client.post("/ingest/bulk", json={"logs": logs})
+>       assert r.status_code == 207
+E       assert 404 == 207
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+tests\test_bulk_ingest.py:67: AssertionError
+__________ test_bulk_persistence_failure_never_reported_as_accepted ___________
+
+client = <starlette.testclient.TestClient object at 0x0000016C28283610>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000016C283B5FC0>
+
+    def test_bulk_persistence_failure_never_reported_as_accepted(client, monkeypatch):
+        """Invariant quan trong nhat (xem README.md): KHONG BAO GIO bao accepted=true cho ban ghi
+        ma viec ghi (persistence) that bai thuc su. Day chinh la test bat duoc mutation o muc 4."""
+        logs = [make_log(trace_id=f"t{i}") for i in range(5)]
+        original_write = main.store.write_log
+    
+        def flaky_write(log_id, log):
+            if log["trace_id"] == "t2":
+                raise StorageError("simulated disk full")
+            return original_write(log_id, log)
+    
+        monkeypatch.setattr(main.store, "write_log", flaky_write)
+    
+        r = client.post("/ingest/bulk", json={"logs": logs})
+>       assert r.status_code == 207
+E       assert 404 == 207
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+tests\test_bulk_ingest.py:93: AssertionError
+________________________ test_bulk_rejects_empty_batch ________________________
+
+client = <starlette.testclient.TestClient object at 0x0000016C2839B970>
+
+    def test_bulk_rejects_empty_batch(client):
+        r = client.post("/ingest/bulk", json={"logs": []})
+>       assert r.status_code == 400
+E       assert 404 == 400
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+tests\test_bulk_ingest.py:113: AssertionError
+____________________ test_bulk_rejects_batch_over_max_size ____________________
+
+client = <starlette.testclient.TestClient object at 0x0000016C28282320>
+
+    def test_bulk_rejects_batch_over_max_size(client):
+        logs = [make_log(trace_id=f"t{i}") for i in range(MAX_BATCH_SIZE + 1)]
+        r = client.post("/ingest/bulk", json={"logs": logs})
+>       assert r.status_code == 400
+E       assert 404 == 400
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+tests\test_bulk_ingest.py:119: AssertionError
+___ test_property_valid_records_never_lost_regardless_of_batch_composition ____
+
+client = <starlette.testclient.TestClient object at 0x0000016C2839A080>
+
+    @given(items=st.lists(_tagged_item, min_size=1, max_size=25))
+>   @settings(
+        max_examples=50,
+        deadline=None,
+        # Hypothesis canh bao (dung, da tu bat duoc khi viet test nay - xem README.md
+        # muc "Flaky test review"): fixture `client` la function-scoped nen KHONG duoc
+        # tao lai giua cac vi du cua @given. O day an toan de bo qua canh bao vi trang
+        # thai thuc su quan trong (main.store) da duoc reset THU CONG o dong dau than ham;
+        # TestClient chi la wrapper HTTP khong mang trang thai nghiep vu.
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
+    )
+
+tests\test_bulk_ingest.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+client = <starlette.testclient.TestClient object at 0x0000016C2839A080>
+items = [('invalid', {'level': 'ERROR'})]
+
+    @given(items=st.lists(_tagged_item, min_size=1, max_size=25))
+    @settings(
+        max_examples=50,
+        deadline=None,
+        # Hypothesis canh bao (dung, da tu bat duoc khi viet test nay - xem README.md
+        # muc "Flaky test review"): fixture `client` la function-scoped nen KHONG duoc
+        # tao lai giua cac vi du cua @given. O day an toan de bo qua canh bao vi trang
+        # thai thuc su quan trong (main.store) da duoc reset THU CONG o dong dau than ham;
+        # TestClient chi la wrapper HTTP khong mang trang thai nghiep vu.
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
+    )
+    def test_property_valid_records_never_lost_regardless_of_batch_composition(client, items):
+        """Property can chung minh (dung thay vi liet ke tung truong hop cu the):
+        'Voi BAT KY to hop nao (so luong, thu tu) giua log hop le va log sai schema trong 1 batch,
+        so log hop le duoc luu lai dung bang so log hop le dua vao - khong hon, khong kem.'
+    
+        Day la dung property-based testing vi khong gian dau vao la moi hoan vi/to hop
+        hop le-vs-loi ma vi du don le khong bao quat het duoc.
+        """
+        main.store = InMemoryLogStore()  # Hypothesis goi lai than ham nhieu lan -> phai reset state moi vi du
+    
+        payload = {"logs": [item for _, item in items]}
+        expected_valid = sum(1 for kind, _ in items if kind == "valid")
+    
+        r = client.post("/ingest/bulk", json=payload)
+    
+>       assert r.status_code == 207
+E       assert 404 == 207
+E        +  where 404 = <Response [404 Not Found]>.status_code
+E       Failing test case: test_property_valid_records_never_lost_regardless_of_batch_composition(
+E           client=<starlette.testclient.TestClient object at 0x0000016C2839A080>,
+E           items=[('invalid', {'level': 'ERROR'})],
+E       )
+
+tests\test_bulk_ingest.py:198: AssertionError
+============================== warnings summary ===============================
+..\..\SE-Project\.venv\lib\site-packages\fastapi\testclient.py:1
+  D:\Nam_4\Software Technology\SE-Project\.venv\lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_bulk_ingest.py::test_bulk_accepts_all_valid_logs_and_they_are_searchable
+FAILED tests/test_bulk_ingest.py::test_bulk_mixed_batch_quarantines_invalid_without_losing_valid_records
+FAILED tests/test_bulk_ingest.py::test_bulk_persistence_failure_never_reported_as_accepted
+FAILED tests/test_bulk_ingest.py::test_bulk_rejects_empty_batch - assert 404 ...
+FAILED tests/test_bulk_ingest.py::test_bulk_rejects_batch_over_max_size - ass...
+FAILED tests/test_bulk_ingest.py::test_property_valid_records_never_lost_regardless_of_batch_composition
+=================== 6 failed, 1 passed, 1 warning in 3.59s ====================
