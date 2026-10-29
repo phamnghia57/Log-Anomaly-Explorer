@@ -16,8 +16,10 @@
 # "Deploy len Vercel".
 
 {$PUBLIC_ADDRESS} {
-	# GET /health, /search, /clusters, /clusters/{id} - Query & Incident API (Nghia)
-	@query path /health /search* /clusters*
+	# GET /health, /search, /clusters, /clusters/{id} - Query & Incident API (Nghia).
+	# /assistant* - AI Assistant (GET conversation, POST message), xem
+	# query-api/src/assistant/router.py.
+	@query path /health /search* /clusters* /assistant*
 	handle @query {
 		reverse_proxy query-api:8002
 	}
@@ -46,6 +48,6 @@
 	}
 
 	handle {
-		respond "Log Anomaly Explorer - xem /health, /search, /clusters, /clusters/{id}, /demo/*, /jaeger/*" 200
+		respond "Log Anomaly Explorer - xem /health, /search, /clusters, /clusters/{id}, /assistant/*, /demo/*, /jaeger/*" 200
 	}
 }
