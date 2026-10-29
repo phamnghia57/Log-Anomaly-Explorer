@@ -8,7 +8,7 @@ Nhận structured log từ demo-app, validate schema, ghi vào kho dữ liệu. 
 - [x] Index cho `StructuredLog` (theo [`log-schema.json`](../docs/architect/contracts/log-schema.json)): index `logs`, mapping tường minh (`src/storage.py` → `LOG_MAPPING`), tự tạo lúc khởi động
 - [x] Quarantine: index riêng `logs-quarantine` (`write_quarantine`), `POST /ingest` trả 400 theo api-contract
 - [x] Retention: `src/retention.py` chạy nền định kỳ (`RETENTION_INTERVAL_SECONDS`) hoặc cron `python -m src.retention`; số ngày lấy từ `RETENTION_DAYS`, **không hardcode**
-- [ ] Viết load test tầng ingestion trong `../load-tests/`
+- [x] Viết load test tầng ingestion trong `../load-tests/` — kết quả đo thật: xem [`../load-tests/README.md`](../load-tests/README.md) mục "Kết quả đo được"
 
 ## Hợp đồng đang tuân theo
 
