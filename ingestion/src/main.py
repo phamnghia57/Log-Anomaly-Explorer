@@ -78,6 +78,59 @@ def ingest(payload: dict = Body(...)):
     return {"accepted": True, "log_id": log_id}
 
 
+# VT-016: import hang loat. Gioi han batch de bao ve p95 (xem README.md "Test strategy" / NFR2).
+MAX_BULK_BATCH_SIZE = 500
+
+
+@app.post("/ingest/bulk", status_code=207)
+def ingest_bulk(payload: dict = Body(...)):
+    """Nhan nhieu structured log trong 1 request (xem api-contract.md muc "POST /ingest/bulk").
+
+    INVARIANT quan trong nhat (bat buoc giu khi sua code nay sau nay): mot ban ghi loi
+    (sai schema HOAC ghi/persist that bai) khong duoc lam mat cac ban ghi hop le khac trong
+    cung batch, va KHONG BAO GIO duoc bao accepted=true cho mot ban ghi ma persistence that bai
+    thuc su. Vi du doc verify dieu nay: ingestion/tests/test_bulk_ingest.py
+    ::test_bulk_persistence_failure_never_reported_as_accepted.
+    """
+    logs = payload.get("logs")
+    if not isinstance(logs, list) or len(logs) == 0:
+        return JSONResponse(status_code=400, content={"accepted": False, "reason": "empty_batch"})
+    if len(logs) > MAX_BULK_BATCH_SIZE:
+        return JSONResponse(
+            status_code=400,
+            content={"accepted": False, "reason": "batch_too_large", "max_batch_size": MAX_BULK_BATCH_SIZE},
+        )
+
+    results: list[dict] = []
+    accepted = quarantined = failed = 0
+    for index, log in enumerate(logs):
+        errors = validate_log(log) if isinstance(log, dict) else ["<root>: phai la object"]
+        if errors:
+            store.write_quarantine(log, errors)
+            results.append({"index": index, "status": "quarantined",
+                             "reason": "schema_validation_failed", "details": errors})
+            quarantined += 1
+            continue
+
+        log_id = str(uuid.uuid4())
+        try:
+            store.write_log(log_id, log)
+        except StorageError:
+            # KHONG duoc chuyen thanh "accepted" du da sinh log_id - day la invariant
+            # trung tam cua change request VT-016 (xem docstring ham nay).
+            results.append({"index": index, "status": "failed", "reason": "storage_unavailable"})
+            failed += 1
+            continue
+
+        results.append({"index": index, "status": "accepted", "log_id": log_id})
+        accepted += 1
+
+    return JSONResponse(
+        status_code=207,
+        content={"accepted": accepted, "quarantined": quarantined, "failed": failed, "results": results},
+    )
+
+
 def _parse_dt(value: str | None, name: str) -> str | None:
     if value is None:
         return None

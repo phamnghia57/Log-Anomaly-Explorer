@@ -51,7 +51,8 @@ Không có Docker: `STORAGE_BACKEND=memory uvicorn src.main:app --port 8000`.
 
 Test: `pip install -r requirements-dev.txt && pytest tests`
 
-Endpoint: `POST /ingest` (202 / 400 / 503), `GET /search` (`service`, `trace_id`, `q`, `from`, `to`, `limit`, `offset`; mặc định 24h gần nhất), `GET /health`.
+Endpoint: `POST /ingest` (202 / 400 / 503), `POST /ingest/bulk` (207, import hàng loạt — xem
+[VT-016](../docs/task/evidence/vt-016/README.md)), `GET /search` (`service`, `trace_id`, `q`, `from`, `to`, `limit`, `offset`; mặc định 24h gần nhất), `GET /health`.
 
 ```bash
 curl -X POST http://localhost:8000/ingest -H "Content-Type: application/json" -d '{
