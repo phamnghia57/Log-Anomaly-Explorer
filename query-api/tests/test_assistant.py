@@ -76,7 +76,10 @@ def _reset_store(admin_auth):
 
 
 def write(log_id: str, **over) -> None:
-    log = {"timestamp": "2026-10-29T00:00:00+00:00", "level": "ERROR", "service": "demo-web",
+    # Thoi diem TUONG DOI (khong co dinh): search_related_logs mac dinh chi
+    # tim 24h gan nhat, moc thoi gian co dinh se tu roi ra ngoai cua so khi
+    # thoi gian troi qua - cung bay da tranh o test_query_api.py::iso().
+    log = {"timestamp": datetime.now(timezone.utc).isoformat(), "level": "ERROR", "service": "demo-web",
            "trace_id": "t1", "span_id": "s1", "message": "Simulated failure in checkout"}
     log.update(over)
     main.store.write_log(log_id, log)
