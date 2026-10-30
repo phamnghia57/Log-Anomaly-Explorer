@@ -1,7 +1,12 @@
-"""Chay 1 luot chat voi AI Assistant: goi OpenAI (qua Langfuse de tu dong
-trace chi phi/do tre/token - xem README.md muc "AI Assistant"), cho phep AI
-tu goi tool de dieu tra them, lap lai toi da ASSISTANT_MAX_TOOL_ROUNDS vong
-truoc khi bat buoc dung (bao ve chi phi/do tre, tranh vong lap vo diem dung).
+"""Chay 1 luot chat voi AI Assistant: goi Azure OpenAI (qua Langfuse de tu
+dong trace chi phi/do tre/token - xem README.md muc "AI Assistant"), cho phep
+AI tu goi tool de dieu tra them, lap lai toi da ASSISTANT_MAX_TOOL_ROUNDS
+vong truoc khi bat buoc dung (bao ve chi phi/do tre, tranh vong lap vo diem
+dung).
+
+Dung Azure OpenAI thay vi OpenAI truc tiep: VM chay o vung Azure "East Asia"
+(Hong Kong) bi OpenAI chan theo IP - xem
+docs/architect/contracts/api-contract.md muc "AI Assistant".
 """
 
 from __future__ import annotations
@@ -10,7 +15,7 @@ import json
 import logging
 from datetime import datetime, timezone
 
-from langfuse.openai import OpenAI
+from langfuse.openai import AzureOpenAI
 
 from . import config
 from .tools import TOOL_SCHEMAS, ToolExecutor
@@ -82,8 +87,12 @@ def run_chat_turn(
     vong), tra ve DANH SACH message MOI can luu them (bao gom ca user_message
     dau tien) - khong bao gom `history` (goi lai da truyen vao).
     """
-    api_key = config.require_openai_api_key()
-    client = OpenAI(api_key=api_key)
+    api_key = config.require_azure_openai_api_key()
+    client = AzureOpenAI(
+        api_key=api_key,
+        azure_endpoint=config.azure_openai_endpoint(),
+        api_version=config.AZURE_OPENAI_API_VERSION,
+    )
     executor = ToolExecutor(store=store, cluster_store=cluster_store, cluster_id=cluster_id)
 
     new_messages: list[dict] = [
@@ -96,7 +105,7 @@ def run_chat_turn(
 
     for round_index in range(config.MAX_TOOL_ROUNDS):
         response = client.chat.completions.create(
-            model=config.OPENAI_MODEL,
+            model=config.AZURE_OPENAI_DEPLOYMENT,
             messages=openai_messages,
             tools=TOOL_SCHEMAS,
             max_tokens=config.MAX_OUTPUT_TOKENS,

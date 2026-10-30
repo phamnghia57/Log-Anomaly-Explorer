@@ -68,10 +68,11 @@ def post_message(cluster_id: str, payload: ChatRequest, request: Request):
     cluster = _get_cluster_or_404(cluster_store, cluster_id)
 
     try:
-        config.require_openai_api_key()
+        config.require_azure_openai_api_key()
     except ValueError:
         raise HTTPException(
-            status_code=503, detail="AI Assistant chua duoc cau hinh (thieu OPENAI_API_KEY)",
+            status_code=503,
+            detail="AI Assistant chua duoc cau hinh (thieu AZURE_OPENAI_API_KEY/AZURE_OPENAI_ENDPOINT)",
         ) from None
 
     store = request.app.state.store
