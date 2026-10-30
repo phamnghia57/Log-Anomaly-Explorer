@@ -68,6 +68,16 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length, mutation.isPending]);
 
+  // Loi that (khong phai tu nguoi dung bam Dung): tra lai noi dung da go,
+  // tranh nguoi dung phai go lai tu dau khi muon thu lai (vd. timeout voi
+  // cau hoi phuc tap - xem AZURE_OPENAI_TIMEOUT_SECONDS/ASSISTANT_MAX_TOOL_ROUNDS).
+  useEffect(() => {
+    if (mutation.isError && !isAbortError && pendingTextRef.current) {
+      setDraft(pendingTextRef.current);
+      pendingTextRef.current = "";
+    }
+  }, [mutation.isError, isAbortError]);
+
   const handleSend = () => {
     const text = draft.trim();
     if (!text || mutation.isPending) return;
@@ -131,9 +141,14 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
         )}
 
         {mutation.isError && !isAbortError && (
-          <p className="py-2 text-xs text-destructive">
-            {mutation.error instanceof Error ? mutation.error.message : "Có lỗi, thử lại."}
-          </p>
+          <div className="my-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+            <p className="font-medium">AI Assistant chưa trả lời được câu hỏi này.</p>
+            <p className="mt-0.5 text-destructive/80">
+              {mutation.error instanceof Error ? mutation.error.message : "Có lỗi, thử lại."}
+              {" "}— có thể do câu hỏi cần tra cứu nhiều, vượt quá thời gian chờ. Nội dung đã được
+              khôi phục vào ô nhập, thử hỏi ngắn gọn/cụ thể hơn rồi gửi lại.
+            </p>
+          </div>
         )}
 
         <div ref={bottomRef} />

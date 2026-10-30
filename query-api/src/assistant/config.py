@@ -45,6 +45,11 @@ AZURE_OPENAI_DEPLOYMENT = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-5-mini"
 # (vd. gpt-5-mini) co the suy luan rat lau, can chan tren de khong treo vo thoi
 # han; het han thi loi duoc bat o router.py (502), khong treo request mai mai.
 AZURE_OPENAI_TIMEOUT_SECONDS = _positive_int("AZURE_OPENAI_TIMEOUT_SECONDS", 60)
+# Muc do "suy nghi" cua model dong reasoning (minimal/low/medium/high - xem
+# Azure OpenAI reasoning models doc). prj2 chi can cau tra loi nhanh, chat
+# luong trung binh la du (du lieu la log demo tu sinh) - de "low" thay vi mac
+# dinh cua Azure (thuong la "medium"/"high") de giam do tre dang ke.
+ASSISTANT_REASONING_EFFORT = os.environ.get("ASSISTANT_REASONING_EFFORT", "low")
 CONVERSATIONS_INDEX = os.environ.get("ASSISTANT_CONVERSATIONS_INDEX", "assistant-conversations")
 # Gioi han so vong AI tu goi tool trong 1 luot chat - bao ve chi phi/do tre va
 # tranh vong lap tool-calling khong diem dung. De THAP (khong phai 5): du lieu

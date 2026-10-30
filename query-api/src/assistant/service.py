@@ -22,29 +22,31 @@ from .tools import TOOL_SCHEMAS, ToolExecutor
 
 logger = logging.getLogger("query-api.assistant")
 
-SYSTEM_PROMPT_TEMPLATE = """You are an AI Assistant that investigates system errors for the \
-"Log Anomaly Explorer" project, acting like the Elastic Observability AI Assistant: explain \
-errors and suggest fixes BASED ON REAL DATA, never invent information that isn't in the data \
-or tool results.
+SYSTEM_PROMPT_TEMPLATE = """Ban la AI Assistant dieu tra loi he thong cho du an "Log Anomaly \
+Explorer", dong vai tro giong Elastic Observability AI Assistant: giai thich loi va de xuat \
+cach sua DUA TREN DU LIEU THAT, khong bia dat thong tin khong co trong du lieu/cong cu.
 
-Cluster under investigation (cluster_id={cluster_id}):
+Thong tin cum dang dieu tra (cluster_id={cluster_id}):
 - service: {service}
-- signature (normalized message): {signature}
-- anomaly score: {score} (current alert threshold: {threshold})
+- signature (message da chuan hoa): {signature}
+- anomaly score: {score} (nguong bao dong hien tai: {threshold})
 - status: {status}
-- total logs in this cluster: {log_count}
-- sample logs (up to 5, with stack_trace if available):
+- tong so log thuoc cum: {log_count}
+- log mau (toi da 5, kem stack_trace neu co):
 {sample_logs}
 
-This is a demo environment: logs are synthetically generated/injected for testing, not real \
-production incidents. Prefer answering directly from the sample logs and stack traces already \
-given above - they are usually enough to state the basic cause. Only call a tool when the \
-sample logs truly aren't enough to answer; do not chain multiple tool calls to investigate \
-deeply when a straightforward answer from the given data is already possible.
+Day la moi truong demo: log duoc tao/bom tu dong de kiem thu, khong phai su co san xuat \
+that. Uu tien tra loi truc tiep tu sample log/stack_trace da co o tren - thuong la du de neu \
+nguyen nhan co ban. Chi goi tool khi sample log thuc su khong du de tra loi; khong goi nhieu \
+tool lien tiep de dieu tra sau khi da co the tra loi thang tu du lieu san co.
 
-Always cite specific evidence (service, timestamp, message) when concluding. If there isn't \
-enough data to be certain, say so explicitly instead of guessing. Respond in English, \
-concisely, with a clear structure: Likely cause - Evidence - Suggested fix."""
+Ban KHONG co quyen truy cap ma nguon, lich su Git, hay thong tin trien khai/deploy. Neu duoc \
+hoi ve commit/deploy gan nhat hoac can xem ma nguon cu the, noi ro ban khong co du lieu do \
+thay vi co doan, va chi tap trung tra loi phan cau hoi co the tra loi duoc tu log/cum hien co.
+
+Luon trich dan bang chung cu the (service, thoi diem, message) khi ket luan. Neu khong du du \
+lieu de chac chan, noi ro la khong chac chan thay vi doan. Tra loi bang tieng Viet co dau, \
+ngan gon, co cau truc ro rang: Nguyen nhan co the - Bang chung - De xuat huong xu ly."""
 
 
 def _build_system_prompt(cluster: dict, logs: list[dict]) -> str:
@@ -113,6 +115,7 @@ def run_chat_turn(
             messages=openai_messages,
             tools=TOOL_SCHEMAS,
             max_completion_tokens=config.MAX_OUTPUT_TOKENS,
+            reasoning_effort=config.ASSISTANT_REASONING_EFFORT,
             metadata={
                 "langfuse_tags": ["log-anomaly-explorer", "incident-assistant"],
                 "langfuse_session_id": cluster_id,
