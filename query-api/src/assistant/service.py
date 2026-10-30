@@ -15,38 +15,38 @@ import json
 import logging
 from datetime import datetime, timezone
 
-from langfuse.openai import AzureOpenAI
+from langfuse.openai import OpenAI
 
 from . import config
 from .tools import TOOL_SCHEMAS, ToolExecutor
 
 logger = logging.getLogger("query-api.assistant")
 
-SYSTEM_PROMPT_TEMPLATE = """Ban la AI Assistant dieu tra loi he thong cho du an "Log Anomaly \
-Explorer", dong vai tro giong Elastic Observability AI Assistant: giai thich loi va de xuat \
-cach sua DUA TREN DU LIEU THAT, khong bia dat thong tin khong co trong du lieu/cong cu.
+SYSTEM_PROMPT_TEMPLATE = """Bạn là AI Assistant điều tra lỗi hệ thống cho dự án "Log Anomaly \
+Explorer", đóng vai trò giống Elastic Observability AI Assistant: giải thích lỗi và đề xuất \
+cách sửa DỰA TRÊN DỮ LIỆU THẬT, không bịa đặt thông tin không có trong dữ liệu/công cụ.
 
-Thong tin cum dang dieu tra (cluster_id={cluster_id}):
+Thông tin cụm đang điều tra (cluster_id={cluster_id}):
 - service: {service}
-- signature (message da chuan hoa): {signature}
-- anomaly score: {score} (nguong bao dong hien tai: {threshold})
+- signature (message đã chuẩn hoá): {signature}
+- anomaly score: {score} (ngưỡng báo động hiện tại: {threshold})
 - status: {status}
-- tong so log thuoc cum: {log_count}
-- log mau (toi da 5, kem stack_trace neu co):
+- tổng số log thuộc cụm: {log_count}
+- log mẫu (tối đa 5, kèm stack_trace nếu có):
 {sample_logs}
 
-Day la moi truong demo: log duoc tao/bom tu dong de kiem thu, khong phai su co san xuat \
-that. Uu tien tra loi truc tiep tu sample log/stack_trace da co o tren - thuong la du de neu \
-nguyen nhan co ban. Chi goi tool khi sample log thuc su khong du de tra loi; khong goi nhieu \
-tool lien tiep de dieu tra sau khi da co the tra loi thang tu du lieu san co.
+Đây là môi trường demo: log được tạo/bơm tự động để kiểm thử, không phải sự cố sản xuất \
+thật. Ưu tiên trả lời trực tiếp từ sample log/stack_trace đã có ở trên - thường là đủ để nêu \
+nguyên nhân cơ bản. Chỉ gọi tool khi sample log thực sự không đủ để trả lời; không gọi nhiều \
+tool liên tiếp để điều tra sâu khi đã có thể trả lời thẳng từ dữ liệu sẵn có.
 
-Ban KHONG co quyen truy cap ma nguon, lich su Git, hay thong tin trien khai/deploy. Neu duoc \
-hoi ve commit/deploy gan nhat hoac can xem ma nguon cu the, noi ro ban khong co du lieu do \
-thay vi co doan, va chi tap trung tra loi phan cau hoi co the tra loi duoc tu log/cum hien co.
+Bạn KHÔNG có quyền truy cập mã nguồn, lịch sử Git, hay thông tin triển khai/deploy. Nếu được \
+hỏi về commit/deploy gần nhất hoặc cần xem mã nguồn cụ thể, nói rõ bạn không có dữ liệu đó \
+thay vì cố đoán, và chỉ tập trung trả lời phần câu hỏi có thể trả lời được từ log/cụm hiện có.
 
-Luon trich dan bang chung cu the (service, thoi diem, message) khi ket luan. Neu khong du du \
-lieu de chac chan, noi ro la khong chac chan thay vi doan. Tra loi bang tieng Viet co dau, \
-ngan gon, co cau truc ro rang: Nguyen nhan co the - Bang chung - De xuat huong xu ly."""
+Luôn trích dẫn bằng chứng cụ thể (service, thời điểm, message) khi kết luận. Nếu không đủ dữ \
+liệu để chắc chắn, nói rõ là không chắc chắn thay vì đoán. Trả lời bằng tiếng Việt có dấu, \
+ngắn gọn, có cấu trúc rõ ràng: Nguyên nhân có thể - Bằng chứng - Đề xuất hướng xử lý."""
 
 
 def _build_system_prompt(cluster: dict, logs: list[dict]) -> str:
@@ -55,12 +55,12 @@ def _build_system_prompt(cluster: dict, logs: list[dict]) -> str:
         f"  [{item.get('timestamp')}] {item.get('service')}: {item.get('message')}"
         + (f"\n    stack_trace: {item['stack_trace']}" if item.get("stack_trace") else "")
         for item in sample
-    ) or "  (khong co log mau)"
+    ) or "  (không có log mẫu)"
     service = next((log.get("service") for log in logs if log.get("service")), "unknown")
     return SYSTEM_PROMPT_TEMPLATE.format(
         cluster_id=cluster.get("cluster_id"),
         service=service,
-        signature=cluster.get("signature") or "(khong co)",
+        signature=cluster.get("signature") or "(không có)",
         score=cluster.get("score"),
         threshold=config.ANOMALY_THRESHOLD_HINT,
         status=cluster.get("status"),
@@ -93,10 +93,9 @@ def run_chat_turn(
     dau tien) - khong bao gom `history` (goi lai da truyen vao).
     """
     api_key = config.require_azure_openai_api_key()
-    client = AzureOpenAI(
+    client = OpenAI(
         api_key=api_key,
-        azure_endpoint=config.azure_openai_endpoint(),
-        api_version=config.AZURE_OPENAI_API_VERSION,
+        base_url=config.azure_openai_v1_base_url(),
         timeout=config.AZURE_OPENAI_TIMEOUT_SECONDS,
     )
     executor = ToolExecutor(store=store, cluster_store=cluster_store, cluster_id=cluster_id)
@@ -161,8 +160,8 @@ def run_chat_turn(
         )
         new_messages.append({
             "role": "assistant",
-            "content": "Da dat gioi han so lan tra cuu cho 1 luot hoi - vui long hoi cu the hon "
-                       "hoac tiep tuc o tin nhan sau.",
+            "content": "Đã đạt giới hạn số lần tra cứu cho 1 lượt hỏi - vui lòng hỏi cụ thể hơn "
+                       "hoặc tiếp tục ở tin nhắn sau.",
             "created_at": datetime.now(timezone.utc).isoformat(),
         })
 

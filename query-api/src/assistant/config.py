@@ -37,7 +37,18 @@ def azure_openai_endpoint() -> str:
     return os.environ.get("AZURE_OPENAI_ENDPOINT", "")
 
 
-AZURE_OPENAI_API_VERSION = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-10-21")
+def azure_openai_v1_base_url() -> str:
+    """URL goi API theo dung huong dan chinh thuc hien tai cua Azure cho model
+    dong reasoning (vd. gpt-5-mini): dung client OpenAI thuong (KHONG phai
+    AzureOpenAI) voi base_url tro vao "<endpoint>/openai/v1/", KHONG can
+    api-version - xem Microsoft Learn "Azure OpenAI reasoning models". Dung
+    api-version co dinh (vd. "2024-10-21", truoc khi GPT-5 ra mat) se khien
+    cac tham so moi nhu reasoning_effort bi AM THAM bo qua (khong loi, chi
+    khong co tac dung) - day la nguyen nhan reasoning_effort=low truoc do
+    khong lam response nhanh hon."""
+    return f"{azure_openai_endpoint().rstrip('/')}/openai/v1/"
+
+
 # Ten DEPLOYMENT (dat luc deploy model tren Azure OpenAI), khong phai ten model
 # goc - Azure dung ten deployment lam gia tri "model" khi goi chat completions.
 AZURE_OPENAI_DEPLOYMENT = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-5-mini")
