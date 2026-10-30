@@ -154,11 +154,14 @@ services:
       # Trace cho chinh query-api (query-api/src/telemetry.py) - de xem endpoint
       # nao cua UI cham tren Jaeger, khong chi co trace cua demo-app.
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://jaeger:4318}
-      # AI Assistant (query-api/src/assistant/) - de trong OPENAI_API_KEY thi
-      # /assistant/* tra 503, cac endpoint khac khong bi anh huong.
+      # AI Assistant (query-api/src/assistant/) - dung Azure OpenAI (xem
+      # .env.example), de trong AZURE_OPENAI_API_KEY thi /assistant/* tra
+      # 503, cac endpoint khac khong bi anh huong.
       ASSISTANT_CONVERSATIONS_INDEX: ${ASSISTANT_CONVERSATIONS_INDEX:-assistant-conversations}
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
+      AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-2024-10-21}
+      AZURE_OPENAI_DEPLOYMENT: ${AZURE_OPENAI_DEPLOYMENT:-gpt-5-mini}
       ASSISTANT_MAX_TOOL_ROUNDS: ${ASSISTANT_MAX_TOOL_ROUNDS:-5}
       ASSISTANT_MAX_OUTPUT_TOKENS: ${ASSISTANT_MAX_OUTPUT_TOKENS:-1200}
       LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}

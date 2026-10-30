@@ -145,7 +145,7 @@ describe("query-api client", () => {
     expect(body).toEqual(conversation);
   });
 
-  it("sendAssistantMessage: nem ApiError voi status 503 khi thieu OPENAI_API_KEY", async () => {
+  it("sendAssistantMessage: nem ApiError voi status 503 khi thieu AZURE_OPENAI_API_KEY", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response("AI Assistant chua duoc cau hinh", { status: 503 }),
     );

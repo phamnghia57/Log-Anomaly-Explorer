@@ -153,10 +153,17 @@ giá trị `null` khi cụm không có trace nào — bên nhận không cần x
 
 ## AI Assistant (Nghĩa) — dựa theo Elastic Observability AI Assistant, thu gọn cho tài nguyên hiện tại
 
-Hỗ trợ điều tra & đề xuất cách sửa cho một cụm lỗi — dùng OpenAI (model `gpt-4o-mini`) với
-function calling để AI tự tra cứu dữ liệu thật thay vì chỉ trả lời dựa trên 1 đoạn text tĩnh.
+Hỗ trợ điều tra & đề xuất cách sửa cho một cụm lỗi — dùng **Azure OpenAI** (model `gpt-5-mini`)
+với function calling để AI tự tra cứu dữ liệu thật thay vì chỉ trả lời dựa trên 1 đoạn text tĩnh.
 Hai endpoint dưới đây yêu cầu JWT admin giống các Query API routes; thiếu/sai/hết hạn token
-trả 401 trước khi đọc dữ liệu hoặc gọi OpenAI.
+trả 401 trước khi đọc dữ liệu hoặc gọi Azure OpenAI.
+
+**Vì sao Azure OpenAI, không dùng OpenAI trực tiếp**: VM chạy ở vùng Azure "East Asia" (Hong
+Kong). OpenAI chặn request theo IP của vùng này (`unsupported_country_region_territory`) — Hong
+Kong không nằm trong danh sách vùng được OpenAI hỗ trợ (cùng nhóm loại trừ với Trung Quốc đại
+lục), dù Việt Nam vẫn được hỗ trợ. Azure OpenAI không bị chặn theo cách này: resource được tạo ở
+một vùng Azure khác (không phải East Asia — vd. Southeast Asia/East US), hoàn toàn không liên
+quan tới vùng của VM gọi đến nó.
 
 ### `GET /assistant/clusters/{cluster_id}/conversation`
 Hội thoại điều tra hiện có của một cụm — 1 conversation/cụm (không phải nhiều thread). Trả
@@ -174,9 +181,9 @@ thoại đã lưu sau lượt này (không chỉ tin nhắn mới).
 - Request: `{ "message": "..." }`
 - Response 200: giống response của `GET` ở trên.
 - Response 404: `cluster_id` không tồn tại.
-- Response 503: thiếu `OPENAI_API_KEY`, hoặc kho hội thoại/cụm chưa sẵn sàng
-  (`STORAGE_BACKEND=memory`).
-- Response 502: lỗi gọi OpenAI (timeout, quota, …) — không làm sập service.
+- Response 503: thiếu `AZURE_OPENAI_API_KEY`/`AZURE_OPENAI_ENDPOINT`, hoặc kho hội thoại/cụm chưa
+  sẵn sàng (`STORAGE_BACKEND=memory`).
+- Response 502: lỗi gọi Azure OpenAI (timeout, quota, …) — không làm sập service.
 
 Dữ liệu lưu theo [`assistant-conversation-schema.json`](./assistant-conversation-schema.json),
 index `assistant-conversations` (env `ASSISTANT_CONVERSATIONS_INDEX`).
@@ -185,8 +192,9 @@ index `assistant-conversations` (env `ASSISTANT_CONVERSATIONS_INDEX`).
 (xu hướng score của cụm đang hỏi), `search_related_logs` (log khác liên quan, mặc định 24h gần
 nhất), `list_active_clusters` (cụm khác đang bất thường cùng lúc — kiểm tra lan sang service
 khác). Giới hạn `ASSISTANT_MAX_TOOL_ROUNDS` vòng gọi tool/lượt chat (mặc định 5) để bảo vệ chi
-phí OpenAI và độ trễ.
+phí Azure OpenAI và độ trễ.
 
 **Theo dõi chi phí/độ trễ**: qua Langfuse (`LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY`, miền
-`https://jp.cloud.langfuse.com`) — tự động, không cần đổi code gọi OpenAI (dùng wrapper
-`langfuse.openai`). Để trống 2 key thì assistant vẫn chạy bình thường, chỉ không gửi trace.
+`https://jp.cloud.langfuse.com`) — tự động, không cần đổi code gọi Azure OpenAI (dùng wrapper
+`langfuse.openai.AzureOpenAI`). Để trống 2 key thì assistant vẫn chạy bình thường, chỉ không gửi
+trace.

@@ -255,13 +255,18 @@ riêng), AI tự gọi lại **dữ liệu thật đã có sẵn** qua function 
 `get_cluster_history`, `search_related_logs`, `list_active_clusters`) trước khi trả lời — không
 bịa đặt dựa trên 1 đoạn text tĩnh.
 
-- **Model**: OpenAI `gpt-4o-mini` (đổi qua `OPENAI_MODEL`). **Bắt buộc** tự điền `OPENAI_API_KEY`
-  thật vào `.env` (không commit) — thiếu key thì `/assistant/*` trả `503`, các endpoint khác
-  **không** bị ảnh hưởng.
+- **Model**: `gpt-5-mini` qua **Azure OpenAI** (không dùng OpenAI trực tiếp — VM chạy ở vùng Azure
+  "East Asia"/Hong Kong, bị OpenAI chặn theo IP, xem `docs/architect/contracts/api-contract.md`
+  mục "AI Assistant"). Tầng "mini" cân bằng hiệu năng/chi phí cho chat có tool-calling (tầng
+  "nano" rẻ hơn nhưng không đủ ổn định cho việc tự gọi tool nhiều vòng). **Bắt buộc** tự điền
+  `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENT` thật vào `.env`
+  (không commit) — thiếu thì `/assistant/*` trả `503`, các endpoint khác **không** bị ảnh hưởng.
+  Resource Azure OpenAI tạo ở vùng khác (không phải East Asia) là đủ để né lỗi, không liên quan
+  vùng của VM gọi đến nó.
 - **Theo dõi chi phí/độ trễ/token**: qua [Langfuse](https://jp.cloud.langfuse.com) — tự động,
-  không cần đổi code gọi OpenAI (dùng `langfuse.openai.OpenAI`, drop-in thay `openai.OpenAI`).
-  Để trống `LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY` thì assistant vẫn chạy bình thường, chỉ
-  không gửi trace đi.
+  không cần đổi code gọi Azure OpenAI (dùng `langfuse.openai.AzureOpenAI`, drop-in thay
+  `openai.AzureOpenAI`). Để trống `LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY` thì assistant vẫn
+  chạy bình thường, chỉ không gửi trace đi.
 - **Lưu hội thoại**: 1 conversation/cụm, index `assistant-conversations` (xem
   [`assistant-conversation-schema.json`](../docs/architect/contracts/assistant-conversation-schema.json)).
   Mở lại Incident View vẫn thấy lại câu hỏi/trả lời cũ.

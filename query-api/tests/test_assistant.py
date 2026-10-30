@@ -76,7 +76,10 @@ def _reset_store(admin_auth):
 
 
 def write(log_id: str, **over) -> None:
-    log = {"timestamp": "2026-10-29T00:00:00+00:00", "level": "ERROR", "service": "demo-web",
+    # Thoi diem TUONG DOI (khong co dinh): search_related_logs mac dinh chi
+    # tim 24h gan nhat, moc thoi gian co dinh se tu roi ra ngoai cua so khi
+    # thoi gian troi qua - cung bay da tranh o test_query_api.py::iso().
+    log = {"timestamp": datetime.now(timezone.utc).isoformat(), "level": "ERROR", "service": "demo-web",
            "trace_id": "t1", "span_id": "s1", "message": "Simulated failure in checkout"}
     log.update(over)
     main.store.write_log(log_id, log)
@@ -107,8 +110,9 @@ def conversations():
 
 
 @pytest.fixture
-def openai_key(monkeypatch):
-    monkeypatch.setenv("OPENAI_API_KEY", "test-key-not-real")
+def azure_openai_env(monkeypatch):
+    monkeypatch.setenv("AZURE_OPENAI_API_KEY", "test-key-not-real")
+    monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "https://fake-resource.openai.azure.com/")
 
 
 @pytest.mark.parametrize("method,path", [
@@ -148,14 +152,16 @@ def fake_response(message):
 
 
 class FakeOpenAI:
-    """Thay the langfuse.openai.OpenAI trong test: tra ve lan luot cac
+    """Thay the langfuse.openai.AzureOpenAI trong test: tra ve lan luot cac
     response da chuan bi san, ghi lai moi lan goi de kiem tra messages/tools
     truyen vao dung."""
 
-    def __init__(self, responses, *, api_key=None):
+    def __init__(self, responses, *, api_key=None, azure_endpoint=None, api_version=None):
         self._responses = list(responses)
         self.calls: list[dict] = []
         self.api_key = api_key
+        self.azure_endpoint = azure_endpoint
+        self.api_version = api_version
         self.chat = SimpleNamespace(completions=SimpleNamespace(create=self._create))
 
     def _create(self, **kwargs):
@@ -168,12 +174,12 @@ class FakeOpenAI:
 def patch_openai(monkeypatch, responses):
     holder: dict[str, FakeOpenAI] = {}
 
-    def factory(*, api_key=None):
-        fake = FakeOpenAI(responses, api_key=api_key)
+    def factory(*, api_key=None, azure_endpoint=None, api_version=None):
+        fake = FakeOpenAI(responses, api_key=api_key, azure_endpoint=azure_endpoint, api_version=api_version)
         holder["instance"] = fake
         return fake
 
-    monkeypatch.setattr(assistant_service, "OpenAI", factory)
+    monkeypatch.setattr(assistant_service, "AzureOpenAI", factory)
     return holder
 
 
@@ -202,17 +208,17 @@ class TestGetConversation:
 # --------------------------------------------------------------------------- POST message
 
 class TestPostMessage:
-    def test_cum_khong_ton_tai_tra_404(self, clusters, conversations, openai_key):
+    def test_cum_khong_ton_tai_tra_404(self, clusters, conversations, azure_openai_env):
         resp = client.post("/assistant/clusters/khong-co/conversation/messages", json={"message": "hi"})
         assert resp.status_code == 404
 
     def test_thieu_openai_key_tra_503(self, clusters, conversations, monkeypatch):
-        monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+        monkeypatch.delenv("AZURE_OPENAI_API_KEY", raising=False)
         clusters.records = [record("c1")]
         resp = client.post("/assistant/clusters/c1/conversation/messages", json={"message": "hi"})
         assert resp.status_code == 503
 
-    def test_tra_loi_thang_khong_can_goi_tool(self, clusters, conversations, openai_key, monkeypatch):
+    def test_tra_loi_thang_khong_can_goi_tool(self, clusters, conversations, azure_openai_env, monkeypatch):
         clusters.records = [record("c1")]
         write("log-1", stack_trace="Traceback...")
         holder = patch_openai(monkeypatch, [
@@ -235,7 +241,7 @@ class TestPostMessage:
         assert "simulated failure in checkout" in sent_messages[0]["content"]
         assert "c1" in sent_messages[0]["content"]
 
-    def test_ai_goi_tool_truoc_khi_tra_loi(self, clusters, conversations, openai_key, monkeypatch):
+    def test_ai_goi_tool_truoc_khi_tra_loi(self, clusters, conversations, azure_openai_env, monkeypatch):
         clusters.records = [record("c1")]
         clusters.history = [{"cluster_id": "c1", "score": 1.0, "status": "normal",
                              "recorded_at": "2026-10-29T00:00:00+00:00"}]
@@ -258,7 +264,7 @@ class TestPostMessage:
         assert "recorded_at" in tool_msg["content"]  # ket qua that cua list_history, khong bia
         assert len(holder["instance"].calls) == 2  # goi OpenAI 2 vong: co tool roi khong con tool
 
-    def test_dat_gioi_han_vong_goi_tool(self, clusters, conversations, openai_key, monkeypatch):
+    def test_dat_gioi_han_vong_goi_tool(self, clusters, conversations, azure_openai_env, monkeypatch):
         monkeypatch.setattr(assistant_config, "MAX_TOOL_ROUNDS", 2)
         clusters.records = [record("c1")]
 
@@ -269,13 +275,13 @@ class TestPostMessage:
 
         calls = []
 
-        def factory(*, api_key=None):
+        def factory(*, api_key=None, azure_endpoint=None, api_version=None):
             fake = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(
                 create=lambda **kw: (calls.append(kw), always_tool_call())[1],
             )))
             return fake
 
-        monkeypatch.setattr(assistant_service, "OpenAI", factory)
+        monkeypatch.setattr(assistant_service, "AzureOpenAI", factory)
 
         resp = client.post("/assistant/clusters/c1/conversation/messages", json={"message": "?"})
 
@@ -285,7 +291,7 @@ class TestPostMessage:
         assert last_message["role"] == "assistant"
         assert "gioi han" in last_message["content"]
 
-    def test_hoi_tiep_gui_kem_lich_su_cu(self, clusters, conversations, openai_key, monkeypatch):
+    def test_hoi_tiep_gui_kem_lich_su_cu(self, clusters, conversations, azure_openai_env, monkeypatch):
         clusters.records = [record("c1")]
         conversations.docs["c1"] = {
             "cluster_id": "c1", "created_at": "2026-10-29T00:00:00+00:00",

@@ -22,9 +22,11 @@ opentelemetry-exporter-otlp>=1.24
 # specifier thi pip tu choi, bao "khong tim thay ban nao khop".
 opentelemetry-instrumentation-fastapi>=0.39b0
 
-# AI Assistant (xem src/assistant/, README.md muc "AI Assistant").
+# AI Assistant (xem src/assistant/, README.md muc "AI Assistant"). Dung Azure
+# OpenAI (class AzureOpenAI, cung package "openai") thay vi OpenAI truc tiep -
+# xem assistant/service.py dau file de biet ly do.
 openai>=1.50,<2
 # langfuse>=5 yeu cau Python >=3.11 (khop python:3.11-slim trong Dockerfile).
-# Dung wrapper "langfuse.openai" (drop-in thay the openai.OpenAI) de tu dong
-# trace chi phi/do tre/token, khong doi logic goi OpenAI.
+# Dung wrapper "langfuse.openai" (drop-in thay the openai.AzureOpenAI) de tu
+# dong trace chi phi/do tre/token, khong doi logic goi Azure OpenAI.
 langfuse>=5,<6
