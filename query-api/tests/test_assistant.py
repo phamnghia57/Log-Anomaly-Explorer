@@ -152,16 +152,15 @@ def fake_response(message):
 
 
 class FakeOpenAI:
-    """Thay the langfuse.openai.AzureOpenAI trong test: tra ve lan luot cac
-    response da chuan bi san, ghi lai moi lan goi de kiem tra messages/tools
-    truyen vao dung."""
+    """Thay the langfuse.openai.OpenAI (tro vao Azure qua base_url) trong
+    test: tra ve lan luot cac response da chuan bi san, ghi lai moi lan goi
+    de kiem tra messages/tools truyen vao dung."""
 
-    def __init__(self, responses, *, api_key=None, azure_endpoint=None, api_version=None, timeout=None):
+    def __init__(self, responses, *, api_key=None, base_url=None, timeout=None):
         self._responses = list(responses)
         self.calls: list[dict] = []
         self.api_key = api_key
-        self.azure_endpoint = azure_endpoint
-        self.api_version = api_version
+        self.base_url = base_url
         self.timeout = timeout
         self.chat = SimpleNamespace(completions=SimpleNamespace(create=self._create))
 
@@ -175,13 +174,12 @@ class FakeOpenAI:
 def patch_openai(monkeypatch, responses):
     holder: dict[str, FakeOpenAI] = {}
 
-    def factory(*, api_key=None, azure_endpoint=None, api_version=None, timeout=None):
-        fake = FakeOpenAI(responses, api_key=api_key, azure_endpoint=azure_endpoint,
-                           api_version=api_version, timeout=timeout)
+    def factory(*, api_key=None, base_url=None, timeout=None):
+        fake = FakeOpenAI(responses, api_key=api_key, base_url=base_url, timeout=timeout)
         holder["instance"] = fake
         return fake
 
-    monkeypatch.setattr(assistant_service, "AzureOpenAI", factory)
+    monkeypatch.setattr(assistant_service, "OpenAI", factory)
     return holder
 
 
@@ -277,13 +275,13 @@ class TestPostMessage:
 
         calls = []
 
-        def factory(*, api_key=None, azure_endpoint=None, api_version=None, timeout=None):
+        def factory(*, api_key=None, base_url=None, timeout=None):
             fake = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(
                 create=lambda **kw: (calls.append(kw), always_tool_call())[1],
             )))
             return fake
 
-        monkeypatch.setattr(assistant_service, "AzureOpenAI", factory)
+        monkeypatch.setattr(assistant_service, "OpenAI", factory)
 
         resp = client.post("/assistant/clusters/c1/conversation/messages", json={"message": "?"})
 
@@ -291,7 +289,7 @@ class TestPostMessage:
         assert len(calls) == 2  # dung dung MAX_TOOL_ROUNDS, khong lap vo han
         last_message = resp.json()["messages"][-1]
         assert last_message["role"] == "assistant"
-        assert "gioi han" in last_message["content"]
+        assert "giới hạn" in last_message["content"]
 
     def test_hoi_tiep_gui_kem_lich_su_cu(self, clusters, conversations, azure_openai_env, monkeypatch):
         clusters.records = [record("c1")]
