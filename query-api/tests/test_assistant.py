@@ -156,12 +156,13 @@ class FakeOpenAI:
     response da chuan bi san, ghi lai moi lan goi de kiem tra messages/tools
     truyen vao dung."""
 
-    def __init__(self, responses, *, api_key=None, azure_endpoint=None, api_version=None):
+    def __init__(self, responses, *, api_key=None, azure_endpoint=None, api_version=None, timeout=None):
         self._responses = list(responses)
         self.calls: list[dict] = []
         self.api_key = api_key
         self.azure_endpoint = azure_endpoint
         self.api_version = api_version
+        self.timeout = timeout
         self.chat = SimpleNamespace(completions=SimpleNamespace(create=self._create))
 
     def _create(self, **kwargs):
@@ -174,8 +175,9 @@ class FakeOpenAI:
 def patch_openai(monkeypatch, responses):
     holder: dict[str, FakeOpenAI] = {}
 
-    def factory(*, api_key=None, azure_endpoint=None, api_version=None):
-        fake = FakeOpenAI(responses, api_key=api_key, azure_endpoint=azure_endpoint, api_version=api_version)
+    def factory(*, api_key=None, azure_endpoint=None, api_version=None, timeout=None):
+        fake = FakeOpenAI(responses, api_key=api_key, azure_endpoint=azure_endpoint,
+                           api_version=api_version, timeout=timeout)
         holder["instance"] = fake
         return fake
 
@@ -275,7 +277,7 @@ class TestPostMessage:
 
         calls = []
 
-        def factory(*, api_key=None, azure_endpoint=None, api_version=None):
+        def factory(*, api_key=None, azure_endpoint=None, api_version=None, timeout=None):
             fake = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(
                 create=lambda **kw: (calls.append(kw), always_tool_call())[1],
             )))

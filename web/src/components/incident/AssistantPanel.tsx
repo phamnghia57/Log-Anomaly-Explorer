@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Bot, Loader2, Search, Send, User } from "lucide-react";
+import { Bot, Loader2, Search, Send, Square, User } from "lucide-react";
 import type { AssistantMessage } from "@/lib/api";
 import { useAssistantConversation, useSendAssistantMessage } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
@@ -55,8 +55,14 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
   const { data, isLoading, isError } = useAssistantConversation(clusterId);
   const mutation = useSendAssistantMessage(clusterId);
   const bottomRef = useRef<HTMLDivElement>(null);
+  // AbortController cho nut "Dung": cho phep nguoi dung huy cau hoi dang cho
+  // (vd. model dong reasoning suy luan qua lau) de hoi lai cau khac, thay vi
+  // phai cho den khi request cu tu ket thuc.
+  const controllerRef = useRef<AbortController | null>(null);
+  const pendingTextRef = useRef("");
 
   const messages = data?.messages ?? [];
+  const isAbortError = mutation.error instanceof DOMException && mutation.error.name === "AbortError";
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -66,7 +72,16 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
     const text = draft.trim();
     if (!text || mutation.isPending) return;
     setDraft("");
-    mutation.mutate(text);
+    pendingTextRef.current = text;
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    mutation.mutate({ message: text, signal: controller.signal });
+  };
+
+  const handleStop = () => {
+    controllerRef.current?.abort();
+    // Tra lai noi dung da go de nguoi dung khong phai nhap lai tu dau.
+    setDraft(pendingTextRef.current);
   };
 
   return (
@@ -103,13 +118,19 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
         </div>
 
         {mutation.isPending && (
-          <div className="flex items-center gap-2 py-2 text-xs text-muted-foreground">
-            <Loader2 className="h-3 w-3 animate-spin" />
-            AI đang điều tra, có thể mất vài giây…
+          <div className="flex items-center justify-between gap-2 py-2 text-xs text-muted-foreground">
+            <span className="flex items-center gap-2">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              AI đang điều tra… (có thể mất đến 1–2 phút với câu hỏi cần tra cứu thêm)
+            </span>
+            <Button variant="ghost" size="sm" className="h-6 gap-1 px-2 text-xs" onClick={handleStop}>
+              <Square className="h-3 w-3" />
+              Dừng
+            </Button>
           </div>
         )}
 
-        {mutation.isError && (
+        {mutation.isError && !isAbortError && (
           <p className="py-2 text-xs text-destructive">
             {mutation.error instanceof Error ? mutation.error.message : "Có lỗi, thử lại."}
           </p>

@@ -36,10 +36,11 @@ Cluster under investigation (cluster_id={cluster_id}):
 - sample logs (up to 5, with stack_trace if available):
 {sample_logs}
 
-Use a tool when you need more information before concluding: get_cluster_history (this \
-cluster's score trend over time), search_related_logs (other related logs), \
-list_active_clusters (other clusters currently anomalous at the same time - check for spread \
-to other services).
+This is a demo environment: logs are synthetically generated/injected for testing, not real \
+production incidents. Prefer answering directly from the sample logs and stack traces already \
+given above - they are usually enough to state the basic cause. Only call a tool when the \
+sample logs truly aren't enough to answer; do not chain multiple tool calls to investigate \
+deeply when a straightforward answer from the given data is already possible.
 
 Always cite specific evidence (service, timestamp, message) when concluding. If there isn't \
 enough data to be certain, say so explicitly instead of guessing. Respond in English, \
@@ -94,6 +95,7 @@ def run_chat_turn(
         api_key=api_key,
         azure_endpoint=config.azure_openai_endpoint(),
         api_version=config.AZURE_OPENAI_API_VERSION,
+        timeout=config.AZURE_OPENAI_TIMEOUT_SECONDS,
     )
     executor = ToolExecutor(store=store, cluster_store=cluster_store, cluster_id=cluster_id)
 

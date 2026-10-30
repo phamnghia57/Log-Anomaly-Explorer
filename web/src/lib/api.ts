@@ -222,10 +222,10 @@ export function getAssistantConversation(clusterId: string, signal?: AbortSignal
 }
 
 export function sendAssistantMessage(
-  clusterId: string, message: string,
+  clusterId: string, message: string, signal?: AbortSignal,
 ): Promise<AssistantConversation> {
   return queryJson<AssistantConversation>(
     `/assistant/clusters/${encodeURIComponent(clusterId)}/conversation/messages`,
-    undefined, undefined, { message },
+    undefined, signal, { message },
   );
 }
