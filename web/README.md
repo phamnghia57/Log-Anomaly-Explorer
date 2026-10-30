@@ -21,6 +21,8 @@ frontend (không có API route/BFF).
 
 ## Tính năng
 
+- **Đăng nhập admin** (`/login`) — form username/password, loading, lỗi đăng nhập/kết nối,
+  lưu phiên tập trung, quay lại trang đang mở sau đăng nhập và menu quản trị/đăng xuất.
 - **Dashboard** (`/`) — thống kê nhanh (tổng cụm, alerted, anomalous, score cao nhất), biểu đồ
   top 10 cụm theo anomaly score, danh sách cụm dạng card (lọc theo status).
 - **Incident View** (`/clusters/:id`) — chi tiết cụm (score, signature, first/last seen), biểu đồ
@@ -36,14 +38,68 @@ frontend (không có API route/BFF).
 
 ## Hợp đồng đang tuân theo
 
-Gọi trực tiếp các endpoint của `query-api`: `GET /search`, `GET /clusters`, `GET /clusters/{id}`
-(có phân trang `logs` qua `logs_limit`/`logs_offset`), `GET /clusters/{id}/history` (dữ liệu cho
-chart xu hướng) — xem
+Gọi `POST /auth/login` và các query endpoints `GET /search`, `GET /clusters`,
+`GET /clusters/{id}` (phân trang `logs` qua `logs_limit`/`logs_offset`) và
+`GET /clusters/{id}/history` (dữ liệu chart xu hướng) — xem
 [`../docs/architect/contracts/api-contract.md`](../docs/architect/contracts/api-contract.md).
 Types trong [`src/lib/api.ts`](src/lib/api.ts) khớp với
 [`log-schema.json`](../docs/architect/contracts/log-schema.json),
 [`cluster-record.schema.json`](../docs/architect/contracts/cluster-record.schema.json) và
 [`cluster-history-schema.json`](../docs/architect/contracts/cluster-history-schema.json).
+
+## Đăng nhập và lưu phiên
+
+Mở `/login`, nhập tài khoản admin đã seed trong OpenSearch (xem
+[`query-api/README.md`](../query-api/README.md)). Form gửi JSON tới
+`${VITE_API_BASE_URL}/auth/login`, dùng cùng cấu hình API base URL với dashboard.
+Backend cần `JWT_SECRET` riêng và admin đã seed; không có signup hoặc credentials mặc định.
+Gateway Caddy proxy `POST /auth/login` và OPTIONS cùng với query routes tới query-api.
+Dev có thể gọi trực tiếp cổng query-api. Xem quy trình đầy đủ tại
+[`docs/task/auth-deployment.md`](../docs/task/auth-deployment.md).
+
+Thành công: đọc `token`/`expires_at`, lưu qua `src/lib/auth.ts` (Zustand), xóa query cache cũ
+và quay lại trang được yêu cầu bằng React Router với `replace` (mặc định `/`). Guard bảo vệ
+`/`, `/search`, `/clusters/:id`: chưa đăng nhập thì chuyển tới `/login` trước khi render/tải
+dữ liệu. Return destination chỉ chấp nhận các route nội bộ đã biết, giữ query/hash; không
+chấp nhận URL bên ngoài hoặc `/login` để tránh open redirect và vòng lặp. Admin còn phiên
+hợp lệ mở `/login` sẽ được chuyển về trang được yêu cầu hoặc Dashboard.
+
+Client chung trong `src/lib/api.ts` gắn `Authorization: Bearer <token>` cho bốn Query API
+endpoints và hai Assistant endpoints được bảo vệ dưới `VITE_API_BASE_URL`. Login không gắn token; link Jaeger mở riêng,
+không đi qua client này. Query requests không dùng HTTP cache/cookie và không theo redirect
+HTTP để tránh gửi token sang route/service ngoài phạm vi. AbortSignal từ TanStack Query được
+truyền tới fetch. Lỗi mạng/5xx hiển thị như trước; không xóa phiên chỉ vì mất kết nối.
+
+Module auth chỉ lưu `{ token, expires_at }` dưới key `log-anomaly-explorer.auth` trong
+localStorage; không lưu username/password. Mật khẩu chỉ ở form/request trong bộ nhớ và được
+xóa khỏi form sau mỗi lần gửi. Response lỗi không được lưu; lỗi credentials hiển thị chung,
+không đưa chi tiết backend vào UI. Form có thông báo riêng cho lỗi mạng/dịch vụ không sẵn sàng.
+
+Phiên còn hạn được restore khi reload/mở lại trình duyệt. Hết `expires_at`, timer xóa phiên;
+guard/client kiểm tra hạn lại trước khi render/request và khi tab được focus lại. Hết hạn
+hoặc Query API trả 401: xóa phiên bị từ chối, hủy request, xóa query/mutation cache rồi
+chuyển tới `/login` với thông báo đăng nhập lại. Không retry 401; lỗi 401 tại form login
+chỉ hiển thị lỗi. Response của request cũ không xóa phiên mới hoặc trả dữ liệu vào cache mới.
+Thay đổi storage giữa các tab được đồng bộ và xóa cache khi thay phiên/đăng xuất. Nếu browser
+chặn storage/hết quota, phiên chỉ tồn tại trong memory đến khi reload. Dữ liệu persisted
+hỏng/hết hạn được loại bỏ.
+
+Menu **Quản trị viên** ở góc phải header có **Đăng xuất**: xóa session trong memory/storage,
+hủy request, xóa cả query và mutation cache, rồi chuyển tới `/login`. Nút Back không mở lại
+trang được bảo vệ khi đã đăng xuất. JWT đã phát vẫn có thể hợp lệ ở backend tới `exp`; đây
+là đăng xuất phía client, chưa có endpoint thu hồi token/refresh token.
+
+**Tradeoff bảo mật:** localStorage tiện restore phiên nhưng JavaScript cùng origin có thể
+đọc token; XSS có thể đánh cắp nó, và dữ liệu storage không phải nguồn đáng tin cậy. Đây là
+tradeoff của client Bearer JWT hiện tại. [OWASP khuyến cáo tránh lưu session identifier
+trong localStorage](https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html#local-storage);
+cookie HttpOnly giảm khả năng script đọc token nhưng cần thiết kế lại cơ chế cookie/BFF
+và CSRF ở backend. Chưa chuyển sang cơ chế đó trong bước này. Dùng HTTPS khi deploy,
+không log token/password, không đưa `JWT_SECRET` vào biến `VITE_*`. Expiry ở client chỉ hỗ trợ
+UX; backend vẫn phải kiểm tra signature/role/expiration cho mọi query được bảo vệ.
+
+Route guard chỉ hỗ trợ UX. Query API vẫn là nơi xác thực chữ ký, thuật toán, role admin và
+expiration cho mọi request được bảo vệ; sửa storage hoặc bỏ qua guard không cấp quyền dữ liệu.
 
 ## Tracing / Jaeger
 
@@ -65,7 +121,8 @@ thời gian xử lý thật của từng request và liên kết đúng 1-1 vớ
 
 Cần `query-api` đang chạy thật (xem `docker-compose.yml` ở gốc repo hoặc
 `query-api/README.md`), vì CORS trên `query-api` đã mở sẵn cho frontend gọi trực tiếp
-(`allow_origins=["*"]`, chỉ cho `GET` — xem `query-api/src/main.py`).
+(`allow_origins=["*"]`, cho `GET`, `POST` và preflight với header Authorization — xem
+`query-api/src/main.py`).
 
 ```bash
 # Từ thư mục gốc repo, dựng backend thật (gồm cả Jaeger):
@@ -73,7 +130,8 @@ docker compose up -d --build
 
 cd web
 npm install
-cp .env.example .env.local      # VITE_API_BASE_URL=http://localhost:9002 (mặc định)
+cp .env.example .env.local
+# Sua VITE_API_BASE_URL khop cong backend: Compose mac dinh http://localhost:8002.
 npm run dev                      # http://localhost:5173
 ```
 
@@ -81,10 +139,43 @@ npm run dev                      # http://localhost:5173
 
 ```bash
 npm run test          # unit test (Vitest + RTL) - mock fetch, khong can backend
-npm run test:e2e      # E2E (Playwright) - CAN backend that dang chay + it nhat 1 cluster co san
+npm run test:e2e -- e2e/login.spec.ts e2e/auth.spec.ts  # mock API, khong can backend
+npm run test:auth-integration -- --reporter=line     # HTTP API that, chi mock OpenSearch
+# Cac spec dashboard/incident can backend + cluster that va env
+# E2E_ADMIN_USERNAME/E2E_ADMIN_PASSWORD cua admin da seed (khong commit credentials).
+npm run test:e2e      # spec dung backend that duoc skip neu thieu credentials
 npm run lint           # oxlint
 npm run build          # type-check (tsc) + production build
 ```
+
+Tests kiểm tra thành công/return destination an toàn, guard, loading và chống gửi lặp,
+lỗi credentials/network, expiry, 401/không retry, Bearer đúng endpoint, abort request,
+logout/xóa cache và navigation. Browser tests chạy Chrome theo cấu hình có sẵn, kiểm tra
+cả mobile, reload và đăng xuất giữa hai tab. Build đã bao gồm typecheck
+(`tsc -b`); có thể chạy riêng `npx tsc -b`. Dùng Node tương thích engine trong package-lock
+(Vitest hiện hỗ trợ Node `^22.12`, `^24` hoặc `>=26`).
+
+`test:auth-integration` cần Python của venv Query API trên PATH (dependencies từ
+`query-api/requirements-dev.txt`) và Chrome theo cấu hình hiện có. Hai process riêng được
+Playwright quản lý tại `127.0.0.1:8023` (FastAPI) và `127.0.0.1:5174` (web), không dùng lại
+server đang chạy. Test tự sinh secret/credentials tạm, gọi seed CLI hai lần, đăng nhập qua
+UI thật, verify JWT, gọi cả bốn query endpoints, kiểm tra CORS, 401, expiry và logout. Không
+mock fetch/login ở browser; chỉ client OpenSearch trong API được mock. Trace/video tắt để
+không ghi request credentials. Test không tạo database/container hay dùng dữ liệu triển khai.
+Đây chưa phải evidence cho OpenSearch hoặc gateway HTTPS thật.
+
+Ví dụ PowerShell từ repo root sau khi đã cài dependencies:
+
+```powershell
+$env:PATH = "$PWD/query-api/.venv/Scripts;$env:PATH"
+Set-Location web
+npm run test:auth-integration -- --reporter=line
+```
+
+Trên Linux/macOS, activate venv Query API trước khi chạy npm. Các E2E cần backend thật dùng
+`E2E_ADMIN_USERNAME`/`E2E_ADMIN_PASSWORD` từ environment, không có credentials mặc định;
+tránh lưu/chia sẻ Playwright traces chứa tài khoản thật. Không cần hai biến này cho suite
+integration riêng vì nó tạo credentials tạm.
 
 ## Deploy lên Vercel
 

@@ -5,6 +5,11 @@
 // docs/task/deployment.md) la 2 noi deploy khac nhau, nen base URL luon cau
 // hinh qua bien moi truong (VITE_API_BASE_URL), khong hardcode.
 
+import {
+  clearSession, getSession, isAuthSession, SESSION_EXPIRED_MESSAGE, useAuthStore,
+  type AuthSession,
+} from "./auth";
+
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)
   ?.replace(/\/$/, "") || "http://localhost:9002";
 
@@ -64,26 +69,79 @@ export class ApiError extends Error {
   }
 }
 
-async function getJson<T>(path: string, params?: Record<string, string | undefined>): Promise<T> {
+export async function loginAdmin(username: string, password: string): Promise<AuthSession> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+      cache: "no-store",
+    });
+  } catch {
+    throw new ApiError("Không kết nối được máy chủ. Vui lòng kiểm tra kết nối và thử lại.", 0);
+  }
+  if (!res.ok) {
+    throw new ApiError(
+      res.status >= 500
+        ? "Dịch vụ đăng nhập tạm thời không khả dụng. Vui lòng thử lại."
+        : "Đăng nhập không thành công. Vui lòng kiểm tra tên đăng nhập và mật khẩu.",
+      res.status,
+    );
+  }
+  const body: unknown = await res.json().catch(() => null);
+  if (!isAuthSession(body)) {
+    throw new ApiError("Không thể hoàn tất đăng nhập. Vui lòng thử lại.", 502);
+  }
+  return { token: body.token, expires_at: body.expires_at };
+}
+
+// Client chi nhan cac duong dan Query API, khong nhan URL tuy y/URL Jaeger.
+type QueryPath = "/search" | "/clusters" | `/clusters/${string}`
+  | `/assistant/clusters/${string}/conversation` | `/assistant/clusters/${string}/conversation/messages`;
+
+async function queryJson<T>(path: QueryPath, params?: Record<string, string | undefined>, signal?: AbortSignal, payload?: Record<string, unknown>): Promise<T> {
   const url = new URL(`${API_BASE_URL}${path}`);
+  const base = new URL(API_BASE_URL);
+  // Khong cho dot-segment trong ID thoat ra endpoint/base path da cau hinh.
+  if (url.origin !== base.origin || url.pathname !== `${base.pathname.replace(/\/$/, "")}${path}`) {
+    throw new ApiError("Đường dẫn Query API không hợp lệ.", 400);
+  }
   for (const [key, value] of Object.entries(params ?? {})) {
     if (value) url.searchParams.set(key, value);
   }
 
   let res: Response;
+  const session = getSession();
+  if (!session) throw new ApiError(useAuthStore.getState().status === "expired"
+    ? SESSION_EXPIRED_MESSAGE : "Vui lòng đăng nhập để xem dữ liệu.", 401);
   try {
-    res = await fetch(url.toString());
-  } catch {
+    res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${session.token}`, ...(payload ? { "Content-Type": "application/json" } : {}) },
+      ...(payload ? { method: "POST", body: JSON.stringify(payload) } : {}),
+      signal, cache: "no-store", credentials: "omit", redirect: "error",
+    });
+  } catch (cause) {
+    if (signal?.aborted) throw cause;
     throw new ApiError(
       `Khong ket noi duoc toi API (${API_BASE_URL}). Kiem tra VITE_API_BASE_URL va backend co dang chay khong.`,
       0,
     );
   }
+  if (res.status === 401) {
+    // Response cua request cu khong duoc xoa session moi vua dang nhap.
+    if (getSession()?.token === session.token) clearSession("expired");
+    throw new ApiError(useAuthStore.getState().status === "expired"
+      ? SESSION_EXPIRED_MESSAGE : "Vui lòng đăng nhập để xem dữ liệu.", 401);
+  }
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new ApiError(body || `API tra ve loi ${res.status}`, res.status);
   }
-  return (await res.json()) as T;
+  const body = await res.json() as T;
+  // Request cu co the hoan tat sau logout/doi tai khoan; khong dua data do vao cache moi.
+  if (getSession()?.token !== session.token) throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
+  return body;
 }
 
 export interface SearchParams {
@@ -95,22 +153,22 @@ export interface SearchParams {
   [key: string]: string | undefined;
 }
 
-export function searchLogs(params: SearchParams) {
-  return getJson<{ total: number; results: StructuredLog[] }>("/search", params);
+export function searchLogs(params: SearchParams, signal?: AbortSignal) {
+  return queryJson<{ total: number; results: StructuredLog[] }>("/search", params, signal);
 }
 
-export function listClusters(params: { status?: ClusterStatus | ""; since?: string }) {
-  return getJson<{ total: number; clusters: ClusterRecord[] }>("/clusters", {
+export function listClusters(params: { status?: ClusterStatus | ""; since?: string }, signal?: AbortSignal) {
+  return queryJson<{ total: number; clusters: ClusterRecord[] }>("/clusters", {
     status: params.status || undefined,
     since: params.since,
-  });
+  }, signal);
 }
 
-export function getCluster(clusterId: string, params?: { logsLimit?: number; logsOffset?: number }) {
-  return getJson<ClusterRecord>(`/clusters/${encodeURIComponent(clusterId)}`, {
+export function getCluster(clusterId: string, params?: { logsLimit?: number; logsOffset?: number }, signal?: AbortSignal) {
+  return queryJson<ClusterRecord>(`/clusters/${encodeURIComponent(clusterId)}`, {
     logs_limit: params?.logsLimit?.toString(),
     logs_offset: params?.logsOffset?.toString(),
-  });
+  }, signal);
 }
 
 // ClusterHistoryPoint - docs/architect/contracts/cluster-history-schema.json
@@ -124,9 +182,10 @@ export interface ClusterHistoryPoint {
   recorded_at: string;
 }
 
-export function getClusterHistory(clusterId: string) {
-  return getJson<{ cluster_id: string; points: ClusterHistoryPoint[] }>(
+export function getClusterHistory(clusterId: string, signal?: AbortSignal) {
+  return queryJson<{ cluster_id: string; points: ClusterHistoryPoint[] }>(
     `/clusters/${encodeURIComponent(clusterId)}/history`,
+    undefined, signal,
   );
 }
 
@@ -155,32 +214,18 @@ export interface AssistantConversation {
   messages: AssistantMessage[];
 }
 
-export function getAssistantConversation(clusterId: string) {
-  return getJson<AssistantConversation>(
+export function getAssistantConversation(clusterId: string, signal?: AbortSignal) {
+  return queryJson<AssistantConversation>(
     `/assistant/clusters/${encodeURIComponent(clusterId)}/conversation`,
+    undefined, signal,
   );
 }
 
-export async function sendAssistantMessage(
+export function sendAssistantMessage(
   clusterId: string, message: string,
 ): Promise<AssistantConversation> {
-  const url = `${API_BASE_URL}/assistant/clusters/${encodeURIComponent(clusterId)}/conversation/messages`;
-  let res: Response;
-  try {
-    res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
-    });
-  } catch {
-    throw new ApiError(
-      `Khong ket noi duoc toi API (${API_BASE_URL}). Kiem tra VITE_API_BASE_URL va backend co dang chay khong.`,
-      0,
-    );
-  }
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new ApiError(body || `API tra ve loi ${res.status}`, res.status);
-  }
-  return (await res.json()) as AssistantConversation;
+  return queryJson<AssistantConversation>(
+    `/assistant/clusters/${encodeURIComponent(clusterId)}/conversation/messages`,
+    undefined, undefined, { message },
+  );
 }

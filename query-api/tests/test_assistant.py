@@ -67,9 +67,12 @@ def record(cluster_id="c1", **over):
 
 
 @pytest.fixture(autouse=True)
-def _reset_store():
+def _reset_store(admin_auth):
+    original_headers = client.headers.copy()
+    client.headers.update(admin_auth)
     main.store._logs.clear()
     yield
+    client.headers = original_headers
 
 
 def write(log_id: str, **over) -> None:
@@ -106,6 +109,20 @@ def conversations():
 @pytest.fixture
 def openai_key(monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "test-key-not-real")
+
+
+@pytest.mark.parametrize("method,path", [
+    ("GET", "/assistant/clusters/c1/conversation"),
+    ("POST", "/assistant/clusters/c1/conversation/messages"),
+])
+@pytest.mark.parametrize("authorization", [None, "Bearer invalid"])
+def test_assistant_requires_admin_before_storage_or_openai(method, path, authorization):
+    client.headers.pop("Authorization", None)
+    if authorization:
+        client.headers["Authorization"] = authorization
+    response = client.request(method, path, json={"message": "hi"} if method == "POST" else None)
+    assert response.status_code == 401
+    assert response.headers["www-authenticate"] == "Bearer"
 
 
 # --------------------------------------------------------------------------- fake OpenAI client

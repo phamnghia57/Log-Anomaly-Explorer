@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./authenticated-test";
 
 test("dashboard tai duoc va hien sidebar + tieu de", async ({ page }) => {
   await page.goto("/");

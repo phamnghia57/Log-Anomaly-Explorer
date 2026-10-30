@@ -1,8 +1,7 @@
 """Endpoint AI Assistant - dieu tra & de xuat cach sua cho 1 cum, giong vai
 tro cua Elastic Observability AI Assistant nhung thu gon cho du an nay (xem
-README.md muc "AI Assistant"). Chua gan auth (PR Auth cua Manh chua merge) -
-TODO: them `Depends(require_admin)` vao 2 route duoi day ngay khi merge, vi
-day la du lieu log/stack trace noi bo va goi API OpenAI co phi.
+README.md muc "AI Assistant"). JWT admin duoc gan cho ca router khi include
+trong main.py, vi day la du lieu log/stack trace noi bo va goi API OpenAI co phi.
 """
 
 from __future__ import annotations

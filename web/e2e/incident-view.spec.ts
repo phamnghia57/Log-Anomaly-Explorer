@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./authenticated-test";
 
 // Can it nhat 1 cluster da ton tai trong backend (xem playwright.config.ts).
 test("bam vao 1 cum -> xem Incident View -> bam trace -> nhay sang Search loc dung", async ({ page }) => {
