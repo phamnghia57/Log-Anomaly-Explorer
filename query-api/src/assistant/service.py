@@ -108,7 +108,7 @@ def run_chat_turn(
             model=config.AZURE_OPENAI_DEPLOYMENT,
             messages=openai_messages,
             tools=TOOL_SCHEMAS,
-            max_tokens=config.MAX_OUTPUT_TOKENS,
+            max_completion_tokens=config.MAX_OUTPUT_TOKENS,
             metadata={
                 "langfuse_tags": ["log-anomaly-explorer", "incident-assistant"],
                 "langfuse_session_id": cluster_id,
