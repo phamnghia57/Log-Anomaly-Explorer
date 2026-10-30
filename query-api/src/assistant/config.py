@@ -41,10 +41,17 @@ AZURE_OPENAI_API_VERSION = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-10-2
 # Ten DEPLOYMENT (dat luc deploy model tren Azure OpenAI), khong phai ten model
 # goc - Azure dung ten deployment lam gia tri "model" khi goi chat completions.
 AZURE_OPENAI_DEPLOYMENT = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-5-mini")
+# Gioi han thoi gian cho MOI lan goi Azure OpenAI (giay) - model dong reasoning
+# (vd. gpt-5-mini) co the suy luan rat lau, can chan tren de khong treo vo thoi
+# han; het han thi loi duoc bat o router.py (502), khong treo request mai mai.
+AZURE_OPENAI_TIMEOUT_SECONDS = _positive_int("AZURE_OPENAI_TIMEOUT_SECONDS", 60)
 CONVERSATIONS_INDEX = os.environ.get("ASSISTANT_CONVERSATIONS_INDEX", "assistant-conversations")
-# Gioi han so vong AI tu goi tool trong 1 luot chat - bao ve chi phi OpenAI va
-# do tre, tranh vong lap tool-calling khong diem dung.
-MAX_TOOL_ROUNDS = _positive_int("ASSISTANT_MAX_TOOL_ROUNDS", 5)
+# Gioi han so vong AI tu goi tool trong 1 luot chat - bao ve chi phi/do tre va
+# tranh vong lap tool-calling khong diem dung. De THAP (khong phai 5): du lieu
+# prj2 la log TU SINH/MO PHONG trong demo, AI chi can neu nguyen nhan co ban
+# tu sample log da co san trong system prompt, khong can dieu tra nhieu vong -
+# giam ca do tre va chi phi (dac biet voi model dong reasoning nhu gpt-5-mini).
+MAX_TOOL_ROUNDS = _positive_int("ASSISTANT_MAX_TOOL_ROUNDS", 2)
 MAX_OUTPUT_TOKENS = _positive_int("ASSISTANT_MAX_OUTPUT_TOKENS", 1200)
 # Chi dung de HIEN THI trong system prompt cho AI biet nguong dang ap dung,
 # khong doc truc tiep tu clustering (khac process, khac bien moi truong).

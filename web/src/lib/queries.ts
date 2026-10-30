@@ -57,7 +57,8 @@ export function useAssistantConversation(clusterId: string | undefined) {
 export function useSendAssistantMessage(clusterId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (message: string) => sendAssistantMessage(clusterId, message),
+    mutationFn: ({ message, signal }: { message: string; signal?: AbortSignal }) =>
+      sendAssistantMessage(clusterId, message, signal),
     // Ghi thang vao cache thay vi invalidate+refetch: response da la TOAN BO
     // hoi thoai moi nhat (xem api-contract.md), khong can goi lai GET.
     onSuccess: (conversation) => {
