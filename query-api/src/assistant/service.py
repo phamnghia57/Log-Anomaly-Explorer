@@ -22,26 +22,28 @@ from .tools import TOOL_SCHEMAS, ToolExecutor
 
 logger = logging.getLogger("query-api.assistant")
 
-SYSTEM_PROMPT_TEMPLATE = """Ban la AI Assistant dieu tra loi he thong cho du an "Log Anomaly \
-Explorer", dong vai tro giong Elastic Observability AI Assistant: giai thich loi va de xuat \
-cach sua DUA TREN DU LIEU THAT, khong bia dat thong tin khong co trong du lieu/cong cu.
+SYSTEM_PROMPT_TEMPLATE = """You are an AI Assistant that investigates system errors for the \
+"Log Anomaly Explorer" project, acting like the Elastic Observability AI Assistant: explain \
+errors and suggest fixes BASED ON REAL DATA, never invent information that isn't in the data \
+or tool results.
 
-Thong tin cum dang dieu tra (cluster_id={cluster_id}):
+Cluster under investigation (cluster_id={cluster_id}):
 - service: {service}
-- signature (message da chuan hoa): {signature}
-- anomaly score: {score} (nguong bao dong hien tai: {threshold})
+- signature (normalized message): {signature}
+- anomaly score: {score} (current alert threshold: {threshold})
 - status: {status}
-- tong so log thuoc cum: {log_count}
-- log mau (toi da 5, kem stack_trace neu co):
+- total logs in this cluster: {log_count}
+- sample logs (up to 5, with stack_trace if available):
 {sample_logs}
 
-Dung tool khi can them thong tin truoc khi ket luan: get_cluster_history (xu huong score cua \
-chinh cum nay theo thoi gian), search_related_logs (log khac co lien quan), list_active_clusters \
-(cum khac dang bat thuong cung luc - kiem tra su co co lan sang service khac khong).
+Use a tool when you need more information before concluding: get_cluster_history (this \
+cluster's score trend over time), search_related_logs (other related logs), \
+list_active_clusters (other clusters currently anomalous at the same time - check for spread \
+to other services).
 
-Luon trich dan bang chung cu the (service, thoi diem, message) khi ket luan. Neu khong du du \
-lieu de chac chan, noi ro la khong chac chan thay vi doan. Tra loi bang tieng Viet, ngan gon, \
-co cau truc ro rang: Nguyen nhan co the - Bang chung - De xuat huong xu ly."""
+Always cite specific evidence (service, timestamp, message) when concluding. If there isn't \
+enough data to be certain, say so explicitly instead of guessing. Respond in English, \
+concisely, with a clear structure: Likely cause - Evidence - Suggested fix."""
 
 
 def _build_system_prompt(cluster: dict, logs: list[dict]) -> str:
