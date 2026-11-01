@@ -87,6 +87,10 @@ describe("frontend authentication integration", () => {
     expect(screen.getByRole("button", { name: "Menu quản trị" })).toBeVisible();
     expect(screen.queryByRole("link", { name: "Đăng nhập" })).not.toBeInTheDocument();
 
+    expect(screen.getByRole("link", { name: "Runbook/Docs" })).toHaveAttribute(
+      "href", "https://github.com/phamnghia57/Log-Anomaly-Explorer/blob/main/docs/task/runbook.md",
+    );
+    expect(screen.getByRole("link", { name: "Runbook/Docs" })).toHaveAttribute("target", "_blank");
     await user.click(screen.getByRole("link", { name: "Search log" }));
     expect(await screen.findByRole("heading", { name: "Search log" })).toBeVisible();
     await user.click(screen.getByRole("link", { name: "Dashboard" }));
