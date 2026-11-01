@@ -76,6 +76,15 @@ class OpenSearchStore:
         except Exception as exc:
             raise StorageError(f"write_cluster failed: {exc}") from exc
 
+    def write_history(self, record, recorded_at):
+        """Append one score point for a cluster at the cycle's window_to."""
+        point = {name: record[name] for name in ("cluster_id", "score", "status")}
+        point["recorded_at"] = recorded_at
+        try:
+            self.client.index(index=self.history, body=point, refresh="wait_for")
+        except Exception as exc:
+            raise StorageError(f"write_history failed: {exc}") from exc
+
     def list_clusters(self, *, status=None, since=None, limit=100, offset=0):
         """Return records by last_seen descending; since includes that instant."""
         if limit < 1 or offset < 0:
@@ -106,10 +115,6 @@ class OpenSearchStore:
 
     def list_history(self, cluster_id, *, since=None, limit=100):
         """Return ClusterHistoryPoint[] for one cluster, oldest first (chart order).
-
-        Read-only side of cluster-history-schema.json. The write side (one point
-        appended per clustering cycle) is Nam's part, not implemented here yet -
-        an empty list is a valid result until that lands.
         """
         if limit < 1:
             raise ValueError("limit must be positive")

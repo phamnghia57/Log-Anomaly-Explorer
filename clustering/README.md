@@ -155,3 +155,20 @@ ML chỉ ghép khi similarity vượt ngưỡng và cách ứng viên thứ hai 
 type hoặc status/code mâu thuẫn trong message gốc sẽ chặn việc ghép thêm. Các nhóm
 đã được rule gộp sẵn vẫn giữ nguyên; ML không tách lại nhóm đó. Template mới không
 có message đại diện trong khoảng dữ liệu hiện tại sẽ giữ thành nhóm riêng.
+
+## History and alert digests
+
+Worker appends one `ClusterHistoryPoint` per cluster per cycle to `HISTORY_INDEX`
+(default `cluster-history`). `recorded_at` is the cycle's `window_to`, and status
+is saved after alert delivery. History is append-only; manually replaying the same
+window appends another point. The existing Dashboard sparkline appears after two points.
+
+Worker sends at most one webhook request per cycle. The payload includes `alerts`
+(array of the existing alert fields), `count`, `window_to`, `subject`, and `message`
+(plain text covering every pending cluster). Legacy top-level alert fields describe
+only the first cluster. Cooldown is still per cluster; failed delivery starts no cooldown.
+
+For the existing Make.com ? Gmail scenario, redetermine the webhook data structure
+with a digest sample, map Gmail Subject to `subject` and plain-text Body to `message`.
+Connect the webhook directly to one Gmail send action; do not iterate `alerts` into
+separate emails. This external scenario must be updated to display the entire digest.
