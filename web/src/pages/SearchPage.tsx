@@ -1,12 +1,18 @@
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { SearchParams } from "@/lib/api";
 import { useSearchLogs, useSearchAggregations } from "@/lib/queries";
-import { SearchAggregationsChart } from "@/components/SearchAggregationsChart";
 import { AppShell } from "@/components/layout/AppShell";
 import { SearchForm, type SearchFormValues } from "@/components/SearchForm";
 import { LogTable } from "@/components/LogTable";
 import { Skeleton } from "@/components/ui/skeleton";
+
+// Keep ECharts out of the initial bundle; load it only when search aggregates are displayed.
+const SearchAggregationsChart = lazy(() =>
+  import("@/components/SearchAggregationsChart").then((module) => ({
+    default: module.SearchAggregationsChart,
+  })),
+);
 
 export function SearchPage() {
   const [urlParams, setUrlParams] = useSearchParams();
@@ -59,7 +65,9 @@ export function SearchPage() {
         {aggregates && hasSearched && (
           <section className="rounded-xl border bg-card p-4" aria-label="Phân bố log theo thời gian">
             <h2 className="mb-3 text-sm font-semibold">Phân bố log theo thời gian</h2>
-            <SearchAggregationsChart data={aggregates} />
+            <Suspense fallback={<Skeleton className="h-[280px] w-full" />}>
+              <SearchAggregationsChart data={aggregates} />
+            </Suspense>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
                 <h3 className="mb-2 text-xs font-medium text-muted-foreground">Level (chọn để lọc)</h3>
