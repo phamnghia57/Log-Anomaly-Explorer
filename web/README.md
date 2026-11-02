@@ -230,3 +230,10 @@ curl -sI https://20-1-2-3.sslip.io/jaeger    # phai tra 200, khong phai 404
 
 Phần của checklist "Search, Incident view" (MVP bắt buộc, xem `README.md` gốc) — UI thật
 thay cho việc chỉ test qua Swagger UI/`curl`.
+
+## Search: histogram/facets và trang Trạng thái hệ thống (Minh)
+
+- Trang `/search` có filter level, histogram theo giờ và facet theo level/service; gọi `GET /search/aggregations` tại Query API. Đòi hỏi JWT admin giống `/search`.
+- Sidebar thêm `/system-status`, gọi `/health` của Query API, Ingestion và Demo App mỗi 15 giây; hiển thị xanh (ok) / đỏ (degraded hoặc unreachable).
+- Khi frontend truy cập bằng HTTPS (Vercel), các URL health **phải** qua Caddy gateway HTTPS, không gọi trực tiếp cổng Docker HTTP. Đặt `VITE_API_BASE_URL=https://<backend-domain>` và (tùy chọn) `VITE_INGESTION_HEALTH_URL=https://<backend-domain>/ingestion/health`, `VITE_DEMO_HEALTH_URL=https://<backend-domain>/demo/health`. Caddy chỉ mở health ingestion, không mở ingest public.
+- Khi dùng local query-api tại `:8002` nhưng gateway tại `:80`, cấu hình health URLs trong `web/.env.local` theo ví dụ `.env.example`.

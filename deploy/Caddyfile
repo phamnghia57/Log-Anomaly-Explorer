@@ -31,6 +31,22 @@
 		reverse_proxy query-api:8002
 	}
 
+	# Chi expose health cua ingestion, khong expose /ingest ra internet.
+	@ingestion_health path /ingestion/health
+	handle @ingestion_health {
+		uri strip_prefix /ingestion
+		header Access-Control-Allow-Origin "*"
+		reverse_proxy ingestion:8000
+	}
+
+	# Health demo co CORS de trang web (Vercel) hien thi trang thai.
+	@demo_health path /demo/health
+	handle @demo_health {
+		uri strip_prefix /demo
+		header Access-Control-Allow-Origin "*"
+		reverse_proxy demo-app:8001
+	}
+
 	# /demo/* -> Demo App (Manh), vd. /demo/simulate-error - tien goi tu xa de
 	# tao du lieu demo ma khong can SSH vao VM.
 	handle_path /demo/* {

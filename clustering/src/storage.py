@@ -10,7 +10,7 @@ class OpenSearchStore:
         if not isinstance(self.log_store, OpenSearchLogStore):
             raise ValueError("Clustering requires STORAGE_BACKEND=opensearch")
         self.client = self.log_store.client
-        self.logs = self.log_store.log_index
+        self.logs = self.log_store.read_indices
         self.clusters = os.getenv("CLUSTER_INDEX", "clusters")
         self.history = os.getenv("HISTORY_INDEX", "cluster-history")
 
@@ -46,7 +46,8 @@ class OpenSearchStore:
     def read_logs(self, start, end):
         scroll_id = None
         try:
-            page = self.client.search(index=self.logs, scroll="2m", body={
+            page = self.client.search(index=self.logs, scroll="2m",
+                                      ignore_unavailable=True, allow_no_indices=True, body={
                 "size": 1000, "sort": ["_doc"], "query": {"bool": {"filter": [
                     {"range": {"timestamp": {"gte": start, "lt": end}}},
                     {"terms": {"level": ["ERROR", "FATAL"]}},

@@ -98,7 +98,7 @@ export async function loginAdmin(username: string, password: string): Promise<Au
 }
 
 // Client chi nhan cac duong dan Query API, khong nhan URL tuy y/URL Jaeger.
-type QueryPath = "/search" | "/clusters" | `/clusters/${string}`
+type QueryPath = "/search" | "/search/aggregations" | "/clusters" | `/clusters/${string}`
   | `/assistant/clusters/${string}/conversation` | `/assistant/clusters/${string}/conversation/messages`;
 
 async function queryJson<T>(path: QueryPath, params?: Record<string, string | undefined>, signal?: AbortSignal, payload?: Record<string, unknown>): Promise<T> {
@@ -150,12 +150,46 @@ export interface SearchParams {
   to?: string;
   service?: string;
   trace_id?: string;
+  level?: LogLevel | "";
   q?: string;
   [key: string]: string | undefined;
 }
 
 export function searchLogs(params: SearchParams, signal?: AbortSignal) {
   return queryJson<{ total: number; results: StructuredLog[] }>("/search", params, signal);
+}
+
+export interface SearchAggregations {
+  histogram: Array<{ time: string; count: number }>;
+  levels: Array<{ key: LogLevel; count: number }>;
+  services: Array<{ key: string; count: number }>;
+}
+
+export function searchAggregations(params: SearchParams, signal?: AbortSignal) {
+  return queryJson<SearchAggregations>("/search/aggregations", params, signal);
+}
+
+export type ServiceHealth = { name: string; ok: boolean; status: string };
+
+// Cac service co /health rieng. Khi deploy Vercel, health URL can tro ve
+// Caddy gateway HTTPS (xem deploy/Caddyfile), khong truy cap Docker host noi bo.
+export const HEALTH_ENDPOINTS = [
+  { name: "Query API", url: `${API_BASE_URL}/health` },
+  { name: "Ingestion", url: import.meta.env.VITE_INGESTION_HEALTH_URL || `${API_BASE_URL}/ingestion/health` },
+  { name: "Demo App", url: import.meta.env.VITE_DEMO_HEALTH_URL || `${API_BASE_URL}/demo/health` },
+];
+
+export async function getSystemHealth(signal?: AbortSignal): Promise<ServiceHealth[]> {
+  return Promise.all(HEALTH_ENDPOINTS.map(async ({ name, url }) => {
+    try {
+      const response = await fetch(url, { signal, cache: "no-store" });
+      if (!response.ok) return { name, ok: false, status: `HTTP ${response.status}` };
+      const body = await response.json() as { status?: string };
+      return { name, ok: body.status === "ok", status: body.status ?? "unknown" };
+    } catch {
+      return { name, ok: false, status: "unreachable" };
+    }
+  }));
 }
 
 export function listClusters(params: { status?: ClusterStatus | ""; since?: string }, signal?: AbortSignal) {
