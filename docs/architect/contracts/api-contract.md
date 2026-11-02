@@ -5,6 +5,8 @@ Hợp đồng giữa tầng dữ liệu (ingestion, clustering) và query-api (N
 > **Bổ sung (đợt nâng cấp 2026-10-24)**: thêm `GET /clusters/{cluster_id}/history` (xu hướng
 > anomaly score) và mục "Auth (dự kiến)" ở cuối file — không đổi/không đụng bất kỳ phần nào đã
 > đóng băng phía trên.
+>
+> **Bổ sung (VT-016, 2026-10-29)**: thêm `POST /ingest/bulk` — không đổi `POST /ingest` hiện có.
 
 ## Ingestion Service (Minh)
 
@@ -17,6 +19,32 @@ Nhận một structured log, validate theo [`log-schema.json`](./log-schema.json
   ```json
   { "accepted": false, "reason": "schema_validation_failed", "details": "..." }
   ```
+
+### `POST /ingest/bulk`
+Nhận nhiều structured log trong 1 request — import hàng loạt (VT-016). Mỗi phần tử validate
+**độc lập** theo `log-schema.json`, y hệt `POST /ingest`.
+
+- **Request body**: `{ "logs": [ <StructuredLog>, ... ] }` — tối thiểu 1, tối đa 500 phần tử
+  (bảo vệ ngân sách p95; batch lớn hơn nên chia nhỏ ở phía gọi).
+- **Response 207** (Multi-Status — kết quả hỗn hợp theo từng phần tử):
+  ```json
+  {
+    "accepted": 3, "quarantined": 1, "failed": 0,
+    "results": [
+      { "index": 0, "status": "accepted", "log_id": "..." },
+      { "index": 1, "status": "quarantined", "reason": "schema_validation_failed", "details": ["..."] },
+      { "index": 2, "status": "failed", "reason": "storage_unavailable" }
+    ]
+  }
+  ```
+- **Response 400**: `{ "accepted": false, "reason": "empty_batch" }` hoặc
+  `{ "accepted": false, "reason": "batch_too_large", "max_batch_size": 500 }` — từ chối **cả
+  batch**, không ghi một phần.
+
+**Invariant bắt buộc**: một phần tử lỗi (sai schema hoặc ghi thất bại) không được làm mất các
+phần tử hợp lệ khác trong cùng batch; một phần tử **không bao giờ** được báo `"status": "accepted"`
+nếu việc ghi (persist) của chính nó thất bại thật. Xem
+`ingestion/tests/test_bulk_ingest.py::test_bulk_persistence_failure_never_reported_as_accepted`.
 
 ## Query & Incident API (Nghĩa)
 

@@ -1,0 +1,35 @@
+============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-9.1.1, pluggy-1.6.0 -- D:\Nam_4\Software Technology\SE-Project\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: D:\Nam_4\Software Technology\Log-Anomaly-Explorer\ingestion
+plugins: anyio-4.15.1, hypothesis-6.168.5, locust-2.46.0, cov-7.1.0
+collecting ... collected 19 items
+
+tests/test_bulk_ingest.py::test_bulk_accepts_all_valid_logs_and_they_are_searchable PASSED [  5%]
+tests/test_bulk_ingest.py::test_bulk_mixed_batch_quarantines_invalid_without_losing_valid_records PASSED [ 10%]
+tests/test_bulk_ingest.py::test_bulk_persistence_failure_never_reported_as_accepted PASSED [ 15%]
+tests/test_bulk_ingest.py::test_bulk_rejects_empty_batch PASSED          [ 21%]
+tests/test_bulk_ingest.py::test_bulk_rejects_batch_over_max_size PASSED  [ 26%]
+tests/test_bulk_ingest.py::test_single_ingest_unaffected_by_bulk_feature PASSED [ 31%]
+tests/test_bulk_ingest.py::test_property_valid_records_never_lost_regardless_of_batch_composition PASSED [ 36%]
+tests/test_ingestion.py::test_ingest_valid_returns_202 PASSED            [ 42%]
+tests/test_ingestion.py::test_ingest_invalid_returns_400_and_quarantines PASSED [ 47%]
+tests/test_ingestion.py::test_bad_timestamp_and_extra_field_rejected PASSED [ 52%]
+tests/test_ingestion.py::test_search_filters_and_default_window PASSED   [ 57%]
+tests/test_ingestion.py::test_search_pagination_total_not_truncated PASSED [ 63%]
+tests/test_ingestion.py::test_storage_error_returns_503 PASSED           [ 68%]
+tests/test_ingestion.py::test_retention_deletes_old PASSED               [ 73%]
+tests/test_ingestion.py::test_get_logs_by_ids PASSED                     [ 78%]
+tests/test_ingestion.py::test_inmemory_log_id_attached_on_read_not_on_write PASSED [ 84%]
+tests/test_ingestion.py::test_validator_ok PASSED                        [ 89%]
+tests/test_ingestion.py::test_opensearch_store_requests PASSED           [ 94%]
+tests/test_ingestion.py::test_opensearch_errors_wrapped PASSED           [100%]
+
+============================== warnings summary ===============================
+..\..\SE-Project\.venv\lib\site-packages\fastapi\testclient.py:1
+  D:\Nam_4\Software Technology\SE-Project\.venv\lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 19 passed, 1 warning in 1.03s ========================
