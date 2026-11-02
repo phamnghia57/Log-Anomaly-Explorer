@@ -5,6 +5,7 @@ import { useSearchLogs } from "@/lib/queries";
 import { AppShell } from "@/components/layout/AppShell";
 import { SearchForm, type SearchFormValues } from "@/components/SearchForm";
 import { LogTable } from "@/components/LogTable";
+import { SearchFacets } from "@/components/SearchFacets";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function SearchPage() {
@@ -37,7 +38,8 @@ export function SearchPage() {
               tren URL doi (vd. bam trace trong ket qua search ngay tren trang nay) -
               react-hook-form chi ap dung defaultValues luc mount, khong tu dong
               cap nhat khi props doi neu khong co key. */}
-          <SearchForm key={traceIdFromUrl ?? "empty"} defaultValues={{ trace_id: traceIdFromUrl }} onSubmit={runSearch} />
+          <SearchForm key={`${traceIdFromUrl ?? "empty"}-${params.level ?? ""}-${params.service ?? ""}`}
+            defaultValues={{ ...params, trace_id: traceIdFromUrl ?? params.trace_id }} onSubmit={runSearch} />
         </div>
 
         {isError && (
@@ -57,6 +59,11 @@ export function SearchPage() {
         {!isFetching && data && (
           <>
             <p className="text-xs text-muted-foreground">{data.total} kết quả</p>
+            {data.facets && (
+              <SearchFacets facets={data.facets} selectedLevel={params.level} selectedService={params.service}
+                onLevel={(value) => setParams((previous) => ({ ...previous, level: value }))}
+                onService={(value) => setParams((previous) => ({ ...previous, service: value }))} />
+            )}
             <LogTable logs={data.results} onTraceClick={(traceId) => setUrlParams({ trace_id: traceId })} />
           </>
         )}

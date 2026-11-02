@@ -10,7 +10,8 @@ bo sung, khong doi chu ky cua phuong thuc cu.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from collections import Counter
 from typing import Any
 
 
@@ -23,6 +24,15 @@ class LogStore:
 
     def write_log(self, log_id: str, log: dict) -> None:
         raise NotImplementedError
+
+    def write_logs(self, entries: list[tuple[str, dict]]) -> None:
+        """Batch write; implementations may perform partial writes on backend failure."""
+        for log_id, log in entries:
+            self.write_log(log_id, log)
+
+    def search_with_facets(self, **filters: Any) -> tuple[list[dict], int, dict]:
+        results, total = self.search_with_total(**filters)
+        return results, total, {"timeline": [], "levels": [], "services": []}
 
     def write_quarantine(self, log: dict, errors: list[str]) -> None:
         """Log sai schema - luu rieng, KHONG vao index chinh (xem docs/architect/contracts/api-contract.md)."""
@@ -48,7 +58,7 @@ class LogStore:
         raise NotImplementedError
 
     def delete_older_than(self, cutoff_iso: str) -> int:
-        """Dung boi retention job (xem retention.py). Tra ve so log da xoa."""
+        """Retention: daily index mode returns number of dropped indices; memory returns logs."""
         raise NotImplementedError
 
     def ping(self) -> bool:
@@ -105,12 +115,38 @@ def _iso_utc_now() -> str:
 class OpenSearchLogStore(LogStore):
     def __init__(self, client: Any, *, log_index: str = "logs",
                  quarantine_index: str = "logs-quarantine",
-                 shards: int = 1, replicas: int = 0) -> None:
+                 shards: int = 1, replicas: int = 0,
+                 daily_index: bool = True) -> None:
         self.client = client
         self.log_index = log_index
         self.quarantine_index = quarantine_index
         self.shards = shards
         self.replicas = replicas
+        self.daily_index = daily_index
+
+    @property
+    def read_index(self) -> str:
+        # Include the legacy index for read-only transition. Never match quarantine.
+        return f"{self.log_index},{self.log_index}-????.??.??" if self.daily_index else self.log_index
+
+    def _daily_index(self, timestamp: str) -> str:
+        try:
+            stamp = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+            if stamp.tzinfo is None:
+                raise ValueError("timestamp without timezone")
+            day = stamp.astimezone(timezone.utc).strftime("%Y.%m.%d")
+        except (TypeError, AttributeError, ValueError) as exc:
+            raise StorageError("invalid timestamp for daily index") from exc
+        return f"{self.log_index}-{day}"
+
+    def _ensure_index(self, name: str, mapping: dict) -> None:
+        try:
+            if not self.client.indices.exists(index=name):
+                self.client.indices.create(index=name, body={"settings": self._settings(),
+                                                             "mappings": mapping})
+        except Exception as exc:  # noqa: BLE001
+            if "resource_already_exists_exception" not in str(exc):
+                raise StorageError(f"cannot prepare index {name}: {exc}") from exc
 
     # -- khoi tao
     @classmethod
@@ -135,23 +171,17 @@ class OpenSearchLogStore(LogStore):
             quarantine_index=config.QUARANTINE_INDEX,
             shards=config.NUMBER_OF_SHARDS,
             replicas=config.NUMBER_OF_REPLICAS,
+            daily_index=config.LOG_INDEX_DAILY,
         )
 
     def _settings(self) -> dict:
         return {"index": {"number_of_shards": self.shards, "number_of_replicas": self.replicas}}
 
     def ensure_ready(self) -> None:
-        for name, mapping in ((self.log_index, LOG_MAPPING), (self.quarantine_index, QUARANTINE_MAPPING)):
-            try:
-                if not self.client.indices.exists(index=name):
-                    self.client.indices.create(
-                        index=name, body={"settings": self._settings(), "mappings": mapping}
-                    )
-            except Exception as exc:  # noqa: BLE001
-                # Race giua 2 worker cung tao index -> bo qua neu da ton tai
-                if "resource_already_exists_exception" in str(exc):
-                    continue
-                raise StorageError(f"cannot prepare index {name}: {exc}") from exc
+        # Create the current UTC day on startup; late-arriving days are created on write.
+        today = self._daily_index(_iso_utc_now()) if self.daily_index else self.log_index
+        self._ensure_index(today, LOG_MAPPING)
+        self._ensure_index(self.quarantine_index, QUARANTINE_MAPPING)
 
     def ping(self) -> bool:
         try:
@@ -161,11 +191,37 @@ class OpenSearchLogStore(LogStore):
 
     # -- ghi
     def write_log(self, log_id: str, log: dict) -> None:
+        target = self._daily_index(log["timestamp"]) if self.daily_index else self.log_index
+        if self.daily_index:
+            self._ensure_index(target, LOG_MAPPING)
         try:
-            # op_type=index: cung log_id thi ghi de -> idempotent khi client retry
-            self.client.index(index=self.log_index, id=log_id, body=log)
+            # same _id within same index => safe overwrite after keyed retry
+            self.client.index(index=target, id=log_id, body=log)
         except Exception as exc:  # noqa: BLE001
             raise StorageError(f"write_log failed: {exc}") from exc
+
+    def write_logs(self, entries: list[tuple[str, dict]]) -> None:
+        if not entries:
+            return
+        from opensearchpy.helpers import bulk
+
+        targets = {self._daily_index(log["timestamp"]) if self.daily_index else self.log_index
+                   for _, log in entries}
+        for target in targets:
+            self._ensure_index(target, LOG_MAPPING)
+        actions = ({"_op_type": "index", "_index":
+                    self._daily_index(log["timestamp"]) if self.daily_index else self.log_index,
+                    "_id": log_id, "_source": log} for log_id, log in entries)
+        try:
+            # Helpers.bulk sends actual _bulk requests; unlike N per-document calls.
+            success, errors = bulk(self.client, actions, raise_on_error=False,
+                                   raise_on_exception=True, request_timeout=30)
+            if errors or success != len(entries):
+                raise StorageError(f"batch write incomplete ({success}/{len(entries)})")
+        except StorageError:
+            raise
+        except Exception as exc:  # noqa: BLE001
+            raise StorageError(f"batch write failed: {exc}") from exc
 
     def write_quarantine(self, log: dict, errors: list[str]) -> None:
         try:
@@ -179,13 +235,16 @@ class OpenSearchLogStore(LogStore):
     # -- doc
     @staticmethod
     def _build_query(service: str | None, trace_id: str | None, query: str | None,
-                     time_from: str | None, time_to: str | None) -> dict:
+                     time_from: str | None, time_to: str | None,
+                     level: str | None = None) -> dict:
         must: list[dict] = []
         filters: list[dict] = []
         if service:
             filters.append({"term": {"service": service}})
         if trace_id:
             filters.append({"term": {"trace_id": trace_id}})
+        if level:
+            filters.append({"term": {"level": level}})
         if time_from or time_to:
             rng: dict = {}
             if time_from:
@@ -199,24 +258,43 @@ class OpenSearchLogStore(LogStore):
             return {"match_all": {}}
         return {"bool": {"must": must, "filter": filters}}
 
-    def search_with_total(self, *, service: str | None = None, trace_id: str | None = None,
-                          query: str | None = None, time_from: str | None = None,
-                          time_to: str | None = None, limit: int = 100,
-                          offset: int = 0) -> tuple[list[dict], int]:
+    def _search_response(self, *, service: str | None = None, trace_id: str | None = None,
+                         level: str | None = None, query: str | None = None,
+                         time_from: str | None = None, time_to: str | None = None,
+                         limit: int = 100, offset: int = 0,
+                         with_facets: bool = False) -> tuple[list[dict], int, dict]:
         body = {
-            "query": self._build_query(service, trace_id, query, time_from, time_to),
+            "query": self._build_query(service, trace_id, query, time_from, time_to, level),
             "sort": [{"timestamp": {"order": "desc"}}],
             "from": offset,
             "size": limit,
             "track_total_hits": True,
         }
+        if with_facets:
+            body["aggs"] = {
+                "timeline": {"date_histogram": {"field": "timestamp",
+                                                "fixed_interval": "1h", "min_doc_count": 0}},
+                "levels": {"terms": {"field": "level", "size": 5}},
+                "services": {"terms": {"field": "service", "size": 20}},
+            }
         try:
-            resp = self.client.search(index=self.log_index, body=body)
+            resp = self.client.search(index=self.read_index, body=body,
+                                      ignore_unavailable=True, allow_no_indices=True)
         except Exception as exc:  # noqa: BLE001
             raise StorageError(f"search failed: {exc}") from exc
         total = resp["hits"]["total"]
         total = total["value"] if isinstance(total, dict) else int(total)
-        return [_with_log_id(h["_source"], h["_id"]) for h in resp["hits"]["hits"]], total
+        aggs = resp.get("aggregations", {})
+        facets = {name: aggs.get(name, {}).get("buckets", [])
+                  for name in ("timeline", "levels", "services")}
+        return [_with_log_id(h["_source"], h["_id"]) for h in resp["hits"]["hits"]], total, facets
+
+    def search_with_total(self, **filters: Any) -> tuple[list[dict], int]:
+        hits, total, _ = self._search_response(**filters)
+        return hits, total
+
+    def search_with_facets(self, **filters: Any) -> tuple[list[dict], int, dict]:
+        return self._search_response(**filters, with_facets=True)
 
     def search(self, **filters: Any) -> list[dict]:
         return self.search_with_total(**filters)[0]
@@ -224,24 +302,52 @@ class OpenSearchLogStore(LogStore):
     def get_logs(self, log_ids: list[str]) -> list[dict]:
         if not log_ids:
             return []
+        # A multi-index mget does not support wildcard _index; use ids query instead.
+        found: dict[str, dict] = {}
         try:
-            resp = self.client.mget(index=self.log_index, body={"ids": list(log_ids)})
+            for offset in range(0, len(log_ids), 500):
+                subset = log_ids[offset:offset + 500]
+                resp = self.client.search(index=self.read_index, body={
+                    "query": {"ids": {"values": subset}}, "size": len(subset)},
+                    ignore_unavailable=True, allow_no_indices=True)
+                for hit in resp["hits"]["hits"]:
+                    found[hit["_id"]] = _with_log_id(hit["_source"], hit["_id"])
         except Exception as exc:  # noqa: BLE001
             raise StorageError(f"get_logs failed: {exc}") from exc
-        return [_with_log_id(d["_source"], d["_id"]) for d in resp["docs"] if d.get("found")]
+        return [found[i] for i in log_ids if i in found]
 
     def delete_older_than(self, cutoff_iso: str) -> int:
+        if not self.daily_index:
+            # Rollback-only compatibility for deployments that keep the legacy single index.
+            try:
+                response = self.client.delete_by_query(
+                    index=self.log_index,
+                    body={"query": {"range": {"timestamp": {"lt": cutoff_iso}}}},
+                    conflicts="proceed", refresh=True, wait_for_completion=True,
+                )
+                return int(response.get("deleted", 0))
+            except Exception as exc:  # noqa: BLE001
+                raise StorageError(f"legacy retention failed: {exc}") from exc
+        cutoff = datetime.fromisoformat(cutoff_iso.replace("Z", "+00:00")).astimezone(timezone.utc)
         try:
-            resp = self.client.delete_by_query(
-                index=self.log_index,
-                body={"query": {"range": {"timestamp": {"lt": cutoff_iso}}}},
-                conflicts="proceed",
-                refresh=True,
-                wait_for_completion=True,
-            )
+            names = self.client.indices.get(index=f"{self.log_index}-????.??.??",
+                                            ignore_unavailable=True, allow_no_indices=True)
+            deleted = 0
+            for name in list(names):
+                prefix = f"{self.log_index}-"
+                if not name.startswith(prefix):
+                    continue
+                try:
+                    day = datetime.strptime(name[len(prefix):], "%Y.%m.%d").replace(tzinfo=timezone.utc)
+                except ValueError:
+                    continue
+                # Drop only when the ENTIRE UTC day lies before cutoff.
+                if day + timedelta(days=1) <= cutoff:
+                    self.client.indices.delete(index=name)
+                    deleted += 1
+            return deleted
         except Exception as exc:  # noqa: BLE001
-            raise StorageError(f"delete_older_than failed: {exc}") from exc
-        return int(resp.get("deleted", 0))
+            raise StorageError(f"retention failed: {exc}") from exc
 
 
 # --------------------------------------------------------------------------- In-memory (dev/test)
@@ -256,6 +362,15 @@ class InMemoryLogStore(LogStore):
     def write_log(self, log_id: str, log: dict) -> None:
         self._logs[log_id] = log
 
+    def write_logs(self, entries: list[tuple[str, dict]]) -> None:
+        """Batch write; implementations may perform partial writes on backend failure."""
+        for log_id, log in entries:
+            self.write_log(log_id, log)
+
+    def search_with_facets(self, **filters: Any) -> tuple[list[dict], int, dict]:
+        results, total = self.search_with_total(**filters)
+        return results, total, {"timeline": [], "levels": [], "services": []}
+
     def write_quarantine(self, log: dict, errors: list[str]) -> None:
         self._quarantine.append({"received_at": _iso_utc_now(), "log": log, "errors": errors})
 
@@ -263,13 +378,11 @@ class InMemoryLogStore(LogStore):
     def _ts(value: str) -> datetime:
         return datetime.fromisoformat(value.replace("Z", "+00:00"))
 
-    def search_with_total(self, **filters: Any) -> tuple[list[dict], int]:
-        # Gan log_id luc doc (ban sao) - khong sua dict dang luu trong self._logs
+    def _matching(self, **filters: Any) -> list[dict]:
         results = [_with_log_id(log, log_id) for log_id, log in self._logs.items()]
-        if filters.get("service"):
-            results = [l for l in results if l.get("service") == filters["service"]]
-        if filters.get("trace_id"):
-            results = [l for l in results if l.get("trace_id") == filters["trace_id"]]
+        for field in ("service", "trace_id", "level"):
+            if filters.get(field):
+                results = [l for l in results if l.get(field) == filters[field]]
         if filters.get("query"):
             words = filters["query"].lower().split()
             results = [l for l in results if all(w in l.get("message", "").lower() for w in words)]
@@ -280,10 +393,29 @@ class InMemoryLogStore(LogStore):
             hi = self._ts(filters["time_to"])
             results = [l for l in results if self._ts(l["timestamp"]) <= hi]
         results.sort(key=lambda l: self._ts(l["timestamp"]), reverse=True)
-        total = len(results)
+        return results
+
+    def search_with_total(self, **filters: Any) -> tuple[list[dict], int]:
+        results = self._matching(**filters)
         offset = filters.get("offset", 0)
         limit = filters.get("limit", 100)
-        return results[offset:offset + limit], total
+        return results[offset:offset + limit], len(results)
+
+    def search_with_facets(self, **filters: Any) -> tuple[list[dict], int, dict]:
+        hits, total = self.search_with_total(**filters)
+        all_hits = self._matching(**filters)
+        hours: Counter[str] = Counter()
+        for item in all_hits:
+            hour = self._ts(item["timestamp"]).astimezone(timezone.utc).replace(
+                minute=0, second=0, microsecond=0).isoformat()
+            hours[hour] += 1
+        def buckets(counter: Counter, limit: int) -> list[dict]:
+            return [{"key": key, "doc_count": count} for key, count in counter.most_common(limit)]
+        return hits, total, {
+            "timeline": [{"key_as_string": key, "doc_count": hours[key]} for key in sorted(hours)],
+            "levels": buckets(Counter(l["level"] for l in all_hits), 5),
+            "services": buckets(Counter(l["service"] for l in all_hits), 20),
+        }
 
     def search(self, **filters: Any) -> list[dict]:
         return self.search_with_total(**filters)[0]

@@ -66,6 +66,14 @@ class TestSearch:
         body = client.get("/search", params={"service": "demo-mobile-api"}).json()
         assert body["total"] == 1
 
+    def test_filter_level_and_facets(self):
+        write("1", level="ERROR")
+        write("2", level="INFO")
+        result = client.get("/search", params={"level": "ERROR"}).json()
+        assert result["total"] == 1
+        assert result["facets"]["levels"] == [{"key": "ERROR", "doc_count": 1}]
+        assert client.get("/search", params={"level": "BOGUS"}).status_code == 422
+
     def test_filter_theo_trace_id(self):
         write("1", trace_id="a")
         write("2", trace_id="b")

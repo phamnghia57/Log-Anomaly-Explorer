@@ -28,7 +28,7 @@ def query_app(monkeypatch, admin_auth):
     point = {"recorded_at": log["timestamp"], "score": 3.2, "status": "alerted"}
     logs, clusters = Mock(), Mock()
     logs.ping.return_value = True
-    logs.search_with_total.return_value = ([log], 1)
+    logs.search_with_facets.return_value = ([log], 1, {"timeline": [], "levels": [], "services": []})
     logs.get_logs.return_value = [log]
     clusters.list_clusters.return_value = [cluster]
     clusters.get_cluster.return_value = cluster
@@ -36,7 +36,7 @@ def query_app(monkeypatch, admin_auth):
     monkeypatch.setattr(main, "store", logs)
     monkeypatch.setattr(main, "cluster_store", clusters)
     expected = {
-        "/search": {"total": 1, "results": [log]},
+        "/search": {"total": 1, "results": [log], "facets": {"timeline": [], "levels": [], "services": []}},
         "/clusters": {"total": 1, "clusters": [cluster]},
         "/clusters/c1": {**cluster, "logs": [log], "logs_total": 1},
         "/clusters/c1/history": {"cluster_id": "c1", "points": [point]},

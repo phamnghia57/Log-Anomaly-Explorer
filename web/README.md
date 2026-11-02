@@ -33,8 +33,12 @@ frontend (không có API route/BFF).
   **hoặc bấm icon ↗ cạnh trace để mở thẳng distributed trace đó trên Jaeger** (xem mục
   "Tracing / Jaeger" bên dưới), và panel **"Điều tra với AI Assistant"** — hỏi đáp về nguyên
   nhân/cách sửa, AI tự tra cứu dữ liệu thật (xem `query-api/README.md` mục "AI Assistant").
-- **Search log** (`/search`) — lọc theo `service`, `trace_id`, từ khoá, thời gian; đồng bộ 2 chiều
+- **Search log** (`/search`) — lọc theo `service`, `trace_id`, `level`, từ khoá, thời gian; histogram và facet theo thời gian/mức độ/service; đồng bộ 2 chiều
   với URL (`?trace_id=...`) để có thể deep-link/chia sẻ link kết quả.
+
+- **Trạng thái hệ thống** (`/system-status`) — chấm xanh/đỏ từ `GET /health` của query-api, ingestion, demo-app; không dùng API backend mới. Clustering chạy worker nên không có `/health` HTTP.
+
+> Health UI: khi chạy Vite local, cấu hình `VITE_HEALTH_BASE_URL=http://localhost:5173` để đi qua Vite proxy `/health/*` tới các port 8000, 8001, 8002; khi deploy Vercel, cấu hình biến đó thành domain HTTPS của Caddy gateway (đã thêm route `/health/ingestion` và `/health/demo-app`). Không trỏ thẳng trình duyệt sang cổng ingestion/demo nếu không bật CORS. `/health` là kết nối service, không phải end-to-end check.
 
 ## Hợp đồng đang tuân theo
 

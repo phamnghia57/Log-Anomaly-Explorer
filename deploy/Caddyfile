@@ -24,6 +24,18 @@
 		reverse_proxy query-api:8002
 	}
 
+	# Chi mo health cua ingestion va demo; khong proxy /ingest ra Internet.
+	handle /health/ingestion {
+		uri replace /health/ingestion /health
+		header Access-Control-Allow-Origin "*"
+		reverse_proxy ingestion:8000
+	}
+	handle /health/demo-app {
+		uri replace /health/demo-app /health
+		header Access-Control-Allow-Origin "*"
+		reverse_proxy demo-app:8001
+	}
+
 	# Swagger UI / OpenAPI tu sinh cua query-api - xem & test API qua trinh
 	# duyet, dung chung cong voi phan con lai.
 	@api-docs path /docs /redoc /openapi.json

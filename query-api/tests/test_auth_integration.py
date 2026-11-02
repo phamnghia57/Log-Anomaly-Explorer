@@ -48,7 +48,10 @@ def test_seed_login_query_and_expiration_preserve_contracts(caplog):
                 assert client.get(path, headers=valid).status_code == 200
 
             search = client.get("/search", headers=valid).json()
-            assert search == {"total": 1, "results": [{**stack.log, "log_id": "auth-test-log"}]}
+            assert search == {"total": 1, "results": [{**stack.log, "log_id": "auth-test-log"}],
+                              "facets": {"timeline": [],
+                                         "levels": [{"key": "ERROR", "doc_count": 1}],
+                                         "services": [{"key": "auth-test", "doc_count": 1}]}}
             validate(stack.log, json.loads((contracts / "log-schema.json").read_text()), format_checker=FormatChecker())
             validate(stack.cluster, json.loads((contracts / "cluster-record.schema.json").read_text()), format_checker=FormatChecker())
             assert client.get("/clusters", headers=valid).json() == {"total": 1, "clusters": [stack.cluster]}

@@ -149,12 +149,27 @@ export interface SearchParams {
   to?: string;
   service?: string;
   trace_id?: string;
+  level?: string;
   q?: string;
   [key: string]: string | undefined;
 }
 
+export interface FacetBucket {
+  key: string;
+  doc_count: number;
+}
+export interface TimeBucket {
+  key_as_string: string;
+  doc_count: number;
+}
+export interface SearchFacets {
+  timeline: TimeBucket[];
+  levels: FacetBucket[];
+  services: FacetBucket[];
+}
+
 export function searchLogs(params: SearchParams, signal?: AbortSignal) {
-  return queryJson<{ total: number; results: StructuredLog[] }>("/search", params, signal);
+  return queryJson<{ total: number; results: StructuredLog[]; facets: SearchFacets }>("/search", params, signal);
 }
 
 export function listClusters(params: { status?: ClusterStatus | ""; since?: string }, signal?: AbortSignal) {

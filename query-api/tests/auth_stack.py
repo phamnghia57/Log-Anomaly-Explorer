@@ -53,8 +53,18 @@ def auth_stack(*, username="integration-admin", password=None, secret=None):
         return {"result": "created"}
 
     def search(*, index, body, **kwargs):
-        hits = [{"_id": id, "_source": deepcopy(doc)} for (name, id), doc in documents.items() if name == index]
-        return {"hits": {"total": {"value": len(hits)}, "hits": hits}}
+        selected = index.split(",")
+        selected_ids = set(body.get("query", {}).get("ids", {}).get("values", []))
+        hits = [{"_id": id, "_source": deepcopy(doc)} for (name, id), doc in documents.items()
+                if name in selected and (not selected_ids or id in selected_ids)]
+        result = {"hits": {"total": {"value": len(hits)}, "hits": hits}}
+        if "aggs" in body:
+            result["aggregations"] = {
+                "timeline": {"buckets": []},
+                "levels": {"buckets": [{"key": "ERROR", "doc_count": len(hits)}]},
+                "services": {"buckets": [{"key": "auth-test", "doc_count": len(hits)}]},
+            }
+        return result
 
     client.indices.create.side_effect = create_index
     client.get.side_effect = get

@@ -47,8 +47,11 @@ services:
     environment:
       OPENSEARCH_URL: ${OPENSEARCH_URL:-http://opensearch:9200}
       LOG_INDEX: ${LOG_INDEX:-logs}
+      LOG_INDEX_DAILY: ${LOG_INDEX_DAILY:-true}
       QUARANTINE_INDEX: ${QUARANTINE_INDEX:-logs-quarantine}
       RETENTION_DAYS: ${RETENTION_DAYS:-30}
+      INGEST_RATE_LIMIT_RPS: ${INGEST_RATE_LIMIT_RPS:-100}
+      INGEST_MAX_BATCH_SIZE: ${INGEST_MAX_BATCH_SIZE:-500}
       RETENTION_INTERVAL_SECONDS: ${RETENTION_INTERVAL_SECONDS:-3600}
     ports:
       - "${INGESTION_PORT:-8000}:8000"
@@ -117,6 +120,7 @@ services:
     environment:
       OPENSEARCH_URL: ${OPENSEARCH_URL:-http://opensearch:9200}
       LOG_INDEX: ${LOG_INDEX:-logs}
+      LOG_INDEX_DAILY: ${LOG_INDEX_DAILY:-true}
       CLUSTER_INDEX: ${CLUSTER_INDEX:-clusters}
       HISTORY_INDEX: ${HISTORY_INDEX:-cluster-history}
       WINDOW_SECONDS: ${WINDOW_SECONDS:-60}
@@ -142,6 +146,7 @@ services:
     environment:
       OPENSEARCH_URL: ${OPENSEARCH_URL:-http://opensearch:9200}
       LOG_INDEX: ${LOG_INDEX:-logs}
+      LOG_INDEX_DAILY: ${LOG_INDEX_DAILY:-true}
       CLUSTER_INDEX: ${CLUSTER_INDEX:-clusters}
       HISTORY_INDEX: ${HISTORY_INDEX:-cluster-history}
       RETENTION_DAYS: ${RETENTION_DAYS:-30}

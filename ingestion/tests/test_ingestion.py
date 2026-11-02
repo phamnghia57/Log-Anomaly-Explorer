@@ -111,6 +111,8 @@ class FakeIndices:
     def __init__(self): self.created = {}
     def exists(self, index): return index in self.created
     def create(self, index, body): self.created[index] = body
+    def get(self, index, **kwargs): return {name: {} for name in self.created if name.startswith("logs-20")}
+    def delete(self, index): self.created.pop(index); return {"acknowledged": True}
 
 
 class FakeClient:
@@ -119,10 +121,13 @@ class FakeClient:
     def index(self, **kw): self.calls.append(("index", kw))
     def search(self, **kw):
         self.calls.append(("search", kw))
-        return {"hits": {"total": {"value": 7}, "hits": [{"_id": "h1", "_source": {"message": "m"}}]}}
-    def mget(self, **kw):
-        self.calls.append(("mget", kw))
-        return {"docs": [{"_id": "a", "found": True, "_source": {"a": 1}}, {"_id": "b", "found": False}]}
+        if "ids" in kw["body"]["query"]:
+            return {"hits": {"total": {"value": 1}, "hits": [{"_id": "a", "_source": {"a": 1}}]}}
+        return {"hits": {"total": {"value": 7}, "hits": [{"_id": "h1", "_source": {"message": "m"}}]},
+                "aggregations": {"timeline": {"buckets": [{"key_as_string": "2026-01-01", "doc_count": 7}]},
+                                 "levels": {"buckets": [{"key": "ERROR", "doc_count": 7}]},
+                                 "services": {"buckets": []}}}
+
     def delete_by_query(self, **kw):
         self.calls.append(("dbq", kw)); return {"deleted": 3}
     def ping(self): return True
@@ -132,11 +137,12 @@ def test_opensearch_store_requests():
     c = FakeClient()
     s = OpenSearchLogStore(c)
     s.ensure_ready()
-    assert set(c.indices.created) == {"logs", "logs-quarantine"}
-    assert c.indices.created["logs"]["mappings"]["properties"]["trace_id"]["type"] == "keyword"
+    today = datetime.now(timezone.utc).strftime("logs-%Y.%m.%d")
+    assert set(c.indices.created) == {today, "logs-quarantine"}
+    assert c.indices.created[today]["mappings"]["properties"]["trace_id"]["type"] == "keyword"
 
-    s.write_log("id1", {"message": "x"})
-    assert c.calls[-1][1]["id"] == "id1" and c.calls[-1][1]["index"] == "logs"
+    s.write_log("id1", {"timestamp": iso(), "message": "x"})
+    assert c.calls[-1][1]["id"] == "id1" and c.calls[-1][1]["index"] == today
     s.write_quarantine({"bad": 1}, ["e"])
     assert c.calls[-1][1]["index"] == "logs-quarantine"
 
@@ -150,14 +156,14 @@ def test_opensearch_store_requests():
 
     assert s.get_logs(["a", "b"]) == [{"a": 1, "log_id": "a"}]
     # write_log khong gan log_id vao body da ghi
-    s.write_log("id2", {"message": "y"})
+    s.write_log("id2", {"timestamp": iso(), "message": "y"})
     assert "log_id" not in c.calls[-1][1]["body"]
-    assert s.delete_older_than("2026-01-01T00:00:00+00:00") == 3
-    assert c.calls[-1][1]["body"]["query"]["range"]["timestamp"]["lt"].startswith("2026")
+    assert s.delete_older_than("2026-01-01T00:00:00+00:00") == 0
+    assert today in c.indices.created
 
 
 def test_opensearch_errors_wrapped():
     class Bad(FakeClient):
         def index(self, **kw): raise RuntimeError("conn refused")
     with pytest.raises(StorageError):
-        OpenSearchLogStore(Bad()).write_log("i", {})
+        OpenSearchLogStore(Bad()).write_log("i", {"timestamp": iso()})

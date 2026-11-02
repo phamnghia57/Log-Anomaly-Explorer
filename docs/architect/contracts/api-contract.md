@@ -198,3 +198,12 @@ phí Azure OpenAI và độ trễ.
 `https://jp.cloud.langfuse.com`) — tự động, không cần đổi code gọi Azure OpenAI (dùng wrapper
 `langfuse.openai.AzureOpenAI`). Để trống 2 key thì assistant vẫn chạy bình thường, chỉ không gửi
 trace.
+
+
+## Bổ sung không phá vỡ hợp đồng — Batch ingestion / Search facets (Minh)
+
+Các endpoint hiện có không bị đổi request hoặc xóa trường response. Nội dung bên dưới là **phần mở rộng** cần được cả nhóm review:
+
+- `POST /ingest/batch`: request là mảng JSON các `StructuredLog` (mặc định tối đa 500). `Idempotency-Key` header là tùy chọn, dùng một key cho một batch bất biến để retry an toàn. **202**: `{ "accepted": true, "count": 2, "log_ids": ["id1", "id2"] }`. **400**: `{ "accepted": false, "reason": "schema_validation_failed", "invalid": [{ "index": 0, "details": ["..."] }] }`, không ghi các log hợp lệ nếu có phần tử lỗi. Mảng rỗng 400, quá ngưỡng 413, body sai kiểu 422; vượt request/giây **429** với `Retry-After: 1`; storage lỗi **503** (có thể ghi một phần trước khi lỗi).
+- `GET /search` (cả ingestion và query-api): bổ sung query param tùy chọn `level=DEBUG|INFO|WARN|ERROR|FATAL`; thêm `facets: { timeline: [{ key_as_string, doc_count }], levels: [{ key, doc_count }], services: [{ key, doc_count }] }` vào response, bên cạnh `total` và `results` cũ. Histogram dựa trên timestamp UTC, bucket 1 giờ, các facet áp dụng cùng bộ lọc với kết quả.
+- `LOG_INDEX_DAILY=true`: ghi mới vào `logs-YYYY.MM.DD` theo UTC, truy vấn cũng đọc index `logs` legacy. Sau khi migrate mới có thể ngừng giữ legacy. Retention drop index nguyên ngày, không xóa index còn chứa một phần dữ liệu trong cutoff.

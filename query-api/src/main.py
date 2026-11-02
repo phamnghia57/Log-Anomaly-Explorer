@@ -162,6 +162,7 @@ def health():
 def search(
     service: str | None = None,
     trace_id: str | None = None,
+    level: str | None = Query(default=None, pattern="^(DEBUG|INFO|WARN|ERROR|FATAL)$"),
     q: str | None = None,
     time_from: str | None = Query(default=None, alias="from"),
     time_to: str | None = Query(default=None, alias="to"),
@@ -178,11 +179,11 @@ def search(
     if start is None and end is None:
         start = (datetime.now(timezone.utc) - timedelta(hours=DEFAULT_WINDOW_HOURS)).isoformat()
 
-    results, total = store.search_with_total(
-        service=service, trace_id=trace_id, query=q,
+    results, total, facets = store.search_with_facets(
+        service=service, trace_id=trace_id, level=level, query=q,
         time_from=start, time_to=end, limit=limit, offset=offset,
     )
-    return {"total": total, "results": results}
+    return {"total": total, "results": results, "facets": facets}
 
 
 def _require_cluster_store():

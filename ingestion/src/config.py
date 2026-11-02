@@ -27,5 +27,11 @@ NUMBER_OF_REPLICAS = int(os.environ.get("OPENSEARCH_REPLICAS", "0"))
 RETENTION_DAYS = int(os.environ.get("RETENTION_DAYS", "30"))
 RETENTION_INTERVAL_SECONDS = int(os.environ.get("RETENTION_INTERVAL_SECONDS", "3600"))
 
+# Rate limit theo request/giay trong MOT process. 0 = tat (test/dev).
+INGEST_RATE_LIMIT_RPS = int(os.environ.get("INGEST_RATE_LIMIT_RPS", "100"))
+MAX_BATCH_SIZE = int(os.environ.get("INGEST_MAX_BATCH_SIZE", "500"))
+# Index log theo ngay, ten LOG_INDEX-YYYY.MM.DD. Index cu LOG_INDEX van doc duoc.
+LOG_INDEX_DAILY = _bool("LOG_INDEX_DAILY", True)
+
 DEFAULT_SEARCH_LIMIT = int(os.environ.get("SEARCH_DEFAULT_LIMIT", "100"))
 MAX_SEARCH_LIMIT = int(os.environ.get("SEARCH_MAX_LIMIT", "1000"))

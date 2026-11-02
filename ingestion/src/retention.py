@@ -23,7 +23,7 @@ DEFAULT_RETENTION_DAYS = config.RETENTION_DAYS
 
 
 def run_retention(store: LogStore, retention_days: int | None = None) -> int:
-    """Xoa moi log cu hon `retention_days` ngay. Tra ve so log da xoa."""
+    """Drop index theo ngay da het han (memory backend xoa log)."""
     days = DEFAULT_RETENTION_DAYS if retention_days is None else retention_days
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     return store.delete_older_than(cutoff.isoformat())
@@ -41,7 +41,7 @@ def start_scheduler(store: LogStore, interval_seconds: int | None = None) -> thr
         while not stop.wait(interval):
             try:
                 deleted = run_retention(store)
-                logger.info("retention: deleted %d logs older than %d days", deleted, DEFAULT_RETENTION_DAYS)
+                logger.info("retention: removed %d indices/logs for policy %d days", deleted, DEFAULT_RETENTION_DAYS)
             except Exception:  # noqa: BLE001 - job nen khong duoc chet vi loi tam thoi
                 logger.exception("retention run failed")
 
