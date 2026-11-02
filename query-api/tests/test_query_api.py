@@ -66,6 +66,16 @@ class TestSearch:
         body = client.get("/search", params={"service": "demo-mobile-api"}).json()
         assert body["total"] == 1
 
+    def test_level_filter_and_aggregations(self):
+        write("1", level="ERROR")
+        write("2", level="INFO")
+        result = client.get("/search", params={"level": "INFO"})
+        assert result.status_code == 200 and result.json()["total"] == 1
+        response = client.get("/search/aggregations")
+        assert response.status_code == 200
+        assert {entry["key"] for entry in response.json()["levels"]} == {"ERROR", "INFO"}
+        assert client.get("/search/aggregations", params={"level": "INVALID"}).status_code == 422
+
     def test_filter_theo_trace_id(self):
         write("1", trace_id="a")
         write("2", trace_id="b")

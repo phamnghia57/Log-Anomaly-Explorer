@@ -57,16 +57,17 @@ AZURE_OPENAI_DEPLOYMENT = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-5-mini"
 # han; het han thi loi duoc bat o router.py (502), khong treo request mai mai.
 AZURE_OPENAI_TIMEOUT_SECONDS = _positive_int("AZURE_OPENAI_TIMEOUT_SECONDS", 60)
 # Muc do "suy nghi" cua model dong reasoning (minimal/low/medium/high - xem
-# Azure OpenAI reasoning models doc). prj2 chi can cau tra loi nhanh, chat
-# luong trung binh la du (du lieu la log demo tu sinh) - de "low" thay vi mac
-# dinh cua Azure (thuong la "medium"/"high") de giam do tre dang ke.
+# Azure OpenAI reasoning models doc). Chi can cau tra loi nhanh, chat luong
+# trung binh la du (du lieu la log demo tu sinh) - de "low" thay vi mac dinh
+# cua Azure (thuong la "medium"/"high") de giam do tre dang ke.
 ASSISTANT_REASONING_EFFORT = os.environ.get("ASSISTANT_REASONING_EFFORT", "low")
 CONVERSATIONS_INDEX = os.environ.get("ASSISTANT_CONVERSATIONS_INDEX", "assistant-conversations")
 # Gioi han so vong AI tu goi tool trong 1 luot chat - bao ve chi phi/do tre va
 # tranh vong lap tool-calling khong diem dung. De THAP (khong phai 5): du lieu
-# prj2 la log TU SINH/MO PHONG trong demo, AI chi can neu nguyen nhan co ban
-# tu sample log da co san trong system prompt, khong can dieu tra nhieu vong -
-# giam ca do tre va chi phi (dac biet voi model dong reasoning nhu gpt-5-mini).
+# cua du an nay la log TU SINH/MO PHONG trong demo, AI chi can neu nguyen
+# nhan co ban tu sample log da co san trong system prompt, khong can dieu tra
+# nhieu vong - giam ca do tre va chi phi (dac biet voi model dong reasoning
+# nhu gpt-5-mini).
 MAX_TOOL_ROUNDS = _positive_int("ASSISTANT_MAX_TOOL_ROUNDS", 2)
 MAX_OUTPUT_TOKENS = _positive_int("ASSISTANT_MAX_OUTPUT_TOKENS", 1200)
 # Chi dung de HIEN THI trong system prompt cho AI biet nguong dang ap dung,

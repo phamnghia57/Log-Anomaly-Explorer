@@ -41,7 +41,7 @@ Các route `/search` và `/clusters*` bên dưới yêu cầu JWT admin trong he
 | Endpoint | Tham số | Ghi chú |
 |---|---|---|
 | `GET /health` | — | `503 degraded` khi mất kết nối kho dữ liệu |
-| `GET /search` | `service`, `trace_id`, `q`, `from`, `to`, `limit`, `offset` | Mặc định 24h gần nhất; `total` không bị cắt bởi `limit` |
+| `GET /search` | `service`, `level`, `trace_id`, `q`, `from`, `to`, `limit`, `offset` | Mặc định 24h gần nhất; `total` không bị cắt bởi `limit` |
 | `GET /clusters` | `status`, `since`, `limit`, `offset` | Mặc định `since` theo `RETENTION_DAYS` |
 | `GET /clusters/{id}` | `logs_limit`, `logs_offset` | Incident View: cụm + `logs` tra từ `log_ids`, **có phân trang** (`logs_total` = tổng số log của cụm) |
 | `GET /clusters/{id}/history` | `since`, `limit` | Xu hướng anomaly score theo thời gian (index `cluster-history`) |
@@ -285,3 +285,9 @@ curl -X POST "http://localhost:8002/assistant/clusters/<cluster_id>/conversation
 
 - **Runbook**: [`../docs/task/runbook.md`](../docs/task/runbook.md)
 - **Load test end-to-end**: `../load-tests/` — mô phỏng tải thật qua toàn bộ pipeline (ingest → cluster → alert → query)
+
+### Mở rộng Search (đợt Minh)
+
+- `GET /search` hỗ trợ `level=DEBUG|INFO|WARN|ERROR|FATAL` (lọc keyword).
+- `GET /search/aggregations` (JWT admin): hỗ trợ bộ lọc như `/search`, thêm `interval=hour|day`; trả các bucket `histogram`, `levels`, `services`. Không sửa schema StructuredLog.
+- Daily indices được đọc qua `OpenSearchLogStore.read_indices` gồm `logs` legacy + `logs-YYYY.MM.DD`; bản thân query-api không cần truy cập index cụ thể.

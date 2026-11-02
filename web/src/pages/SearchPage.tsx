@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { SearchParams } from "@/lib/api";
-import { useSearchLogs } from "@/lib/queries";
+import { useSearchLogs, useSearchAggregations } from "@/lib/queries";
+import { SearchAggregationsChart } from "@/components/SearchAggregationsChart";
 import { AppShell } from "@/components/layout/AppShell";
 import { SearchForm, type SearchFormValues } from "@/components/SearchForm";
 import { LogTable } from "@/components/LogTable";
@@ -22,6 +23,7 @@ export function SearchPage() {
   }, [traceIdFromUrl]);
 
   const { data, isFetching, isError, error } = useSearchLogs(params, hasSearched);
+  const { data: aggregates, isError: aggregatesError } = useSearchAggregations(params, hasSearched && Boolean(data));
 
   const runSearch = (values: SearchFormValues) => {
     setParams(values);
@@ -37,7 +39,7 @@ export function SearchPage() {
               tren URL doi (vd. bam trace trong ket qua search ngay tren trang nay) -
               react-hook-form chi ap dung defaultValues luc mount, khong tu dong
               cap nhat khi props doi neu khong co key. */}
-          <SearchForm key={traceIdFromUrl ?? "empty"} defaultValues={{ trace_id: traceIdFromUrl }} onSubmit={runSearch} />
+          <SearchForm key={`${traceIdFromUrl ?? "empty"}:${params.level ?? ""}:${params.service ?? ""}`} defaultValues={{ ...params, trace_id: traceIdFromUrl ?? params.trace_id }} onSubmit={runSearch} />
         </div>
 
         {isError && (
@@ -52,6 +54,40 @@ export function SearchPage() {
               <Skeleton key={i} className="h-11" />
             ))}
           </div>
+        )}
+
+        {aggregates && hasSearched && (
+          <section className="rounded-xl border bg-card p-4" aria-label="Phân bố log theo thời gian">
+            <h2 className="mb-3 text-sm font-semibold">Phân bố log theo thời gian</h2>
+            <SearchAggregationsChart data={aggregates} />
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <h3 className="mb-2 text-xs font-medium text-muted-foreground">Level (chọn để lọc)</h3>
+                <div className="flex flex-wrap gap-2">
+                  {aggregates.levels.map((item) => (
+                    <button type="button" key={item.key} onClick={() => setParams({ ...params, level: item.key })}
+                      className="rounded-md border px-2 py-1 text-xs hover:bg-accent" aria-label={`Lọc level ${item.key}`}>
+                      {item.key}: {item.count}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h3 className="mb-2 text-xs font-medium text-muted-foreground">Service (chọn để lọc)</h3>
+                <div className="flex flex-wrap gap-2">
+                  {aggregates.services.map((item) => (
+                    <button type="button" key={item.key} onClick={() => setParams({ ...params, service: item.key })}
+                      className="rounded-md border px-2 py-1 text-xs hover:bg-accent" aria-label={`Lọc service ${item.key}`}>
+                      {item.key}: {item.count}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+        {aggregatesError && hasSearched && (
+          <p role="alert" className="text-sm text-destructive">Không tải được histogram/facets.</p>
         )}
 
         {!isFetching && data && (

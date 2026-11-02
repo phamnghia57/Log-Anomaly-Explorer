@@ -9,6 +9,8 @@ import {
   listClusters,
   loginAdmin,
   searchLogs,
+  searchAggregations,
+  getSystemHealth,
   sendAssistantMessage,
 } from "./api";
 import { AUTH_STORAGE_KEY, clearSession, getSession, saveSession, useAuthStore } from "./auth";
@@ -50,6 +52,22 @@ describe("query-api client", () => {
     const calledUrl = new URL(fetchMock.mock.calls[0][0] as string);
     expect(calledUrl.searchParams.has("service")).toBe(false);
     expect(calledUrl.searchParams.has("q")).toBe(false);
+  });
+
+  it("searchAggregations: sends level and time range", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ histogram: [], levels: [], services: [] })));
+    await searchAggregations({ level: "ERROR", from: "2026-10-01" });
+    const url = new URL(fetchMock.mock.calls[0][0] as string);
+    expect(url.pathname).toBe("/search/aggregations");
+    expect(url.searchParams.get("level")).toBe("ERROR");
+  });
+
+  it("getSystemHealth: handles down service without losing others", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ status: "ok" })));
+    fetchMock.mockRejectedValueOnce(new Error("connection failed"));
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ status: "degraded" }), { status: 503 }));
+    const health = await getSystemHealth();
+    expect(health.map((entry) => entry.ok)).toEqual([true, false, false]);
   });
 
   it("listClusters: loc theo status dung tham so", async () => {

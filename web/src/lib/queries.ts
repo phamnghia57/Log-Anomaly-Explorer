@@ -6,6 +6,8 @@ import {
   getClusterHistory,
   listClusters,
   searchLogs,
+  searchAggregations,
+  getSystemHealth,
   sendAssistantMessage,
 } from "./api";
 
@@ -43,6 +45,23 @@ export function useSearchLogs(params: SearchParams, enabled: boolean) {
     queryKey: ["search", params],
     queryFn: ({ signal }) => searchLogs(params, signal),
     enabled,
+  });
+}
+
+export function useSearchAggregations(params: SearchParams, enabled: boolean) {
+  return useQuery({
+    queryKey: ["search-aggregations", params],
+    queryFn: ({ signal }) => searchAggregations(params, signal),
+    enabled,
+  });
+}
+
+export function useSystemHealth() {
+  return useQuery({
+    queryKey: ["system-health"],
+    queryFn: ({ signal }) => getSystemHealth(signal),
+    refetchInterval: 15_000,
+    retry: false,
   });
 }
 

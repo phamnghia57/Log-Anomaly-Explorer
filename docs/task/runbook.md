@@ -80,6 +80,10 @@ Các nguyên nhân thường gặp hơn và cách xử lý:
    `demo-app` hoặc một client khác đang gửi payload sai `log-schema.json`. Phân biệt 2 nguyên nhân
    trước khi scale hạ tầng.
 
+5. Nếu nhận **429** từ `/ingest` hoặc `/ingest/batch`, kiểm tra `INGEST_RATE_LIMIT_RPS` (giới hạn mỗi tiến trình); client cần giảm nhịp, đọc `Retry-After` và tránh retry dồn dập. Batch 1–500 log giúp giảm request overhead nhưng không thay thế backpressure tập trung khi chạy nhiều instance.
+6. Mở **Trạng thái hệ thống** trên web để đối chiếu `/health` của Query API, Ingestion và Demo App; màu xanh = HTTP 200 + `status=ok`, đỏ = degraded/không kết nối.
+7. Với dữ liệu tăng nhanh, kiểm tra daily indices `logs-YYYY.MM.DD` và retention theo `RETENTION_DAYS`. Retention drop trọn ngày cũ, **không tự drop legacy `logs`**; chỉ backup/migrate/xoá legacy sau khi phối hợp trưởng nhóm. Không xóa `logs-quarantine` bằng daily retention.
+
 ## Khi sửa cấu hình (`.env`, `Caddyfile`) mà không thấy hiệu lực
 
 Phát hiện thật qua vận hành: `docker compose up -d` (không kèm `--force-recreate`) **không tự

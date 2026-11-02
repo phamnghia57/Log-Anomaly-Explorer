@@ -17,6 +17,7 @@ from starlette.datastructures import State
 from clustering.src.storage import OpenSearchStore
 from ingestion.src.storage import OpenSearchLogStore
 
+from fnmatch import fnmatchcase
 
 @contextmanager
 def auth_stack(*, username="integration-admin", password=None, secret=None):
@@ -25,9 +26,17 @@ def auth_stack(*, username="integration-admin", password=None, secret=None):
     now = datetime.now(timezone.utc).isoformat()
     log = {"timestamp": now, "level": "ERROR", "service": "auth-test",
            "trace_id": "a" * 32, "span_id": "b" * 16, "message": "Integration test fault"}
-    cluster = {"cluster_id": "auth-test-cluster", "score": 3.0, "status": "alerted",
-               "log_ids": ["auth-test-log"], "trace_ids": [log["trace_id"]],
-               "signature": "Integration test fault", "first_seen": now, "last_seen": now}
+    cluster = {
+        "cluster_id": "auth-test-cluster",
+        "service": log["service"],
+        "score": 3.0,
+        "status": "alerted",
+        "log_ids": ["auth-test-log"],
+        "trace_ids": [log["trace_id"]],
+        "signature": "Integration test fault",
+        "first_seen": now,
+        "last_seen": now,
+    }
     point = {"cluster_id": cluster["cluster_id"], "score": 3.0, "status": "alerted", "recorded_at": now}
     documents = {("auth-test-clusters", cluster["cluster_id"]): cluster,
                  ("auth-test-logs", "auth-test-log"): log,
@@ -53,8 +62,20 @@ def auth_stack(*, username="integration-admin", password=None, secret=None):
         return {"result": "created"}
 
     def search(*, index, body, **kwargs):
-        hits = [{"_id": id, "_source": deepcopy(doc)} for (name, id), doc in documents.items() if name == index]
-        return {"hits": {"total": {"value": len(hits)}, "hits": hits}}
+        patterns = [part.strip() for part in index.split(",")]
+
+        hits = [
+            {"_id": doc_id, "_source": deepcopy(doc)}
+            for (index_name, doc_id), doc in documents.items()
+            if any(fnmatchcase(index_name, p) for p in patterns)
+        ]
+
+        return {
+            "hits": {
+                "total": {"value": len(hits)},
+                "hits": hits,
+            }
+        }
 
     client.indices.create.side_effect = create_index
     client.get.side_effect = get

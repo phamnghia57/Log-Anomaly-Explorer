@@ -6,7 +6,7 @@ export function safeReturnTo(value: unknown): string {
   try {
     const url = new URL(value, window.location.origin);
     if (url.origin !== window.location.origin
-      || !(url.pathname === "/" || url.pathname === "/search" || /^\/clusters\/[^/]+$/.test(url.pathname))) return "/";
+      || !(url.pathname === "/" || url.pathname === "/search" || url.pathname === "/system-status" || /^\/clusters\/[^/]+$/.test(url.pathname))) return "/";
     return `${url.pathname}${url.search}${url.hash}`;
   } catch {
     return "/";

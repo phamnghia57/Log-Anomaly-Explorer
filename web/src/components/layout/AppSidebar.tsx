@@ -1,4 +1,4 @@
-import { Activity, LayoutDashboard, Search } from "lucide-react";
+import { BookOpen, Activity, LayoutDashboard, Search, HeartPulse } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -15,6 +15,7 @@ import {
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/search", label: "Search log", icon: Search, end: false },
+  { to: "/system-status", label: "Trạng thái hệ thống", icon: HeartPulse, end: false },
 ];
 
 export function AppSidebar() {
@@ -48,6 +49,14 @@ export function AppSidebar() {
                   </NavLink>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Runbook/Docs">
+                  <a href="https://github.com/phamnghia57/Log-Anomaly-Explorer/blob/main/docs/task/runbook.md" target="_blank" rel="noopener noreferrer">
+                    <BookOpen />
+                    <span>Runbook/Docs</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

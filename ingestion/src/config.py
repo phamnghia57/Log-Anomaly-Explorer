@@ -29,3 +29,9 @@ RETENTION_INTERVAL_SECONDS = int(os.environ.get("RETENTION_INTERVAL_SECONDS", "3
 
 DEFAULT_SEARCH_LIMIT = int(os.environ.get("SEARCH_DEFAULT_LIMIT", "100"))
 MAX_SEARCH_LIMIT = int(os.environ.get("SEARCH_MAX_LIMIT", "1000"))
+
+# Gioi han luu luong cap process; trien khai nhieu replicas can rate limiter chung tai gateway.
+INGEST_RATE_LIMIT_RPS = int(os.environ.get("INGEST_RATE_LIMIT_RPS", "100"))
+INGEST_MAX_BATCH_SIZE = int(os.environ.get("INGEST_MAX_BATCH_SIZE", "500"))
+if INGEST_RATE_LIMIT_RPS < 1 or INGEST_MAX_BATCH_SIZE < 1:
+    raise ValueError("INGEST_RATE_LIMIT_RPS and INGEST_MAX_BATCH_SIZE must be positive")

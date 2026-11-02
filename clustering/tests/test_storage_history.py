@@ -88,3 +88,27 @@ def test_list_history_loi_client_boc_thanh_storage_error(store):
     client.search = boom
     with pytest.raises(StorageError):
         s.list_history("c1")
+
+
+def test_write_history_appends_only_schema_fields(store):
+    s, client = store
+    client.index = lambda **kw: client.calls.append(("index", kw))
+    record = {"cluster_id": "c1", "score": 5.0, "status": "alerted", "log_ids": ["private"]}
+    for end in ("2026-10-26T00:01:00Z", "2026-10-26T00:02:00Z"):
+        s.write_history(record, end)
+    assert len(client.calls) == 2
+    for _, call in client.calls:
+        assert call["index"] == "cluster-history"
+        assert "id" not in call
+        assert set(call["body"]) == {"cluster_id", "score", "status", "recorded_at"}
+        assert call["body"]["status"] == "alerted"
+    assert client.calls[0][1]["body"]["recorded_at"] != client.calls[1][1]["body"]["recorded_at"]
+
+
+def test_write_history_wraps_client_failure(store):
+    s, client = store
+    def fail(**kw):
+        raise RuntimeError("offline")
+    client.index = fail
+    with pytest.raises(StorageError, match="write_history failed"):
+        s.write_history({"cluster_id": "c1", "score": 1, "status": "normal"}, "2026-10-26T00:01:00Z")

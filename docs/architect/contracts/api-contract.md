@@ -18,6 +18,13 @@ Nhận một structured log, validate theo [`log-schema.json`](./log-schema.json
   { "accepted": false, "reason": "schema_validation_failed", "details": "..." }
   ```
 
+### `POST /ingest/batch` (bổ sung tương thích)
+Nhận **JSON array** 1..`INGEST_MAX_BATCH_SIZE` structured logs (`log-schema.json` không đổi).
+- **202**: `{ "accepted": true, "accepted_count": 2, "log_ids": ["...", "..."] }`
+- **400**: bất kỳ item không hợp lệ → quarantine các item sai, không ghi item nào của batch, `{ "accepted": false, "reason": "schema_validation_failed", "errors": [{ "index": 0, "details": ["..."] }] }`.
+- **422**: body không phải `list[object]`; **429**: vượt RPS (header `Retry-After: 1`); **503**: storage không khả dụng (Bulk có thể đã ghi một phần). Giới hạn rate tính cho cả `/ingest` và `/ingest/batch` theo process.
+
+
 ## Query & Incident API (Nghĩa)
 
 ### `GET /search`
@@ -28,9 +35,22 @@ Tìm log thô theo field — **không phải** semantic/vector search.
 | `from`, `to` | ISO 8601 datetime | Không (mặc định 24h gần nhất) |
 | `service` | string | Không |
 | `trace_id` | string | Không |
+| `level` | `DEBUG` / `INFO` / `WARN` / `ERROR` / `FATAL` | Không |
 | `q` | string (full-text trên `message`) | Không |
 
 Response: danh sách log theo `log-schema.json`, kèm `total`.
+
+### `GET /search/aggregations` (JWT admin)
+Nhận cùng các bộ lọc `service`, `level`, `trace_id`, `q`, `from`, `to`, thêm `interval=hour|day` (mặc định hour); khi không có `from`/`to`, mặc định 24h.
+
+```json
+{
+  "histogram": [{"time": "2026-11-02T10:00:00.000Z", "count": 12}],
+  "levels": [{"key": "ERROR", "count": 8}],
+  "services": [{"key": "demo-web", "count": 12}]
+}
+```
+
 
 ### `GET /clusters`
 Danh sách cụm bất thường, đọc từ dữ liệu do Nam ghi theo [`cluster-record.schema.json`](./cluster-record.schema.json).
