@@ -5,6 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { StatCards } from "@/components/dashboard/StatCards";
 import { ClusterGrid } from "@/components/dashboard/ClusterGrid";
 import { StatusFacets } from "@/components/dashboard/StatusFacets";
+import { ServiceFacets } from "@/components/dashboard/ServiceFacets";
 import {
   TimeRangeControl, sinceFromRange, type TimeRangeKey,
 } from "@/components/dashboard/TimeRangeControl";
@@ -18,6 +19,7 @@ const AnomalyScoreChart = lazy(() =>
 
 export function DashboardPage() {
   const [status, setStatus] = useState<ClusterStatus | "all">("all");
+  const [service, setService] = useState<string | "all">("all");
   const [range, setRange] = useState<TimeRangeKey>("24h");
   const [autoRefreshMs, setAutoRefreshMs] = useState<number | false>(30_000);
 
@@ -29,13 +31,16 @@ export function DashboardPage() {
   const since = useMemo(() => sinceFromRange(range), [range]);
   const { data, isLoading, isFetching, isError, error, refetch } = useClusters(since, autoRefreshMs);
 
-  // Loc hien thi theo status o client (data da tai day du trong khoang thoi
-  // gian). StatusFacets van nhan `data.clusters` CHUA LOC de dem dung so
-  // luong cho ca 4 facet, khong chi facet dang chon.
+  // Loc hien thi theo status + service o client (data da tai day du trong
+  // khoang thoi gian). StatusFacets/ServiceFacets van nhan `data.clusters`
+  // CHUA LOC de dem dung tong so luong cho moi facet (khong doi theo facet
+  // kia dang chon - giu don gian, khong cross-filter giua 2 facet).
   const filtered = useMemo(() => {
     if (!data) return undefined;
-    return status === "all" ? data.clusters : data.clusters.filter((c) => c.status === status);
-  }, [data, status]);
+    return data.clusters.filter((c) =>
+      (status === "all" || c.status === status) &&
+      (service === "all" || (c.service || "unknown") === service));
+  }, [data, status, service]);
 
   return (
     <AppShell title="Dashboard">
@@ -83,8 +88,9 @@ export function DashboardPage() {
           <h2 className="mb-3 text-sm font-semibold text-muted-foreground">Cụm bất thường</h2>
 
           <div className="grid gap-4 lg:grid-cols-[180px_1fr]">
-            <aside className="lg:sticky lg:top-6 lg:self-start">
+            <aside className="lg:sticky lg:top-6 lg:self-start space-y-4">
               {data && <StatusFacets clusters={data.clusters} value={status} onChange={setStatus} />}
+              {data && <ServiceFacets clusters={data.clusters} value={service} onChange={setService} />}
             </aside>
 
             {isLoading ? (

@@ -10,11 +10,8 @@ const FACETS: { value: ClusterStatus | "all"; label: string }[] = [
 ];
 
 // Facet tinh client-side tu danh sach cum DA TAI (so cum demo-scale, khong
-// can aggregation endpoint rieng). Chi facet theo `status`: ClusterRecord
-// (cluster-record.schema.json, additionalProperties: false) KHONG co field
-// `service` - service chi nam trong cluster_id dang sha1 mot chieu, khong
-// doc nguoc lai duoc. Muon facet theo service phai doi contract (Nam), chua
-// lam o day.
+// can aggregation endpoint rieng). Facet theo `service` o ServiceFacets.tsx
+// (component rieng, cung pattern) - 2 facet ket hop AND trong DashboardPage.
 export function StatusFacets({
   clusters, value, onChange,
 }: {

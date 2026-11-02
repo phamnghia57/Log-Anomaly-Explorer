@@ -42,7 +42,12 @@ export function ClusterCard({ cluster: c }: { cluster: ClusterRecord }) {
     <Link to={`/clusters/${encodeURIComponent(c.cluster_id)}`}>
       <Card className="h-full py-4 transition hover:border-primary/40 hover:shadow-md">
         <CardHeader className="flex-row items-start justify-between gap-2 px-4">
-          <ClusterStatusBadge status={c.status} />
+          <div className="flex items-center gap-2">
+            <ClusterStatusBadge status={c.status} />
+            {c.service && (
+              <span className="truncate font-mono text-[10px] text-muted-foreground">{c.service}</span>
+            )}
+          </div>
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <GitBranch className="h-3 w-3" />
             {(c.trace_ids ?? []).length}

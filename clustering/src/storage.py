@@ -17,7 +17,7 @@ class OpenSearchStore:
     def ensure_ready(self):
         self.log_store.ensure_ready()
         fields = {name: {"type": "keyword"} for name in
-                  ("cluster_id", "signature", "log_ids", "trace_ids", "status")}
+                  ("cluster_id", "service", "signature", "log_ids", "trace_ids", "status")}
         fields.update(score={"type": "double"}, first_seen={"type": "date"}, last_seen={"type": "date"})
         try:
             if not self.client.indices.exists(index=self.clusters):

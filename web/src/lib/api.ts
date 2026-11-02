@@ -47,6 +47,7 @@ export type ClusterStatus = "normal" | "anomalous" | "alerted";
 // (+ "logs" duoc query-api dien them o GET /clusters/{id}, xem api-contract.md)
 export interface ClusterRecord {
   cluster_id: string;
+  service?: string;
   signature?: string;
   score: number;
   log_ids?: string[];
