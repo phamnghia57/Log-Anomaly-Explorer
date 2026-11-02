@@ -1,4 +1,4 @@
-import { Activity, LayoutDashboard, Search } from "lucide-react";
+import { BookOpen, Activity, LayoutDashboard, Search } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -48,6 +48,14 @@ export function AppSidebar() {
                   </NavLink>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Runbook/Docs">
+                  <a href="https://github.com/phamnghia57/Log-Anomaly-Explorer/blob/main/docs/task/runbook.md" target="_blank" rel="noopener noreferrer">
+                    <BookOpen />
+                    <span>Runbook/Docs</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

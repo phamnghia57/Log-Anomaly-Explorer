@@ -66,3 +66,40 @@ def test_khong_co_key_trace_ids_van_gui_duoc(sent):
 def test_duoi_nguong_thi_khong_gui(sent):
     assert alert.check_and_alert(record(score=1.0), "demo-web") is False
     assert sent == []
+
+
+def test_batch_sends_one_digest_and_preserves_cooldown(sent):
+    first, second, normal = record(), record(cluster_id="c2"), record(cluster_id="c3", score=1)
+    records = [("web", first), ("api", second), ("web", normal)]
+    assert alert.check_and_alert_batch(records, window_to="2026-10-26T00:01:00Z") == 2
+    assert len(sent) == 1
+    payload = sent[0]["json"]
+    assert payload["count"] == 2
+    assert [a["service"] for a in payload["alerts"]] == ["web", "api"]
+    assert "c1" in payload["message"] and "c2" in payload["message"]
+    assert payload["window_to"] == "2026-10-26T00:01:00Z"
+    assert [c["status"] for _, c in records] == ["alerted", "alerted", "normal"]
+    assert alert.check_and_alert_batch(records) == 0
+    assert len(sent) == 1
+
+
+def test_failed_batch_retries_all_clusters(monkeypatch, sent):
+    post = alert.httpx.post
+    def fail(*args, **kwargs):
+        raise httpx.ConnectError("offline")
+    monkeypatch.setattr(alert.httpx, "post", fail)
+    records = [("web", record()), ("api", record(cluster_id="c2"))]
+    assert alert.check_and_alert_batch(records) == 0
+    assert all(c["status"] == "anomalous" for _, c in records)
+    monkeypatch.setattr(alert.httpx, "post", post)
+    assert alert.check_and_alert_batch(records) == 2
+    assert len(sent) == 1
+
+
+def test_missing_webhook_does_not_start_cooldown(monkeypatch, sent):
+    records = [("web", record())]
+    monkeypatch.delenv("ALERT_WEBHOOK_URL")
+    assert alert.check_and_alert_batch(records) == 0
+    assert records[0][1]["status"] == "anomalous"
+    monkeypatch.setenv("ALERT_WEBHOOK_URL", "http://webhook.test/hook")
+    assert alert.check_and_alert_batch(records) == 1
