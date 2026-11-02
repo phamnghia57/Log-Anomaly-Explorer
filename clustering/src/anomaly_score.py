@@ -61,6 +61,7 @@ def compute_anomaly_score(
 
     return {
         "cluster_id": make_cluster_id(service, signature),
+        "service": service,
         "signature": signature,
         "score": score,
         "log_ids": [log["log_id"] for log in logs if log.get("log_id")],

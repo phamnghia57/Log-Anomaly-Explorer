@@ -4,11 +4,15 @@
   "title": "ClusterRecord",
   "description": "Hop dong du lieu giua clustering (Nam) va query-api / incident view (Nghia). Moi cum loi sau khi cham diem bat thuong duoc luu theo dinh dang nay.",
   "type": "object",
-  "required": ["cluster_id", "score", "log_ids", "first_seen", "last_seen", "status"],
+  "required": ["cluster_id", "score", "log_ids", "first_seen", "last_seen", "status", "service"],
   "properties": {
     "cluster_id": {
       "type": "string",
       "description": "Dinh danh duy nhat cho mot cum loi tuong tu"
+    },
+    "service": {
+      "type": "string",
+      "description": "Ten service cua cac log thuoc cum nay (mot cum chi gom log cua dung 1 service - xem compute_anomaly_score). Dung de facet theo service o Dashboard."
     },
     "signature": {
       "type": "string",
