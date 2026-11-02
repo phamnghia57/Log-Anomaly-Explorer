@@ -5,7 +5,7 @@ import os
 import time
 from datetime import datetime, timedelta, timezone
 
-from .alert import check_and_alert, get_threshold
+from .alert import check_and_alert_batch, get_threshold
 from .anomaly_score import _parse_ts
 from .pipeline import analyze
 from .storage import OpenSearchStore
@@ -42,10 +42,12 @@ def main():
             logs = list(store.read_logs(start.isoformat(), end.isoformat()))
             records = analyze(logs, end.isoformat(), window_seconds=seconds,
                               history_windows=history, threshold=get_threshold(), augmenter=augmenter)
-            for service, record in records:
+            for _, record in records:
                 store.write_cluster(record)
-                check_and_alert(record, service)
+            check_and_alert_batch(records, window_to=end.isoformat())
+            for _, record in records:
                 store.write_cluster(record)
+                store.write_history(record, end.isoformat())
             logging.info("Processed %s: %d clusters", end.isoformat(), len(records))
             if args.once or args.window_to:
                 break

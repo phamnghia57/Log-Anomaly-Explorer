@@ -47,47 +47,53 @@ def reset_alert_state() -> None:
 
 
 def check_and_alert(cluster: dict, service: str = "") -> bool:
-    """Neu cluster['score'] > ANOMALY_THRESHOLD: gui alert va cap nhat status.
+    """Compatibility entry point for sending one cluster."""
+    return bool(check_and_alert_batch([(service, cluster)]))
 
-    Tra ve True neu da gui alert. Payload gui di xem docs/architect/contracts/api-contract.md.
-    """
-    if cluster["score"] <= get_threshold():
-        cluster["status"] = "normal"
-        return False
 
-    cluster["status"] = "anomalous"
-    cluster_id = cluster["cluster_id"]
-
-    last = _last_alert.get(cluster_id)
-    if last is not None and time.monotonic() - last < _float_env(
-        "ALERT_COOLDOWN_SECONDS", DEFAULT_COOLDOWN_SECONDS
-    ):
-        cluster["status"] = "alerted"  # da bao gan day, khong gui lai
-        return False
-
+def check_and_alert_batch(records, *, window_to=None) -> int:
+    """Send one digest per cycle; only successful delivery starts cooldown."""
+    pending = []
+    for service, cluster in records:
+        if cluster["score"] <= get_threshold():
+            cluster["status"] = "normal"
+            continue
+        cluster["status"] = "anomalous"
+        last = _last_alert.get(cluster["cluster_id"])
+        if last is not None and time.monotonic() - last < _float_env(
+            "ALERT_COOLDOWN_SECONDS", DEFAULT_COOLDOWN_SECONDS
+        ):
+            cluster["status"] = "alerted"
+            continue
+        pending.append((service, cluster))
+    if not pending:
+        return 0
     webhook = get_webhook_url()
     if not webhook:
-        # Chua cau hinh webhook: giu "anomalous" (chua gui), khong gia vo da gui.
-        logger.warning("ALERT_WEBHOOK_URL chua cau hinh - cum %s vuot nguong nhung chua gui alert", cluster_id)
-        return False
-
-    payload = {
-        "cluster_id": cluster_id,
-        "score": cluster["score"],
-        "service": service,
-        "first_seen": cluster["first_seen"],
-        # Mot trace dai dien cua cum, de kenh nhan alert ghep duoc link mo
-        # thang trace do tren Jaeger (/jaeger/trace/{trace_id}). Luon co key
-        # (null khi cum khong co trace nao) de template ben nhan khong vo.
+        logger.warning("ALERT_WEBHOOK_URL is missing; %d alerts remain unsent", len(pending))
+        return 0
+    alerts = [{
+        "cluster_id": cluster["cluster_id"], "score": cluster["score"],
+        "service": service, "first_seen": cluster["first_seen"],
         "trace_id": next(iter(cluster.get("trace_ids") or []), None),
-    }
+    } for service, cluster in pending]
+    subject = f"Log Anomaly Explorer: {len(alerts)} alerts"
+    message = "\n\n".join(
+        f"Service: {a['service']}\nCluster: {a['cluster_id']}\nScore: {a['score']}"
+        f"\nFirst seen: {a['first_seen']}\nTrace: {a['trace_id'] or '-'}"
+        for a in alerts
+    )
+    # Keep legacy fields for existing consumers; digest consumers use alerts/message.
+    payload = {**alerts[0], "alerts": alerts, "count": len(alerts),
+               "window_to": window_to, "subject": subject, "message": message}
     try:
         response = httpx.post(webhook, json=payload, timeout=3.0)
         response.raise_for_status()
     except httpx.HTTPError as exc:
-        logger.error("gui alert that bai cho cum %s: %s", cluster_id, exc)
-        return False  # van "anomalous", lan chay sau se thu lai
-
-    _last_alert[cluster_id] = time.monotonic()
-    cluster["status"] = "alerted"
-    return True
+        logger.error("Alert digest failed: %s", exc)
+        return 0
+    sent_at = time.monotonic()
+    for _, cluster in pending:
+        _last_alert[cluster["cluster_id"]] = sent_at
+        cluster["status"] = "alerted"
+    return len(pending)
