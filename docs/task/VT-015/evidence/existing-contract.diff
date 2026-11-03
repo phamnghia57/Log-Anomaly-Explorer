@@ -1,0 +1,17 @@
+﻿diff --git a/docs/architect/contracts/api-contract.md b/docs/architect/contracts/api-contract.md
+index 797fe62..827e52e 100644
+--- a/docs/architect/contracts/api-contract.md
++++ b/docs/architect/contracts/api-contract.md
+@@ -198,3 +198,12 @@ phí Azure OpenAI và độ trễ.
+ `https://jp.cloud.langfuse.com`) — tự động, không cần đổi code gọi Azure OpenAI (dùng wrapper
+ `langfuse.openai.AzureOpenAI`). Để trống 2 key thì assistant vẫn chạy bình thường, chỉ không gửi
+ trace.
++
++### Alert digest (one request per worker cycle)
++
++The worker sends `{ "alerts": [<Alert>, ...], "count": N, "window_to": "ISO8601",
++"subject": "Log Anomaly Explorer: N alerts", "message": "plain-text digest" }`.
++Each Alert has the five fields shown above. Legacy top-level fields mirror the first
++Alert. Email integrations must map `subject` and `message` to one email, without
++iterating the array. Normal clusters and clusters within cooldown are excluded.
++Only a successful webhook response marks pending clusters alerted and starts cooldown.
