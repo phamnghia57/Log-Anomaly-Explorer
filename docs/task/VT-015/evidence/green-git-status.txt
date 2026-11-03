@@ -1,0 +1,11 @@
+ M docs/architect/contracts/api-contract.md
+ M query-api/src/auth.py
+ M query-api/src/main.py
+ M query-api/src/tokens.py
+?? docs/task/VT-015/evidence/green-auth-admin-pytest.txt
+?? docs/task/VT-015/evidence/green-existing-pytest.txt
+?? docs/task/VT-015/evidence/green-patch.diff
+?? docs/task/VT-015/evidence/green-vt015-pytest.txt
+?? docs/task/VT-015/evidence/red-commit.txt
+?? query-api/src/approvals.py
+?? query-api/tests/test_vt015_green_regression.py
