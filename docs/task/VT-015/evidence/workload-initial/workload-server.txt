@@ -1,0 +1,2 @@
+Chua doc duoc cum (ValueError: Clustering requires STORAGE_BACKEND=opensearch) - /clusters* se tra 503
+Chua dung duoc kho hoi thoai AI Assistant (ValueError: Assistant conversation storage requires STORAGE_BACKEND=opensearch) - /assistant/* se tra 503

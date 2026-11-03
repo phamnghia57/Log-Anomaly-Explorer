@@ -1,0 +1,1 @@
+PASS: 162 CSV rows, no errors; every p50/p95/p99/max independently recomputed; response counts match; 82 unique persisted documents; same-ID batches exactly one winner/document; independent batch exactly 80 winners/documents.
