@@ -16,14 +16,15 @@ ApprovalRepository = importlib.import_module("query-api.src.approvals").Approval
 
 
 def test_reviewer_login_and_assistant_denial(monkeypatch, admin_auth):
+    # Patch State's backing mapping so teardown restores keys rather than deleting them.
     repository = Mock()
     repository.get.return_value = {
         "username": "reviewer-a", "role": "reviewer",
         "password_hash": passwords.hash_password("reviewer-password"),
     }
-    monkeypatch.setattr(main.app.state, "user_repository", repository)
+    monkeypatch.setitem(main.app.state._state, "user_repository", repository)
     conversations = Mock()
-    monkeypatch.setattr(main.app.state, "assistant_conversations", conversations)
+    monkeypatch.setitem(main.app.state._state, "assistant_conversations", conversations)
     with TestClient(main.app) as client:
         response = client.post("/auth/login", json={
             "username": "reviewer-a", "password": "reviewer-password",

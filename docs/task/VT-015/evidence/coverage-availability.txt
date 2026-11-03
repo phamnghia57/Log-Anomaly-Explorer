@@ -1,0 +1,4 @@
+Command: .venv-vt015/Scripts/python.exe -m pip show pytest-cov coverage
+WARNING: Package(s) not found: coverage, pytest-cov
+
+Exit code: 1
