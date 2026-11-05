@@ -1,0 +1,3 @@
+﻿ M docs/architect/contracts/api-contract.md
+?? docs/task/VT-015/
+?? query-api/tests/test_vt015_approval.py

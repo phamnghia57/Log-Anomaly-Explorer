@@ -26,7 +26,8 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timedelta, timezone
 
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import Body, Depends, FastAPI, HTTPException, Query, Request
+from pydantic import BaseModel, ConfigDict
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
@@ -34,7 +35,8 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from ingestion.src import config
 from ingestion.src.storage import LogStore, OpenSearchLogStore, StorageError, build_store
 
-from .auth import require_admin, router as auth_router
+from .auth import require_admin, require_reviewer, router as auth_router
+from .approvals import ApprovalRepository
 from .assistant.router import router as assistant_router
 from .assistant.storage import ConversationRepository
 from .telemetry import setup_telemetry
@@ -70,6 +72,7 @@ setup_telemetry(app)
 store: LogStore = build_store()
 # Dung lai client hien co; memory backend chi ho tro cac route doc/dev, khong login.
 app.state.user_repository = UserRepository(store) if isinstance(store, OpenSearchLogStore) else None
+app.state.approval_repository = ApprovalRepository(store) if isinstance(store, OpenSearchLogStore) else None
 app.include_router(auth_router)
 
 
@@ -158,7 +161,7 @@ def health():
     return JSONResponse(status_code=200 if ok else 503, content=body)
 
 
-@app.get("/search", dependencies=[Depends(require_admin)])
+@app.get("/search", dependencies=[Depends(require_reviewer)])
 def search(
     service: str | None = None,
     trace_id: str | None = None,
@@ -213,7 +216,7 @@ def _require_cluster_store():
     return cluster_store
 
 
-@app.get("/clusters", dependencies=[Depends(require_admin)])
+@app.get("/clusters", dependencies=[Depends(require_reviewer)])
 def list_clusters(
     status: str | None = None,
     since: str | None = None,
@@ -237,7 +240,7 @@ def list_clusters(
     return {"total": len(results), "clusters": results}
 
 
-@app.get("/clusters/{cluster_id}", dependencies=[Depends(require_admin)])
+@app.get("/clusters/{cluster_id}", dependencies=[Depends(require_reviewer)])
 def get_cluster(
     cluster_id: str,
     logs_limit: int = Query(default=config.DEFAULT_SEARCH_LIMIT, ge=1, le=config.MAX_SEARCH_LIMIT),
@@ -265,7 +268,7 @@ def get_cluster(
     return {**cluster, "logs": logs, "logs_total": len(log_ids)}
 
 
-@app.get("/clusters/{cluster_id}/history", dependencies=[Depends(require_admin)])
+@app.get("/clusters/{cluster_id}/history", dependencies=[Depends(require_reviewer)])
 def get_cluster_history(
     cluster_id: str,
     since: str | None = None,
@@ -291,3 +294,43 @@ def get_cluster_history(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from None
     return {"cluster_id": cluster_id, "points": points}
+
+
+class ApprovalRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
+def _approval_repository(request: Request):
+    repository = request.app.state.approval_repository
+    if repository is None:
+        raise HTTPException(status_code=503, detail="Approval storage unavailable")
+    return repository
+
+
+@app.post("/clusters/{cluster_id}/approval", status_code=201)
+def approve_cluster(
+    cluster_id: str,
+    request: Request,
+    payload: ApprovalRequest = Body(default=ApprovalRequest()),
+    actor: dict = Depends(require_reviewer),
+):
+    if _require_cluster_store().get_cluster(cluster_id) is None:
+        raise HTTPException(status_code=404, detail="cluster not found")
+    document = {
+        "cluster_id": cluster_id,
+        "approved_by": actor["sub"],
+        "approved_at": datetime.now(timezone.utc).isoformat(),
+    }
+    if not _approval_repository(request).create(document):
+        raise HTTPException(status_code=409, detail="cluster already approved")
+    return document
+
+
+@app.get("/clusters/{cluster_id}/approval", dependencies=[Depends(require_reviewer)])
+def get_cluster_approval(cluster_id: str, request: Request):
+    if _require_cluster_store().get_cluster(cluster_id) is None:
+        raise HTTPException(status_code=404, detail="cluster not found")
+    document = _approval_repository(request).get(cluster_id)
+    if document is None:
+        raise HTTPException(status_code=404, detail="approval not found")
+    return document

@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/phamnghia57/Log-Anomaly-Explorer/docs/architect/contracts/users-schema.json",
-  "title": "AdminUser",
-  "description": "THIET KE - chua co code tuong ung. Hop dong cho index moi `users` trong OpenSearch sieng co (khong them database moi), phuc vu tinh nang Auth (xem api-contract.md muc 'Auth'). Chi dung cho dang nhap admin, KHONG co public signup.",
+  "title": "User",
+  "description": "Users index for admin and reviewer authentication. Accounts are explicitly provisioned; no public signup.",
   "type": "object",
   "required": ["username", "password_hash", "role", "created_at"],
   "properties": {
@@ -16,8 +16,8 @@
     },
     "role": {
       "type": "string",
-      "enum": ["admin"],
-      "description": "Chi co 1 vai tro o ban dau - de ngo mo rong sau nay (vd. 'viewer')"
+      "enum": ["admin", "reviewer"],
+      "description": "Role assigned during explicit provisioning, never supplied by a login request."
     },
     "created_at": { "type": "string", "format": "date-time" },
     "last_login_at": {

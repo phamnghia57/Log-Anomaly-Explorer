@@ -1,0 +1,12 @@
+[
+  {
+    "url": "http://127.0.0.1:9200/",
+    "error_type": "URLError",
+    "error": "<urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>"
+  },
+  {
+    "url": "https://127.0.0.1:9200/",
+    "error_type": "URLError",
+    "error": "<urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>"
+  }
+]

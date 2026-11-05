@@ -1,0 +1,97 @@
+Command: git rev-parse HEAD
+0ae83dc5c70dab310fe78d6d31ff7aae66db2342
+Exit code: 0
+
+Command: git branch --show-current
+bt3/23001907-vt015
+Exit code: 0
+
+Command: git status --short
+ M docs/architect/contracts/api-contract.md
+ M docs/architect/contracts/users-schema.json
+ M query-api/src/approvals.py
+ M query-api/src/users.py
+?? docs/task/VT-015/README.md
+?? docs/task/VT-015/ai-usage-log.md
+?? docs/task/VT-015/evidence-index.md
+?? docs/task/VT-015/evidence/submission-audit.txt
+?? docs/task/VT-015/evidence/submission-coverage.data
+?? docs/task/VT-015/evidence/submission-coverage.json
+?? docs/task/VT-015/evidence/submission-doc-checks.txt
+?? docs/task/VT-015/evidence/submission-pytest.txt
+?? docs/task/VT-015/evidence/submission-setup-pytest.txt
+?? docs/task/VT-015/evidence/submission-setup-review.md
+?? docs/task/VT-015/personal-reflection-vi.md
+?? docs/task/VT-015/traceability-matrix.md
+?? query-api/src/setup_reviewer.py
+?? query-api/tests/test_vt015_setup.py
+Exit code: 0
+
+Command: git diff --stat
+ docs/architect/contracts/api-contract.md   |  9 +++++++++
+ docs/architect/contracts/users-schema.json |  8 ++++----
+ query-api/src/approvals.py                 | 26 +++++++++++++++++++++++++-
+ query-api/src/users.py                     | 22 ++++++++++++++++++++++
+ 4 files changed, 60 insertions(+), 5 deletions(-)
+Exit code: 0
+
+Command: git diff --check
+Exit code: 0
+
+Command: git diff a4f13a37942606572f98c70fe5df05bedd7d0868 -- query-api/tests/test_vt015_approval.py
+Exit code: 0
+
+Unchanged unrelated API contract SHA256: 6991aa03dfc314305a94f862e139772a81c12e2cb754d33492984250c0cd7018
+
+Final per-module line/branch coverage (not combined percentage):
+query-api\src\approvals.py: line 100.00%; branch 100.00%; missing lines=[]; missing arcs=[]
+query-api\src\auth.py: line 100.00%; branch 100.00%; missing lines=[]; missing arcs=[]
+query-api\src\main.py: line 95.59%; branch 85.71%; missing lines=[108, 109, 110, 152, 275, 276]; missing arcs=[[106, 108], [151, 152], [214, 217], [270, 273]]
+query-api\src\setup_reviewer.py: line 97.22%; branch 87.50%; missing lines=[49]; missing arcs=[[48, 49]]
+query-api\src\tokens.py: line 97.14%; branch 100.00%; missing lines=[52]; missing arcs=[]
+query-api\src\users.py: line 93.94%; branch 87.50%; missing lines=[65, 85, 107, 108]; missing arcs=[[64, 65], [84, 85]]
+
+FINAL STAGED REVIEW
+PASS: exactly 17 explicitly permitted VT-015 setup, schema, test and submission files staged.
+PASS: git diff --cached --check (exit 0, no output).
+PASS: unrelated api-contract.md excluded from staging and unchanged SHA256.
+Command: git diff --cached --stat
+ docs/architect/contracts/users-schema.json         |   8 +-
+ docs/task/VT-015/README.md                         | 216 +++++++++++++++++++++
+ docs/task/VT-015/ai-usage-log.md                   |  48 +++++
+ docs/task/VT-015/evidence-index.md                 |  93 +++++++++
+ docs/task/VT-015/evidence/submission-audit.txt     |  52 +++++
+ docs/task/VT-015/evidence/submission-coverage.data | Bin 0 -> 77824 bytes
+ docs/task/VT-015/evidence/submission-coverage.json |   1 +
+ .../task/VT-015/evidence/submission-doc-checks.txt |   3 +
+ docs/task/VT-015/evidence/submission-pytest.txt    |  30 +++
+ .../VT-015/evidence/submission-setup-pytest.txt    |  11 ++
+ .../VT-015/evidence/submission-setup-review.md     |  73 +++++++
+ docs/task/VT-015/personal-reflection-vi.md         |  17 ++
+ docs/task/VT-015/traceability-matrix.md            |  39 ++++
+ query-api/src/approvals.py                         |  26 ++-
+ query-api/src/setup_reviewer.py                    |  49 +++++
+ query-api/src/users.py                             |  22 +++
+ query-api/tests/test_vt015_setup.py                | 209 ++++++++++++++++++++
+ 17 files changed, 892 insertions(+), 5 deletions(-)
+Exit code: 0
+Command: git status --short
+ M docs/architect/contracts/api-contract.md
+M  docs/architect/contracts/users-schema.json
+A  docs/task/VT-015/README.md
+A  docs/task/VT-015/ai-usage-log.md
+A  docs/task/VT-015/evidence-index.md
+A  docs/task/VT-015/evidence/submission-audit.txt
+A  docs/task/VT-015/evidence/submission-coverage.data
+A  docs/task/VT-015/evidence/submission-coverage.json
+A  docs/task/VT-015/evidence/submission-doc-checks.txt
+A  docs/task/VT-015/evidence/submission-pytest.txt
+A  docs/task/VT-015/evidence/submission-setup-pytest.txt
+A  docs/task/VT-015/evidence/submission-setup-review.md
+A  docs/task/VT-015/personal-reflection-vi.md
+A  docs/task/VT-015/traceability-matrix.md
+M  query-api/src/approvals.py
+A  query-api/src/setup_reviewer.py
+M  query-api/src/users.py
+A  query-api/tests/test_vt015_setup.py
+Exit code: 0

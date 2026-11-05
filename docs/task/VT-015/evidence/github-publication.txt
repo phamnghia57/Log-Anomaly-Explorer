@@ -1,0 +1,51 @@
+VT-015 GitHub publication and draft preparation
+
+Verified before publication:
+Branch: bt3/23001907-vt015
+HEAD: 15bbd209de9a3e2b7f892d31798bd62924c63d72
+origin fetch/push: https://github.com/phamnghia57/Log-Anomaly-Explorer.git
+Index empty; only pre-existing api-contract.md modified.
+No api-contract.md commit in baseline..HEAD; committed content unchanged from baseline.
+
+Command: git ls-remote --symref origin HEAD
+Observed exit: 0
+ref: refs/heads/main HEAD
+836e0dfc34b7b4308cabef83047eb9aa57ad7d88 HEAD
+
+Command: git push --no-follow-tags origin refs/heads/bt3/23001907-vt015:refs/heads/bt3/23001907-vt015
+Observed exit: 0
+To https://github.com/phamnghia57/Log-Anomaly-Explorer.git
+ * [new branch] bt3/23001907-vt015 -> bt3/23001907-vt015
+No force-push, tags, main push, merge or PR creation.
+
+Command: git ls-remote origin refs/heads/bt3/23001907-vt015
+Observed exit: 0
+15bbd209de9a3e2b7f892d31798bd62924c63d72 refs/heads/bt3/23001907-vt015
+Branch URL: https://github.com/phamnghia57/Log-Anomaly-Explorer/tree/bt3/23001907-vt015
+
+PR base: main (actual remote default branch).
+Common ancestor: 50a3af1a159253d9f4d414fb54a4a90b1c4eba4a
+Main-only commits: 11; head-only commits: 5.
+No merge/rebase or tests combining the current main with this head were performed.
+
+Draft preparation checks:
+PASS: eight planned report page blocks, seven explicit page breaks.
+Rendered PDF pagination NOT verified; no PDF generated. Later render must enforce <=8 pages.
+PASS: exact 317-word Vietnamese reflection body copied from committed source.
+PASS: local report/PR Markdown links resolve.
+PASS: all ten pinned evidence references exist in published commit.
+PASS: index still empty; API contract remains unchanged and unstaged.
+No repeated test/mutation/performance phases during source-only preparation.
+Report, PR draft and this publication record are uncommitted local review artifacts.
+Contract SHA256: 6991aa03dfc314305a94f862e139772a81c12e2cb754d33492984250c0cd7018
+
+Command: git rev-parse HEAD
+15bbd209de9a3e2b7f892d31798bd62924c63d72
+Exit code: 0
+Command: git status --short
+ M docs/architect/contracts/api-contract.md
+?? docs/task/VT-015/academic-report-source.md
+?? docs/task/VT-015/pr-draft.md
+Exit code: 0
+Command: git diff --check
+Exit code: 0

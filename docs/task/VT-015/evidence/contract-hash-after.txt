@@ -1,0 +1,8 @@
+﻿
+
+Algorithm : SHA256
+Hash      : 6991AA03DFC314305A94F862E139772A81C12E2CB754D33492984250C0CD7018
+Path      : D:\Log-Anomaly-Explorer\docs\architect\contracts\api-contract.md
+
+
+

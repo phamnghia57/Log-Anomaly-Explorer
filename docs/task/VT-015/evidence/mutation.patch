@@ -1,0 +1,18 @@
+diff --git a/query-api/src/approvals.py b/query-api/src/approvals.py
+index 84139fd..a86e4ff 100644
+--- a/query-api/src/approvals.py
++++ b/query-api/src/approvals.py
+@@ -13,11 +13,11 @@ class ApprovalRepository:
+     def create(self, document: dict) -> bool:
+         try:
+             # A deterministic ID and _create arbitrate competing processes in storage.
+-            result = self.client.create(
++            result = self.client.index(
+                 index=self.index, id=document["cluster_id"], body=document,
+                 refresh="wait_for",
+             )
+-            if result.get("result") != "created":
++            if result.get("result") not in ("created", "updated"):
+                 raise StorageError("approval creation was not confirmed")
+             return True
+         except ConflictError:

@@ -1,0 +1,33 @@
+Command: git branch --show-current
+bt3/23001907-vt015
+Exit code: 0
+
+Command: git diff e0c5a4f2600e562bf0e465df300c178b912842d7 -- query-api/src
+Exit code: 0
+
+Command: git diff a4f13a37942606572f98c70fe5df05bedd7d0868 -- query-api/tests/test_vt015_approval.py
+Exit code: 0
+
+Command: git diff --check
+Exit code: 0
+
+Command: git status --short
+ M docs/architect/contracts/api-contract.md
+ M query-api/tests/test_vt015_green_regression.py
+?? docs/task/VT-015/evidence/PATCH-mutation-review.md
+?? docs/task/VT-015/evidence/concurrency-repeats.txt
+?? docs/task/VT-015/evidence/coverage-availability.txt
+?? docs/task/VT-015/evidence/final-all-pytest.txt
+?? docs/task/VT-015/evidence/final-restoration-audit.txt
+?? docs/task/VT-015/evidence/green-commit.txt
+?? docs/task/VT-015/evidence/mutation-pytest.txt
+?? docs/task/VT-015/evidence/mutation.patch
+?? docs/task/VT-015/evidence/restored-all-pytest.txt
+?? docs/task/VT-015/evidence/shared-state-minimal-after.txt
+?? docs/task/VT-015/evidence/shared-state-minimal-before.txt
+?? docs/task/VT-015/evidence/shared-state-shuffled-after.txt
+?? docs/task/VT-015/evidence/shared-state-shuffled-pytest.txt
+?? docs/task/VT-015/evidence/shuffled_suite.py
+Exit code: 0
+
+Contract SHA256: 6991aa03dfc314305a94f862e139772a81c12e2cb754d33492984250c0cd7018

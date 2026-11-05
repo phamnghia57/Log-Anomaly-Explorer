@@ -1,0 +1,308 @@
+diff --git a/query-api/src/auth.py b/query-api/src/auth.py
+index 3ea9e5f..a36cf4f 100644
+--- a/query-api/src/auth.py
++++ b/query-api/src/auth.py
+@@ -36,7 +36,7 @@ _DUMMY_HASH = hash_password(secrets.token_urlsafe(32))
+ _bearer = HTTPBearer(auto_error=False)
+ 
+ 
+-def require_admin(
++def require_reviewer(
+     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
+ ) -> dict:
+     """Verify JWT truoc khi query storage; missing/malformed token deu tra 401."""
+@@ -54,6 +54,12 @@ def require_admin(
+         raise HTTPException(status_code=503, detail="Authentication unavailable") from None
+ 
+ 
++def require_admin(claims: dict = Depends(require_reviewer)) -> dict:
++    if claims["role"] != "admin":
++        raise HTTPException(status_code=403, detail="Admin access required")
++    return claims
++
++
+ class LoginRequest(BaseModel):
+     username: StrictStr
+     password: SecretStr
+@@ -87,12 +93,12 @@ def login(
+         credentials.password.get_secret_value(),
+         stored_hash if isinstance(stored_hash, str) else _DUMMY_HASH,
+     )
+-    if (not valid_password or not user or user.get("role") != "admin"
++    if (not valid_password or not user or user.get("role") not in ("admin", "reviewer")
+             or user.get("username") != credentials.username):
+         raise HTTPException(status_code=401, detail="Invalid username or password")
+ 
+     try:
+-        result = create_access_token(user["username"])
++        result = create_access_token(user["username"], role=user["role"])
+     except JWTConfigurationError:
+         raise HTTPException(status_code=503, detail="Authentication unavailable") from None
+     response.headers["Cache-Control"] = "no-store"
+diff --git a/query-api/src/main.py b/query-api/src/main.py
+index 512305a..bba67c2 100644
+--- a/query-api/src/main.py
++++ b/query-api/src/main.py
+@@ -26,7 +26,8 @@ from __future__ import annotations
+ import logging
+ from datetime import datetime, timedelta, timezone
+ 
+-from fastapi import Depends, FastAPI, HTTPException, Query
++from fastapi import Body, Depends, FastAPI, HTTPException, Query, Request
++from pydantic import BaseModel, ConfigDict
+ from fastapi.middleware.cors import CORSMiddleware
+ from fastapi.responses import JSONResponse
+ from prometheus_fastapi_instrumentator import Instrumentator
+@@ -34,7 +35,8 @@ from prometheus_fastapi_instrumentator import Instrumentator
+ from ingestion.src import config
+ from ingestion.src.storage import LogStore, OpenSearchLogStore, StorageError, build_store
+ 
+-from .auth import require_admin, router as auth_router
++from .auth import require_admin, require_reviewer, router as auth_router
++from .approvals import ApprovalRepository
+ from .assistant.router import router as assistant_router
+ from .assistant.storage import ConversationRepository
+ from .telemetry import setup_telemetry
+@@ -70,6 +72,7 @@ setup_telemetry(app)
+ store: LogStore = build_store()
+ # Dung lai client hien co; memory backend chi ho tro cac route doc/dev, khong login.
+ app.state.user_repository = UserRepository(store) if isinstance(store, OpenSearchLogStore) else None
++app.state.approval_repository = ApprovalRepository(store) if isinstance(store, OpenSearchLogStore) else None
+ app.include_router(auth_router)
+ 
+ 
+@@ -158,7 +161,7 @@ def health():
+     return JSONResponse(status_code=200 if ok else 503, content=body)
+ 
+ 
+-@app.get("/search", dependencies=[Depends(require_admin)])
++@app.get("/search", dependencies=[Depends(require_reviewer)])
+ def search(
+     service: str | None = None,
+     trace_id: str | None = None,
+@@ -194,7 +197,7 @@ def _require_cluster_store():
+     return cluster_store
+ 
+ 
+-@app.get("/clusters", dependencies=[Depends(require_admin)])
++@app.get("/clusters", dependencies=[Depends(require_reviewer)])
+ def list_clusters(
+     status: str | None = None,
+     since: str | None = None,
+@@ -218,7 +221,7 @@ def list_clusters(
+     return {"total": len(results), "clusters": results}
+ 
+ 
+-@app.get("/clusters/{cluster_id}", dependencies=[Depends(require_admin)])
++@app.get("/clusters/{cluster_id}", dependencies=[Depends(require_reviewer)])
+ def get_cluster(
+     cluster_id: str,
+     logs_limit: int = Query(default=config.DEFAULT_SEARCH_LIMIT, ge=1, le=config.MAX_SEARCH_LIMIT),
+@@ -246,7 +249,7 @@ def get_cluster(
+     return {**cluster, "logs": logs, "logs_total": len(log_ids)}
+ 
+ 
+-@app.get("/clusters/{cluster_id}/history", dependencies=[Depends(require_admin)])
++@app.get("/clusters/{cluster_id}/history", dependencies=[Depends(require_reviewer)])
+ def get_cluster_history(
+     cluster_id: str,
+     since: str | None = None,
+@@ -272,3 +275,43 @@ def get_cluster_history(
+     except ValueError as exc:
+         raise HTTPException(status_code=400, detail=str(exc)) from None
+     return {"cluster_id": cluster_id, "points": points}
++
++
++class ApprovalRequest(BaseModel):
++    model_config = ConfigDict(extra="forbid")
++
++
++def _approval_repository(request: Request):
++    repository = request.app.state.approval_repository
++    if repository is None:
++        raise HTTPException(status_code=503, detail="Approval storage unavailable")
++    return repository
++
++
++@app.post("/clusters/{cluster_id}/approval", status_code=201)
++def approve_cluster(
++    cluster_id: str,
++    request: Request,
++    payload: ApprovalRequest = Body(default=ApprovalRequest()),
++    actor: dict = Depends(require_reviewer),
++):
++    if _require_cluster_store().get_cluster(cluster_id) is None:
++        raise HTTPException(status_code=404, detail="cluster not found")
++    document = {
++        "cluster_id": cluster_id,
++        "approved_by": actor["sub"],
++        "approved_at": datetime.now(timezone.utc).isoformat(),
++    }
++    if not _approval_repository(request).create(document):
++        raise HTTPException(status_code=409, detail="cluster already approved")
++    return document
++
++
++@app.get("/clusters/{cluster_id}/approval", dependencies=[Depends(require_reviewer)])
++def get_cluster_approval(cluster_id: str, request: Request):
++    if _require_cluster_store().get_cluster(cluster_id) is None:
++        raise HTTPException(status_code=404, detail="cluster not found")
++    document = _approval_repository(request).get(cluster_id)
++    if document is None:
++        raise HTTPException(status_code=404, detail="approval not found")
++    return document
+diff --git a/query-api/src/tokens.py b/query-api/src/tokens.py
+index 2cf8688..a8e71c4 100644
+--- a/query-api/src/tokens.py
++++ b/query-api/src/tokens.py
+@@ -26,14 +26,16 @@ def jwt_settings() -> tuple[str, int]:
+     return secret, lifetime
+ 
+ 
+-def create_access_token(username: str) -> dict:
++def create_access_token(username: str, role: str = "admin") -> dict:
++    if role not in ("admin", "reviewer"):
++        raise ValueError("Unsupported role")
+     secret, lifetime = jwt_settings()
+     try:
+         expires_at = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(seconds=lifetime)
+     except OverflowError:
+         raise JWTConfigurationError("JWT_EXPIRY_SECONDS is out of range") from None
+     token = jwt.encode(
+-        {"sub": username, "role": "admin", "exp": int(expires_at.timestamp())},
++        {"sub": username, "role": role, "exp": int(expires_at.timestamp())},
+         secret, algorithm=JWT_ALGORITHM,
+     )
+     return {"token": token, "expires_at": expires_at.isoformat()}
+@@ -49,6 +51,6 @@ def decode_access_token(token: str) -> dict:
+     except (TypeError, ValueError, OverflowError):
+         raise jwt.InvalidTokenError("Invalid token claims") from None
+     if (not isinstance(claims["sub"], str) or not claims["sub"].strip()
+-            or claims["role"] != "admin" or type(claims["exp"]) is not int):
+-        raise jwt.InvalidTokenError("Invalid admin token claims")
++            or claims["role"] not in ("admin", "reviewer") or type(claims["exp"]) is not int):
++        raise jwt.InvalidTokenError("Invalid token claims")
+     return claims
+diff --git a/query-api/src/approvals.py b/query-api/src/approvals.py
+new file mode 100644
+index 0000000..84139fd
+--- /dev/null
++++ b/query-api/src/approvals.py
+@@ -0,0 +1,37 @@
++"""Create-only approvals, isolated from original logs, clusters and history."""
++
++from opensearchpy.exceptions import ConflictError, NotFoundError
++
++from ingestion.src.storage import StorageError
++
++
++class ApprovalRepository:
++    def __init__(self, log_store):
++        self.client = log_store.client
++        self.index = "cluster-approvals"
++
++    def create(self, document: dict) -> bool:
++        try:
++            # A deterministic ID and _create arbitrate competing processes in storage.
++            result = self.client.create(
++                index=self.index, id=document["cluster_id"], body=document,
++                refresh="wait_for",
++            )
++            if result.get("result") != "created":
++                raise StorageError("approval creation was not confirmed")
++            return True
++        except ConflictError:
++            return False
++        except Exception:
++            raise StorageError("cannot create approval") from None
++
++    def get(self, cluster_id: str) -> dict | None:
++        try:
++            result = self.client.get(index=self.index, id=cluster_id)
++            return result["_source"] if result.get("found") else None
++        except NotFoundError as exc:
++            if exc.error == "index_not_found_exception":
++                raise StorageError("approval index is missing") from None
++            return None
++        except Exception:
++            raise StorageError("cannot read approval") from None
+diff --git a/query-api/tests/test_vt015_green_regression.py b/query-api/tests/test_vt015_green_regression.py
+new file mode 100644
+index 0000000..eaccabd
+--- /dev/null
++++ b/query-api/tests/test_vt015_green_regression.py
+@@ -0,0 +1,74 @@
++"""Supplemental GREEN checks; the committed RED suite remains unchanged."""
++import importlib
++from types import SimpleNamespace
++from unittest.mock import Mock
++
++import pytest
++from fastapi.testclient import TestClient
++from opensearchpy.exceptions import ConflictError, NotFoundError
++
++from ingestion.src.storage import StorageError
++
++main = importlib.import_module("query-api.src.main")
++tokens = importlib.import_module("query-api.src.tokens")
++passwords = importlib.import_module("query-api.src.passwords")
++ApprovalRepository = importlib.import_module("query-api.src.approvals").ApprovalRepository
++
++
++def test_reviewer_login_and_assistant_denial(monkeypatch, admin_auth):
++    repository = Mock()
++    repository.get.return_value = {
++        "username": "reviewer-a", "role": "reviewer",
++        "password_hash": passwords.hash_password("reviewer-password"),
++    }
++    monkeypatch.setattr(main.app.state, "user_repository", repository)
++    conversations = Mock()
++    monkeypatch.setattr(main.app.state, "assistant_conversations", conversations)
++    with TestClient(main.app) as client:
++        response = client.post("/auth/login", json={
++            "username": "reviewer-a", "password": "reviewer-password",
++        })
++        assert response.status_code == 200
++        token = response.json()["token"]
++        assert tokens.decode_access_token(token)["role"] == "reviewer"
++        headers = {"Authorization": f"Bearer {token}"}
++        for method, path in [
++            ("GET", "/assistant/clusters/c1/conversation"),
++            ("POST", "/assistant/clusters/c1/conversation/messages"),
++        ]:
++            assert client.request(method, path, headers=headers, json={}).status_code == 403
++    assert not conversations.mock_calls
++
++
++def test_repository_uses_separate_index_and_create_only():
++    client = Mock()
++    client.create.return_value = {"result": "created"}
++    repository = ApprovalRepository(SimpleNamespace(client=client))
++    document = {"cluster_id": "c1", "approved_by": "reviewer-a", "approved_at": "now"}
++    assert repository.create(document) is True
++    client.create.assert_called_once_with(
++        index="cluster-approvals", id="c1", body=document, refresh="wait_for",
++    )
++    assert not client.index.called and not client.update.called
++    client.create.side_effect = ConflictError(409, "version_conflict_engine_exception")
++    assert repository.create(document) is False
++
++
++@pytest.mark.parametrize("result,error", [({}, None), (None, TimeoutError())])
++def test_repository_never_reports_unconfirmed_write_as_success(result, error):
++    client = Mock()
++    client.create.return_value = result
++    client.create.side_effect = error
++    with pytest.raises(StorageError):
++        ApprovalRepository(SimpleNamespace(client=client)).create({"cluster_id": "c1"})
++
++
++def test_repository_read_distinguishes_missing_document_and_storage_failure():
++    client = Mock()
++    repository = ApprovalRepository(SimpleNamespace(client=client))
++    client.get.side_effect = NotFoundError(404, "not_found")
++    assert repository.get("c1") is None
++    for error in [NotFoundError(404, "index_not_found_exception"), TimeoutError()]:
++        client.get.side_effect = error
++        with pytest.raises(StorageError):
++            repository.get("c1")

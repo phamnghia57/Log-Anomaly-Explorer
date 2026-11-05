@@ -26,14 +26,16 @@ def jwt_settings() -> tuple[str, int]:
     return secret, lifetime
 
 
-def create_access_token(username: str) -> dict:
+def create_access_token(username: str, role: str = "admin") -> dict:
+    if role not in ("admin", "reviewer"):
+        raise ValueError("Unsupported role")
     secret, lifetime = jwt_settings()
     try:
         expires_at = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(seconds=lifetime)
     except OverflowError:
         raise JWTConfigurationError("JWT_EXPIRY_SECONDS is out of range") from None
     token = jwt.encode(
-        {"sub": username, "role": "admin", "exp": int(expires_at.timestamp())},
+        {"sub": username, "role": role, "exp": int(expires_at.timestamp())},
         secret, algorithm=JWT_ALGORITHM,
     )
     return {"token": token, "expires_at": expires_at.isoformat()}
@@ -49,6 +51,6 @@ def decode_access_token(token: str) -> dict:
     except (TypeError, ValueError, OverflowError):
         raise jwt.InvalidTokenError("Invalid token claims") from None
     if (not isinstance(claims["sub"], str) or not claims["sub"].strip()
-            or claims["role"] != "admin" or type(claims["exp"]) is not int):
-        raise jwt.InvalidTokenError("Invalid admin token claims")
+            or claims["role"] not in ("admin", "reviewer") or type(claims["exp"]) is not int):
+        raise jwt.InvalidTokenError("Invalid token claims")
     return claims
