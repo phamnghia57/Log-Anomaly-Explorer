@@ -6,6 +6,7 @@ import ReactEChartsCore from "echarts-for-react/esm/core";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ClusterRecord } from "@/lib/api";
+import { chartAxis, chartColors, chartTooltip } from "@/lib/chart-theme";
 
 // Import modular (khong phai toan bo "echarts") - chi lay bar chart + grid/
 // tooltip component can dung, giam dang ke bundle size so voi import mac
@@ -13,9 +14,9 @@ import type { ClusterRecord } from "@/lib/api";
 echarts.use([BarChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
 const STATUS_COLOR: Record<ClusterRecord["status"], string> = {
-  normal: "#94a3b8",
-  anomalous: "#f59e0b",
-  alerted: "#ef4444",
+  normal: chartColors.normal,
+  anomalous: chartColors.anomalous,
+  alerted: chartColors.alerted,
 };
 
 // Bieu do cot ngang: diem anomaly score cua tung cum, mau theo status - giup
@@ -34,15 +35,18 @@ export function AnomalyScoreChart({ clusters }: { clusters: ClusterRecord[] }) {
   const option = {
     grid: { left: 8, right: 24, top: 8, bottom: 8, containLabel: true },
     tooltip: {
+      ...chartTooltip,
       trigger: "item",
       formatter: (p: { data: { signature: string; status: string } ; value: number }) =>
         `<div style="max-width:260px;white-space:normal">${p.data.signature}</div>score: <b>${p.value}</b> · ${p.data.status}`,
     },
-    xAxis: { type: "value", splitLine: { lineStyle: { color: "#e2e8f0" } } },
+    xAxis: { ...chartAxis, type: "value" },
     yAxis: {
+      ...chartAxis,
       type: "category",
       data: sorted.map((c) => c.cluster_id),
       axisLabel: {
+        ...chartAxis.axisLabel,
         formatter: (id: string) => {
           const c = sorted.find((x) => x.cluster_id === id);
           const sig = c?.signature || id;
@@ -71,7 +75,7 @@ export function AnomalyScoreChart({ clusters }: { clusters: ClusterRecord[] }) {
     <ReactEChartsCore
       echarts={echarts}
       option={option}
-      style={{ height: Math.max(160, sorted.length * 34) }}
+      style={{ height: Math.max(190, sorted.length * 42) }}
       onEvents={{
         click: (params: { data?: { clusterId?: string } }) => {
           if (params.data?.clusterId) navigate(`/clusters/${encodeURIComponent(params.data.clusterId)}`);

@@ -143,7 +143,7 @@ export function ClusterDetailPage() {
             </Card>
 
             {history && history.points.length > 0 && (
-              <div className="rounded-xl border bg-card p-4">
+              <div className="grafana-panel min-w-0 rounded-xl border bg-card p-4 sm:p-6">
                 <h2 className="mb-3 text-sm font-semibold text-muted-foreground">
                   Xu hướng anomaly score
                 </h2>

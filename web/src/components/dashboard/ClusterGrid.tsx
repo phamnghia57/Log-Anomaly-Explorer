@@ -13,7 +13,7 @@ export function ClusterGrid({ clusters }: { clusters: ClusterRecord[] }) {
   const sorted = [...clusters].sort((a, b) => b.score - a.score);
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="cluster-card-grid min-w-0">
       {sorted.map((c) => (
         <ClusterCard key={c.cluster_id} cluster={c} />
       ))}
