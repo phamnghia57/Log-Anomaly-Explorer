@@ -84,9 +84,9 @@
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
+    --background: #0c0c0e;
     --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
+    --card: #18181b;
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.205 0 0);
     --popover-foreground: oklch(0.985 0 0);
@@ -107,7 +107,7 @@
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
+    --sidebar: #111113;
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.488 0.243 264.376);
     --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -115,6 +115,28 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
+}
+
+.dark .ambient-background {
+  background-color: #0c0c0e;
+  background-image:
+    radial-gradient(ellipse at 5% 0%, #54545845, transparent 50%),
+    radial-gradient(ellipse at 100% 45%, #62626824, transparent 50%),
+    radial-gradient(ellipse at 15% 100%, #47474c35, transparent 45%);
+  background-attachment: fixed;
+}
+
+.dark [data-slot="card"], .dark .grafana-panel {
+  background-color: #18181b;
+  background-image: linear-gradient(140deg, #ffffff05, transparent 60%);
+  border: 1px solid #ffffff12;
+  box-shadow: 0 6px 24px #00000020;
+}
+
+.cluster-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+  gap: 1.25rem;
 }
 
 @layer base {

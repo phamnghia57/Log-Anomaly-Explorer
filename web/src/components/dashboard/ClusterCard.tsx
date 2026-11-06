@@ -39,8 +39,9 @@ export function ClusterCard({ cluster: c }: { cluster: ClusterRecord }) {
   const { data: history } = useClusterHistory(c.cluster_id);
 
   return (
-    <Link to={`/clusters/${encodeURIComponent(c.cluster_id)}`}>
-      <Card className="h-full py-4 transition hover:border-primary/40 hover:shadow-md">
+    <div className="relative min-w-0">
+      <Link to={`/clusters/${encodeURIComponent(c.cluster_id)}`} className="absolute inset-0 rounded-xl focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Open cluster ${c.signature || c.cluster_id}`} />
+      <Card className="grafana-panel pointer-events-none h-full gap-4 py-5 transition hover:border-primary/40">
         <CardHeader className="flex-row items-start justify-between gap-2 px-4">
           <div className="flex items-center gap-2">
             <ClusterStatusBadge status={c.status} />
@@ -72,15 +73,18 @@ export function ClusterCard({ cluster: c }: { cluster: ClusterRecord }) {
 
           <ScoreBar score={c.score} />
 
-          {history && history.points.length > 1 && (
+          {history && history.points.length > 0 && (
             <Suspense fallback={null}>
-              <ClusterCardSparkline points={history.points} />
+              <div className="border-t border-white/5 pt-3">
+                <p className="text-xs font-medium text-foreground/80">Xu hướng anomaly score</p>
+                <ClusterCardSparkline points={history.points} />
+              </div>
             </Suspense>
           )}
 
           <p className="text-xs text-muted-foreground">Gần nhất: {formatRelative(c.last_seen)}</p>
         </CardContent>
       </Card>
-    </Link>
+    </div>
   );
 }

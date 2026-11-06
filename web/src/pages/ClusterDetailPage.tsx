@@ -122,9 +122,10 @@ export function ClusterDetailPage() {
                                   target="_blank"
                                   rel="noreferrer"
                                   title="Xem trace trên Jaeger"
-                                  className="flex items-center border-l border-background/50 px-1.5 text-muted-foreground hover:text-foreground"
+                                  aria-label={`Xem trace trên Jaeger: ${tid}`}
+                                  className="flex items-center gap-1.5 border-l border-background/50 px-2 py-1 text-xs font-medium text-primary hover:bg-accent hover:underline"
                                 >
-                                  <ExternalLink className="h-3 w-3" />
+                                  <ExternalLink className="h-3.5 w-3.5" />
                                 </a>
                               )}
                             </div>
@@ -143,7 +144,7 @@ export function ClusterDetailPage() {
             </Card>
 
             {history && history.points.length > 0 && (
-              <div className="rounded-xl border bg-card p-4">
+              <div className="grafana-panel min-w-0 rounded-xl border bg-card p-4 sm:p-6">
                 <h2 className="mb-3 text-sm font-semibold text-muted-foreground">
                   Xu hướng anomaly score
                 </h2>
