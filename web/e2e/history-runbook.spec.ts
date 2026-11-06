@@ -29,11 +29,13 @@ test("dashboard renders score history and links to the runbook", async ({ page }
   const docs = page.getByRole("link", { name: "Runbook/Docs" });
   await expect(docs).toHaveAttribute("href", "https://github.com/phamnghia57/Log-Anomaly-Explorer/blob/main/docs/task/runbook.md");
   await expect(docs).toHaveAttribute("target", "_blank");
-  const card = page.locator(`a[href="/clusters/${cluster.cluster_id}"]`);
+  const clusterLink = page.locator(`a[href="/clusters/${cluster.cluster_id}"]`);
+  const card = clusterLink.locator("..");
   await expect(card).toContainText(cluster.signature);
   await expect(card.locator("canvas")).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath("dashboard-history.png"), fullPage: true });
-  await card.click();
+  // The chart handles pointer events; open the incident outside its interactive area.
+  await clusterLink.click({ position: { x: 12, y: 12 } });
   await expect(page.getByRole("heading", { name: "Xu hướng anomaly score" })).toBeVisible();
   await expect(page.locator("canvas")).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath("incident-history.png"), fullPage: true });
