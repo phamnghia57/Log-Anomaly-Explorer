@@ -75,7 +75,7 @@ export function ClusterCard({ cluster: c }: { cluster: ClusterRecord }) {
 
           {history && history.points.length > 0 && (
             <Suspense fallback={null}>
-              <div className="pointer-events-auto border-t border-white/5 pt-3">
+              <div className="border-t border-white/5 pt-3">
                 <p className="text-xs font-medium text-foreground/80">Xu hướng anomaly score</p>
                 <ClusterCardSparkline points={history.points} />
               </div>

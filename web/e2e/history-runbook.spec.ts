@@ -33,11 +33,15 @@ test("dashboard renders score history and links to the runbook", async ({ page }
   const card = clusterLink.locator("..");
   await expect(card).toContainText(cluster.signature);
   await expect(card.locator("canvas")).toBeVisible();
+  await expect(card.locator("canvas")).toHaveCSS("height", "64px");
+  await expect(card).not.toContainText("Kéo thanh để phóng to thời gian");
   await page.screenshot({ path: testInfo.outputPath("dashboard-history.png"), fullPage: true });
   // The chart handles pointer events; open the incident outside its interactive area.
   await clusterLink.click({ position: { x: 12, y: 12 } });
   await expect(page.getByRole("heading", { name: "Xu hướng anomaly score" })).toBeVisible();
   await expect(page.locator("canvas")).toBeVisible();
+  await expect(page.locator("canvas")).toHaveCSS("height", "360px");
+  await expect(page.getByText("Kéo thanh để phóng to thời gian")).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath("incident-history.png"), fullPage: true });
   expect(errors).toEqual([]);
 });
