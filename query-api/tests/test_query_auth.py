@@ -68,12 +68,9 @@ def test_missing_or_malformed_authorization_is_401(query_app, path, authorizatio
     ["signature", "expired", "role", "unsigned", "algorithm", "malformed",
      "missing_sub", "missing_role", "missing_exp", "empty_sub"],
 )
-def test_invalid_tokens_are_rejected_before_storage(query_app, path, failure, caplog):
+def test_invalid_tokens_are_rejected_before_storage(query_app, admin_auth, path, failure, caplog):
     client, logs, clusters, _ = query_app
-    claims = {
-        "sub": "test-admin", "role": "admin",
-        "exp": int(datetime.now(timezone.utc).timestamp()) + 3600,
-    }
+    claims = jwt.decode(admin_auth["Authorization"].split(" ", 1)[1], config.JWT_SECRET, algorithms=["HS256"])
     key, algorithm = config.JWT_SECRET, "HS256"
     if failure == "signature":
         key = secrets.token_urlsafe(48)

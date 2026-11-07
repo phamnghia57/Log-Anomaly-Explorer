@@ -42,7 +42,7 @@ def repository(monkeypatch):
     client.indices.exists.return_value = False
     client.indices.create.return_value = {"acknowledged": True}
 
-    def get(*, index, id):
+    def get(*, index, id, **kwargs):
         if id not in documents:
             raise NotFoundError(404, "not_found", {"found": False})
         return {"found": True, "_source": deepcopy(documents[id])}
@@ -101,7 +101,9 @@ def test_seed_creates_schema_valid_admin_in_users_only(repository, credentials, 
         (Path(__file__).parents[2] / "docs/architect/contracts/users-schema.json").read_text()
     )
     validate(body, schema, format_checker=FormatChecker())
-    assert set(body) == {"username", "password_hash", "role", "created_at"}
+    assert set(body) == {"username", "password_hash", "role", "created_at", "enabled", "auth_version"}
+    assert body["enabled"] is True
+    assert body["auth_version"]
     assert body["username"] == username
     assert body["role"] == "admin"
     assert datetime.fromisoformat(body["created_at"]).utcoffset().total_seconds() == 0

@@ -125,51 +125,42 @@ Khi `score > ngưỡng`, Clustering service tự gọi webhook/email cấu hình
 mở thẳng trace đó trên Jaeger: `https://<domain>/jaeger/trace/<trace_id>`. Key **luôn có mặt**,
 giá trị `null` khi cụm không có trace nào — bên nhận không cần xử lý trường hợp thiếu key.
 
-## Auth (đã triển khai)
+## Auth — persistent sessions (#73)
 
-> Đã triển khai trong [Query API](../../../query-api/src/auth.py),
-> [JWT utilities](../../../query-api/src/tokens.py) và [web](../../../web/src/App.tsx).
-> Mô tả dưới đây đồng bộ với code hiện có; giữ nguyên cấu trúc request/response đã thống nhất.
+Design/rollout proposed for review through Draft PR #74. Existing query/ingestion/cluster response
+contracts remain unchanged. Operators initialize the users mapping and `auth-sessions`
+index explicitly; there is no public registration or password-reset endpoint.
 
-- **Phạm vi**: chỉ đăng nhập (login), **không có public signup**. Tài khoản admin được seed sẵn
-  bằng lệnh riêng `python -m query-api.src.seed_admin`, đọc credentials từ environment;
-  không tự seed khi API khởi động. Không có `POST /auth/register`, signup hoặc password-reset API.
-- **Lưu trữ**: index `users` (cấu hình qua `USERS_INDEX`) trong OpenSearch sẵn có, không thêm
-  database/container. Document shape theo [`users-schema.json`](./users-schema.json), dùng
-  username làm document ID và lưu `password_hash` Argon2id, không lưu plaintext password.
-- **`POST /auth/login`**
-  - Request JSON: `{ "username": "...", "password": "..." }`
-  - Response 200: `{ "token": "<JWT>", "expires_at": "..." }`, với `expires_at` là ISO-8601 UTC
-    cùng thời điểm với claim `exp`; response có `Cache-Control: no-store`.
-  - Response 401: `{ "detail": "Invalid username or password" }` cho sai username/password
-    hoặc account không hợp lệ — không phân biệt rõ sai cái nào (tránh dò username).
-  - JSON/fields không hợp lệ trả 422 với `detail="Invalid login request"`, không echo input.
-    Cấu hình JWT hoặc user storage không sẵn sàng trả 503 với thông báo chung.
-- **JWT claims**: `sub` là username, `role="admin"`, `exp` là Unix timestamp (giây).
-  Ký và verify bằng HS256 với allowlist cố định; yêu cầu đủ ba claims, kiểm tra signature,
-  role admin và expiration. Không chấp nhận unsigned token/algorithm khác hoặc token hết hạn.
-  Secret đọc từ env `JWT_SECRET` (bắt buộc, ít nhất 32 bytes UTF-8, không có fallback).
-  Lifetime lấy từ `JWT_EXPIRY_SECONDS`, mặc định `3600` giây, không có expiry leeway.
-- **Áp dụng JWT**: `GET /search`, `GET /clusters`, `GET /clusters/{cluster_id}` và
-  `GET /clusters/{cluster_id}/history` có dependency `require_admin`, yêu cầu header
-  `Authorization: Bearer <token>`. Không nhận token qua query string. Thiếu, malformed, sai
-  signature/claims/role hoặc hết hạn → 401 với `WWW-Authenticate: Bearer`. Query parameters
-  và cấu trúc response thành công giữ nguyên.
-- **Public**: `GET /health` và `POST /auth/login` không yêu cầu JWT; CORS OPTIONS preflight
-  cho GET/POST và Authorization/Content-Type cũng không yêu cầu JWT. `/metrics` không gắn
-  guard nhưng chỉ dành cho mạng nội bộ, không được gateway proxy ra Internet. Các route
-  tài liệu tự sinh `/docs`, `/docs/oauth2-redirect`, `/redoc`, `/openapi.json` vẫn không gắn JWT.
-- **Phía `web/`**: trang `/login` lưu `{token, expires_at}` trong module auth/localStorage,
-  không lưu password; đính kèm header
-  `Authorization` ở tầng client chung (`web/src/lib/api.ts`), redirect về `/login` khi API trả
-  401 hoặc session hết hạn. Dashboard, Search và Incident View yêu cầu đăng nhập (route guard).
-  Logout xóa session/cache ở client; không thu hồi JWT đã phát trước `exp`. Backend vẫn là
-  nơi quyết định quyền truy cập, không dựa vào frontend guard.
-- **Env hiện có**: `JWT_SECRET`, `JWT_EXPIRY_SECONDS` (mặc định `3600`), `USERS_INDEX`
-  (mặc định `users`), `ADMIN_SEED_USERNAME`, `ADMIN_SEED_PASSWORD` (chỉ dùng khi seed, không log).
-  Hướng dẫn chạy/seed: [triển khai auth](../../task/auth-deployment.md).
-- **AI Assistant**: hai route GET/POST ở mục dưới cũng dùng `Depends(require_admin)` và
-  `Authorization: Bearer <token>` vì đọc log/stack trace nội bộ và gọi API có phí.
+- `POST /auth/login`: JSON `{username, password}`. Success 200 `{token, expires_at}`
+  with a rotating refresh cookie; invalid credentials/account 401, invalid JSON/fields
+  422 with sanitized `detail="Invalid login request"`, unavailable auth/storage 503.
+- `POST /auth/refresh`: refresh cookie only, no token in query/body. Success 200 has the
+  same access response shape and replaces the cookie. Invalid/expired/reused refresh 401;
+  storage/config failure 503. Replay of a previously issued refresh token revokes its session.
+- `POST /auth/logout`: revokes the cookie's session and clears the cookie, idempotent 204.
+  An expired access token does not prevent logout. Storage failure is 503 and is not success.
+- Every auth POST requires `X-CSRF-Protection: 1`. If `Origin` is supplied it must match
+  `AUTH_ALLOWED_ORIGINS`; `null` is rejected. Origin/CSRF failure is 403. Every auth response
+  (including errors) has `Cache-Control: no-store` and `Pragma: no-cache`.
+- Cookie `lae_refresh`: HttpOnly, Secure by default, SameSite=Lax, host-only,
+  `Path=/api/auth`, absolute lifetime 7 days. The browser calls `/api/auth/*` on its own
+  origin through Vercel/Vite; upstream FastAPI paths remain `/auth/*`.
+- Access JWT: HS256, `sub`, `role=admin`, `sid`, `ver`, `token_use=access`, `iat`, `exp`.
+  Default lifetime 900 seconds, capped at session expiry. Refresh JWT has `token_use=refresh`
+  and random `jti`; rotation does not extend the absolute session expiry. Types cannot substitute
+  for each other. JWT_SECRET is mandatory (at least 32 UTF-8 bytes); algorithms are allowlisted.
+- Protected query/aggregation/assistant routes require `Authorization: Bearer <access JWT>`.
+  Every request reads the current user and session by ID in realtime. Missing, disabled,
+  non-admin, revoked, expired or version-mismatched identity/session is 401 with the existing
+  generic detail and `WWW-Authenticate: Bearer`. Expired access additionally has
+  `X-Auth-Reason: access_expired`. Storage/config unavailable is 503; authentication is never bypassed.
+- Logout revokes the browser session. CLI disable/enable/role/password/revoke-all changes
+  the account version atomically and invalidates every session. Already authorized in-flight
+  requests can finish; subsequent authorization attempts see the change.
+- `/health`, OPTIONS and existing API docs remain public. `/metrics` remains internal.
+- The browser stores access tokens in RAM, restores through the cookie and removes legacy
+  localStorage tokens. See [session runbook](../../task/jwt-sessions.md) for configuration,
+  migration, CLI, tests and deployment gates.
 
 ## AI Assistant (Nghĩa) — dựa theo Elastic Observability AI Assistant, thu gọn cho tài nguyên hiện tại
 

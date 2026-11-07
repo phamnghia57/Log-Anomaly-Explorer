@@ -1,5 +1,12 @@
 # JWT admin: triển khai và xác minh
 
+> Hướng dẫn hiện tại sau issue #73: [JWT sessions](jwt-sessions.md). Phần bên dưới là
+> ghi chép triển khai phiên bản auth trước #73, giữ để đối chiếu evidence cũ; không dùng
+> các giới hạn localStorage/stateless hoặc lệnh login cũ cho phiên bản mới.
+
+## Ghi chép lịch sử trước #73
+
+
 Phạm vi của Mạnh: Query API/web dùng JWT admin, users ở OpenSearch hiện có. Không có
 database/container mới, public signup, tự seed khi startup hoặc thay đổi frozen contracts.
 Đọc thêm [Query API](../../query-api/README.md), [web](../../web/README.md).

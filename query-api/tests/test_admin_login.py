@@ -19,6 +19,8 @@ auth = importlib.import_module("query-api.src.auth")
 config = importlib.import_module("query-api.src.config")
 tokens = importlib.import_module("query-api.src.tokens")
 users = importlib.import_module("query-api.src.users")
+sessions = importlib.import_module("query-api.src.sessions")
+fake = importlib.import_module("query-api.tests.fake_opensearch")
 passwords = importlib.import_module("query-api.src.passwords")
 
 
@@ -40,6 +42,7 @@ def clock(monkeypatch):
             return cls.current.astimezone(tz) if tz else cls.current.replace(tzinfo=None)
 
     monkeypatch.setattr(tokens, "datetime", Clock)
+    monkeypatch.setattr(sessions, "datetime", Clock)
     monkeypatch.setattr(jwt.api_jwt, "datetime", Clock)
     return Clock
 
@@ -57,18 +60,21 @@ def login_app(monkeypatch, jwt_config, admin_credentials):
         "username": username, "password_hash": hashed,
         "role": "admin", "created_at": "2026-01-01T00:00:00+00:00",
     }
-    client = Mock()
-
-    def get(*, index, id):
-        if id != username:
-            raise NotFoundError(404, "not_found")
-        return {"found": True, "_source": document}
-
-    client.get.side_effect = get
     monkeypatch.setattr(config, "USERS_INDEX", "login-test-users")
+    monkeypatch.setattr(config, "AUTH_SESSIONS_INDEX", "login-test-sessions")
+    client, documents = fake.fake_client({("login-test-users", username): document})
+    original_get = client.get.side_effect
+    def get(*, index, id, **kwargs):
+        if index == "login-test-users" and id == username:
+            documents[index, id] = deepcopy(document)
+        return original_get(index=index, id=id, **kwargs)
+    client.get.side_effect = get
     repository = users.UserRepository(OpenSearchLogStore(client))
-    monkeypatch.setattr(main.app, "state", State({"user_repository": repository}))
-    with TestClient(main.app) as app:
+    session_repository = sessions.SessionRepository(repository.log_store)
+    session_repository.ensure_ready()
+    client.reset_mock()
+    monkeypatch.setattr(main.app, "state", State({"user_repository": repository, "session_repository": session_repository}))
+    with TestClient(main.app, headers={"X-CSRF-Protection": "1"}) as app:
         yield app, client, {"username": username, "password": password}, document
 
 
@@ -86,16 +92,17 @@ def test_login_returns_signed_admin_claims_and_configured_expiry(
     assert set(body) == {"token", "expires_at"}
     claims = jwt.decode(body["token"], jwt_config, algorithms=["HS256"])
     assert jwt.get_unverified_header(body["token"])["alg"] == "HS256"
-    assert claims == {
-        "sub": credentials["username"], "role": "admin",
-        "exp": int((clock.current + timedelta(seconds=120)).timestamp()),
-    }
+    assert claims["sub"] == credentials["username"]
+    assert claims["role"] == "admin"
+    assert claims["token_use"] == "access"
+    assert claims["sid"] and claims["ver"] == "legacy"
+    assert claims["exp"] == int((clock.current + timedelta(seconds=120)).timestamp())
     assert tokens.decode_access_token(body["token"]) == claims
     expires_at = datetime.fromisoformat(body["expires_at"])
     assert expires_at.utcoffset() == timedelta(0)
     assert expires_at.timestamp() == claims["exp"]
-    storage.get.assert_called_once_with(index="login-test-users", id=credentials["username"])
-    storage.create.assert_not_called()
+    storage.get.assert_called_once_with(index="login-test-users", id=credentials["username"], realtime=True)
+    assert storage.create.call_count == 1  # persistent session, never credentials
     storage.index.assert_not_called()
     storage.indices.create.assert_not_called()
     assert document == original
@@ -270,7 +277,8 @@ def test_no_registration_or_password_reset_route(login_app, path):
 
 
 def test_issued_token_expires_at_exact_configured_boundary(jwt_config, clock):
-    body = tokens.create_access_token("test-admin")
+    body = tokens.create_access_token("test-admin", sid="test-session", auth_version="test-version",
+                                      session_expires_at=clock.current + timedelta(days=7))
     clock.current += timedelta(seconds=config.JWT_EXPIRY_SECONDS - 1)
     assert tokens.decode_access_token(body["token"])["sub"] == "test-admin"
 
@@ -301,9 +309,10 @@ def test_wrong_signature_is_rejected(jwt_config, clock):
         tokens.decode_access_token(token)
 
 
-@pytest.mark.parametrize("missing", ["sub", "role", "exp"])
+@pytest.mark.parametrize("missing", ["sub", "role", "exp", "iat", "sid", "ver", "token_use"])
 def test_required_claims_cannot_be_omitted(jwt_config, clock, missing):
-    claims = {"sub": "test-admin", "role": "admin", "exp": int(clock.current.timestamp()) + 3600}
+    claims = {"sub": "test-admin", "role": "admin", "exp": int(clock.current.timestamp()) + 3600,
+              "iat": int(clock.current.timestamp()), "sid": "test-session", "ver": "test-version", "token_use": "access"}
     del claims[missing]
     token = jwt.encode(claims, jwt_config, algorithm="HS256")
 
@@ -316,7 +325,8 @@ def test_required_claims_cannot_be_omitted(jwt_config, clock, missing):
     [("sub", ""), ("sub", 42), ("role", "viewer"), ("role", None), ("exp", "2000000000")],
 )
 def test_invalid_admin_claims_are_rejected(jwt_config, clock, claim, value):
-    claims = {"sub": "test-admin", "role": "admin", "exp": int(clock.current.timestamp()) + 3600}
+    claims = {"sub": "test-admin", "role": "admin", "exp": int(clock.current.timestamp()) + 3600,
+              "iat": int(clock.current.timestamp()), "sid": "test-session", "ver": "test-version", "token_use": "access"}
     claims[claim] = value
     token = jwt.encode(claims, jwt_config, algorithm="HS256")
 
@@ -325,7 +335,8 @@ def test_invalid_admin_claims_are_rejected(jwt_config, clock, claim, value):
 
 
 def test_validator_also_requires_configured_secret(jwt_config, monkeypatch):
-    token = tokens.create_access_token("test-admin")["token"]
+    token = tokens.create_access_token("test-admin", sid="test-session", auth_version="test-version",
+                                      session_expires_at=datetime.now(timezone.utc) + timedelta(days=7))["token"]
     monkeypatch.setattr(config, "JWT_SECRET", None)
 
     with pytest.raises(tokens.JWTConfigurationError):

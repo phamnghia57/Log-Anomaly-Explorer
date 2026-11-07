@@ -17,7 +17,18 @@ def _positive_int(name: str, default: int) -> int:
 
 # Khong co secret mac dinh. Auth phai goi require_jwt_secret() truoc khi dung.
 JWT_SECRET = os.environ.get("JWT_SECRET")
-JWT_EXPIRY_SECONDS = _positive_int("JWT_EXPIRY_SECONDS", 3600)
+JWT_EXPIRY_SECONDS = _positive_int("JWT_EXPIRY_SECONDS", 900)
+AUTH_REFRESH_TTL_SECONDS = _positive_int("AUTH_REFRESH_TTL_SECONDS", 604800)
+AUTH_SESSIONS_INDEX = os.environ.get("AUTH_SESSIONS_INDEX", "auth-sessions")
+if not AUTH_SESSIONS_INDEX.strip():
+    raise ValueError("AUTH_SESSIONS_INDEX must not be empty")
+_cookie_secure = os.environ.get("AUTH_COOKIE_SECURE", "true").lower()
+if _cookie_secure not in {"true", "false"}:
+    raise ValueError("AUTH_COOKIE_SECURE must be true or false")
+AUTH_COOKIE_SECURE = _cookie_secure == "true"
+AUTH_ALLOWED_ORIGINS = tuple(origin.strip() for origin in os.environ.get(
+    "AUTH_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
+).split(",") if origin.strip())
 ADMIN_SEED_USERNAME = os.environ.get("ADMIN_SEED_USERNAME")
 ADMIN_SEED_PASSWORD = os.environ.get("ADMIN_SEED_PASSWORD")
 USERS_INDEX = os.environ.get("USERS_INDEX", "users")

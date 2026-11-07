@@ -6,12 +6,12 @@
 // hinh qua bien moi truong (VITE_API_BASE_URL), khong hardcode.
 
 import {
-  clearSession, getSession, isAuthSession, SESSION_EXPIRED_MESSAGE, useAuthStore,
-  type AuthSession,
+  authGeneration, clearSession, getSession, loginSession, refreshSession,
+  SESSION_EXPIRED_MESSAGE, useAuthStore,
 } from "./auth";
+import { API_BASE_URL, ApiError } from "./api-base";
+export { API_BASE_URL, ApiError } from "./api-base";
 
-export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)
-  ?.replace(/\/$/, "") || "http://localhost:9002";
 
 // Jaeger UI (xem docker-compose.yml muc "jaeger") - rong = khong hien lien
 // ket trace (vd. moi truong chua trien khai Jaeger).
@@ -61,41 +61,7 @@ export interface ClusterRecord {
   logs_total?: number;
 }
 
-export class ApiError extends Error {
-  status: number;
-  constructor(message: string, status: number) {
-    super(message);
-    this.status = status;
-    this.name = "ApiError";
-  }
-}
-
-export async function loginAdmin(username: string, password: string): Promise<AuthSession> {
-  let res: Response;
-  try {
-    res = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-      cache: "no-store",
-    });
-  } catch {
-    throw new ApiError("Không kết nối được máy chủ. Vui lòng kiểm tra kết nối và thử lại.", 0);
-  }
-  if (!res.ok) {
-    throw new ApiError(
-      res.status >= 500
-        ? "Dịch vụ đăng nhập tạm thời không khả dụng. Vui lòng thử lại."
-        : "Đăng nhập không thành công. Vui lòng kiểm tra tên đăng nhập và mật khẩu.",
-      res.status,
-    );
-  }
-  const body: unknown = await res.json().catch(() => null);
-  if (!isAuthSession(body)) {
-    throw new ApiError("Không thể hoàn tất đăng nhập. Vui lòng thử lại.", 502);
-  }
-  return { token: body.token, expires_at: body.expires_at };
-}
+export const loginAdmin = loginSession;
 
 // Client chi nhan cac duong dan Query API, khong nhan URL tuy y/URL Jaeger.
 type QueryPath = "/search" | "/search/aggregations" | "/clusters" | `/clusters/${string}`
@@ -112,28 +78,34 @@ async function queryJson<T>(path: QueryPath, params?: Record<string, string | un
     if (value) url.searchParams.set(key, value);
   }
 
-  let res: Response;
-  const session = getSession();
+  const generation = authGeneration();
+  let session = getSession();
   if (!session) throw new ApiError(useAuthStore.getState().status === "expired"
     ? SESSION_EXPIRED_MESSAGE : "Vui lòng đăng nhập để xem dữ liệu.", 401);
-  try {
-    res = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${session.token}`, ...(payload ? { "Content-Type": "application/json" } : {}) },
-      ...(payload ? { method: "POST", body: JSON.stringify(payload) } : {}),
-      signal, cache: "no-store", credentials: "omit", redirect: "error",
-    });
-  } catch (cause) {
-    if (signal?.aborted) throw cause;
-    throw new ApiError(
-      `Khong ket noi duoc toi API (${API_BASE_URL}). Kiem tra VITE_API_BASE_URL va backend co dang chay khong.`,
-      0,
-    );
-  }
-  if (res.status === 401) {
-    // Response cua request cu khong duoc xoa session moi vua dang nhap.
-    if (getSession()?.token === session.token) clearSession("expired");
-    throw new ApiError(useAuthStore.getState().status === "expired"
-      ? SESSION_EXPIRED_MESSAGE : "Vui lòng đăng nhập để xem dữ liệu.", 401);
+  if (Date.parse(session.expires_at) <= Date.now()) session = await refreshSession();
+  let res!: Response;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    if (signal?.aborted) throw signal.reason;
+    if (generation !== authGeneration()) throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
+    try {
+      res = await fetch(url.toString(), {
+        headers: { Authorization: `Bearer ${session.token}`, ...(payload ? { "Content-Type": "application/json" } : {}) },
+        ...(payload ? { method: "POST", body: JSON.stringify(payload) } : {}),
+        signal, cache: "no-store", credentials: "omit", redirect: "error",
+      });
+    } catch (cause) {
+      if (signal?.aborted) throw cause;
+      throw new ApiError("Không kết nối được tới API. Vui lòng thử lại.", 0);
+    }
+    if (generation !== authGeneration()) throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
+    if (res.status !== 401) break;
+    if (attempt === 0 && res.headers.get("X-Auth-Reason") === "access_expired") {
+      const latest = getSession();
+      session = latest && latest.token !== session.token ? latest : await refreshSession(true);
+      continue;
+    }
+    clearSession("expired");
+    throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
   }
   if (!res.ok) {
     const body = await res.text().catch(() => "");
@@ -141,7 +113,7 @@ async function queryJson<T>(path: QueryPath, params?: Record<string, string | un
   }
   const body = await res.json() as T;
   // Request cu co the hoan tat sau logout/doi tai khoan; khong dua data do vao cache moi.
-  if (getSession()?.token !== session.token) throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
+  if (generation !== authGeneration()) throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
   return body;
 }
 
