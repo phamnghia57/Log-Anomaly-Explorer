@@ -143,3 +143,15 @@ with OpenSearch 2.17.1 and a browser.
 - [ ] After review/staging approval, use Closes #73 and merge; verify the coordinated release.
 
 Local browser and live-storage evidence does not claim Vercel preview or production rollout.
+
+### Preview handoff to Nghĩa
+
+The user explicitly delegated Vercel preview verification to Nghĩa. The automated deployment
+for commit 787c42b reported `rewrites[0] missing required property destination` while reading
+vercel.ts. The same config evaluates locally with a supplied HTTPS API_PROXY_TARGET and the
+official routing-utils transformer returns no error and the expected external destination.
+Vercel project logs/settings require sign-in, so the platform-side cause has not been confirmed.
+Check API_PROXY_TARGET, Vercel's programmatic-config support and detailed build logs before
+retrying preview. Also deploy the new session-aware backend to staging; pointing this web at
+the old backend cannot verify refresh/logout. Keep this gate open until Secure-cookie/proxy
+verification succeeds on the actual preview. PR stays draft and issue #73 stays open.

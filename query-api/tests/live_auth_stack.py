@@ -16,9 +16,9 @@ from clustering.src.storage import OpenSearchStore
 @contextmanager
 def live_auth_stack(url, username, password, secret):
     prefix = "issue73-browser-" + secrets.token_hex(8)
-    names = {kind: prefix + "-" + kind for kind in ("users", "sessions", "logs", "clusters", "history")}
+    names = {kind: prefix + "-" + kind for kind in ("users", "sessions", "logs", "clusters", "history", "quarantine")}
     client = OpenSearch(url, timeout=10, max_retries=0)
-    store = OpenSearchLogStore(client, log_index=names["logs"], shards=1, replicas=0)
+    store = OpenSearchLogStore(client, log_index=names["logs"], quarantine_index=names["quarantine"], shards=1, replicas=0)
     now = datetime.now(timezone.utc).isoformat()
     log = {"timestamp": now, "level": "ERROR", "service": "auth-test", "trace_id": "a" * 32,
            "span_id": "b" * 16, "message": "Integration test fault"}

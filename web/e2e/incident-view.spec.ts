@@ -9,7 +9,7 @@ test("bam vao 1 cum -> xem Incident View -> bam trace -> nhay sang Search loc du
   await firstCard.click();
 
   await expect(page).toHaveURL(/\/clusters\/.+/);
-  await expect(page.getByText("Anomaly score")).toBeVisible();
+  await expect(page.getByText("Anomaly score", { exact: true })).toBeVisible();
   await expect(page.getByText("Log trong cụm")).toBeVisible();
 
   const traceButtons = page.locator("button").filter({ hasText: /^[0-9a-f]{16}$/ });
