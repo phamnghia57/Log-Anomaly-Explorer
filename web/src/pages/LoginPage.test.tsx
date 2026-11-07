@@ -5,7 +5,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { API_BASE_URL } from "@/lib/api";
 import {
-  AUTH_STORAGE_KEY, clearSession, getSession, restoreSession, saveSession,
+  AUTH_STORAGE_KEY, clearSession, getSession, saveSession,
   SESSION_EXPIRED_MESSAGE,
 } from "@/lib/auth";
 import { LoginPage } from "./LoginPage";
@@ -77,9 +77,9 @@ describe("admin login page", () => {
       method: "POST", body: JSON.stringify({ username: "test-admin", password: "test-password" }),
     }));
     expect(getSession()).toEqual(result);
-    expect(JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY)!)).toEqual(result);
+    expect(localStorage.getItem(AUTH_STORAGE_KEY)).toBeNull();
     expect(queryClient.getQueryData(["previous-private-data"])).toBeUndefined();
-    expect(localStorage.getItem(AUTH_STORAGE_KEY)).not.toContain("test-password");
+    expect(localStorage.getItem(AUTH_STORAGE_KEY)).toBeNull();
   });
 
   it("shows pending state, disables duplicate submissions and recovers after rejection", async () => {
@@ -162,7 +162,7 @@ describe("admin login page", () => {
 
   it("explains an expired restored session and accepts a fresh login", async () => {
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ ...session(), expires_at: "2020-01-01T00:00:00Z" }));
-    restoreSession();
+    clearSession("expired");
     const { user } = renderLogin();
     expect(screen.getByRole("status")).toHaveTextContent(SESSION_EXPIRED_MESSAGE);
     const fresh = session();

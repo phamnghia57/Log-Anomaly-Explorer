@@ -112,38 +112,44 @@ describe("frontend authentication integration", () => {
     expect(JSON.parse(screen.getByTestId("location").textContent!)).toEqual({ path: "/login", state: { from: "/search?trace_id=abc" } });
   });
 
-  it("expires an open protected page, clears private cache and returns to login", () => {
+  it("returns to login when automatic refresh is rejected at access expiry", async () => {
     vi.useFakeTimers();
     saveSession({ token: "short-test-token", expires_at: new Date(Date.now() + 2_000).toISOString() });
     renderApp("/search");
     cachePrivateState();
     expect(screen.getByRole("heading", { name: "Search log" })).toBeVisible();
 
-    act(() => { vi.advanceTimersByTime(2_000); });
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 }));
+    await act(async () => { await vi.advanceTimersByTimeAsync(2_000); });
 
     expect(screen.getByRole("heading", { name: "Đăng nhập quản trị" })).toBeVisible();
     expect(screen.getByRole("status")).toHaveTextContent(SESSION_EXPIRED_MESSAGE);
     expectEmptyCache();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0][0]).toContain("/auth/refresh");
   });
 
-  it("never treats an expired session as authenticated even when its timer has not run", async () => {
+  it("waits for refresh before fetching with an expired access token", async () => {
     vi.useFakeTimers();
     const current = session();
     saveSession(current);
     vi.setSystemTime(new Date(current.expires_at));
 
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 }));
     renderApp();
+    await act(async () => { await vi.advanceTimersByTimeAsync(1); });
 
     expect(screen.getByRole("heading", { name: "Đăng nhập quản trị" })).toBeVisible();
     expect(getSession()).toBeNull();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0][0]).toContain("/auth/refresh");
   });
 
   it("logs out through the admin menu, aborts pending requests and clears query/mutation caches", async () => {
     saveSession(session());
     let signal: AbortSignal | undefined;
-    fetchMock.mockImplementation((_url, options) => new Promise((_resolve, reject) => {
+    fetchMock.mockImplementation((url, options) => url.endsWith("/auth/logout")
+      ? Promise.resolve(new Response(null, { status: 204 })) : new Promise((_resolve, reject) => {
       signal = options.signal;
       signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
     }));
@@ -164,14 +170,20 @@ describe("frontend authentication integration", () => {
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
-  it.each([AUTH_STORAGE_KEY, null])("handles logout/storage clear in another tab (%s) and clears private cache", async (key) => {
+  it("handles a logout broadcast from another tab and clears private cache", async () => {
+    const connections: { onmessage?: (event: { data: string }) => void }[] = [];
+    vi.stubGlobal("BroadcastChannel", class {
+      onmessage?: (event: { data: string }) => void;
+      constructor() { connections.push(this); }
+      close() {}
+      postMessage() {}
+    });
     saveSession(session());
     renderApp("/search");
     cachePrivateState();
 
     act(() => {
-      localStorage.removeItem(AUTH_STORAGE_KEY);
-      window.dispatchEvent(new StorageEvent("storage", { key }));
+      connections[0].onmessage?.({ data: "logout" });
     });
 
     expect(await screen.findByRole("heading", { name: "Đăng nhập quản trị" })).toBeVisible();

@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
 
 const STORAGE_KEY = "log-anomaly-explorer.auth";
+test.beforeEach(async ({ context }) => {
+  await context.route("**/search/aggregations?*", (route) => route.fulfill({
+    json: { histogram: [], levels: [], services: [] },
+  }));
+  await context.route("**/auth/refresh", (route) => route.fulfill({ status: 401, json: { detail: "Unauthorized" } }));
+  await context.route("**/auth/logout", (route) => route.fulfill({ status: 204 }));
+});
 const cors = { "Access-Control-Allow-Origin": "*" };
 const session = () => ({ token: "browser-test-token", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
 
@@ -39,7 +46,7 @@ test("deep link returns after login, navigation works, and logout blocks history
 });
 
 test("401 clears auth, redirects to login, and a failed login stays on the form", async ({ page }) => {
-  await page.addInitScript(({ key, current }) => localStorage.setItem(key, JSON.stringify(current)), { key: STORAGE_KEY, current: session() });
+  await page.route("**/auth/refresh", (route) => route.fulfill({ json: session() }));
   let queries = 0;
   await page.route(/\/clusters(?:\?.*)?$/, (route) => {
     queries++;
@@ -67,7 +74,9 @@ test("expiration removes a protected page without waiting for an API request", a
   const now = Date.now();
   await page.clock.install({ time: now });
   const current = { token: "expiring-browser-test-token", expires_at: new Date(now + 3_600_000).toISOString() };
-  await page.addInitScript(({ key, current }) => localStorage.setItem(key, JSON.stringify(current)), { key: STORAGE_KEY, current });
+  let refreshes = 0;
+  await page.route("**/auth/refresh", (route) => ++refreshes === 1
+    ? route.fulfill({ json: current }) : route.fulfill({ status: 401, json: { detail: "Unauthorized" } }));
   await page.goto("/search");
   await expect(page.getByRole("heading", { name: "Search log", exact: true })).toBeVisible();
 
@@ -79,8 +88,10 @@ test("expiration removes a protected page without waiting for an API request", a
 });
 
 test("mobile admin menu logs out and synchronizes another open tab", async ({ page, context }, testInfo) => {
-  await page.goto("/login");
-  await page.evaluate(({ key, current }) => localStorage.setItem(key, JSON.stringify(current)), { key: STORAGE_KEY, current: session() });
+  let active = true;
+  await context.route("**/auth/refresh", (route) => active
+    ? route.fulfill({ json: session() }) : route.fulfill({ status: 401 }));
+  await context.route("**/auth/logout", (route) => { active = false; return route.fulfill({ status: 204 }); });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/search");
   const otherTab = await context.newPage();

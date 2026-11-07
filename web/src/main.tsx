@@ -9,7 +9,7 @@ import "./index.css";
 import { restoreSession } from "@/lib/auth";
 import { ApiError } from "@/lib/api";
 
-restoreSession();
+void restoreSession().catch(() => {});
 
 const queryClient = new QueryClient({
   defaultOptions: {

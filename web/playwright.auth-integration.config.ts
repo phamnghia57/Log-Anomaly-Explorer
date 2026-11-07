@@ -11,7 +11,9 @@ export default defineConfig({
   testDir: "./e2e/integration",
   workers: 1,
   fullyParallel: false,
-  projects: base.projects,
+  projects: base.projects?.map((project) => ({ ...project,
+    use: { ...project.use, channel: process.env.CI ? undefined : "chrome" },
+  })),
   use: { baseURL: "http://127.0.0.1:5174", trace: "off", screenshot: "off", video: "off" },
   webServer: [
     {
@@ -20,14 +22,14 @@ export default defineConfig({
       url: "http://127.0.0.1:8023/health",
       reuseExistingServer: false,
       timeout: 30_000,
-      env: { STORAGE_BACKEND: "opensearch", OTEL_EXPORTER_OTLP_ENDPOINT: "", JWT_EXPIRY_SECONDS: "3600", USERS_INDEX: "auth-test-users" },
+      env: { STORAGE_BACKEND: "memory", OTEL_EXPORTER_OTLP_ENDPOINT: "", JWT_EXPIRY_SECONDS: "4", USERS_INDEX: "auth-test-users", AUTH_COOKIE_SECURE: "false" },
     },
     {
       command: "npm run dev -- --host 127.0.0.1 --port 5174 --strictPort",
       url: "http://127.0.0.1:5174",
       reuseExistingServer: false,
       timeout: 30_000,
-      env: { VITE_API_BASE_URL: "http://127.0.0.1:8023" },
+      env: { VITE_API_BASE_URL: "/api", API_PROXY_TARGET: "http://127.0.0.1:8023" },
     },
   ],
 });
