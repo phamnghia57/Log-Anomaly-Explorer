@@ -19,7 +19,7 @@
 	# Query API, gom POST/OPTIONS /auth/login; giu nguyen Authorization khi proxy.
 	# /assistant* - AI Assistant (GET conversation, POST message), xem
 	# query-api/src/assistant/router.py.
-	@query path /health /auth/login /search* /clusters* /assistant*
+	@query path /health /auth/login /auth/refresh /auth/logout /search* /clusters* /assistant*
 	handle @query {
 		reverse_proxy query-api:8002
 	}

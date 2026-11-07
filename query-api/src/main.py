@@ -24,6 +24,8 @@ mot index `clusters` ma worker cua Nam ghi vao.
 from __future__ import annotations
 
 import logging
+import asyncio
+from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, FastAPI, HTTPException, Query
@@ -39,10 +41,33 @@ from .assistant.router import router as assistant_router
 from .assistant.storage import ConversationRepository
 from .telemetry import setup_telemetry
 from .users import UserRepository
+from .sessions import SessionRepository
 
 logger = logging.getLogger("query-api")
 
-app = FastAPI(title="Log Anomaly Explorer - Query & Incident API")
+@asynccontextmanager
+async def lifespan(app):
+    async def cleanup_sessions():
+        while True:
+            await asyncio.sleep(3600)
+            repository = getattr(app.state, "session_repository", None)
+            if repository is not None:
+                try:
+                    await asyncio.to_thread(repository.cleanup)
+                except StorageError:
+                    logger.warning("Expired auth sessions cleanup unavailable")
+    task = asyncio.create_task(cleanup_sessions())
+    try:
+        yield
+    finally:
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
+
+app = FastAPI(title="Log Anomaly Explorer - Query & Incident API", lifespan=lifespan)
 
 # API doc log (GET), login va Assistant JSON (POST) - frontend khac domain backend.
 app.add_middleware(
@@ -70,6 +95,7 @@ setup_telemetry(app)
 store: LogStore = build_store()
 # Dung lai client hien co; memory backend chi ho tro cac route doc/dev, khong login.
 app.state.user_repository = UserRepository(store) if isinstance(store, OpenSearchLogStore) else None
+app.state.session_repository = SessionRepository(store) if isinstance(store, OpenSearchLogStore) else None
 app.include_router(auth_router)
 
 

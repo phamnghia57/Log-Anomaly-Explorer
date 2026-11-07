@@ -21,7 +21,21 @@ sys.path.insert(0, str(REPO_ROOT))
 def admin_auth(monkeypatch):
     """JWT that cho API regression tests; khong bypass authentication dependency."""
     config = importlib.import_module("query-api.src.config")
-    tokens = importlib.import_module("query-api.src.tokens")
+    main = importlib.import_module("query-api.src.main")
+    users = importlib.import_module("query-api.src.users")
+    sessions = importlib.import_module("query-api.src.sessions")
+    fake = importlib.import_module("query-api.tests.fake_opensearch")
+    from ingestion.src.storage import OpenSearchLogStore
     monkeypatch.setattr(config, "JWT_SECRET", secrets.token_urlsafe(48))
     monkeypatch.setattr(config, "JWT_EXPIRY_SECONDS", 3600)
-    return {"Authorization": f"Bearer {tokens.create_access_token('test-admin')['token']}"}
+    monkeypatch.setattr(config, "AUTH_SESSIONS_INDEX", "unit-auth-sessions")
+    client, _ = fake.fake_client({(config.USERS_INDEX, "test-admin"): {
+        "username": "test-admin", "role": "admin", "auth_version": "unit-version",
+    }})
+    store = OpenSearchLogStore(client)
+    repository = sessions.SessionRepository(store)
+    repository.ensure_ready()
+    monkeypatch.setattr(main.app.state, "user_repository", users.UserRepository(store), raising=False)
+    monkeypatch.setattr(main.app.state, "session_repository", repository, raising=False)
+    access, _, _ = repository.start({"username": "test-admin", "role": "admin", "auth_version": "unit-version"})
+    return {"Authorization": f"Bearer {access['token']}"}

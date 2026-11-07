@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/phamnghia57/Log-Anomaly-Explorer/docs/architect/contracts/users-schema.json",
   "title": "AdminUser",
-  "description": "THIET KE - chua co code tuong ung. Hop dong cho index moi `users` trong OpenSearch sieng co (khong them database moi), phuc vu tinh nang Auth (xem api-contract.md muc 'Auth'). Chi dung cho dang nhap admin, KHONG co public signup.",
+  "description": "User records in the existing OpenSearch cluster. Only enabled admin accounts can log in. Optional enabled/auth_version preserve legacy records; operator changes rotate auth_version to revoke all sessions. No public signup.",
   "type": "object",
   "required": ["username", "password_hash", "role", "created_at"],
   "properties": {
@@ -16,10 +16,13 @@
     },
     "role": {
       "type": "string",
-      "enum": ["admin"],
+      "enum": ["admin", "viewer"],
       "description": "Chi co 1 vai tro o ban dau - de ngo mo rong sau nay (vd. 'viewer')"
     },
     "created_at": { "type": "string", "format": "date-time" },
+    "enabled": { "type": "boolean", "default": true },
+    "auth_version": { "type": "string", "minLength": 1,
+      "description": "Random account epoch; absent legacy accounts use legacy. Changed atomically on operator actions." },
     "last_login_at": {
       "type": ["string", "null"],
       "format": "date-time",

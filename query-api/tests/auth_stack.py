@@ -41,25 +41,8 @@ def auth_stack(*, username="integration-admin", password=None, secret=None):
     documents = {("auth-test-clusters", cluster["cluster_id"]): cluster,
                  ("auth-test-logs", "auth-test-log"): log,
                  ("auth-test-history", "point-1"): point}
-    indexes = {index for index, _ in documents}
-    client = Mock()
-    client.ping.return_value = True
-    client.indices.exists.side_effect = lambda *, index: index in indexes
-
-    def create_index(*, index, body):
-        indexes.add(index)
-        return {"acknowledged": True}
-
-    def get(*, index, id, **kwargs):
-        if (index, id) not in documents:
-            raise NotFoundError(404, "not_found")
-        return {"found": True, "_source": deepcopy(documents[index, id])}
-
-    def create(*, index, id, body, **kwargs):
-        if (index, id) in documents:
-            raise ConflictError(409, "version_conflict_engine_exception")
-        documents[index, id] = deepcopy(body)
-        return {"result": "created"}
+    from .fake_opensearch import fake_client
+    client, documents = fake_client(documents)
 
     def search(*, index, body, **kwargs):
         patterns = [part.strip() for part in index.split(",")]
@@ -77,9 +60,6 @@ def auth_stack(*, username="integration-admin", password=None, secret=None):
             }
         }
 
-    client.indices.create.side_effect = create_index
-    client.get.side_effect = get
-    client.create.side_effect = create
     client.search.side_effect = search
     client.mget.side_effect = lambda *, index, body: {"docs": [
         {"found": True, "_id": id, "_source": deepcopy(documents[index, id])} for id in body["ids"]
@@ -91,13 +71,17 @@ def auth_stack(*, username="integration-admin", password=None, secret=None):
         config = importlib.import_module("query-api.src.config")
         stack.enter_context(patch.multiple(config, JWT_SECRET=secret, JWT_EXPIRY_SECONDS=3600,
                                            ADMIN_SEED_USERNAME=username, ADMIN_SEED_PASSWORD=password,
-                                           USERS_INDEX="auth-test-users"))
+                                           USERS_INDEX="auth-test-users", AUTH_SESSIONS_INDEX="auth-test-sessions",
+                                           AUTH_COOKIE_SECURE=False,
+                                           AUTH_ALLOWED_ORIGINS=("http://127.0.0.1:5174",)))
         main = importlib.import_module("query-api.src.main")
         repository = importlib.import_module("query-api.src.users").UserRepository(log_store)
+        sessions = importlib.import_module("query-api.src.sessions").SessionRepository(log_store)
+        sessions.ensure_ready()
         clusters = OpenSearchStore(log_store)
         clusters.clusters, clusters.history = "auth-test-clusters", "auth-test-history"
         stack.enter_context(patch.multiple(main, store=log_store, cluster_store=clusters))
-        stack.enter_context(patch.object(main.app, "state", State({"user_repository": repository})))
+        stack.enter_context(patch.object(main.app, "state", State({"user_repository": repository, "session_repository": sessions})))
         yield SimpleNamespace(app=main.app, repository=repository, client=client, documents=documents,
                               credentials={"username": username, "password": password}, secret=secret,
                               cluster=cluster, log=log, point=point)

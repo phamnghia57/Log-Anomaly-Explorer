@@ -27,7 +27,7 @@ def test_seed_login_query_and_expiration_preserve_contracts(caplog):
         assert stack.credentials["password"] not in json.dumps(list(stack.documents.values()))
         assert stack.client.create.call_count == 1
 
-        with TestClient(stack.app) as client:
+        with TestClient(stack.app, headers={"X-CSRF-Protection": "1"}) as client:
             login = client.post("/auth/login", json=stack.credentials)
             assert login.status_code == 200
             assert set(login.json()) == {"token", "expires_at"}
