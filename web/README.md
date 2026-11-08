@@ -153,6 +153,11 @@ Proxy target phải là HTTPS origin không có path/credentials; cấu hình đ
 đổi phải redeploy. Backend đặt `AUTH_ALLOWED_ORIGINS` đúng origin của web production/preview
 và `AUTH_COOKIE_SECURE=true`. Vercel root directory vẫn là `web`.
 
+`vercel.ts` xuất cấu hình qua `default` và tạo rewrite bằng helper `routes.rewrite()`.
+Chạy `npm test -- proxy.test.ts` để kiểm tra cấu hình sau khi bundle bằng esbuild,
+thực thi trong Node và serialize thành JSON; test dùng bộ kiểm tra routing của Vercel
+để xác minh `/api/auth/refresh` được chuyển đúng tới backend trước SPA fallback.
+
 - `VITE_JAEGER_URL` cũng phải HTTPS nếu muốn nút "Xem trace trên Jaeger" hoạt động từ trang
   Vercel — hoặc để trống nếu Jaeger chỉ chạy nội bộ (nút sẽ tự ẩn).
 
