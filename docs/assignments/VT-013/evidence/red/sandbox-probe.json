@@ -1,0 +1,55 @@
+{
+  "recorded_at_utc": "2026-11-08T12:06:26.026834+00:00",
+  "interpreter": "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "win32",
+  "implementation": "CPython",
+  "packages": {
+    "pytest": "9.2.0",
+    "fastapi": "0.162.2",
+    "starlette": "1.10.0",
+    "httpx": "0.28.1",
+    "anyio": "4.16.0",
+    "pydantic": "2.14.3",
+    "opensearch-py": "3.2.0",
+    "PyJWT": "2.15.1",
+    "argon2-cffi": "25.1.0",
+    "langfuse": "5.2.0",
+    "prometheus-fastapi-instrumentator": "8.1.0",
+    "opentelemetry-instrumentation-fastapi": "0.66b2"
+  },
+  "branch": "feat/vt013-undo-manhpd",
+  "head": "29f06e9cff420d87bf255d516dc2982b20f399c2",
+  "environment_overrides": {
+    "STORAGE_BACKEND": "memory",
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "",
+    "LANGFUSE_TRACING_ENABLED": "false",
+    "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1"
+  },
+  "classification": "environment probe; not valid RED assertion evidence",
+  "runs": [
+    {
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "-m",
+        "pytest",
+        "-vv",
+        "--tb=short",
+        "-rA",
+        "--color=no",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "faulthandler_timeout=20",
+        "tests/test_assistant_undo_contract.py::test_t03_send_response_exposes_revision_contract"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+      "exit_code": null,
+      "timed_out": true,
+      "timeout_seconds": 40,
+      "duration_seconds": 40.018
+    }
+  ]
+}

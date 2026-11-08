@@ -1,0 +1,98 @@
+{
+  "command": [
+    "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+    "-u",
+    "-B",
+    "-m",
+    "pytest",
+    "-vv",
+    "--tb=short",
+    "-rA",
+    "--color=no",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "faulthandler_timeout=20",
+    "tests/test_assistant_undo_contract.py::test_t03_send_response_exposes_revision_contract"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+  "exit_code": null,
+  "timed_out": true,
+  "timeout_seconds": 40,
+  "duration_seconds": 40.018
+}
+
+============================= test session starts =============================
+
+platform win32 -- Python 3.14.6, pytest-9.2.0, pluggy-1.7.0 -- D:\SE\LAE-issue-73\.venv\Scripts\python.exe
+
+rootdir: D:\SE\Log-Anomaly-Explorer\query-api
+
+collecting ... collected 1 item
+
+
+
+tests/test_assistant_undo_contract.py::test_t03_send_response_exposes_revision_contract Timeout (0:00:20)!
+Thread 0x000029b4 [Thread-1 (run_blocking_portal)] (most recent call first):
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 298 in accept
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 633 in _fallback_socketpair
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\asyncio\proactor_events.py", line 785 in _make_self_pipe
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\asyncio\proactor_events.py", line 639 in __init__
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\asyncio\windows_events.py", line 316 in __init__
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\asyncio\events.py", line 735 in new_event_loop
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\asyncio\events.py", line 847 in new_event_loop
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\asyncio\runners.py", line 147 in _lazy_init
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\asyncio\runners.py", line 60 in __enter__
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2620 in run
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\anyio\_core\_eventloop.py", line 83 in run
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\anyio\from_thread.py", line 639 in run_blocking_portal
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024 in run
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082 in _bootstrap_inner
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1044 in _bootstrap
+
+Thread 0x00002d28 (most recent call first):
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 369 in wait
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\concurrent\futures\_base.py", line 449 in result
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\anyio\from_thread.py", line 655 in start_blocking_portal
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 141 in __enter__
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 530 in enter_context
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\starlette\testclient.py", line 559 in __enter__
+  File "D:\SE\Log-Anomaly-Explorer\query-api\tests\test_assistant_undo_contract.py", line 63 in harness
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\fixtures.py", line 1067 in call_fixture_func
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\fixtures.py", line 1407 in pytest_fixture_setup
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pluggy\_execution.py", line 147 in _multicall
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pluggy\_manager.py", line 183 in _hookexec
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pluggy\_caller.py", line 197 in __call__
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\fixtures.py", line 1301 in execute
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\fixtures.py", line 797 in _get_active_fixturedef
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\fixtures.py", line 701 in getfixturevalue
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\fixtures.py", line 877 in _fillfixtures
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\python.py", line 1801 in setup
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\runner.py", line 536 in setup
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\runner.py", line 170 in pytest_runtest_setup
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pluggy\_execution.py", line 147 in _multicall
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pluggy\_manager.py", line 183 in _hookexec
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pluggy\_caller.py", line 197 in __call__
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\runner.py", line 250 in <lambda>
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\runner.py", line 361 in from_call
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\runner.py", line 249 in call_and_report
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\runner.py", line 132 in runtestprotocol
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\runner.py", line 118 in pytest_runtest_protocol
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pluggy\_execution.py", line 147 in _multicall
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pluggy\_manager.py", line 183 in _hookexec
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pluggy\_caller.py", line 197 in __call__
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\main.py", line 411 in pytest_runtestloop
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pluggy\_execution.py", line 147 in _multicall
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pluggy\_manager.py", line 183 in _hookexec
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pluggy\_caller.py", line 197 in __call__
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\main.py", line 387 in _main
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\main.py", line 333 in wrap_session
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\main.py", line 380 in pytest_cmdline_main
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pluggy\_execution.py", line 147 in _multicall
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pluggy\_manager.py", line 183 in _hookexec
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pluggy\_caller.py", line 197 in __call__
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\config\__init__.py", line 262 in _main
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\_pytest\config\__init__.py", line 286 in _console_main
+  File "D:\SE\LAE-issue-73\.venv\Lib\site-packages\pytest\__main__.py", line 9 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 203 in _run_module_as_main
