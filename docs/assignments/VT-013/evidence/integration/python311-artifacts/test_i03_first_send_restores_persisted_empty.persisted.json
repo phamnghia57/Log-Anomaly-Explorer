@@ -1,0 +1,18 @@
+{
+  "index": "vt013-b747e02ce8644bf9-17b7e8e9b7-conversations",
+  "document": {
+    "_index": "vt013-b747e02ce8644bf9-17b7e8e9b7-conversations",
+    "_id": "vt013-integration-cluster",
+    "_version": 2,
+    "_seq_no": 1,
+    "_primary_term": 1,
+    "found": true,
+    "_source": {
+      "cluster_id": "vt013-integration-cluster",
+      "created_at": "2026-11-08T15:04:31.653262+00:00",
+      "updated_at": "2026-11-08T15:04:32.102557+00:00",
+      "messages": [],
+      "undo": null
+    }
+  }
+}

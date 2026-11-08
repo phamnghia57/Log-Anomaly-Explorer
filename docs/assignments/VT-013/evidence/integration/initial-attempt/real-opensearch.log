@@ -1,0 +1,102 @@
+{
+  "command": [
+    "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+    "-u",
+    "-B",
+    "-m",
+    "pytest",
+    "-vv",
+    "--tb=short",
+    "-rA",
+    "--color=no",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "faulthandler_timeout=20",
+    "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\integration\\real-opensearch.junit.xml",
+    "tests/test_assistant_undo_integration.py"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+  "exit_code": 1,
+  "timed_out": false,
+  "timeout_seconds": 600,
+  "duration_seconds": 154.395
+}
+
+============================= test session starts =============================
+platform win32 -- Python 3.14.6, pytest-9.2.0, pluggy-1.7.0 -- D:\SE\LAE-issue-73\.venv\Scripts\python.exe
+rootdir: D:\SE\Log-Anomaly-Explorer\query-api
+collecting ... collected 13 items
+
+tests/test_assistant_undo_integration.py::test_i01_create_send_undo_get PASSED [  7%]
+tests/test_assistant_undo_integration.py::test_i02_restore_exact_tool_history PASSED [ 15%]
+tests/test_assistant_undo_integration.py::test_i03_first_send_restores_persisted_empty PASSED [ 23%]
+tests/test_assistant_undo_integration.py::test_i04_restart_api_process_recovers_restored_history PASSED [ 30%]
+tests/test_assistant_undo_integration.py::test_i05_concurrent_sends_have_one_commit[create-only] PASSED [ 38%]
+tests/test_assistant_undo_integration.py::test_i05_concurrent_sends_have_one_commit[conditional-update] PASSED [ 46%]
+tests/test_assistant_undo_integration.py::test_i06_concurrent_undos_have_one_commit PASSED [ 53%]
+tests/test_assistant_undo_integration.py::test_i07_missing_document_versus_missing_index PASSED [ 61%]
+tests/test_assistant_undo_integration.py::test_i08_existing_strict_mapping_is_upgraded_additively PASSED [ 69%]
+tests/test_assistant_undo_integration.py::test_i09_legacy_document_remains_readable PASSED [ 76%]
+tests/test_assistant_undo_integration.py::test_i10_real_connection_failure_propagates_without_data_loss PASSED [ 84%]
+tests/test_assistant_undo_integration.py::test_i11_real_write_rejection_preserves_snapshot PASSED [ 92%]
+tests/test_assistant_undo_integration.py::test_i12_validation_and_admin_auth_remain_enforced FAILED [100%]
+
+================================== FAILURES ===================================
+_____________ test_i12_validation_and_admin_auth_remain_enforced ______________
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_urlparse.py:409: in normalize_port
+    port_as_int = int(port)
+                  ^^^^^^^^^
+E   ValueError: invalid literal for int() with base 10: '63085assistant'
+
+During handling of the above exception, another exception occurred:
+tests\test_assistant_undo_integration.py:411: in test_i12_validation_and_admin_auth_remain_enforced
+    unauthenticated = httpx.get(str(api.client.base_url) + CONVERSATION.lstrip("/"), trust_env=False)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_api.py:195: in get
+    return request(
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_api.py:109: in request
+    return client.request(
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_client.py:812: in request
+    request = self.build_request(
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_client.py:366: in build_request
+    url = self._merge_url(url)
+          ^^^^^^^^^^^^^^^^^^^^
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_client.py:396: in _merge_url
+    merge_url = URL(url)
+                ^^^^^^^^
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_urls.py:117: in __init__
+    self._uri_reference = urlparse(url, **kwargs)
+                          ^^^^^^^^^^^^^^^^^^^^^^^
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_urlparse.py:321: in urlparse
+    parsed_port: int | None = normalize_port(port, scheme)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_urlparse.py:411: in normalize_port
+    raise InvalidURL(f"Invalid port: {port!r}")
+E   httpx.InvalidURL: Invalid port: '63085assistant'
+=================================== PASSES ====================================
+_______________ test_i07_missing_document_versus_missing_index ________________
+------------------------------ Captured log call ------------------------------
+WARNING  opensearch:base.py:280 GET http://127.0.0.1:59196/vt013-198275400aa54c94-bcdfbe4817-conversations/_doc/vt013-integration-cluster [status:404 request:0.006s]
+WARNING  opensearch:base.py:280 GET http://127.0.0.1:59196/vt013-198275400aa54c94-bcdfbe4817-missing/_doc/vt013-integration-cluster [status:404 request:0.007s]
+WARNING  opensearch:base.py:280 GET http://127.0.0.1:59196/vt013-198275400aa54c94-bcdfbe4817-conversations/_doc/vt013-integration-cluster [status:404 request:0.006s]
+WARNING  opensearch:base.py:280 GET http://127.0.0.1:59196/vt013-198275400aa54c94-bcdfbe4817-missing/_doc/vt013-integration-cluster [status:404 request:0.004s]
+___________ test_i08_existing_strict_mapping_is_upgraded_additively ___________
+------------------------------ Captured log call ------------------------------
+WARNING  opensearch:base.py:280 PUT http://127.0.0.1:59196/vt013-198275400aa54c94-cfec8721c1-conversations/_doc/invalid-extra-field [status:400 request:0.010s]
+- generated xml file: D:\SE\Log-Anomaly-Explorer\docs\assignments\VT-013\evidence\integration\real-opensearch.junit.xml -
+=========================== short test summary info ===========================
+PASSED tests/test_assistant_undo_integration.py::test_i01_create_send_undo_get
+PASSED tests/test_assistant_undo_integration.py::test_i02_restore_exact_tool_history
+PASSED tests/test_assistant_undo_integration.py::test_i03_first_send_restores_persisted_empty
+PASSED tests/test_assistant_undo_integration.py::test_i04_restart_api_process_recovers_restored_history
+PASSED tests/test_assistant_undo_integration.py::test_i05_concurrent_sends_have_one_commit[create-only]
+PASSED tests/test_assistant_undo_integration.py::test_i05_concurrent_sends_have_one_commit[conditional-update]
+PASSED tests/test_assistant_undo_integration.py::test_i06_concurrent_undos_have_one_commit
+PASSED tests/test_assistant_undo_integration.py::test_i07_missing_document_versus_missing_index
+PASSED tests/test_assistant_undo_integration.py::test_i08_existing_strict_mapping_is_upgraded_additively
+PASSED tests/test_assistant_undo_integration.py::test_i09_legacy_document_remains_readable
+PASSED tests/test_assistant_undo_integration.py::test_i10_real_connection_failure_propagates_without_data_loss
+PASSED tests/test_assistant_undo_integration.py::test_i11_real_write_rejection_preserves_snapshot
+FAILED tests/test_assistant_undo_integration.py::test_i12_validation_and_admin_auth_remain_enforced - httpx.InvalidURL: Invalid port: '63085assistant'
+================== 1 failed, 12 passed in 152.63s (0:02:32) ===================

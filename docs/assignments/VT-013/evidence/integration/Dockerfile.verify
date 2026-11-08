@@ -1,0 +1,4 @@
+FROM vt013-query-api:b747e02ce8644bf9
+USER root
+RUN python -m pip install --no-cache-dir 'pytest>=8'
+USER appuser

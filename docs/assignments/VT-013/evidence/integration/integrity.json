@@ -1,0 +1,6 @@
+{
+  "preexisting_file_count": 345,
+  "changed_preexisting_files": [],
+  "new_file_scope": "query-api/tests/{test_assistant_undo_integration,vt013_integration_server}.py and docs/assignments/VT-013/evidence/integration/ only",
+  "note": "SHA-256 comparison of every 345 pre-existing tracked/untracked file against the task-start snapshot; no existing file changed."
+}

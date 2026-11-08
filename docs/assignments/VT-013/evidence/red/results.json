@@ -1,0 +1,499 @@
+{
+  "recorded_at_utc": "2026-11-08T12:10:23.900371+00:00",
+  "interpreter": "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "win32",
+  "implementation": "CPython",
+  "packages": {
+    "pytest": "9.2.0",
+    "fastapi": "0.162.2",
+    "starlette": "1.10.0",
+    "httpx": "0.28.1",
+    "anyio": "4.16.0",
+    "pydantic": "2.14.3",
+    "opensearch-py": "3.2.0",
+    "PyJWT": "2.15.1",
+    "argon2-cffi": "25.1.0",
+    "langfuse": "5.2.0",
+    "prometheus-fastapi-instrumentator": "8.1.0",
+    "opentelemetry-instrumentation-fastapi": "0.66b2"
+  },
+  "branch": "feat/vt013-undo-manhpd",
+  "head": "29f06e9cff420d87bf255d516dc2982b20f399c2",
+  "environment_overrides": {
+    "STORAGE_BACKEND": "memory",
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "",
+    "LANGFUSE_TRACING_ENABLED": "false",
+    "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1"
+  },
+  "sha256": {
+    "query-api/src/assistant/router.py": "fa94998c8a0935fb7e7bcdc94ed53a6ea553f253baa840192a9047911df9314d",
+    "query-api/src/assistant/storage.py": "90f95ecfee9fd8c80dc3f7b03e901846ebd052778b024014ae02d616bd6e600d",
+    "docs/assignments/VT-013/plan.md": "0dd6622a58d226d344c1706c721e284ab64dbd39077e24ee54948c56c7d89a1b",
+    "query-api/tests/test_assistant_undo_contract.py": "c2eb6d575d56aeb20c70f4ed178b8d8be11aa842ab22a44d2bbda76bcbd49320",
+    "query-api/tests/vt013_opensearch_fake.py": "7b47700bb72937d9c5aa41bacb336ec0fe25106b54aea956a3872a7b10a9336f"
+  },
+  "runs": [
+    {
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "-m",
+        "pytest",
+        "-vv",
+        "--tb=short",
+        "-rA",
+        "--color=no",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "faulthandler_timeout=20",
+        "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\red\\existing-tests.junit.xml",
+        "tests/test_assistant.py",
+        "tests/test_assistant_storage.py"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 120,
+      "duration_seconds": 6.067,
+      "cases": [
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[None-GET-/assistant/clusters/c1/conversation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[None-POST-/assistant/clusters/c1/conversation/messages]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-GET-/assistant/clusters/c1/conversation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-POST-/assistant/clusters/c1/conversation/messages]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_cum_khong_ton_tai_tra_404",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_chua_hoi_lan_nao_tra_messages_rong",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tra_ve_hoi_thoai_da_luu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_cum_khong_ton_tai_tra_404",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_thieu_openai_key_tra_503",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tra_loi_thang_khong_can_goi_tool",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ai_goi_tool_truoc_khi_tra_loi",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_dat_gioi_han_vong_goi_tool",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_hoi_tiep_gui_kem_lich_su_cu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tool_khong_ton_tai_tra_error_khong_nem_exception",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_get_cluster_history_khong_co_cluster_store_tra_error",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_search_related_logs_mac_dinh_24h_va_gioi_han_limit",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_list_active_clusters_loc_theo_status",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_loi_trong_tool_duoc_boc_thanh_error_khong_lam_vo_chat",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_tao_index_voi_mapping_strict",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_get_chua_co_conversation_tra_none",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_save_roi_get_lai_dung_du_lieu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_save_lan_2_giu_nguyen_created_at_ban_dau",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_goi_lai_khong_nem_loi",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_bo_qua_loi_index_da_ton_tai_tu_worker_khac",
+          "status": "passed",
+          "message": ""
+        }
+      ]
+    },
+    {
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "-m",
+        "pytest",
+        "-vv",
+        "--tb=short",
+        "-rA",
+        "--color=no",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "faulthandler_timeout=20",
+        "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\red\\focused-red.junit.xml",
+        "tests/test_assistant_undo_contract.py"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+      "exit_code": 1,
+      "timed_out": false,
+      "timeout_seconds": 120,
+      "duration_seconds": 6.631,
+      "cases": [
+        {
+          "name": "test_t03_send_response_exposes_revision_contract",
+          "status": "failed",
+          "message": "AssertionError: assert {'cluster_id': 'vt013-contract-cluster', 'messages': [{'role': 'user', 'content': 'First question.', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant', 'content': 'Deterministic test answer.', 'created_at': '2026-11-08T00:00:00+00:00'}]} == {'cluster_id': 'vt013-contract-cluster', 'messages': [{'role': 'user', 'content': 'First question.', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant', 'content': 'Deterministic test answer.', 'created_at':...\n[+30 more lines; full report in element text]"
+        },
+        {
+          "name": "test_t03_undo_first_send_persists_empty_history",
+          "status": "failed",
+          "message": "assert 404 == 200\n +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[space]",
+          "status": "failed",
+          "message": "AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1, 'stored_document': {'_index': 'assistant-conversations', '_id': 'vt013-contract-cluster', 'found': True, '_seq_no': 0, '_primary_term': 1, '_version': 1, '_source': {'cluster_id': 'vt013-contract-cluster', 'created_at': '2026-11-08T12:10:35.552301+00:00', 'updated_at': '2026-11-08T12:10:35.552301+00:00', 'messages': [{'role': 'user', 'content': ' ', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant',...\n[+50 more lines; full report in element text]"
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[tabs-newlines]",
+          "status": "failed",
+          "message": "AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1, 'stored_document': {'_index': 'assistant-conversations', '_id': 'vt013-contract-cluster', 'found': True, '_seq_no': 0, '_primary_term': 1, '_version': 1, '_source': {'cluster_id': 'vt013-contract-cluster', 'created_at': '2026-11-08T12:10:35.575301+00:00', 'updated_at': '2026-11-08T12:10:35.575301+00:00', 'messages': [{'role': 'user', 'content': '\\t\\r\\n', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assist...\n[+50 more lines; full report in element text]"
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[nonbreaking-space]",
+          "status": "failed",
+          "message": "AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1, 'stored_document': {'_index': 'assistant-conversations', '_id': 'vt013-contract-cluster', 'found': True, '_seq_no': 0, '_primary_term': 1, '_version': 1, '_source': {'cluster_id': 'vt013-contract-cluster', 'created_at': '2026-11-08T12:10:35.604405+00:00', 'updated_at': '2026-11-08T12:10:35.604405+00:00', 'messages': [{'role': 'user', 'content': ' \\xa0 ', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assist...\n[+50 more lines; full report in element text]"
+        },
+        {
+          "name": "test_t11_read_failure_returns_503_and_preserves_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_raises_storage_error_in_actual_repository",
+          "status": "failed",
+          "message": "Failed: DID NOT RAISE StorageError"
+        },
+        {
+          "name": "test_t12_missing_index_returns_503_not_empty_success[GET]",
+          "status": "failed",
+          "message": "AssertionError: assert {'status': 200, 'generation_calls': 0, 'write_attempts': 0} == {'status': 503, 'generation_calls': 0, 'write_attempts': 0}\n  \n  Common items:\n  {'generation_calls': 0, 'write_attempts': 0}\n  Differing items:\n  {'status': 200} != {'status': 503}\n  \n  Full diff: (-: missing in left side, +: extra in left side)\n    {\n  -     'status': 503,\n  ?               ^ ^\n  +     'status': 200,\n  ?               ^ ^\n        'generation_calls': 0,\n        'write_attempts': 0,\n    }"
+        },
+        {
+          "name": "test_t12_missing_index_returns_503_not_empty_success[POST]",
+          "status": "failed",
+          "message": "AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1} == {'status': 503, 'generation_calls': 0, 'write_attempts': 0}\n  \n  Differing items:\n  {'write_attempts': 1} != {'write_attempts': 0}\n  {'status': 200} != {'status': 503}\n  {'generation_calls': 1} != {'generation_calls': 0}\n  \n  Full diff: (-: missing in left side, +: extra in left side)\n    {\n  -     'status': 503,\n  ?               ^ ^\n  +     'status': 200,\n  ?               ^ ^\n  -     'generation_calls': 0,\n[+8 more lines; full report in element text]"
+        },
+        {
+          "name": "test_t14_concurrent_sends_cannot_silently_overwrite[existing-document]",
+          "status": "failed",
+          "message": "AssertionError: assert {'statuses': [200, 200], 'commits': 2} == {'statuses': [200, 409], 'commits': 1}\n  \n  Differing items:\n  {'commits': 2} != {'commits': 1}\n  {'statuses': [200, 200]} != {'statuses': [200, 409]}\n  \n  Full diff: (-: missing in left side, +: extra in left side)\n    {\n        'statuses': [\n            200,\n  -         409,\n  ?         ^ ^\n  +         200,\n  ?         ^ ^\n        ],\n  -     'commits': 1,\n  ?                ^\n  +     'commits': 2,\n  ?                ^\n    }"
+        },
+        {
+          "name": "test_t14_concurrent_sends_cannot_silently_overwrite[first-creation]",
+          "status": "failed",
+          "message": "AssertionError: assert {'statuses': [200, 200], 'commits': 2} == {'statuses': [200, 409], 'commits': 1}\n  \n  Differing items:\n  {'commits': 2} != {'commits': 1}\n  {'statuses': [200, 200]} != {'statuses': [200, 409]}\n  \n  Full diff: (-: missing in left side, +: extra in left side)\n    {\n        'statuses': [\n            200,\n  -         409,\n  ?         ^ ^\n  +         200,\n  ?         ^ ^\n        ],\n  -     'commits': 1,\n  ?                ^\n  +     'commits': 2,\n  ?                ^\n    }"
+        },
+        {
+          "name": "test_fake_copies_documents_and_does_not_protect_unconditional_writes",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_enforces_explicit_conditional_and_create_only_writes",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_preserves_missing_index_exception_and_ignore_semantics",
+          "status": "passed",
+          "message": ""
+        }
+      ]
+    },
+    {
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "-m",
+        "pytest",
+        "-vv",
+        "--tb=short",
+        "-rA",
+        "--color=no",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "faulthandler_timeout=20",
+        "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\red\\combined-regression.junit.xml",
+        "tests/test_assistant_undo_contract.py",
+        "tests/test_assistant.py",
+        "tests/test_assistant_storage.py"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+      "exit_code": 1,
+      "timed_out": false,
+      "timeout_seconds": 120,
+      "duration_seconds": 6.584,
+      "cases": [
+        {
+          "name": "test_t03_send_response_exposes_revision_contract",
+          "status": "failed",
+          "message": "AssertionError: assert {'cluster_id': 'vt013-contract-cluster', 'messages': [{'role': 'user', 'content': 'First question.', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant', 'content': 'Deterministic test answer.', 'created_at': '2026-11-08T00:00:00+00:00'}]} == {'cluster_id': 'vt013-contract-cluster', 'messages': [{'role': 'user', 'content': 'First question.', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant', 'content': 'Deterministic test answer.', 'created_at':...\n[+30 more lines; full report in element text]"
+        },
+        {
+          "name": "test_t03_undo_first_send_persists_empty_history",
+          "status": "failed",
+          "message": "assert 404 == 200\n +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[space]",
+          "status": "failed",
+          "message": "AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1, 'stored_document': {'_index': 'assistant-conversations', '_id': 'vt013-contract-cluster', 'found': True, '_seq_no': 0, '_primary_term': 1, '_version': 1, '_source': {'cluster_id': 'vt013-contract-cluster', 'created_at': '2026-11-08T12:10:41.876701+00:00', 'updated_at': '2026-11-08T12:10:41.876701+00:00', 'messages': [{'role': 'user', 'content': ' ', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant',...\n[+50 more lines; full report in element text]"
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[tabs-newlines]",
+          "status": "failed",
+          "message": "AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1, 'stored_document': {'_index': 'assistant-conversations', '_id': 'vt013-contract-cluster', 'found': True, '_seq_no': 0, '_primary_term': 1, '_version': 1, '_source': {'cluster_id': 'vt013-contract-cluster', 'created_at': '2026-11-08T12:10:41.900696+00:00', 'updated_at': '2026-11-08T12:10:41.900696+00:00', 'messages': [{'role': 'user', 'content': '\\t\\r\\n', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assist...\n[+50 more lines; full report in element text]"
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[nonbreaking-space]",
+          "status": "failed",
+          "message": "AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1, 'stored_document': {'_index': 'assistant-conversations', '_id': 'vt013-contract-cluster', 'found': True, '_seq_no': 0, '_primary_term': 1, '_version': 1, '_source': {'cluster_id': 'vt013-contract-cluster', 'created_at': '2026-11-08T12:10:41.922462+00:00', 'updated_at': '2026-11-08T12:10:41.922462+00:00', 'messages': [{'role': 'user', 'content': ' \\xa0 ', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assist...\n[+50 more lines; full report in element text]"
+        },
+        {
+          "name": "test_t11_read_failure_returns_503_and_preserves_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_raises_storage_error_in_actual_repository",
+          "status": "failed",
+          "message": "Failed: DID NOT RAISE StorageError"
+        },
+        {
+          "name": "test_t12_missing_index_returns_503_not_empty_success[GET]",
+          "status": "failed",
+          "message": "AssertionError: assert {'status': 200, 'generation_calls': 0, 'write_attempts': 0} == {'status': 503, 'generation_calls': 0, 'write_attempts': 0}\n  \n  Common items:\n  {'generation_calls': 0, 'write_attempts': 0}\n  Differing items:\n  {'status': 200} != {'status': 503}\n  \n  Full diff: (-: missing in left side, +: extra in left side)\n    {\n  -     'status': 503,\n  ?               ^ ^\n  +     'status': 200,\n  ?               ^ ^\n        'generation_calls': 0,\n        'write_attempts': 0,\n    }"
+        },
+        {
+          "name": "test_t12_missing_index_returns_503_not_empty_success[POST]",
+          "status": "failed",
+          "message": "AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1} == {'status': 503, 'generation_calls': 0, 'write_attempts': 0}\n  \n  Differing items:\n  {'generation_calls': 1} != {'generation_calls': 0}\n  {'status': 200} != {'status': 503}\n  {'write_attempts': 1} != {'write_attempts': 0}\n  \n  Full diff: (-: missing in left side, +: extra in left side)\n    {\n  -     'status': 503,\n  ?               ^ ^\n  +     'status': 200,\n  ?               ^ ^\n  -     'generation_calls': 0,\n[+8 more lines; full report in element text]"
+        },
+        {
+          "name": "test_t14_concurrent_sends_cannot_silently_overwrite[existing-document]",
+          "status": "failed",
+          "message": "AssertionError: assert {'statuses': [200, 200], 'commits': 2} == {'statuses': [200, 409], 'commits': 1}\n  \n  Differing items:\n  {'statuses': [200, 200]} != {'statuses': [200, 409]}\n  {'commits': 2} != {'commits': 1}\n  \n  Full diff: (-: missing in left side, +: extra in left side)\n    {\n        'statuses': [\n            200,\n  -         409,\n  ?         ^ ^\n  +         200,\n  ?         ^ ^\n        ],\n  -     'commits': 1,\n  ?                ^\n  +     'commits': 2,\n  ?                ^\n    }"
+        },
+        {
+          "name": "test_t14_concurrent_sends_cannot_silently_overwrite[first-creation]",
+          "status": "failed",
+          "message": "AssertionError: assert {'statuses': [200, 200], 'commits': 2} == {'statuses': [200, 409], 'commits': 1}\n  \n  Differing items:\n  {'statuses': [200, 200]} != {'statuses': [200, 409]}\n  {'commits': 2} != {'commits': 1}\n  \n  Full diff: (-: missing in left side, +: extra in left side)\n    {\n        'statuses': [\n            200,\n  -         409,\n  ?         ^ ^\n  +         200,\n  ?         ^ ^\n        ],\n  -     'commits': 1,\n  ?                ^\n  +     'commits': 2,\n  ?                ^\n    }"
+        },
+        {
+          "name": "test_fake_copies_documents_and_does_not_protect_unconditional_writes",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_enforces_explicit_conditional_and_create_only_writes",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_preserves_missing_index_exception_and_ignore_semantics",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[None-GET-/assistant/clusters/c1/conversation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[None-POST-/assistant/clusters/c1/conversation/messages]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-GET-/assistant/clusters/c1/conversation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-POST-/assistant/clusters/c1/conversation/messages]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_cum_khong_ton_tai_tra_404",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_chua_hoi_lan_nao_tra_messages_rong",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tra_ve_hoi_thoai_da_luu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_cum_khong_ton_tai_tra_404",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_thieu_openai_key_tra_503",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tra_loi_thang_khong_can_goi_tool",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ai_goi_tool_truoc_khi_tra_loi",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_dat_gioi_han_vong_goi_tool",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_hoi_tiep_gui_kem_lich_su_cu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tool_khong_ton_tai_tra_error_khong_nem_exception",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_get_cluster_history_khong_co_cluster_store_tra_error",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_search_related_logs_mac_dinh_24h_va_gioi_han_limit",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_list_active_clusters_loc_theo_status",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_loi_trong_tool_duoc_boc_thanh_error_khong_lam_vo_chat",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_tao_index_voi_mapping_strict",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_get_chua_co_conversation_tra_none",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_save_roi_get_lai_dung_du_lieu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_save_lan_2_giu_nguyen_created_at_ban_dau",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_goi_lai_khong_nem_loi",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_bo_qua_loi_index_da_ton_tai_tu_worker_khac",
+          "status": "passed",
+          "message": ""
+        }
+      ]
+    }
+  ]
+}

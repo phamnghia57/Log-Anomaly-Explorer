@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r query-api/requirements.txt
 COPY query-api query-api
 COPY ingestion ingestion
 COPY clustering clustering
+COPY docs/architect/contracts/assistant-conversation-schema.json docs/architect/contracts/assistant-conversation-schema.json
 
 ENV PYTHONPATH=/app
 RUN useradd -m appuser && chown -R appuser /app

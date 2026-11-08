@@ -1,0 +1,103 @@
+{
+  "command": [
+    "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+    "-u",
+    "-B",
+    "-m",
+    "pytest",
+    "-vv",
+    "--tb=short",
+    "-rA",
+    "--color=no",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "faulthandler_timeout=20",
+    "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\green\\assistant-regression.junit.xml",
+    "tests/test_assistant.py",
+    "tests/test_assistant_storage.py"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+  "exit_code": 0,
+  "timed_out": false,
+  "timeout_seconds": 120,
+  "duration_seconds": 4.568
+}
+
+============================= test session starts =============================
+platform win32 -- Python 3.14.6, pytest-9.2.0, pluggy-1.7.0 -- D:\SE\LAE-issue-73\.venv\Scripts\python.exe
+rootdir: D:\SE\Log-Anomaly-Explorer\query-api
+collecting ... collected 24 items
+
+tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[None-GET-/assistant/clusters/c1/conversation] PASSED [  4%]
+tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[None-POST-/assistant/clusters/c1/conversation/messages] PASSED [  8%]
+tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-GET-/assistant/clusters/c1/conversation] PASSED [ 12%]
+tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-POST-/assistant/clusters/c1/conversation/messages] PASSED [ 16%]
+tests/test_assistant.py::TestGetConversation::test_cum_khong_ton_tai_tra_404 PASSED [ 20%]
+tests/test_assistant.py::TestGetConversation::test_chua_hoi_lan_nao_tra_messages_rong PASSED [ 25%]
+tests/test_assistant.py::TestGetConversation::test_tra_ve_hoi_thoai_da_luu PASSED [ 29%]
+tests/test_assistant.py::TestPostMessage::test_cum_khong_ton_tai_tra_404 PASSED [ 33%]
+tests/test_assistant.py::TestPostMessage::test_thieu_openai_key_tra_503 PASSED [ 37%]
+tests/test_assistant.py::TestPostMessage::test_tra_loi_thang_khong_can_goi_tool PASSED [ 41%]
+tests/test_assistant.py::TestPostMessage::test_ai_goi_tool_truoc_khi_tra_loi PASSED [ 45%]
+tests/test_assistant.py::TestPostMessage::test_dat_gioi_han_vong_goi_tool PASSED [ 50%]
+tests/test_assistant.py::TestPostMessage::test_hoi_tiep_gui_kem_lich_su_cu PASSED [ 54%]
+tests/test_assistant.py::TestToolExecutor::test_tool_khong_ton_tai_tra_error_khong_nem_exception PASSED [ 58%]
+tests/test_assistant.py::TestToolExecutor::test_get_cluster_history_khong_co_cluster_store_tra_error PASSED [ 62%]
+tests/test_assistant.py::TestToolExecutor::test_search_related_logs_mac_dinh_24h_va_gioi_han_limit PASSED [ 66%]
+tests/test_assistant.py::TestToolExecutor::test_list_active_clusters_loc_theo_status PASSED [ 70%]
+tests/test_assistant.py::TestToolExecutor::test_loi_trong_tool_duoc_boc_thanh_error_khong_lam_vo_chat PASSED [ 75%]
+tests/test_assistant_storage.py::test_ensure_ready_tao_index_voi_mapping_strict PASSED [ 79%]
+tests/test_assistant_storage.py::test_get_chua_co_conversation_tra_none PASSED [ 83%]
+tests/test_assistant_storage.py::test_save_roi_get_lai_dung_du_lieu PASSED [ 87%]
+tests/test_assistant_storage.py::test_save_lan_2_giu_nguyen_created_at_ban_dau PASSED [ 91%]
+tests/test_assistant_storage.py::test_ensure_ready_goi_lai_khong_nem_loi PASSED [ 95%]
+tests/test_assistant_storage.py::test_ensure_ready_bo_qua_loi_index_da_ton_tai_tu_worker_khac PASSED [100%]
+
+============================== warnings summary ===============================
+..\..\LAE-issue-73\.venv\Lib\site-packages\fastapi\testclient.py:1
+  D:\SE\LAE-issue-73\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=================================== PASSES ====================================
+____________ TestPostMessage.test_tra_loi_thang_khong_can_goi_tool ____________
+------------------------------ Captured log call ------------------------------
+WARNING  langfuse:client.py:378 Authentication error: Langfuse client initialized without public_key. Client will be disabled. Provide a public_key parameter or set LANGFUSE_PUBLIC_KEY environment variable.
+_____________ TestPostMessage.test_ai_goi_tool_truoc_khi_tra_loi ______________
+------------------------------ Captured log call ------------------------------
+WARNING  langfuse:client.py:378 Authentication error: Langfuse client initialized without public_key. Client will be disabled. Provide a public_key parameter or set LANGFUSE_PUBLIC_KEY environment variable.
+_______________ TestPostMessage.test_dat_gioi_han_vong_goi_tool _______________
+------------------------------ Captured log call ------------------------------
+WARNING  query-api.assistant:service.py:157 Assistant dat gioi han 2 vong goi tool cho cum c1 (round=1)
+WARNING  langfuse:client.py:378 Authentication error: Langfuse client initialized without public_key. Client will be disabled. Provide a public_key parameter or set LANGFUSE_PUBLIC_KEY environment variable.
+______________ TestPostMessage.test_hoi_tiep_gui_kem_lich_su_cu _______________
+------------------------------ Captured log call ------------------------------
+WARNING  langfuse:client.py:378 Authentication error: Langfuse client initialized without public_key. Client will be disabled. Provide a public_key parameter or set LANGFUSE_PUBLIC_KEY environment variable.
+- generated xml file: D:\SE\Log-Anomaly-Explorer\docs\assignments\VT-013\evidence\green\assistant-regression.junit.xml -
+=========================== short test summary info ===========================
+PASSED tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[None-GET-/assistant/clusters/c1/conversation]
+PASSED tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[None-POST-/assistant/clusters/c1/conversation/messages]
+PASSED tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-GET-/assistant/clusters/c1/conversation]
+PASSED tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-POST-/assistant/clusters/c1/conversation/messages]
+PASSED tests/test_assistant.py::TestGetConversation::test_cum_khong_ton_tai_tra_404
+PASSED tests/test_assistant.py::TestGetConversation::test_chua_hoi_lan_nao_tra_messages_rong
+PASSED tests/test_assistant.py::TestGetConversation::test_tra_ve_hoi_thoai_da_luu
+PASSED tests/test_assistant.py::TestPostMessage::test_cum_khong_ton_tai_tra_404
+PASSED tests/test_assistant.py::TestPostMessage::test_thieu_openai_key_tra_503
+PASSED tests/test_assistant.py::TestPostMessage::test_tra_loi_thang_khong_can_goi_tool
+PASSED tests/test_assistant.py::TestPostMessage::test_ai_goi_tool_truoc_khi_tra_loi
+PASSED tests/test_assistant.py::TestPostMessage::test_dat_gioi_han_vong_goi_tool
+PASSED tests/test_assistant.py::TestPostMessage::test_hoi_tiep_gui_kem_lich_su_cu
+PASSED tests/test_assistant.py::TestToolExecutor::test_tool_khong_ton_tai_tra_error_khong_nem_exception
+PASSED tests/test_assistant.py::TestToolExecutor::test_get_cluster_history_khong_co_cluster_store_tra_error
+PASSED tests/test_assistant.py::TestToolExecutor::test_search_related_logs_mac_dinh_24h_va_gioi_han_limit
+PASSED tests/test_assistant.py::TestToolExecutor::test_list_active_clusters_loc_theo_status
+PASSED tests/test_assistant.py::TestToolExecutor::test_loi_trong_tool_duoc_boc_thanh_error_khong_lam_vo_chat
+PASSED tests/test_assistant_storage.py::test_ensure_ready_tao_index_voi_mapping_strict
+PASSED tests/test_assistant_storage.py::test_get_chua_co_conversation_tra_none
+PASSED tests/test_assistant_storage.py::test_save_roi_get_lai_dung_du_lieu
+PASSED tests/test_assistant_storage.py::test_save_lan_2_giu_nguyen_created_at_ban_dau
+PASSED tests/test_assistant_storage.py::test_ensure_ready_goi_lai_khong_nem_loi
+PASSED tests/test_assistant_storage.py::test_ensure_ready_bo_qua_loi_index_da_ton_tai_tu_worker_khac
+======================== 24 passed, 1 warning in 3.21s ========================

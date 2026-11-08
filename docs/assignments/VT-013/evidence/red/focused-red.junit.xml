@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="14" time="4.822" timestamp="2026-11-08T19:10:31.010660+07:00" hostname="PDM"><testcase classname="tests.test_assistant_undo_contract" name="test_t03_send_response_exposes_revision_contract" time="0.078"><failure message="AssertionError: assert {'cluster_id': 'vt013-contract-cluster', 'messages': [{'role': 'user', 'content': 'First question.', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant', 'content': 'Deterministic test answer.', 'created_at': '2026-11-08T00:00:00+00:00'}]} == {'cluster_id': 'vt013-contract-cluster', 'messages': [{'role': 'user', 'content': 'First question.', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant', 'content': 'Deterministic test answer.', 'created_at':...&#10;[+30 more lines; full report in element text]">tests\test_assistant_undo_contract.py:85: in test_t03_send_response_exposes_revision_contract
+    assert response.json() == {
+E   AssertionError: assert {'cluster_id': 'vt013-contract-cluster', 'messages': [{'role': 'user', 'content': 'First question.', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant', 'content': 'Deterministic test answer.', 'created_at': '2026-11-08T00:00:00+00:00'}]} == {'cluster_id': 'vt013-contract-cluster', 'messages': [{'role': 'user', 'content': 'First question.', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant', 'content': 'Deterministic test answer.', 'created_at': '2026-11-08T00:00:00+00:00'}], 'revision': '1:0', 'undo_available': True}
+E
+E     Common items:
+E     {'cluster_id': 'vt013-contract-cluster',
+E      'messages': [{'content': 'First question.',
+E                    'created_at': '2026-11-08T00:00:00+00:00',
+E                    'role': 'user'},
+E                   {'content': 'Deterministic test answer.',
+E                    'created_at': '2026-11-08T00:00:00+00:00',
+E                    'role': 'assistant'}]}
+E     Right contains 2 more items:
+E     {'revision': '1:0', 'undo_available': True}
+E
+E     Full diff: (-: missing in left side, +: extra in left side)
+E       {
+E           'cluster_id': 'vt013-contract-cluster',
+E           'messages': [
+E               {
+E                   'role': 'user',
+E                   'content': 'First question.',
+E                   'created_at': '2026-11-08T00:00:00+00:00',
+E               },
+E               {
+E                   'role': 'assistant',
+E                   'content': 'Deterministic test answer.',
+E                   'created_at': '2026-11-08T00:00:00+00:00',
+E               },
+E           ],
+E     -     'revision': '1:0',
+E     -     'undo_available': True,
+E       }</failure></testcase><testcase classname="tests.test_assistant_undo_contract" name="test_t03_undo_first_send_persists_empty_history" time="0.024"><failure message="assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">tests\test_assistant_undo_contract.py:101: in test_t03_undo_first_send_persists_empty_history
+    assert response.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = &lt;Response [404 Not Found]&gt;.status_code</failure></testcase><testcase classname="tests.test_assistant_undo_contract" name="test_t06_whitespace_message_is_rejected_without_side_effects[space]" time="0.015"><failure message="AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1, 'stored_document': {'_index': 'assistant-conversations', '_id': 'vt013-contract-cluster', 'found': True, '_seq_no': 0, '_primary_term': 1, '_version': 1, '_source': {'cluster_id': 'vt013-contract-cluster', 'created_at': '2026-11-08T12:10:35.552301+00:00', 'updated_at': '2026-11-08T12:10:35.552301+00:00', 'messages': [{'role': 'user', 'content': ' ', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant',...&#10;[+50 more lines; full report in element text]">tests\test_assistant_undo_contract.py:127: in test_t06_whitespace_message_is_rejected_without_side_effects
+    assert observed == {"status": 422, "generation_calls": 0,
+E   AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1, 'stored_document': {'_index': 'assistant-conversations', '_id': 'vt013-contract-cluster', 'found': True, '_seq_no': 0, '_primary_term': 1, '_version': 1, '_source': {'cluster_id': 'vt013-contract-cluster', 'created_at': '2026-11-08T12:10:35.552301+00:00', 'updated_at': '2026-11-08T12:10:35.552301+00:00', 'messages': [{'role': 'user', 'content': ' ', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant', 'content': 'Deterministic test answer.', 'created_at': '2026-11-08T00:00:00+00:00'}]}}} == {'status': 422, 'generation_calls': 0, 'write_attempts': 0, 'stored_document': None}
+E
+E     Differing items:
+E     {'write_attempts': 1} != {'write_attempts': 0}
+E     {'status': 200} != {'status': 422}
+E     {'generation_calls': 1} != {'generation_calls': 0}
+E     {'stored_document': {'_index': 'assistant-conversations', '_id': 'vt013-contract-cluster', 'found': True, '_seq_no': 0, ...}} != {'stored_document': None}
+E
+E     Full diff: (-: missing in left side, +: extra in left side)
+E       {
+E     -     'status': 422,
+E     ?               - ^
+E     +     'status': 200,
+E     ?                ^^
+E     -     'generation_calls': 0,
+E     ?                         ^
+E     +     'generation_calls': 1,
+E     ?                         ^
+E     -     'write_attempts': 0,
+E     ?                       ^
+E     +     'write_attempts': 1,
+E     ?                       ^
+E     -     'stored_document': None,
+E     ?                        ^^^^^
+E     +     'stored_document': {
+E     ?                        ^
+E     +         '_index': 'assistant-conversations',
+E     +         '_id': 'vt013-contract-cluster',
+E     +         'found': True,
+E     +         '_seq_no': 0,
+E     +         '_primary_term': 1,
+E     +         '_version': 1,
+E     +         '_source': {
+E     +             'cluster_id': 'vt013-contract-cluster',
+E     +             'created_at': '2026-11-08T12:10:35.552301+00:00',
+E     +             'updated_at': '2026-11-08T12:10:35.552301+00:00',
+E     +             'messages': [
+E     +                 {
+E     +                     'role': 'user',
+E     +                     'content': ' ',
+E     +                     'created_at': '2026-11-08T00:00:00+00:00',
+E     +                 },
+E     +                 {
+E     +                     'role': 'assistant',
+E     +                     'content': 'Deterministic test answer.',
+E     +                     'created_at': '2026-11-08T00:00:00+00:00',
+E     +                 },
+E     +             ],
+E     +         },
+E     +     },
+E       }</failure></testcase><testcase classname="tests.test_assistant_undo_contract" name="test_t06_whitespace_message_is_rejected_without_side_effects[tabs-newlines]" time="0.013"><failure message="AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1, 'stored_document': {'_index': 'assistant-conversations', '_id': 'vt013-contract-cluster', 'found': True, '_seq_no': 0, '_primary_term': 1, '_version': 1, '_source': {'cluster_id': 'vt013-contract-cluster', 'created_at': '2026-11-08T12:10:35.575301+00:00', 'updated_at': '2026-11-08T12:10:35.575301+00:00', 'messages': [{'role': 'user', 'content': '\t\r\n', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assist...&#10;[+50 more lines; full report in element text]">tests\test_assistant_undo_contract.py:127: in test_t06_whitespace_message_is_rejected_without_side_effects
+    assert observed == {"status": 422, "generation_calls": 0,
+E   AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1, 'stored_document': {'_index': 'assistant-conversations', '_id': 'vt013-contract-cluster', 'found': True, '_seq_no': 0, '_primary_term': 1, '_version': 1, '_source': {'cluster_id': 'vt013-contract-cluster', 'created_at': '2026-11-08T12:10:35.575301+00:00', 'updated_at': '2026-11-08T12:10:35.575301+00:00', 'messages': [{'role': 'user', 'content': '\t\r\n', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant', 'content': 'Deterministic test answer.', 'created_at': '2026-11-08T00:00:00+00:00'}]}}} == {'status': 422, 'generation_calls': 0, 'write_attempts': 0, 'stored_document': None}
+E
+E     Differing items:
+E     {'write_attempts': 1} != {'write_attempts': 0}
+E     {'status': 200} != {'status': 422}
+E     {'generation_calls': 1} != {'generation_calls': 0}
+E     {'stored_document': {'_index': 'assistant-conversations', '_id': 'vt013-contract-cluster', 'found': True, '_seq_no': 0, ...}} != {'stored_document': None}
+E
+E     Full diff: (-: missing in left side, +: extra in left side)
+E       {
+E     -     'status': 422,
+E     ?               - ^
+E     +     'status': 200,
+E     ?                ^^
+E     -     'generation_calls': 0,
+E     ?                         ^
+E     +     'generation_calls': 1,
+E     ?                         ^
+E     -     'write_attempts': 0,
+E     ?                       ^
+E     +     'write_attempts': 1,
+E     ?                       ^
+E     -     'stored_document': None,
+E     ?                        ^^^^^
+E     +     'stored_document': {
+E     ?                        ^
+E     +         '_index': 'assistant-conversations',
+E     +         '_id': 'vt013-contract-cluster',
+E     +         'found': True,
+E     +         '_seq_no': 0,
+E     +         '_primary_term': 1,
+E     +         '_version': 1,
+E     +         '_source': {
+E     +             'cluster_id': 'vt013-contract-cluster',
+E     +             'created_at': '2026-11-08T12:10:35.575301+00:00',
+E     +             'updated_at': '2026-11-08T12:10:35.575301+00:00',
+E     +             'messages': [
+E     +                 {
+E     +                     'role': 'user',
+E     +                     'content': '\t\r\n',
+E     +                     'created_at': '2026-11-08T00:00:00+00:00',
+E     +                 },
+E     +                 {
+E     +                     'role': 'assistant',
+E     +                     'content': 'Deterministic test answer.',
+E     +                     'created_at': '2026-11-08T00:00:00+00:00',
+E     +                 },
+E     +             ],
+E     +         },
+E     +     },
+E       }</failure></testcase><testcase classname="tests.test_assistant_undo_contract" name="test_t06_whitespace_message_is_rejected_without_side_effects[nonbreaking-space]" time="0.012"><failure message="AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1, 'stored_document': {'_index': 'assistant-conversations', '_id': 'vt013-contract-cluster', 'found': True, '_seq_no': 0, '_primary_term': 1, '_version': 1, '_source': {'cluster_id': 'vt013-contract-cluster', 'created_at': '2026-11-08T12:10:35.604405+00:00', 'updated_at': '2026-11-08T12:10:35.604405+00:00', 'messages': [{'role': 'user', 'content': ' \xa0 ', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assist...&#10;[+50 more lines; full report in element text]">tests\test_assistant_undo_contract.py:127: in test_t06_whitespace_message_is_rejected_without_side_effects
+    assert observed == {"status": 422, "generation_calls": 0,
+E   AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1, 'stored_document': {'_index': 'assistant-conversations', '_id': 'vt013-contract-cluster', 'found': True, '_seq_no': 0, '_primary_term': 1, '_version': 1, '_source': {'cluster_id': 'vt013-contract-cluster', 'created_at': '2026-11-08T12:10:35.604405+00:00', 'updated_at': '2026-11-08T12:10:35.604405+00:00', 'messages': [{'role': 'user', 'content': ' \xa0 ', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant', 'content': 'Deterministic test answer.', 'created_at': '2026-11-08T00:00:00+00:00'}]}}} == {'status': 422, 'generation_calls': 0, 'write_attempts': 0, 'stored_document': None}
+E
+E     Differing items:
+E     {'write_attempts': 1} != {'write_attempts': 0}
+E     {'status': 200} != {'status': 422}
+E     {'generation_calls': 1} != {'generation_calls': 0}
+E     {'stored_document': {'_index': 'assistant-conversations', '_id': 'vt013-contract-cluster', 'found': True, '_seq_no': 0, ...}} != {'stored_document': None}
+E
+E     Full diff: (-: missing in left side, +: extra in left side)
+E       {
+E     -     'status': 422,
+E     ?               - ^
+E     +     'status': 200,
+E     ?                ^^
+E     -     'generation_calls': 0,
+E     ?                         ^
+E     +     'generation_calls': 1,
+E     ?                         ^
+E     -     'write_attempts': 0,
+E     ?                       ^
+E     +     'write_attempts': 1,
+E     ?                       ^
+E     -     'stored_document': None,
+E     ?                        ^^^^^
+E     +     'stored_document': {
+E     ?                        ^
+E     +         '_index': 'assistant-conversations',
+E     +         '_id': 'vt013-contract-cluster',
+E     +         'found': True,
+E     +         '_seq_no': 0,
+E     +         '_primary_term': 1,
+E     +         '_version': 1,
+E     +         '_source': {
+E     +             'cluster_id': 'vt013-contract-cluster',
+E     +             'created_at': '2026-11-08T12:10:35.604405+00:00',
+E     +             'updated_at': '2026-11-08T12:10:35.604405+00:00',
+E     +             'messages': [
+E     +                 {
+E     +                     'role': 'user',
+E     +                     'content': ' \xa0 ',
+E     +                     'created_at': '2026-11-08T00:00:00+00:00',
+E     +                 },
+E     +                 {
+E     +                     'role': 'assistant',
+E     +                     'content': 'Deterministic test answer.',
+E     +                     'created_at': '2026-11-08T00:00:00+00:00',
+E     +                 },
+E     +             ],
+E     +         },
+E     +     },
+E       }</failure></testcase><testcase classname="tests.test_assistant_undo_contract" name="test_t11_read_failure_returns_503_and_preserves_history" time="0.011" /><testcase classname="tests.test_assistant_undo_contract" name="test_t12_missing_index_raises_storage_error_in_actual_repository" time="0.008"><failure message="Failed: DID NOT RAISE StorageError">tests\test_assistant_undo_contract.py:147: in test_t12_missing_index_raises_storage_error_in_actual_repository
+    with pytest.raises(logs.StorageError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE StorageError</failure></testcase><testcase classname="tests.test_assistant_undo_contract" name="test_t12_missing_index_returns_503_not_empty_success[GET]" time="0.025"><failure message="AssertionError: assert {'status': 200, 'generation_calls': 0, 'write_attempts': 0} == {'status': 503, 'generation_calls': 0, 'write_attempts': 0}&#10;  &#10;  Common items:&#10;  {'generation_calls': 0, 'write_attempts': 0}&#10;  Differing items:&#10;  {'status': 200} != {'status': 503}&#10;  &#10;  Full diff: (-: missing in left side, +: extra in left side)&#10;    {&#10;  -     'status': 503,&#10;  ?               ^ ^&#10;  +     'status': 200,&#10;  ?               ^ ^&#10;        'generation_calls': 0,&#10;        'write_attempts': 0,&#10;    }">tests\test_assistant_undo_contract.py:160: in test_t12_missing_index_returns_503_not_empty_success
+    assert observed == {"status": 503, "generation_calls": 0, "write_attempts": 0}
+E   AssertionError: assert {'status': 200, 'generation_calls': 0, 'write_attempts': 0} == {'status': 503, 'generation_calls': 0, 'write_attempts': 0}
+E
+E     Common items:
+E     {'generation_calls': 0, 'write_attempts': 0}
+E     Differing items:
+E     {'status': 200} != {'status': 503}
+E
+E     Full diff: (-: missing in left side, +: extra in left side)
+E       {
+E     -     'status': 503,
+E     ?               ^ ^
+E     +     'status': 200,
+E     ?               ^ ^
+E           'generation_calls': 0,
+E           'write_attempts': 0,
+E       }</failure></testcase><testcase classname="tests.test_assistant_undo_contract" name="test_t12_missing_index_returns_503_not_empty_success[POST]" time="0.030"><failure message="AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1} == {'status': 503, 'generation_calls': 0, 'write_attempts': 0}&#10;  &#10;  Differing items:&#10;  {'write_attempts': 1} != {'write_attempts': 0}&#10;  {'status': 200} != {'status': 503}&#10;  {'generation_calls': 1} != {'generation_calls': 0}&#10;  &#10;  Full diff: (-: missing in left side, +: extra in left side)&#10;    {&#10;  -     'status': 503,&#10;  ?               ^ ^&#10;  +     'status': 200,&#10;  ?               ^ ^&#10;  -     'generation_calls': 0,&#10;[+8 more lines; full report in element text]">tests\test_assistant_undo_contract.py:160: in test_t12_missing_index_returns_503_not_empty_success
+    assert observed == {"status": 503, "generation_calls": 0, "write_attempts": 0}
+E   AssertionError: assert {'status': 200, 'generation_calls': 1, 'write_attempts': 1} == {'status': 503, 'generation_calls': 0, 'write_attempts': 0}
+E
+E     Differing items:
+E     {'write_attempts': 1} != {'write_attempts': 0}
+E     {'status': 200} != {'status': 503}
+E     {'generation_calls': 1} != {'generation_calls': 0}
+E
+E     Full diff: (-: missing in left side, +: extra in left side)
+E       {
+E     -     'status': 503,
+E     ?               ^ ^
+E     +     'status': 200,
+E     ?               ^ ^
+E     -     'generation_calls': 0,
+E     ?                         ^
+E     +     'generation_calls': 1,
+E     ?                         ^
+E     -     'write_attempts': 0,
+E     ?                       ^
+E     +     'write_attempts': 1,
+E     ?                       ^
+E       }</failure></testcase><testcase classname="tests.test_assistant_undo_contract" name="test_t14_concurrent_sends_cannot_silently_overwrite[existing-document]" time="0.036"><failure message="AssertionError: assert {'statuses': [200, 200], 'commits': 2} == {'statuses': [200, 409], 'commits': 1}&#10;  &#10;  Differing items:&#10;  {'commits': 2} != {'commits': 1}&#10;  {'statuses': [200, 200]} != {'statuses': [200, 409]}&#10;  &#10;  Full diff: (-: missing in left side, +: extra in left side)&#10;    {&#10;        'statuses': [&#10;            200,&#10;  -         409,&#10;  ?         ^ ^&#10;  +         200,&#10;  ?         ^ ^&#10;        ],&#10;  -     'commits': 1,&#10;  ?                ^&#10;  +     'commits': 2,&#10;  ?                ^&#10;    }">tests\test_assistant_undo_contract.py:183: in test_t14_concurrent_sends_cannot_silently_overwrite
+    assert observed == {"statuses": [200, 409], "commits": 1}
+E   AssertionError: assert {'statuses': [200, 200], 'commits': 2} == {'statuses': [200, 409], 'commits': 1}
+E
+E     Differing items:
+E     {'commits': 2} != {'commits': 1}
+E     {'statuses': [200, 200]} != {'statuses': [200, 409]}
+E
+E     Full diff: (-: missing in left side, +: extra in left side)
+E       {
+E           'statuses': [
+E               200,
+E     -         409,
+E     ?         ^ ^
+E     +         200,
+E     ?         ^ ^
+E           ],
+E     -     'commits': 1,
+E     ?                ^
+E     +     'commits': 2,
+E     ?                ^
+E       }</failure></testcase><testcase classname="tests.test_assistant_undo_contract" name="test_t14_concurrent_sends_cannot_silently_overwrite[first-creation]" time="0.026"><failure message="AssertionError: assert {'statuses': [200, 200], 'commits': 2} == {'statuses': [200, 409], 'commits': 1}&#10;  &#10;  Differing items:&#10;  {'commits': 2} != {'commits': 1}&#10;  {'statuses': [200, 200]} != {'statuses': [200, 409]}&#10;  &#10;  Full diff: (-: missing in left side, +: extra in left side)&#10;    {&#10;        'statuses': [&#10;            200,&#10;  -         409,&#10;  ?         ^ ^&#10;  +         200,&#10;  ?         ^ ^&#10;        ],&#10;  -     'commits': 1,&#10;  ?                ^&#10;  +     'commits': 2,&#10;  ?                ^&#10;    }">tests\test_assistant_undo_contract.py:183: in test_t14_concurrent_sends_cannot_silently_overwrite
+    assert observed == {"statuses": [200, 409], "commits": 1}
+E   AssertionError: assert {'statuses': [200, 200], 'commits': 2} == {'statuses': [200, 409], 'commits': 1}
+E
+E     Differing items:
+E     {'commits': 2} != {'commits': 1}
+E     {'statuses': [200, 200]} != {'statuses': [200, 409]}
+E
+E     Full diff: (-: missing in left side, +: extra in left side)
+E       {
+E           'statuses': [
+E               200,
+E     -         409,
+E     ?         ^ ^
+E     +         200,
+E     ?         ^ ^
+E           ],
+E     -     'commits': 1,
+E     ?                ^
+E     +     'commits': 2,
+E     ?                ^
+E       }</failure></testcase><testcase classname="tests.test_assistant_undo_contract" name="test_fake_copies_documents_and_does_not_protect_unconditional_writes" time="0.001" /><testcase classname="tests.test_assistant_undo_contract" name="test_fake_enforces_explicit_conditional_and_create_only_writes" time="0.001" /><testcase classname="tests.test_assistant_undo_contract" name="test_fake_preserves_missing_index_exception_and_ignore_semantics" time="0.002" /></testsuite></testsuites>

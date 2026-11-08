@@ -1,0 +1,16 @@
+{
+  "command": [
+    "docker",
+    "image",
+    "inspect",
+    "opensearchproject/opensearch:2.17.1",
+    "--format",
+    "{{json .}}"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+  "exit_code": 0,
+  "timed_out": false,
+  "duration_seconds": 0.363
+}
+
+{"Id":"sha256:1193b7c29c5d63028523728243cc4da047ac49f697a8f8105e5aeee2f89bcc4c","RepoTags":["opensearchproject/opensearch:2.17.1"],"RepoDigests":["opensearchproject/opensearch@sha256:1193b7c29c5d63028523728243cc4da047ac49f697a8f8105e5aeee2f89bcc4c"],"Comment":"buildkit.dockerfile.v0","Created":"2024-10-15T19:16:18.82282218Z","Config":{"User":"1000","ExposedPorts":{"9200/tcp":{},"9300/tcp":{},"9600/tcp":{},"9650/tcp":{}},"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/opensearch/jdk/bin:/usr/share/opensearch/bin","JAVA_HOME=/usr/share/opensearch/jdk","LD_LIBRARY_PATH=:/usr/share/opensearch/plugins/opensearch-knn/lib"],"Entrypoint":["./opensearch-docker-entrypoint.sh"],"Cmd":["opensearch"],"WorkingDir":"/usr/share/opensearch","Labels":{"DOCKERFILE":"https://github.com/opensearch-project/opensearch-build/blob/main/docker/release/dockerfiles/opensearch.al2.dockerfile","org.label-schema.build-date":"2024-10-15T19:14:50Z","org.label-schema.description":"10332","org.label-schema.license":"Apache-2.0","org.label-schema.name":"opensearch","org.label-schema.schema-version":"1.0","org.label-schema.url":"https://opensearch.org","org.label-schema.vcs-url":"https://github.com/opensearch-project/OpenSearch","org.label-schema.vendor":"OpenSearch","org.label-schema.version":"2.17.1"},"ArgsEscaped":true},"Architecture":"amd64","Os":"linux","Size":2334636609,"RootFS":{"Type":"layers","Layers":["sha256:fcac1b22fe3d8739879312bf1c5cac1b8cee892c66b330759302365c9efa1340","sha256:2762ac027f61ddc3780e38ab7f5e1651c14986e1c8c0f36b528e1c57677c2fa4","sha256:eefd4d7d47dede278d2cb70554adc691e994ff4776a62426d64c04282bd5eb97","sha256:28f9808afd7451efd47b22a4a77289d81528fa7e28cb66ee69ef21cab2fb8e7a","sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef","sha256:6695aa0c79c77cf96b945ec7019f4bc2025205d066f4748669766c68e439ef00","sha256:378b495907b6ef2f0134bdc6e67d6c7dd15085b465cbb3111d660e2f94ffac30"]},"Metadata":{"LastTagTime":"2026-10-23T11:24:00.11956472Z"},"Descriptor":{"mediaType":"application/vnd.docker.distribution.manifest.list.v2+json","digest":"sha256:1193b7c29c5d63028523728243cc4da047ac49f697a8f8105e5aeee2f89bcc4c","size":685},"Identity":{"Pull":[{"Repository":"docker.io/opensearchproject/opensearch"}]}}

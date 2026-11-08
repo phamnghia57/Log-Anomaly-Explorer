@@ -1,10 +1,10 @@
 """Test cho AI Assistant: chat loop (tool calling), persistence qua
-ConversationRepository gia, va endpoint /assistant/*.
+ConversationRepository that voi OpenSearch transport gia, va endpoint /assistant/*.
 
 Khong goi OpenAI/Langfuse that: mock lop client (OpenAI tu service.py goi)
 de kiem soat kich ban (tra loi thang, hoac goi tool truoc khi tra loi).
 Dung STORAGE_BACKEND=memory (xem conftest.py) nen khong can OpenSearch that -
-cluster_store/assistant_conversations trong app.state duoc thay bang fake.
+cluster_store dung fake; conversation repository dung transport gia trong app.state.
 """
 
 from __future__ import annotations
@@ -15,11 +15,15 @@ from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
+from ingestion.src.storage import OpenSearchLogStore
+
+from vt013_opensearch_fake import RevisionedOpenSearch
 
 main = importlib.import_module("query-api.src.main")
 assistant_config = importlib.import_module("query-api.src.assistant.config")
 assistant_service = importlib.import_module("query-api.src.assistant.service")
 assistant_tools = importlib.import_module("query-api.src.assistant.tools")
+conversation_storage = importlib.import_module("query-api.src.assistant.storage")
 
 client = TestClient(main.app)
 
@@ -40,21 +44,6 @@ class FakeClusterStore:
 
     def list_history(self, cluster_id, *, since=None, limit=100):
         return list(self.history)
-
-
-class FakeConversationRepository:
-    def __init__(self):
-        self.docs: dict[str, dict] = {}
-
-    def get(self, cluster_id):
-        return self.docs.get(cluster_id)
-
-    def save(self, cluster_id, messages, *, created_at=None):
-        now = datetime.now(timezone.utc).isoformat()
-        document = {"cluster_id": cluster_id, "created_at": created_at or now,
-                    "updated_at": now, "messages": messages}
-        self.docs[cluster_id] = document
-        return document
 
 
 def record(cluster_id="c1", **over):
@@ -102,7 +91,8 @@ def clusters():
 
 @pytest.fixture
 def conversations():
-    fake = FakeConversationRepository()
+    fake = conversation_storage.ConversationRepository(OpenSearchLogStore(RevisionedOpenSearch()))
+    fake.ensure_ready()
     original = main.app.state.assistant_conversations
     main.app.state.assistant_conversations = fake
     yield fake
@@ -192,15 +182,16 @@ class TestGetConversation:
     def test_chua_hoi_lan_nao_tra_messages_rong(self, clusters, conversations):
         clusters.records = [record("c1")]
         body = client.get("/assistant/clusters/c1/conversation").json()
-        assert body == {"cluster_id": "c1", "messages": []}
+        assert body == {"cluster_id": "c1", "messages": [],
+                        "revision": None, "undo_available": False}
 
     def test_tra_ve_hoi_thoai_da_luu(self, clusters, conversations):
         clusters.records = [record("c1")]
-        conversations.docs["c1"] = {
+        conversations.client.create(index=conversations.index, id="c1", body={
             "cluster_id": "c1", "created_at": "2026-10-29T00:00:00+00:00",
             "updated_at": "2026-10-29T00:00:00+00:00",
             "messages": [{"role": "user", "content": "hi", "created_at": "2026-10-29T00:00:00+00:00"}],
-        }
+        })
         body = client.get("/assistant/clusters/c1/conversation").json()
         assert body["messages"][0]["content"] == "hi"
 
@@ -293,14 +284,14 @@ class TestPostMessage:
 
     def test_hoi_tiep_gui_kem_lich_su_cu(self, clusters, conversations, azure_openai_env, monkeypatch):
         clusters.records = [record("c1")]
-        conversations.docs["c1"] = {
+        conversations.client.create(index=conversations.index, id="c1", body={
             "cluster_id": "c1", "created_at": "2026-10-29T00:00:00+00:00",
             "updated_at": "2026-10-29T00:00:00+00:00",
             "messages": [
                 {"role": "user", "content": "Lan truoc hoi gi?", "created_at": "2026-10-29T00:00:00+00:00"},
                 {"role": "assistant", "content": "Da tra loi A.", "created_at": "2026-10-29T00:00:01+00:00"},
             ],
-        }
+        })
         holder = patch_openai(monkeypatch, [fake_response(fake_message(content="Tiep tuc B."))])
 
         resp = client.post("/assistant/clusters/c1/conversation/messages", json={"message": "Con gi nua?"})

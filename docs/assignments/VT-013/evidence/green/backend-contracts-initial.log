@@ -1,0 +1,184 @@
+{
+  "command": [
+    "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+    "-u",
+    "-B",
+    "-m",
+    "pytest",
+    "-vv",
+    "--tb=short",
+    "-rA",
+    "--color=no",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "faulthandler_timeout=20",
+    "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\green\\backend-contracts.junit.xml",
+    "tests/test_assistant_undo_backend.py"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+  "exit_code": 1,
+  "timed_out": false,
+  "timeout_seconds": 120,
+  "duration_seconds": 4.883
+}
+
+============================= test session starts =============================
+platform win32 -- Python 3.14.6, pytest-9.2.0, pluggy-1.7.0 -- D:\SE\LAE-issue-73\.venv\Scripts\python.exe
+rootdir: D:\SE\Log-Anomaly-Explorer\query-api
+collecting ... collected 52 items
+
+tests/test_assistant_undo_backend.py::test_t02_undo_restores_exact_tool_history_and_creation_time PASSED [  1%]
+tests/test_assistant_undo_backend.py::test_t04_t05_one_level_undo_is_consumed_and_old_revision_conflicts PASSED [  3%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload0] PASSED [  5%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload1] PASSED [  7%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload2] PASSED [  9%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload3] PASSED [ 11%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload4] PASSED [ 13%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload5] PASSED [ 15%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload6] PASSED [ 17%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload7] PASSED [ 19%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload8] PASSED [ 21%]
+tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[x] PASSED [ 23%]
+tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[message1] PASSED [ 25%]
+tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[message2] PASSED [ 26%]
+tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[message3] PASSED [ 28%]
+tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[ hi ] PASSED [ 30%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[None] PASSED [ 32%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1_0] PASSED [ 34%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[True] PASSED [ 36%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[] PASSED [ 38%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[ ] PASSED [ 40%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1_1] PASSED [ 42%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[0:0] PASSED [ 44%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[01:0] PASSED [ 46%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:00] PASSED [ 48%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:-1] PASSED [ 50%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[+1:0] PASSED [ 51%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:+0] PASSED [ 53%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[ 1:0] PASSED [ 55%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0\n] PASSED [ 57%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[\uff11:\uff10] PASSED [ 59%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0:0] PASSED [ 61%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[9223372036854775808:0] PASSED [ 63%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:9223372036854775808] PASSED [ 65%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[revision18] PASSED [ 67%]
+tests/test_assistant_undo_backend.py::test_t08_undo_request_requires_only_the_revision_field[payload0] PASSED [ 69%]
+tests/test_assistant_undo_backend.py::test_t08_undo_request_requires_only_the_revision_field[payload1] PASSED [ 71%]
+tests/test_assistant_undo_backend.py::test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[1:0] PASSED [ 73%]
+tests/test_assistant_undo_backend.py::test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[9223372036854775807:9223372036854775807] PASSED [ 75%]
+tests/test_assistant_undo_backend.py::test_t10_stale_revision_does_not_touch_newer_history PASSED [ 76%]
+tests/test_assistant_undo_backend.py::test_t13_rejected_undo_write_is_503_and_preserves_snapshot PASSED [ 78%]
+tests/test_assistant_undo_backend.py::test_t15_t16_competing_undo_mutations_use_the_same_version[undo] PASSED [ 80%]
+tests/test_assistant_undo_backend.py::test_t15_t16_competing_undo_mutations_use_the_same_version[send] PASSED [ 82%]
+tests/test_assistant_undo_backend.py::test_t18_mapping_update_preserves_legacy_data_and_is_idempotent PASSED [ 84%]
+tests/test_assistant_undo_backend.py::test_t18_mapping_failures_are_storage_errors[exception] PASSED [ 86%]
+tests/test_assistant_undo_backend.py::test_t18_mapping_failures_are_storage_errors[unacknowledged] PASSED [ 88%]
+tests/test_assistant_undo_backend.py::test_t19_undo_keeps_admin_authentication[None] PASSED [ 90%]
+tests/test_assistant_undo_backend.py::test_t19_undo_keeps_admin_authentication[Bearer invalid] PASSED [ 92%]
+tests/test_assistant_undo_backend.py::test_t22_corrupt_snapshot_is_not_an_empty_success PASSED [ 94%]
+tests/test_assistant_undo_backend.py::test_snapshot_and_saved_data_do_not_alias_caller_objects FAILED [ 96%]
+tests/test_assistant_undo_backend.py::test_invalid_version_metadata_is_not_defaulted[metadata0] PASSED [ 98%]
+tests/test_assistant_undo_backend.py::test_invalid_version_metadata_is_not_defaulted[metadata1] PASSED [100%]
+
+================================== FAILURES ===================================
+__________ test_snapshot_and_saved_data_do_not_alias_caller_objects ___________
+tests\test_assistant_undo_backend.py:227: in test_snapshot_and_saved_data_do_not_alias_caller_objects
+    assert saved.document["undo"]["messages"] == history
+E   AssertionError: assert [{'role': 'user', 'content': 'Previously committed question.', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant', 'content': 'Deterministic test answer.', 'created_at': '2026-11-08T00:00:00+00:00'}] == [{'role': 'user', 'content': 'caller mutation', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant', 'content': 'Deterministic test answer.', 'created_at': '2026-11-08T00:00:00+00:00'}]
+E
+E     At index 0 diff: {'role': 'user', 'content': 'Previously committed question.', 'created_at': '2026-11-08T00:00:00+00:00'} != {'role': 'user', 'content': 'caller mutation', 'created_at': '2026-11-08T00:00:00+00:00'}
+E
+E     Full diff: (-: missing in left side, +: extra in left side)
+E       [
+E           {
+E               'role': 'user',
+E     -         'content': 'caller mutation',
+E     +         'content': 'Previously committed question.',
+E               'created_at': '2026-11-08T00:00:00+00:00',
+E           },
+E           {
+E               'role': 'assistant',
+E               'content': 'Deterministic test answer.',
+E               'created_at': '2026-11-08T00:00:00+00:00',
+E           },
+E       ]
+============================== warnings summary ===============================
+..\..\LAE-issue-73\.venv\Lib\site-packages\fastapi\testclient.py:1
+  D:\SE\LAE-issue-73\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=================================== PASSES ====================================
+- generated xml file: D:\SE\Log-Anomaly-Explorer\docs\assignments\VT-013\evidence\green\backend-contracts.junit.xml -
+=========================== short test summary info ===========================
+PASSED tests/test_assistant_undo_backend.py::test_t02_undo_restores_exact_tool_history_and_creation_time
+PASSED tests/test_assistant_undo_backend.py::test_t04_t05_one_level_undo_is_consumed_and_old_revision_conflicts
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload0]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload1]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload2]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload3]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload4]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload5]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload6]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload7]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload8]
+PASSED tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[x]
+PASSED tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[message1]
+PASSED tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[message2]
+PASSED tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[message3]
+PASSED tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[ hi ]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[None]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1_0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[True]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[ ]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1_1]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[0:0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[01:0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:00]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:-1]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[+1:0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:+0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[ 1:0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0\n]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[\uff11:\uff10]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0:0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[9223372036854775808:0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:9223372036854775808]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[revision18]
+PASSED tests/test_assistant_undo_backend.py::test_t08_undo_request_requires_only_the_revision_field[payload0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_undo_request_requires_only_the_revision_field[payload1]
+PASSED tests/test_assistant_undo_backend.py::test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[1:0]
+PASSED tests/test_assistant_undo_backend.py::test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[9223372036854775807:9223372036854775807]
+PASSED tests/test_assistant_undo_backend.py::test_t10_stale_revision_does_not_touch_newer_history
+PASSED tests/test_assistant_undo_backend.py::test_t13_rejected_undo_write_is_503_and_preserves_snapshot
+PASSED tests/test_assistant_undo_backend.py::test_t15_t16_competing_undo_mutations_use_the_same_version[undo]
+PASSED tests/test_assistant_undo_backend.py::test_t15_t16_competing_undo_mutations_use_the_same_version[send]
+PASSED tests/test_assistant_undo_backend.py::test_t18_mapping_update_preserves_legacy_data_and_is_idempotent
+PASSED tests/test_assistant_undo_backend.py::test_t18_mapping_failures_are_storage_errors[exception]
+PASSED tests/test_assistant_undo_backend.py::test_t18_mapping_failures_are_storage_errors[unacknowledged]
+PASSED tests/test_assistant_undo_backend.py::test_t19_undo_keeps_admin_authentication[None]
+PASSED tests/test_assistant_undo_backend.py::test_t19_undo_keeps_admin_authentication[Bearer invalid]
+PASSED tests/test_assistant_undo_backend.py::test_t22_corrupt_snapshot_is_not_an_empty_success
+PASSED tests/test_assistant_undo_backend.py::test_invalid_version_metadata_is_not_defaulted[metadata0]
+PASSED tests/test_assistant_undo_backend.py::test_invalid_version_metadata_is_not_defaulted[metadata1]
+FAILED tests/test_assistant_undo_backend.py::test_snapshot_and_saved_data_do_not_alias_caller_objects - AssertionError: assert [{'role': 'user', 'content': 'Previously committed question.', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant', 'content': 'Deterministic test answer.', 'created_at': '2026-11-08T00:00:00+00:00'}] == [{'role': 'user', 'content': 'caller mutation', 'created_at': '2026-11-08T00:00:00+00:00'}, {'role': 'assistant', 'content': 'Deterministic test answer.', 'created_at': '2026-11-08T00:00:00+00:00'}]
+
+  At index 0 diff: {'role': 'user', 'content': 'Previously committed question.', 'created_at': '2026-11-08T00:00:00+00:00'} != {'role': 'user', 'content': 'caller mutation', 'created_at': '2026-11-08T00:00:00+00:00'}
+
+  Full diff: (-: missing in left side, +: extra in left side)
+    [
+        {
+            'role': 'user',
+  -         'content': 'caller mutation',
+  +         'content': 'Previously committed question.',
+            'created_at': '2026-11-08T00:00:00+00:00',
+        },
+        {
+            'role': 'assistant',
+            'content': 'Deterministic test answer.',
+            'created_at': '2026-11-08T00:00:00+00:00',
+        },
+    ]
+=================== 1 failed, 51 passed, 1 warning in 3.69s ===================
