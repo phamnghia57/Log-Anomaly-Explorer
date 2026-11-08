@@ -155,7 +155,7 @@ giá trị `null` khi cụm không có trace nào — bên nhận không cần x
 
 Hỗ trợ điều tra & đề xuất cách sửa cho một cụm lỗi — dùng **Azure OpenAI** (model `gpt-5-mini`)
 với function calling để AI tự tra cứu dữ liệu thật thay vì chỉ trả lời dựa trên 1 đoạn text tĩnh.
-Hai endpoint dưới đây yêu cầu JWT admin giống các Query API routes; thiếu/sai/hết hạn token
+Các endpoint dưới đây yêu cầu JWT admin giống các Query API routes; thiếu/sai/hết hạn token
 trả 401 trước khi đọc dữ liệu hoặc gọi Azure OpenAI.
 
 **Vì sao Azure OpenAI, không dùng OpenAI trực tiếp**: VM chạy ở vùng Azure "East Asia" (Hong
@@ -171,15 +171,18 @@ Hội thoại điều tra hiện có của một cụm — 1 conversation/cụm 
 
 Response:
 ```json
-{ "cluster_id": "...", "messages": [ { "role": "user|assistant|tool", "content": "...", "created_at": "..." } ] }
+{ "cluster_id": "...", "messages": [], "revision": null, "undo_available": false }
 ```
 
 ### `POST /assistant/clusters/{cluster_id}/conversation/messages`
 Gửi 1 tin nhắn, AI có thể tự gọi tool để điều tra thêm trước khi trả lời. Trả về **toàn bộ** hội
 thoại đã lưu sau lượt này (không chỉ tin nhắn mới).
 
-- Request: `{ "message": "..." }`
+- Request: `{ "message": "..." }`; chỉ nhận string có 1–4000 Unicode code point,
+  không chỉ chứa whitespace; không tự sửa nội dung đã được API chấp nhận.
+  Field thừa, thiếu, null, sai kiểu, rỗng hoặc vượt giới hạn trả 422.
 - Response 200: giống response của `GET` ở trên.
+- Response 409: `{ "detail": "revision_conflict" }` nếu hội thoại đổi sau khi đọc.
 - Response 404: `cluster_id` không tồn tại.
 - Response 503: thiếu `AZURE_OPENAI_API_KEY`/`AZURE_OPENAI_ENDPOINT`, hoặc kho hội thoại/cụm chưa
   sẵn sàng (`STORAGE_BACKEND=memory`).
@@ -187,6 +190,45 @@ thoại đã lưu sau lượt này (không chỉ tin nhắn mới).
 
 Dữ liệu lưu theo [`assistant-conversation-schema.json`](./assistant-conversation-schema.json),
 index `assistant-conversations` (env `ASSISTANT_CONVERSATIONS_INDEX`).
+
+### `POST /assistant/clusters/{cluster_id}/conversation/undo` — VT-013
+
+Hoàn tác đúng một lượt Send đã lưu gần nhất, gồm cả các message tool của lượt đó.
+Mọi admin có JWT hợp lệ đều dùng được; Undo không gọi Azure OpenAI hoặc tool.
+
+- Request: `{ "expected_revision": "1:0" }`; field bắt buộc, string strict, không có field thừa.
+- Revision có dạng canonical `<primary_term>:<seq_no>`: term ≥ 1, sequence ≥ 0,
+  mỗi số ≤ `9223372036854775807`; chỉ chữ số ASCII, không dấu, whitespace hay
+  số 0 đứng đầu (ngoại trừ sequence `0`). Request sai trả 422.
+- Response 200: cùng contract GET/Send, trả toàn bộ `messages` đã phục hồi,
+  revision mới và `undo_available: false`.
+- Response 409: `{ "detail": "revision_conflict" }` khi revision cũ hoặc chưa có
+  document tương ứng; `{ "detail": "nothing_to_undo" }` khi revision hiện tại
+  không có snapshot. Kiểm tra revision trước snapshot. Retry revision cũ sau
+  Undo thành công vẫn trả conflict, không hoàn tác thêm lượt nữa.
+- Response 401: thiếu/sai/hết hạn JWT, giữ `WWW-Authenticate: Bearer`.
+- Response 404: `{ "detail": "cluster not found" }` nếu cluster không tồn tại.
+- Response 503: lỗi storage hoặc snapshot/metadata lưu trữ không hợp lệ; giữ
+  envelope `{ "error": "storage_unavailable", "detail": "..." }` với detail
+  đã loại thông tin nhạy cảm. Không trả thành công với dữ liệu mặc định.
+
+`messages` vẫn là mảng message theo schema hiện hành, giữ nguyên thứ tự, timestamp,
+null và tool-call fields. `revision` là token opaque đối với client, lấy từ sequence
+number/primary term của OpenSearch; không dùng timestamp. `undo_available` cho biết
+snapshot một cấp có tồn tại. Không trả snapshot trong response công khai.
+
+Hội thoại chưa tồn tại trả `messages: []`, `revision: null`, `undo_available: false`.
+Hội thoại legacy không có `undo` vẫn đọc được với revision thật và Undo chưa khả dụng.
+Undo lượt Send đầu tiên để lại document rỗng hợp lệ với revision mới. Chỉ phục hồi
+message history; giữ `created_at` của conversation, cập nhật `updated_at`, không có redo.
+
+Send ghi history mới và snapshot trước đó trong cùng một document. Update/Undo phải
+gửi cả `if_seq_no` và `if_primary_term`; lần tạo đầu dùng create-only. Không có
+fallback ghi vô điều kiện khi conflict. Field `undo` được thêm vào strict mapping
+theo cách additive; không xoá/tạo lại index. Không dùng lẫn writer cũ và mới.
+
+Nếu write timeout, commit có thể đã xảy ra: client cần GET để đối chiếu, không tự
+retry mutation. Thiếu index là lỗi storage, khác với document chưa tồn tại hợp lệ.
 
 **Tool AI có thể tự gọi** (chỉ đọc, xem `query-api/src/assistant/tools.py`): `get_cluster_history`
 (xu hướng score của cụm đang hỏi), `search_related_logs` (log khác liên quan, mặc định 24h gần

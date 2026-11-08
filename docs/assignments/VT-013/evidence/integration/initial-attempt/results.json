@@ -1,0 +1,734 @@
+{
+  "recorded_at_utc": "2026-11-08T14:55:01.603206+00:00",
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "interpreter": "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+  "packages": {
+    "pytest": "9.2.0",
+    "fastapi": "0.162.2",
+    "starlette": "1.10.0",
+    "httpx": "0.28.1",
+    "pydantic": "2.14.3",
+    "opensearch-py": "3.2.0",
+    "jsonschema": "4.26.0"
+  },
+  "head": "4487c1d93c77c117b1c18c0f611cd76152e3a011",
+  "branch": "feat/vt013-undo-manhpd",
+  "production_sha256_before": {
+    "query-api/src/assistant/storage.py": "ddaaf6057906c6d7242b1ebcdc79ff43101606d127c31f56575504ea1b2240e2",
+    "query-api/src/assistant/router.py": "339e851612f52990a2d0292c71b034c9e5981f19813f19cc3d3b7e51ab241968",
+    "query-api/Dockerfile": "8618ae0ffca2b8f25ffbf030d3f81cb39811cab83f47532f514ec28b2827f98f",
+    "docs/architect/contracts/assistant-conversation-schema.json": "d09e6ec37736178df8277b2f79f303b945d60961b43e3531a5d40f484ddb85e1",
+    "docs/architect/contracts/api-contract.md": "53b562d70c6aa4af4054e9203641b5c8e6fa97a693602dbe050a9d61b3bf5099",
+    "docs/assignments/VT-013/plan.md": "0dd6622a58d226d344c1706c721e284ab64dbd39077e24ee54948c56c7d89a1b"
+  },
+  "commands": [
+    {
+      "command": [
+        "docker",
+        "version",
+        "--format",
+        "{{json .}}"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.208
+    },
+    {
+      "command": [
+        "docker",
+        "image",
+        "inspect",
+        "opensearchproject/opensearch:2.17.1",
+        "--format",
+        "{{json .}}"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.257
+    },
+    {
+      "command": [
+        "docker",
+        "run",
+        "-d",
+        "--name",
+        "vt013-integration-198275400aa54c94",
+        "--label",
+        "vt013.run=198275400aa54c94",
+        "--publish",
+        "127.0.0.1::9200",
+        "--memory",
+        "2g",
+        "--ulimit",
+        "nofile=65536:65536",
+        "--tmpfs",
+        "/usr/share/opensearch/data:rw,uid=1000,gid=1000,size=1g",
+        "--env",
+        "discovery.type=single-node",
+        "--env",
+        "cluster.name=vt013-integration-198275400aa54c94",
+        "--env",
+        "DISABLE_SECURITY_PLUGIN=true",
+        "--env",
+        "DISABLE_INSTALL_DEMO_CONFIG=true",
+        "--env",
+        "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m",
+        "opensearchproject/opensearch:2.17.1"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.832
+    },
+    {
+      "command": [
+        "docker",
+        "inspect",
+        "c4a3c36715d1c8d9f3e1f20b7f04acd4c70926a76205c8bf6bdf5fc9ef2fe306"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.236
+    },
+    {
+      "command": [
+        "docker",
+        "logs",
+        "c4a3c36715d1c8d9f3e1f20b7f04acd4c70926a76205c8bf6bdf5fc9ef2fe306"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.244
+    },
+    {
+      "command": [
+        "docker",
+        "inspect",
+        "c4a3c36715d1c8d9f3e1f20b7f04acd4c70926a76205c8bf6bdf5fc9ef2fe306"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.197
+    },
+    {
+      "command": [
+        "docker",
+        "rm",
+        "-f",
+        "c4a3c36715d1c8d9f3e1f20b7f04acd4c70926a76205c8bf6bdf5fc9ef2fe306"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.969
+    }
+  ],
+  "runs": [
+    {
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "-m",
+        "pytest",
+        "-vv",
+        "--tb=short",
+        "-rA",
+        "--color=no",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "faulthandler_timeout=20",
+        "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\integration\\real-opensearch.junit.xml",
+        "tests/test_assistant_undo_integration.py"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+      "exit_code": 1,
+      "timed_out": false,
+      "timeout_seconds": 600,
+      "duration_seconds": 154.395,
+      "cases": [
+        {
+          "name": "test_i01_create_send_undo_get",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_i02_restore_exact_tool_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_i03_first_send_restores_persisted_empty",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_i04_restart_api_process_recovers_restored_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_i05_concurrent_sends_have_one_commit[create-only]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_i05_concurrent_sends_have_one_commit[conditional-update]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_i06_concurrent_undos_have_one_commit",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_i07_missing_document_versus_missing_index",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_i08_existing_strict_mapping_is_upgraded_additively",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_i09_legacy_document_remains_readable",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_i10_real_connection_failure_propagates_without_data_loss",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_i11_real_write_rejection_preserves_snapshot",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_i12_validation_and_admin_auth_remain_enforced",
+          "status": "failed",
+          "message": "httpx.InvalidURL: Invalid port: '63085assistant'"
+        }
+      ]
+    },
+    {
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "-m",
+        "pytest",
+        "-vv",
+        "--tb=short",
+        "-rA",
+        "--color=no",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "faulthandler_timeout=20",
+        "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\integration\\backend-regression.junit.xml",
+        "tests/test_assistant_undo_contract.py",
+        "tests/test_assistant_undo_backend.py",
+        "tests/test_assistant.py",
+        "tests/test_assistant_storage.py"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 180,
+      "duration_seconds": 10.104,
+      "cases": [
+        {
+          "name": "test_t03_send_response_exposes_revision_contract",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t03_undo_first_send_persists_empty_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[space]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[tabs-newlines]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[nonbreaking-space]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t11_read_failure_returns_503_and_preserves_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_raises_storage_error_in_actual_repository",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_returns_503_not_empty_success[GET]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_returns_503_not_empty_success[POST]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t14_concurrent_sends_cannot_silently_overwrite[existing-document]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t14_concurrent_sends_cannot_silently_overwrite[first-creation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_copies_documents_and_does_not_protect_unconditional_writes",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_enforces_explicit_conditional_and_create_only_writes",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_preserves_missing_index_exception_and_ignore_semantics",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t02_undo_restores_exact_tool_history_and_creation_time",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t04_t05_one_level_undo_is_consumed_and_old_revision_conflicts",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload2]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload3]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload4]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload5]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload6]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload7]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload8]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[x]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[message1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[message2]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[message3]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[ hi ]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[None]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1_0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[True]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[ ]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1_1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[0:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[01:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:00]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:-1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[+1:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:+0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[ 1:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0\\n]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[\\uff11:\\uff10]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[9223372036854775808:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:9223372036854775808]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[revision18]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_undo_request_requires_only_the_revision_field[payload0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_undo_request_requires_only_the_revision_field[payload1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[1:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[9223372036854775807:9223372036854775807]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t10_stale_revision_does_not_touch_newer_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t13_rejected_undo_write_is_503_and_preserves_snapshot",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t15_t16_competing_undo_mutations_use_the_same_version[undo]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t15_t16_competing_undo_mutations_use_the_same_version[send]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t18_mapping_update_preserves_legacy_data_and_is_idempotent",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t18_mapping_failures_are_storage_errors[exception]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t18_mapping_failures_are_storage_errors[unacknowledged]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t19_undo_keeps_admin_authentication[None]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t19_undo_keeps_admin_authentication[Bearer invalid]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t22_corrupt_snapshot_is_not_an_empty_success",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_snapshot_and_saved_data_do_not_alias_caller_objects",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_invalid_version_metadata_is_not_defaulted[metadata0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_invalid_version_metadata_is_not_defaulted[metadata1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[None-GET-/assistant/clusters/c1/conversation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[None-POST-/assistant/clusters/c1/conversation/messages]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-GET-/assistant/clusters/c1/conversation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-POST-/assistant/clusters/c1/conversation/messages]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_cum_khong_ton_tai_tra_404",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_chua_hoi_lan_nao_tra_messages_rong",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tra_ve_hoi_thoai_da_luu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_cum_khong_ton_tai_tra_404",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_thieu_openai_key_tra_503",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tra_loi_thang_khong_can_goi_tool",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ai_goi_tool_truoc_khi_tra_loi",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_dat_gioi_han_vong_goi_tool",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_hoi_tiep_gui_kem_lich_su_cu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tool_khong_ton_tai_tra_error_khong_nem_exception",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_get_cluster_history_khong_co_cluster_store_tra_error",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_search_related_logs_mac_dinh_24h_va_gioi_han_limit",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_list_active_clusters_loc_theo_status",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_loi_trong_tool_duoc_boc_thanh_error_khong_lam_vo_chat",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_tao_index_voi_mapping_strict",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_get_chua_co_conversation_tra_none",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_save_roi_get_lai_dung_du_lieu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_save_lan_2_giu_nguyen_created_at_ban_dau",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_goi_lai_khong_nem_loi",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_bo_qua_loi_index_da_ton_tai_tu_worker_khac",
+          "status": "passed",
+          "message": ""
+        }
+      ]
+    }
+  ],
+  "real_integration": "FAIL",
+  "docker_build": "NOT VERIFIED",
+  "python311": "NOT VERIFIED",
+  "opensearch": {
+    "name": "c4a3c36715d1",
+    "cluster_name": "vt013-integration-198275400aa54c94",
+    "cluster_uuid": "m_Yo0HgKTDKj_kQhey8QHg",
+    "version": {
+      "distribution": "opensearch",
+      "number": "2.17.1",
+      "build_type": "tar",
+      "build_hash": "1893d20797e30110e5877170e44d42275ce5951e",
+      "build_date": "2024-09-26T21:59:32.078798875Z",
+      "build_snapshot": false,
+      "lucene_version": "9.11.1",
+      "minimum_wire_compatibility_version": "7.10.0",
+      "minimum_index_compatibility_version": "7.0.0"
+    },
+    "tagline": "The OpenSearch Project: https://opensearch.org/"
+  },
+  "blocker_or_failure": "RuntimeError: Integration assertions/setup failed; preserve logs and investigate before Docker build",
+  "owned_container_removed": true,
+  "production_sha256_after": {
+    "query-api/src/assistant/storage.py": "ddaaf6057906c6d7242b1ebcdc79ff43101606d127c31f56575504ea1b2240e2",
+    "query-api/src/assistant/router.py": "339e851612f52990a2d0292c71b034c9e5981f19813f19cc3d3b7e51ab241968",
+    "query-api/Dockerfile": "8618ae0ffca2b8f25ffbf030d3f81cb39811cab83f47532f514ec28b2827f98f",
+    "docs/architect/contracts/assistant-conversation-schema.json": "d09e6ec37736178df8277b2f79f303b945d60961b43e3531a5d40f484ddb85e1",
+    "docs/architect/contracts/api-contract.md": "53b562d70c6aa4af4054e9203641b5c8e6fa97a693602dbe050a9d61b3bf5099",
+    "docs/assignments/VT-013/plan.md": "0dd6622a58d226d344c1706c721e284ab64dbd39077e24ee54948c56c7d89a1b"
+  },
+  "finished_at_utc": "2026-11-08T14:58:11.081251+00:00"
+}

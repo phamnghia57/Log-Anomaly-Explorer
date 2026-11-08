@@ -1,0 +1,16 @@
+{
+  "command": [
+    "docker",
+    "image",
+    "inspect",
+    "vt013-query-api:b747e02ce8644bf9",
+    "--format",
+    "{{json .}}"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+  "exit_code": 0,
+  "timed_out": false,
+  "duration_seconds": 0.393
+}
+
+{"Id":"sha256:764c2b91a16bf18638768299993cf6aa7de97f61e8203e0046469c158d908752","RepoTags":["vt013-query-api:b747e02ce8644bf9"],"RepoDigests":["vt013-query-api@sha256:764c2b91a16bf18638768299993cf6aa7de97f61e8203e0046469c158d908752"],"Comment":"buildkit.dockerfile.v0","Created":"2026-11-08T15:03:43.050033664Z","Config":{"User":"appuser","ExposedPorts":{"8002/tcp":{}},"Env":["PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","LANG=C.UTF-8","GPG_KEY=A035C8C19219BA821ECEA86B64E628F8D684696D","PYTHON_VERSION=3.11.18","PYTHON_SHA256=9120e0a653868f6e3698d36cdd99e5a58903ec9469e448f21d98f7b16d8fa290","PYTHONPATH=/app"],"Cmd":["uvicorn","query-api.src.main:app","--host","0.0.0.0","--port","8002"],"WorkingDir":"/app","ArgsEscaped":true},"Architecture":"amd64","Os":"linux","Size":551562881,"RootFS":{"Type":"layers","Layers":["sha256:dd57f90311a2567b55ff22eeacff1602fd04ad7566e315957731359eab173b90","sha256:cd9a29aa43e014bda7a7815521ab51a3ababf2bceb4de66302701ac217ff26fb","sha256:961adfab8c074ba37b3fa0c54bb96911f8648a1788176a864bfb0750cfdef155","sha256:688ef2053b5da5e0048efd435dace328a25d5d4c8cb5e2cd1a7a92c697c586d5","sha256:0c1a01c0913016eba27669f285137ae678734d78d12df75732a696e8ecce59f9","sha256:92531eecca26a509cd10875a2e0fea91c373f6d40b3f50d321b9d80ce3954fde","sha256:059fbf0be860996d23d12dc8a69249a04b0fdff36cb372cf863e50bddf3885a8","sha256:502b277135b57aef6b6de36f8920a47c2ba15006669ce623113c1467313d30d9","sha256:ee46efc4cc3dc0b7ea40a9779c80a199a43e32044be521c459f5e9fab98fdb05","sha256:a65fd711a20715f5c6c81d371b2a994a881d827cdcb11b059ab7c3f897021daa","sha256:feeb850befd262b97bb1524b9b8440cd9581b991c97da6a52bea8b9954746969","sha256:9fe0aaf88423828c5df463f2b06beafd716846a338a3420704b082a2a7537a64"]},"Metadata":{"LastTagTime":"2026-11-08T15:03:49.114850726Z"},"Descriptor":{"mediaType":"application/vnd.oci.image.index.v1+json","digest":"sha256:764c2b91a16bf18638768299993cf6aa7de97f61e8203e0046469c158d908752","size":856},"Identity":{"Build":[{"Ref":"y8d4gngs3vv6zovtc9aj6kzes","CreatedAt":"2026-11-08T15:03:56.456093676Z"}]}}

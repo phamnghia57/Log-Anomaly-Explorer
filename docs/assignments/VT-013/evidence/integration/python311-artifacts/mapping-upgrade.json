@@ -1,0 +1,42 @@
+{
+  "before": {
+    "dynamic": "strict",
+    "properties": {
+      "cluster_id": {
+        "type": "keyword"
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "messages": {
+        "type": "object",
+        "dynamic": "false"
+      },
+      "updated_at": {
+        "type": "date"
+      }
+    }
+  },
+  "after": {
+    "dynamic": "strict",
+    "properties": {
+      "cluster_id": {
+        "type": "keyword"
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "messages": {
+        "type": "object",
+        "dynamic": "false"
+      },
+      "undo": {
+        "type": "object",
+        "enabled": false
+      },
+      "updated_at": {
+        "type": "date"
+      }
+    }
+  }
+}

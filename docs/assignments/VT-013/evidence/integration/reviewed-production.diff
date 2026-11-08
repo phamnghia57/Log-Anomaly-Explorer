@@ -1,0 +1,342 @@
+diff --git a/docs/architect/contracts/api-contract.md b/docs/architect/contracts/api-contract.md
+index 797fe62..da75861 100644
+--- a/docs/architect/contracts/api-contract.md
++++ b/docs/architect/contracts/api-contract.md
+@@ -158 +158 @@ với function calling để AI tự tra cứu dữ liệu thật thay vì chỉ
+-Hai endpoint dưới đây yêu cầu JWT admin giống các Query API routes; thiếu/sai/hết hạn token
++Các endpoint dưới đây yêu cầu JWT admin giống các Query API routes; thiếu/sai/hết hạn token
+@@ -174 +174 @@ Response:
+-{ "cluster_id": "...", "messages": [ { "role": "user|assistant|tool", "content": "...", "created_at": "..." } ] }
++{ "cluster_id": "...", "messages": [], "revision": null, "undo_available": false }
+@@ -181 +181,3 @@ thoại đã lưu sau lượt này (không chỉ tin nhắn mới).
+-- Request: `{ "message": "..." }`
++- Request: `{ "message": "..." }`; chỉ nhận string có 1–4000 Unicode code point,
++  không chỉ chứa whitespace; không tự sửa nội dung đã được API chấp nhận.
++  Field thừa, thiếu, null, sai kiểu, rỗng hoặc vượt giới hạn trả 422.
+@@ -182,0 +185 @@ thoại đã lưu sau lượt này (không chỉ tin nhắn mới).
++- Response 409: `{ "detail": "revision_conflict" }` nếu hội thoại đổi sau khi đọc.
+@@ -190,0 +194,39 @@ index `assistant-conversations` (env `ASSISTANT_CONVERSATIONS_INDEX`).
++### `POST /assistant/clusters/{cluster_id}/conversation/undo` — VT-013
++
++Hoàn tác đúng một lượt Send đã lưu gần nhất, gồm cả các message tool của lượt đó.
++Mọi admin có JWT hợp lệ đều dùng được; Undo không gọi Azure OpenAI hoặc tool.
++
++- Request: `{ "expected_revision": "1:0" }`; field bắt buộc, string strict, không có field thừa.
++- Revision có dạng canonical `<primary_term>:<seq_no>`: term ≥ 1, sequence ≥ 0,
++  mỗi số ≤ `9223372036854775807`; chỉ chữ số ASCII, không dấu, whitespace hay
++  số 0 đứng đầu (ngoại trừ sequence `0`). Request sai trả 422.
++- Response 200: cùng contract GET/Send, trả toàn bộ `messages` đã phục hồi,
++  revision mới và `undo_available: false`.
++- Response 409: `{ "detail": "revision_conflict" }` khi revision cũ hoặc chưa có
++  document tương ứng; `{ "detail": "nothing_to_undo" }` khi revision hiện tại
++  không có snapshot. Kiểm tra revision trước snapshot. Retry revision cũ sau
++  Undo thành công vẫn trả conflict, không hoàn tác thêm lượt nữa.
++- Response 401: thiếu/sai/hết hạn JWT, giữ `WWW-Authenticate: Bearer`.
++- Response 404: `{ "detail": "cluster not found" }` nếu cluster không tồn tại.
++- Response 503: lỗi storage hoặc snapshot/metadata lưu trữ không hợp lệ; giữ
++  envelope `{ "error": "storage_unavailable", "detail": "..." }` với detail
++  đã loại thông tin nhạy cảm. Không trả thành công với dữ liệu mặc định.
++
++`messages` vẫn là mảng message theo schema hiện hành, giữ nguyên thứ tự, timestamp,
++null và tool-call fields. `revision` là token opaque đối với client, lấy từ sequence
++number/primary term của OpenSearch; không dùng timestamp. `undo_available` cho biết
++snapshot một cấp có tồn tại. Không trả snapshot trong response công khai.
++
++Hội thoại chưa tồn tại trả `messages: []`, `revision: null`, `undo_available: false`.
++Hội thoại legacy không có `undo` vẫn đọc được với revision thật và Undo chưa khả dụng.
++Undo lượt Send đầu tiên để lại document rỗng hợp lệ với revision mới. Chỉ phục hồi
++message history; giữ `created_at` của conversation, cập nhật `updated_at`, không có redo.
++
++Send ghi history mới và snapshot trước đó trong cùng một document. Update/Undo phải
++gửi cả `if_seq_no` và `if_primary_term`; lần tạo đầu dùng create-only. Không có
++fallback ghi vô điều kiện khi conflict. Field `undo` được thêm vào strict mapping
++theo cách additive; không xoá/tạo lại index. Không dùng lẫn writer cũ và mới.
++
++Nếu write timeout, commit có thể đã xảy ra: client cần GET để đối chiếu, không tự
++retry mutation. Thiếu index là lỗi storage, khác với document chưa tồn tại hợp lệ.
++
+diff --git a/docs/architect/contracts/assistant-conversation-schema.json b/docs/architect/contracts/assistant-conversation-schema.json
+index 5a5e87e..24d6e98 100644
+--- a/docs/architect/contracts/assistant-conversation-schema.json
++++ b/docs/architect/contracts/assistant-conversation-schema.json
+@@ -40,0 +41,9 @@
++    },
++    "undo": {
++      "type": ["object", "null"],
++      "description": "VT-013: one previous message sequence, consumed by Undo. Optional for legacy conversations; null means no Undo is available.",
++      "required": ["messages"],
++      "properties": {
++        "messages": { "$ref": "#/properties/messages" }
++      },
++      "additionalProperties": false
+diff --git a/query-api/Dockerfile b/query-api/Dockerfile
+index fb0bfae..f254cf6 100644
+--- a/query-api/Dockerfile
++++ b/query-api/Dockerfile
+@@ -17,0 +18 @@ COPY clustering clustering
++COPY docs/architect/contracts/assistant-conversation-schema.json docs/architect/contracts/assistant-conversation-schema.json
+diff --git a/query-api/src/assistant/router.py b/query-api/src/assistant/router.py
+index 0089403..66b5045 100644
+--- a/query-api/src/assistant/router.py
++++ b/query-api/src/assistant/router.py
+@@ -9,0 +10 @@ import logging
++from copy import deepcopy
+@@ -12 +13 @@ from fastapi import APIRouter, HTTPException, Request
+-from pydantic import BaseModel, Field
++from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
+@@ -17,0 +19 @@ from .service import run_chat_turn
++from .storage import ConversationConflict, ConversationState, parse_revision
+@@ -25 +27,29 @@ class ChatRequest(BaseModel):
+-    message: str = Field(min_length=1, max_length=4000)
++    model_config = ConfigDict(extra="forbid")
++    message: StrictStr = Field(min_length=1, max_length=4000)
++
++    @field_validator("message")
++    @classmethod
++    def meaningful_message(cls, value: str) -> str:
++        if not value.strip():
++            raise ValueError("Assistant message must not be blank")
++        return value
++
++
++class UndoRequest(BaseModel):
++    model_config = ConfigDict(extra="forbid")
++    expected_revision: StrictStr = Field(min_length=3, max_length=39)
++
++    @field_validator("expected_revision")
++    @classmethod
++    def valid_revision(cls, value: str) -> str:
++        parse_revision(value)
++        return value
++
++
++def _conversation_response(cluster_id: str, state: ConversationState | None) -> dict:
++    return {
++        "cluster_id": cluster_id,
++        "messages": state.document["messages"] if state is not None else [],
++        "revision": state.revision if state is not None else None,
++        "undo_available": state is not None and state.document.get("undo") is not None,
++    }
+@@ -60 +90 @@ def get_conversation(cluster_id: str, request: Request):
+-    return {"cluster_id": cluster_id, "messages": conversation["messages"] if conversation else []}
++    return _conversation_response(cluster_id, conversation)
+@@ -83 +113 @@ def post_message(cluster_id: str, payload: ChatRequest, request: Request):
+-    history = existing["messages"] if existing else []
++    history = deepcopy(existing.document["messages"]) if existing is not None else []
+@@ -97,2 +127,17 @@ def post_message(cluster_id: str, payload: ChatRequest, request: Request):
+-    saved = repository.save(cluster_id, all_messages, created_at=existing["created_at"] if existing else None)
+-    return {"cluster_id": cluster_id, "messages": saved["messages"]}
++    try:
++        saved = repository.save(cluster_id, all_messages, previous=existing)
++    except ConversationConflict as exc:
++        raise HTTPException(status_code=409, detail=exc.reason) from None
++    return _conversation_response(cluster_id, saved)
++
++
++@router.post("/clusters/{cluster_id}/conversation/undo")
++def undo_send(cluster_id: str, payload: UndoRequest, request: Request):
++    cluster_store = _require_cluster_store(request)
++    _get_cluster_or_404(cluster_store, cluster_id)
++    repository = _require_conversation_repository(request)
++    try:
++        restored = repository.undo(cluster_id, payload.expected_revision)
++    except ConversationConflict as exc:
++        raise HTTPException(status_code=409, detail=exc.reason) from None
++    return _conversation_response(cluster_id, restored)
+diff --git a/query-api/src/assistant/storage.py b/query-api/src/assistant/storage.py
+index 184c054..d62937c 100644
+--- a/query-api/src/assistant/storage.py
++++ b/query-api/src/assistant/storage.py
+@@ -1,8 +1 @@
+-"""Luu hoi thoai dieu tra voi AI Assistant, dung chung client OpenSearch da
+-cau hinh cua ingestion - cung cach query-api/src/users.py (PR Auth, chua
+-merge) lam cho index `users`.
+-
+-1 conversation / 1 cluster_id (upsert theo _id = cluster_id, KHONG phai
+-nhieu thread song song cho cung 1 cum) - xem
+-docs/architect/contracts/assistant-conversation-schema.json.
+-"""
++"""One versioned conversation per cluster, with one atomic Undo snapshot."""
+@@ -11,0 +5,2 @@ from __future__ import annotations
++from copy import deepcopy
++from dataclasses import dataclass
+@@ -12,0 +8,6 @@ from datetime import datetime, timezone
++import json
++from pathlib import Path
++import re
++
++from jsonschema import Draft7Validator, FormatChecker
++from opensearchpy.exceptions import ConflictError, NotFoundError, RequestError
+@@ -17,0 +19,7 @@ from . import config
++_MAX_VERSION = 2**63 - 1
++_REVISION = re.compile(r"([1-9][0-9]{0,18}):(0|[1-9][0-9]{0,18})", re.ASCII)
++_SCHEMA = Path(__file__).resolve().parents[3] / "docs/architect/contracts/assistant-conversation-schema.json"
++_VALIDATOR = Draft7Validator(json.loads(_SCHEMA.read_text(encoding="utf-8")),
++                             format_checker=FormatChecker())
++
++UNDO_MAPPING = {"type": "object", "enabled": False}
+@@ -24,4 +31,0 @@ CONVERSATION_MAPPING = {
+-        # object + dynamic=False: luu nguyen (khong index sub-field) - giong
+-        # cach `metadata` trong log-schema.json xu ly du lieu hinh dang tu
+-        # do. Khong can tim kiem BEN TRONG noi dung chat, chi can doc lai
+-        # nguyen ven theo cluster_id.
+@@ -28,0 +33 @@ CONVERSATION_MAPPING = {
++        "undo": UNDO_MAPPING,
+@@ -32,0 +38,42 @@ CONVERSATION_MAPPING = {
++def parse_revision(value: str) -> tuple[int, int]:
++    """Validate canonical primary-term:sequence-number, including sequence zero."""
++    match = _REVISION.fullmatch(value) if isinstance(value, str) else None
++    if match is None:
++        raise ValueError("Invalid conversation revision")
++    term, sequence = map(int, match.groups())
++    if term > _MAX_VERSION or sequence > _MAX_VERSION:
++        raise ValueError("Invalid conversation revision")
++    return term, sequence
++
++
++class ConversationConflict(Exception):
++    def __init__(self, reason: str = "revision_conflict"):
++        self.reason = reason
++        super().__init__(reason)
++
++
++@dataclass(frozen=True)
++class ConversationState:
++    document: dict
++    seq_no: int
++    primary_term: int
++
++    @property
++    def revision(self) -> str:
++        return f"{self.primary_term}:{self.seq_no}"
++
++
++def _state(cluster_id: str, document: dict, metadata: dict) -> ConversationState:
++    try:
++        _VALIDATOR.validate(document)
++        if document["cluster_id"] != cluster_id:
++            raise ValueError("Conversation identity mismatch")
++        sequence, term = metadata["_seq_no"], metadata["_primary_term"]
++        if type(sequence) is not int or type(term) is not int:
++            raise ValueError("Invalid version metadata")
++        parse_revision(f"{term}:{sequence}")
++        return ConversationState(deepcopy(document), sequence, term)
++    except Exception:
++        raise StorageError("invalid conversation data or version metadata") from None
++
++
+@@ -41,0 +89 @@ class ConversationRepository:
++        """Create a new index or add the optional field to an existing strict map."""
+@@ -44,11 +92,41 @@ class ConversationRepository:
+-                self.client.indices.create(index=self.index, body={
+-                    "settings": self.log_store._settings(),
+-                    "mappings": CONVERSATION_MAPPING,
+-                })
+-        except Exception as exc:  # noqa: BLE001
+-            # Race giua nhieu worker cung tao index - bo qua neu da ton tai.
+-            if "resource_already_exists_exception" not in str(exc):
+-                raise StorageError(f"cannot prepare {self.index}: {exc}") from exc
+-
+-    def get(self, cluster_id: str) -> dict | None:
+-        """Tra ve conversation hien co cho cluster_id, hoac None neu chua co."""
++                try:
++                    result = self.client.indices.create(index=self.index, body={
++                        "settings": self.log_store._settings(),
++                        "mappings": CONVERSATION_MAPPING,
++                    })
++                except RequestError as exc:
++                    if exc.error != "resource_already_exists_exception":
++                        raise
++                    # Another worker created the index; still ensure its mapping.
++                else:
++                    if not result.get("acknowledged"):
++                        raise StorageError("conversation index creation was not acknowledged")
++                    return
++            result = self.client.indices.put_mapping(index=self.index, body={
++                "properties": {"undo": UNDO_MAPPING},
++            })
++            if not result.get("acknowledged"):
++                raise StorageError("conversation mapping update was not acknowledged")
++        except Exception:
++            raise StorageError("cannot prepare conversation storage") from None
++
++    def get(self, cluster_id: str) -> ConversationState | None:
++        """Only a genuine absent document means no conversation, never an index error."""
++        try:
++            response = self.client.get(index=self.index, id=cluster_id)
++            if response.get("found") is False and "error" not in response:
++                return None
++            if response.get("found") is not True:
++                raise StorageError("invalid conversation response")
++            return _state(cluster_id, response["_source"], response)
++        except NotFoundError as exc:
++            if (exc.error != "index_not_found_exception" and isinstance(exc.info, dict)
++                    and exc.info.get("found") is False and "error" not in exc.info):
++                return None
++            raise StorageError("conversation storage is unavailable") from None
++        except Exception:
++            raise StorageError("cannot read conversation") from None
++
++    def _write(self, cluster_id: str, document: dict,
++               previous: ConversationState | None) -> ConversationState:
++        # Validate before any I/O. Version metadata is never stored in _source.
+@@ -56,8 +134,24 @@ class ConversationRepository:
+-            response = self.client.get(index=self.index, id=cluster_id, ignore=[404])
+-        except Exception as exc:  # noqa: BLE001
+-            raise StorageError(f"get conversation failed: {exc}") from exc
+-        return response["_source"] if response.get("found") else None
+-
+-    def save(self, cluster_id: str, messages: list[dict], *, created_at: str | None = None) -> dict:
+-        """Ghi de toan bo messages (upsert theo cluster_id). `created_at` giu
+-        nguyen tu lan tao dau neu truyen vao, khong bi reset moi lan luu."""
++            _VALIDATOR.validate(document)
++        except Exception:
++            raise StorageError("invalid conversation data") from None
++        body = deepcopy(document)
++        try:
++            if previous is None:
++                response = self.client.create(index=self.index, id=cluster_id,
++                                              body=body, refresh="wait_for")
++            else:
++                response = self.client.index(
++                    index=self.index, id=cluster_id, body=body, refresh="wait_for",
++                    if_seq_no=previous.seq_no, if_primary_term=previous.primary_term,
++                )
++        except ConflictError:
++            raise ConversationConflict() from None
++        except Exception:
++            raise StorageError("cannot save conversation") from None
++        # A malformed write response has an uncertain outcome. Never fabricate
++        # version metadata or retry the write; the caller must reconcile by GET.
++        return _state(cluster_id, body, response)
++
++    def save(self, cluster_id: str, messages: list[dict], *,
++             previous: ConversationState | None) -> ConversationState:
++        """Commit a completed Send and its previous history in the same document."""
+@@ -67 +161 @@ class ConversationRepository:
+-            "created_at": created_at or now,
++            "created_at": previous.document["created_at"] if previous else now,
+@@ -69 +163,2 @@ class ConversationRepository:
+-            "messages": messages,
++            "messages": deepcopy(messages),
++            "undo": {"messages": deepcopy(previous.document["messages"]) if previous else []},
+@@ -71,5 +166,14 @@ class ConversationRepository:
+-        try:
+-            self.client.index(index=self.index, id=cluster_id, body=document, refresh="wait_for")
+-        except Exception as exc:  # noqa: BLE001
+-            raise StorageError(f"save conversation failed: {exc}") from exc
+-        return document
++        return self._write(cluster_id, document, previous)
++
++    def undo(self, cluster_id: str, expected_revision: str) -> ConversationState:
++        parse_revision(expected_revision)
++        current = self.get(cluster_id)
++        if current is None or current.revision != expected_revision:
++            raise ConversationConflict()
++        snapshot = current.document.get("undo")
++        if snapshot is None:
++            raise ConversationConflict("nothing_to_undo")
++        document = deepcopy(current.document)
++        document.update(messages=deepcopy(snapshot["messages"]), undo=None,
++                        updated_at=datetime.now(timezone.utc).isoformat())
++        return self._write(cluster_id, document, current)

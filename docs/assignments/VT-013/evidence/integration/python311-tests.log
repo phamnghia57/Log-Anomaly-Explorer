@@ -1,0 +1,297 @@
+{
+  "command": [
+    "docker",
+    "run",
+    "--rm",
+    "--network",
+    "container:3150c62e1eaf0b4cc114301f17133cb13cd4c25d642751b4ff04a23c51fb62c1",
+    "--mount",
+    "type=bind,src=D:\\SE\\Log-Anomaly-Explorer\\query-api\\tests,dst=/app/query-api/tests,readonly",
+    "--mount",
+    "type=bind,src=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\integration,dst=/evidence",
+    "--workdir",
+    "/app/query-api",
+    "--env",
+    "STORAGE_BACKEND=memory",
+    "--env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "--env",
+    "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1",
+    "--env",
+    "OTEL_EXPORTER_OTLP_ENDPOINT=",
+    "--env",
+    "LANGFUSE_TRACING_ENABLED=false",
+    "--env",
+    "VT013_INTEGRATION_CONTEXT=/evidence/instance-python311.json",
+    "--env",
+    "VT013_INTEGRATION_ARTIFACTS=/evidence/python311-artifacts",
+    "--entrypoint",
+    "python",
+    "vt013-query-api-tests:b747e02ce8644bf9",
+    "-u",
+    "-B",
+    "-m",
+    "pytest",
+    "-vv",
+    "--tb=short",
+    "-rA",
+    "--color=no",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=/evidence/python311-tests.junit.xml",
+    "tests/test_assistant_undo_integration.py",
+    "tests/test_assistant_undo_contract.py",
+    "tests/test_assistant_undo_backend.py",
+    "tests/test_assistant.py",
+    "tests/test_assistant_storage.py"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+  "exit_code": 0,
+  "timed_out": false,
+  "duration_seconds": 96.097
+}
+
+============================= test session starts ==============================
+platform linux -- Python 3.11.18, pytest-9.2.0, pluggy-1.7.0 -- /usr/local/bin/python
+rootdir: /app/query-api
+collecting ... collected 103 items
+
+tests/test_assistant_undo_integration.py::test_i01_create_send_undo_get PASSED [  0%]
+tests/test_assistant_undo_integration.py::test_i02_restore_exact_tool_history PASSED [  1%]
+tests/test_assistant_undo_integration.py::test_i03_first_send_restores_persisted_empty PASSED [  2%]
+tests/test_assistant_undo_integration.py::test_i04_restart_api_process_recovers_restored_history PASSED [  3%]
+tests/test_assistant_undo_integration.py::test_i05_concurrent_sends_have_one_commit[create-only] PASSED [  4%]
+tests/test_assistant_undo_integration.py::test_i05_concurrent_sends_have_one_commit[conditional-update] PASSED [  5%]
+tests/test_assistant_undo_integration.py::test_i06_concurrent_undos_have_one_commit PASSED [  6%]
+tests/test_assistant_undo_integration.py::test_i07_missing_document_versus_missing_index PASSED [  7%]
+tests/test_assistant_undo_integration.py::test_i08_existing_strict_mapping_is_upgraded_additively PASSED [  8%]
+tests/test_assistant_undo_integration.py::test_i09_legacy_document_remains_readable PASSED [  9%]
+tests/test_assistant_undo_integration.py::test_i10_real_connection_failure_propagates_without_data_loss PASSED [ 10%]
+tests/test_assistant_undo_integration.py::test_i11_real_write_rejection_preserves_snapshot PASSED [ 11%]
+tests/test_assistant_undo_integration.py::test_i12_validation_and_admin_auth_remain_enforced PASSED [ 12%]
+tests/test_assistant_undo_contract.py::test_t03_send_response_exposes_revision_contract PASSED [ 13%]
+tests/test_assistant_undo_contract.py::test_t03_undo_first_send_persists_empty_history PASSED [ 14%]
+tests/test_assistant_undo_contract.py::test_t06_whitespace_message_is_rejected_without_side_effects[space] PASSED [ 15%]
+tests/test_assistant_undo_contract.py::test_t06_whitespace_message_is_rejected_without_side_effects[tabs-newlines] PASSED [ 16%]
+tests/test_assistant_undo_contract.py::test_t06_whitespace_message_is_rejected_without_side_effects[nonbreaking-space] PASSED [ 17%]
+tests/test_assistant_undo_contract.py::test_t11_read_failure_returns_503_and_preserves_history PASSED [ 18%]
+tests/test_assistant_undo_contract.py::test_t12_missing_index_raises_storage_error_in_actual_repository PASSED [ 19%]
+tests/test_assistant_undo_contract.py::test_t12_missing_index_returns_503_not_empty_success[GET] PASSED [ 20%]
+tests/test_assistant_undo_contract.py::test_t12_missing_index_returns_503_not_empty_success[POST] PASSED [ 21%]
+tests/test_assistant_undo_contract.py::test_t14_concurrent_sends_cannot_silently_overwrite[existing-document] PASSED [ 22%]
+tests/test_assistant_undo_contract.py::test_t14_concurrent_sends_cannot_silently_overwrite[first-creation] PASSED [ 23%]
+tests/test_assistant_undo_contract.py::test_fake_copies_documents_and_does_not_protect_unconditional_writes PASSED [ 24%]
+tests/test_assistant_undo_contract.py::test_fake_enforces_explicit_conditional_and_create_only_writes PASSED [ 25%]
+tests/test_assistant_undo_contract.py::test_fake_preserves_missing_index_exception_and_ignore_semantics PASSED [ 26%]
+tests/test_assistant_undo_backend.py::test_t02_undo_restores_exact_tool_history_and_creation_time PASSED [ 27%]
+tests/test_assistant_undo_backend.py::test_t04_t05_one_level_undo_is_consumed_and_old_revision_conflicts PASSED [ 28%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload0] PASSED [ 29%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload1] PASSED [ 30%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload2] PASSED [ 31%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload3] PASSED [ 32%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload4] PASSED [ 33%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload5] PASSED [ 33%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload6] PASSED [ 34%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload7] PASSED [ 35%]
+tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload8] PASSED [ 36%]
+tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[x] PASSED [ 37%]
+tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[message1] PASSED [ 38%]
+tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[message2] PASSED [ 39%]
+tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[message3] PASSED [ 40%]
+tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[ hi ] PASSED [ 41%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[None] PASSED [ 42%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1_0] PASSED [ 43%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[True] PASSED [ 44%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[] PASSED [ 45%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[ ] PASSED [ 46%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1_1] PASSED [ 47%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[0:0] PASSED [ 48%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[01:0] PASSED [ 49%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:00] PASSED [ 50%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:-1] PASSED [ 51%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[+1:0] PASSED [ 52%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:+0] PASSED [ 53%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[ 1:0] PASSED [ 54%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0\n] PASSED [ 55%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[\uff11:\uff10] PASSED [ 56%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0:0] PASSED [ 57%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[9223372036854775808:0] PASSED [ 58%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:9223372036854775808] PASSED [ 59%]
+tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[revision18] PASSED [ 60%]
+tests/test_assistant_undo_backend.py::test_t08_undo_request_requires_only_the_revision_field[payload0] PASSED [ 61%]
+tests/test_assistant_undo_backend.py::test_t08_undo_request_requires_only_the_revision_field[payload1] PASSED [ 62%]
+tests/test_assistant_undo_backend.py::test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[1:0] PASSED [ 63%]
+tests/test_assistant_undo_backend.py::test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[9223372036854775807:9223372036854775807] PASSED [ 64%]
+tests/test_assistant_undo_backend.py::test_t10_stale_revision_does_not_touch_newer_history PASSED [ 65%]
+tests/test_assistant_undo_backend.py::test_t13_rejected_undo_write_is_503_and_preserves_snapshot PASSED [ 66%]
+tests/test_assistant_undo_backend.py::test_t15_t16_competing_undo_mutations_use_the_same_version[undo] PASSED [ 66%]
+tests/test_assistant_undo_backend.py::test_t15_t16_competing_undo_mutations_use_the_same_version[send] PASSED [ 67%]
+tests/test_assistant_undo_backend.py::test_t18_mapping_update_preserves_legacy_data_and_is_idempotent PASSED [ 68%]
+tests/test_assistant_undo_backend.py::test_t18_mapping_failures_are_storage_errors[exception] PASSED [ 69%]
+tests/test_assistant_undo_backend.py::test_t18_mapping_failures_are_storage_errors[unacknowledged] PASSED [ 70%]
+tests/test_assistant_undo_backend.py::test_t19_undo_keeps_admin_authentication[None] PASSED [ 71%]
+tests/test_assistant_undo_backend.py::test_t19_undo_keeps_admin_authentication[Bearer invalid] PASSED [ 72%]
+tests/test_assistant_undo_backend.py::test_t22_corrupt_snapshot_is_not_an_empty_success PASSED [ 73%]
+tests/test_assistant_undo_backend.py::test_snapshot_and_saved_data_do_not_alias_caller_objects PASSED [ 74%]
+tests/test_assistant_undo_backend.py::test_invalid_version_metadata_is_not_defaulted[metadata0] PASSED [ 75%]
+tests/test_assistant_undo_backend.py::test_invalid_version_metadata_is_not_defaulted[metadata1] PASSED [ 76%]
+tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[None-GET-/assistant/clusters/c1/conversation] PASSED [ 77%]
+tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[None-POST-/assistant/clusters/c1/conversation/messages] PASSED [ 78%]
+tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-GET-/assistant/clusters/c1/conversation] PASSED [ 79%]
+tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-POST-/assistant/clusters/c1/conversation/messages] PASSED [ 80%]
+tests/test_assistant.py::TestGetConversation::test_cum_khong_ton_tai_tra_404 PASSED [ 81%]
+tests/test_assistant.py::TestGetConversation::test_chua_hoi_lan_nao_tra_messages_rong PASSED [ 82%]
+tests/test_assistant.py::TestGetConversation::test_tra_ve_hoi_thoai_da_luu PASSED [ 83%]
+tests/test_assistant.py::TestPostMessage::test_cum_khong_ton_tai_tra_404 PASSED [ 84%]
+tests/test_assistant.py::TestPostMessage::test_thieu_openai_key_tra_503 PASSED [ 85%]
+tests/test_assistant.py::TestPostMessage::test_tra_loi_thang_khong_can_goi_tool PASSED [ 86%]
+tests/test_assistant.py::TestPostMessage::test_ai_goi_tool_truoc_khi_tra_loi PASSED [ 87%]
+tests/test_assistant.py::TestPostMessage::test_dat_gioi_han_vong_goi_tool PASSED [ 88%]
+tests/test_assistant.py::TestPostMessage::test_hoi_tiep_gui_kem_lich_su_cu PASSED [ 89%]
+tests/test_assistant.py::TestToolExecutor::test_tool_khong_ton_tai_tra_error_khong_nem_exception PASSED [ 90%]
+tests/test_assistant.py::TestToolExecutor::test_get_cluster_history_khong_co_cluster_store_tra_error PASSED [ 91%]
+tests/test_assistant.py::TestToolExecutor::test_search_related_logs_mac_dinh_24h_va_gioi_han_limit PASSED [ 92%]
+tests/test_assistant.py::TestToolExecutor::test_list_active_clusters_loc_theo_status PASSED [ 93%]
+tests/test_assistant.py::TestToolExecutor::test_loi_trong_tool_duoc_boc_thanh_error_khong_lam_vo_chat PASSED [ 94%]
+tests/test_assistant_storage.py::test_ensure_ready_tao_index_voi_mapping_strict PASSED [ 95%]
+tests/test_assistant_storage.py::test_get_chua_co_conversation_tra_none PASSED [ 96%]
+tests/test_assistant_storage.py::test_save_roi_get_lai_dung_du_lieu PASSED [ 97%]
+tests/test_assistant_storage.py::test_save_lan_2_giu_nguyen_created_at_ban_dau PASSED [ 98%]
+tests/test_assistant_storage.py::test_ensure_ready_goi_lai_khong_nem_loi PASSED [ 99%]
+tests/test_assistant_storage.py::test_ensure_ready_bo_qua_loi_index_da_ton_tai_tu_worker_khac PASSED [100%]
+
+=============================== warnings summary ===============================
+../../usr/local/lib/python3.11/site-packages/fastapi/testclient.py:1
+  /usr/local/lib/python3.11/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+==================================== PASSES ====================================
+________________ test_i07_missing_document_versus_missing_index ________________
+------------------------------ Captured log call -------------------------------
+WARNING  opensearch:base.py:280 GET http://127.0.0.1:9200/vt013-b747e02ce8644bf9-8ecc10a816-conversations/_doc/vt013-integration-cluster [status:404 request:0.003s]
+WARNING  opensearch:base.py:280 GET http://127.0.0.1:9200/vt013-b747e02ce8644bf9-8ecc10a816-missing/_doc/vt013-integration-cluster [status:404 request:0.001s]
+WARNING  opensearch:base.py:280 GET http://127.0.0.1:9200/vt013-b747e02ce8644bf9-8ecc10a816-conversations/_doc/vt013-integration-cluster [status:404 request:0.002s]
+WARNING  opensearch:base.py:280 GET http://127.0.0.1:9200/vt013-b747e02ce8644bf9-8ecc10a816-missing/_doc/vt013-integration-cluster [status:404 request:0.002s]
+___________ test_i08_existing_strict_mapping_is_upgraded_additively ____________
+------------------------------ Captured log call -------------------------------
+WARNING  opensearch:base.py:280 PUT http://127.0.0.1:9200/vt013-b747e02ce8644bf9-450471ae5c-conversations/_doc/invalid-extra-field [status:400 request:0.004s]
+____________ TestPostMessage.test_tra_loi_thang_khong_can_goi_tool _____________
+------------------------------ Captured log call -------------------------------
+WARNING  langfuse:client.py:378 Authentication error: Langfuse client initialized without public_key. Client will be disabled. Provide a public_key parameter or set LANGFUSE_PUBLIC_KEY environment variable.
+______________ TestPostMessage.test_ai_goi_tool_truoc_khi_tra_loi ______________
+------------------------------ Captured log call -------------------------------
+WARNING  langfuse:client.py:378 Authentication error: Langfuse client initialized without public_key. Client will be disabled. Provide a public_key parameter or set LANGFUSE_PUBLIC_KEY environment variable.
+_______________ TestPostMessage.test_dat_gioi_han_vong_goi_tool ________________
+------------------------------ Captured log call -------------------------------
+WARNING  query-api.assistant:service.py:157 Assistant dat gioi han 2 vong goi tool cho cum c1 (round=1)
+WARNING  langfuse:client.py:378 Authentication error: Langfuse client initialized without public_key. Client will be disabled. Provide a public_key parameter or set LANGFUSE_PUBLIC_KEY environment variable.
+_______________ TestPostMessage.test_hoi_tiep_gui_kem_lich_su_cu _______________
+------------------------------ Captured log call -------------------------------
+WARNING  langfuse:client.py:378 Authentication error: Langfuse client initialized without public_key. Client will be disabled. Provide a public_key parameter or set LANGFUSE_PUBLIC_KEY environment variable.
+----------- generated xml file: /evidence/python311-tests.junit.xml ------------
+=========================== short test summary info ============================
+PASSED tests/test_assistant_undo_integration.py::test_i01_create_send_undo_get
+PASSED tests/test_assistant_undo_integration.py::test_i02_restore_exact_tool_history
+PASSED tests/test_assistant_undo_integration.py::test_i03_first_send_restores_persisted_empty
+PASSED tests/test_assistant_undo_integration.py::test_i04_restart_api_process_recovers_restored_history
+PASSED tests/test_assistant_undo_integration.py::test_i05_concurrent_sends_have_one_commit[create-only]
+PASSED tests/test_assistant_undo_integration.py::test_i05_concurrent_sends_have_one_commit[conditional-update]
+PASSED tests/test_assistant_undo_integration.py::test_i06_concurrent_undos_have_one_commit
+PASSED tests/test_assistant_undo_integration.py::test_i07_missing_document_versus_missing_index
+PASSED tests/test_assistant_undo_integration.py::test_i08_existing_strict_mapping_is_upgraded_additively
+PASSED tests/test_assistant_undo_integration.py::test_i09_legacy_document_remains_readable
+PASSED tests/test_assistant_undo_integration.py::test_i10_real_connection_failure_propagates_without_data_loss
+PASSED tests/test_assistant_undo_integration.py::test_i11_real_write_rejection_preserves_snapshot
+PASSED tests/test_assistant_undo_integration.py::test_i12_validation_and_admin_auth_remain_enforced
+PASSED tests/test_assistant_undo_contract.py::test_t03_send_response_exposes_revision_contract
+PASSED tests/test_assistant_undo_contract.py::test_t03_undo_first_send_persists_empty_history
+PASSED tests/test_assistant_undo_contract.py::test_t06_whitespace_message_is_rejected_without_side_effects[space]
+PASSED tests/test_assistant_undo_contract.py::test_t06_whitespace_message_is_rejected_without_side_effects[tabs-newlines]
+PASSED tests/test_assistant_undo_contract.py::test_t06_whitespace_message_is_rejected_without_side_effects[nonbreaking-space]
+PASSED tests/test_assistant_undo_contract.py::test_t11_read_failure_returns_503_and_preserves_history
+PASSED tests/test_assistant_undo_contract.py::test_t12_missing_index_raises_storage_error_in_actual_repository
+PASSED tests/test_assistant_undo_contract.py::test_t12_missing_index_returns_503_not_empty_success[GET]
+PASSED tests/test_assistant_undo_contract.py::test_t12_missing_index_returns_503_not_empty_success[POST]
+PASSED tests/test_assistant_undo_contract.py::test_t14_concurrent_sends_cannot_silently_overwrite[existing-document]
+PASSED tests/test_assistant_undo_contract.py::test_t14_concurrent_sends_cannot_silently_overwrite[first-creation]
+PASSED tests/test_assistant_undo_contract.py::test_fake_copies_documents_and_does_not_protect_unconditional_writes
+PASSED tests/test_assistant_undo_contract.py::test_fake_enforces_explicit_conditional_and_create_only_writes
+PASSED tests/test_assistant_undo_contract.py::test_fake_preserves_missing_index_exception_and_ignore_semantics
+PASSED tests/test_assistant_undo_backend.py::test_t02_undo_restores_exact_tool_history_and_creation_time
+PASSED tests/test_assistant_undo_backend.py::test_t04_t05_one_level_undo_is_consumed_and_old_revision_conflicts
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload0]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload1]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload2]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload3]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload4]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload5]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload6]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload7]
+PASSED tests/test_assistant_undo_backend.py::test_t06_invalid_send_inputs_have_no_side_effects[payload8]
+PASSED tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[x]
+PASSED tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[message1]
+PASSED tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[message2]
+PASSED tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[message3]
+PASSED tests/test_assistant_undo_backend.py::test_t07_valid_boundary_messages_preserve_accepted_text[ hi ]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[None]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1_0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[True]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[ ]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1_1]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[0:0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[01:0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:00]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:-1]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[+1:0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:+0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[ 1:0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0\n]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[\uff11:\uff10]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0:0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[9223372036854775808:0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[1:9223372036854775808]
+PASSED tests/test_assistant_undo_backend.py::test_t08_invalid_revisions_are_422_without_reads_or_writes[revision18]
+PASSED tests/test_assistant_undo_backend.py::test_t08_undo_request_requires_only_the_revision_field[payload0]
+PASSED tests/test_assistant_undo_backend.py::test_t08_undo_request_requires_only_the_revision_field[payload1]
+PASSED tests/test_assistant_undo_backend.py::test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[1:0]
+PASSED tests/test_assistant_undo_backend.py::test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[9223372036854775807:9223372036854775807]
+PASSED tests/test_assistant_undo_backend.py::test_t10_stale_revision_does_not_touch_newer_history
+PASSED tests/test_assistant_undo_backend.py::test_t13_rejected_undo_write_is_503_and_preserves_snapshot
+PASSED tests/test_assistant_undo_backend.py::test_t15_t16_competing_undo_mutations_use_the_same_version[undo]
+PASSED tests/test_assistant_undo_backend.py::test_t15_t16_competing_undo_mutations_use_the_same_version[send]
+PASSED tests/test_assistant_undo_backend.py::test_t18_mapping_update_preserves_legacy_data_and_is_idempotent
+PASSED tests/test_assistant_undo_backend.py::test_t18_mapping_failures_are_storage_errors[exception]
+PASSED tests/test_assistant_undo_backend.py::test_t18_mapping_failures_are_storage_errors[unacknowledged]
+PASSED tests/test_assistant_undo_backend.py::test_t19_undo_keeps_admin_authentication[None]
+PASSED tests/test_assistant_undo_backend.py::test_t19_undo_keeps_admin_authentication[Bearer invalid]
+PASSED tests/test_assistant_undo_backend.py::test_t22_corrupt_snapshot_is_not_an_empty_success
+PASSED tests/test_assistant_undo_backend.py::test_snapshot_and_saved_data_do_not_alias_caller_objects
+PASSED tests/test_assistant_undo_backend.py::test_invalid_version_metadata_is_not_defaulted[metadata0]
+PASSED tests/test_assistant_undo_backend.py::test_invalid_version_metadata_is_not_defaulted[metadata1]
+PASSED tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[None-GET-/assistant/clusters/c1/conversation]
+PASSED tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[None-POST-/assistant/clusters/c1/conversation/messages]
+PASSED tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-GET-/assistant/clusters/c1/conversation]
+PASSED tests/test_assistant.py::test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-POST-/assistant/clusters/c1/conversation/messages]
+PASSED tests/test_assistant.py::TestGetConversation::test_cum_khong_ton_tai_tra_404
+PASSED tests/test_assistant.py::TestGetConversation::test_chua_hoi_lan_nao_tra_messages_rong
+PASSED tests/test_assistant.py::TestGetConversation::test_tra_ve_hoi_thoai_da_luu
+PASSED tests/test_assistant.py::TestPostMessage::test_cum_khong_ton_tai_tra_404
+PASSED tests/test_assistant.py::TestPostMessage::test_thieu_openai_key_tra_503
+PASSED tests/test_assistant.py::TestPostMessage::test_tra_loi_thang_khong_can_goi_tool
+PASSED tests/test_assistant.py::TestPostMessage::test_ai_goi_tool_truoc_khi_tra_loi
+PASSED tests/test_assistant.py::TestPostMessage::test_dat_gioi_han_vong_goi_tool
+PASSED tests/test_assistant.py::TestPostMessage::test_hoi_tiep_gui_kem_lich_su_cu
+PASSED tests/test_assistant.py::TestToolExecutor::test_tool_khong_ton_tai_tra_error_khong_nem_exception
+PASSED tests/test_assistant.py::TestToolExecutor::test_get_cluster_history_khong_co_cluster_store_tra_error
+PASSED tests/test_assistant.py::TestToolExecutor::test_search_related_logs_mac_dinh_24h_va_gioi_han_limit
+PASSED tests/test_assistant.py::TestToolExecutor::test_list_active_clusters_loc_theo_status
+PASSED tests/test_assistant.py::TestToolExecutor::test_loi_trong_tool_duoc_boc_thanh_error_khong_lam_vo_chat
+PASSED tests/test_assistant_storage.py::test_ensure_ready_tao_index_voi_mapping_strict
+PASSED tests/test_assistant_storage.py::test_get_chua_co_conversation_tra_none
+PASSED tests/test_assistant_storage.py::test_save_roi_get_lai_dung_du_lieu
+PASSED tests/test_assistant_storage.py::test_save_lan_2_giu_nguyen_created_at_ban_dau
+PASSED tests/test_assistant_storage.py::test_ensure_ready_goi_lai_khong_nem_loi
+PASSED tests/test_assistant_storage.py::test_ensure_ready_bo_qua_loi_index_da_ton_tai_tu_worker_khac
+================== 103 passed, 1 warning in 93.98s (0:01:33) ===================

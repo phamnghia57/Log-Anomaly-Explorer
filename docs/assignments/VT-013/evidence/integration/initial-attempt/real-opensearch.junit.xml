@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="13" time="152.482" timestamp="2026-11-08T21:55:26.442299+07:00" hostname="PDM"><testcase classname="tests.test_assistant_undo_integration" name="test_i01_create_send_undo_get" time="12.390" /><testcase classname="tests.test_assistant_undo_integration" name="test_i02_restore_exact_tool_history" time="12.272" /><testcase classname="tests.test_assistant_undo_integration" name="test_i03_first_send_restores_persisted_empty" time="11.353" /><testcase classname="tests.test_assistant_undo_integration" name="test_i04_restart_api_process_recovers_restored_history" time="18.833" /><testcase classname="tests.test_assistant_undo_integration" name="test_i05_concurrent_sends_have_one_commit[create-only]" time="9.325" /><testcase classname="tests.test_assistant_undo_integration" name="test_i05_concurrent_sends_have_one_commit[conditional-update]" time="10.166" /><testcase classname="tests.test_assistant_undo_integration" name="test_i06_concurrent_undos_have_one_commit" time="11.252" /><testcase classname="tests.test_assistant_undo_integration" name="test_i07_missing_document_versus_missing_index" time="15.266" /><testcase classname="tests.test_assistant_undo_integration" name="test_i08_existing_strict_mapping_is_upgraded_additively" time="11.189" /><testcase classname="tests.test_assistant_undo_integration" name="test_i09_legacy_document_remains_readable" time="9.812" /><testcase classname="tests.test_assistant_undo_integration" name="test_i10_real_connection_failure_propagates_without_data_loss" time="10.315" /><testcase classname="tests.test_assistant_undo_integration" name="test_i11_real_write_rejection_preserves_snapshot" time="9.885" /><testcase classname="tests.test_assistant_undo_integration" name="test_i12_validation_and_admin_auth_remain_enforced" time="8.740"><failure message="httpx.InvalidURL: Invalid port: '63085assistant'">D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_urlparse.py:409: in normalize_port
+    port_as_int = int(port)
+                  ^^^^^^^^^
+E   ValueError: invalid literal for int() with base 10: '63085assistant'
+
+During handling of the above exception, another exception occurred:
+tests\test_assistant_undo_integration.py:411: in test_i12_validation_and_admin_auth_remain_enforced
+    unauthenticated = httpx.get(str(api.client.base_url) + CONVERSATION.lstrip("/"), trust_env=False)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_api.py:195: in get
+    return request(
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_api.py:109: in request
+    return client.request(
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_client.py:812: in request
+    request = self.build_request(
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_client.py:366: in build_request
+    url = self._merge_url(url)
+          ^^^^^^^^^^^^^^^^^^^^
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_client.py:396: in _merge_url
+    merge_url = URL(url)
+                ^^^^^^^^
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_urls.py:117: in __init__
+    self._uri_reference = urlparse(url, **kwargs)
+                          ^^^^^^^^^^^^^^^^^^^^^^^
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_urlparse.py:321: in urlparse
+    parsed_port: int | None = normalize_port(port, scheme)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\SE\LAE-issue-73\.venv\Lib\site-packages\httpx\_urlparse.py:411: in normalize_port
+    raise InvalidURL(f"Invalid port: {port!r}")
+E   httpx.InvalidURL: Invalid port: '63085assistant'</failure></testcase></testsuite></testsuites>

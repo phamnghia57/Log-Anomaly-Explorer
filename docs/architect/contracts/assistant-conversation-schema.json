@@ -38,6 +38,15 @@
           "name": { "type": "string", "description": "Ten tool da goi, chi co o message role=tool" }
         }
       }
+    },
+    "undo": {
+      "type": ["object", "null"],
+      "description": "VT-013: one previous message sequence, consumed by Undo. Optional for legacy conversations; null means no Undo is available.",
+      "required": ["messages"],
+      "properties": {
+        "messages": { "$ref": "#/properties/messages" }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

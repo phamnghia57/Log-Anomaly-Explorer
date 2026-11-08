@@ -1,0 +1,69 @@
+{
+  "command": [
+    "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+    "-u",
+    "-B",
+    "-m",
+    "pytest",
+    "-vv",
+    "--tb=short",
+    "-rA",
+    "--color=no",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "faulthandler_timeout=20",
+    "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\green\\focused-green.junit.xml",
+    "tests/test_assistant_undo_contract.py"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+  "exit_code": 0,
+  "timed_out": false,
+  "timeout_seconds": 120,
+  "duration_seconds": 5.363
+}
+
+============================= test session starts =============================
+platform win32 -- Python 3.14.6, pytest-9.2.0, pluggy-1.7.0 -- D:\SE\LAE-issue-73\.venv\Scripts\python.exe
+rootdir: D:\SE\Log-Anomaly-Explorer\query-api
+collecting ... collected 14 items
+
+tests/test_assistant_undo_contract.py::test_t03_send_response_exposes_revision_contract PASSED [  7%]
+tests/test_assistant_undo_contract.py::test_t03_undo_first_send_persists_empty_history PASSED [ 14%]
+tests/test_assistant_undo_contract.py::test_t06_whitespace_message_is_rejected_without_side_effects[space] PASSED [ 21%]
+tests/test_assistant_undo_contract.py::test_t06_whitespace_message_is_rejected_without_side_effects[tabs-newlines] PASSED [ 28%]
+tests/test_assistant_undo_contract.py::test_t06_whitespace_message_is_rejected_without_side_effects[nonbreaking-space] PASSED [ 35%]
+tests/test_assistant_undo_contract.py::test_t11_read_failure_returns_503_and_preserves_history PASSED [ 42%]
+tests/test_assistant_undo_contract.py::test_t12_missing_index_raises_storage_error_in_actual_repository PASSED [ 50%]
+tests/test_assistant_undo_contract.py::test_t12_missing_index_returns_503_not_empty_success[GET] PASSED [ 57%]
+tests/test_assistant_undo_contract.py::test_t12_missing_index_returns_503_not_empty_success[POST] PASSED [ 64%]
+tests/test_assistant_undo_contract.py::test_t14_concurrent_sends_cannot_silently_overwrite[existing-document] PASSED [ 71%]
+tests/test_assistant_undo_contract.py::test_t14_concurrent_sends_cannot_silently_overwrite[first-creation] PASSED [ 78%]
+tests/test_assistant_undo_contract.py::test_fake_copies_documents_and_does_not_protect_unconditional_writes PASSED [ 85%]
+tests/test_assistant_undo_contract.py::test_fake_enforces_explicit_conditional_and_create_only_writes PASSED [ 92%]
+tests/test_assistant_undo_contract.py::test_fake_preserves_missing_index_exception_and_ignore_semantics PASSED [100%]
+
+============================== warnings summary ===============================
+..\..\LAE-issue-73\.venv\Lib\site-packages\fastapi\testclient.py:1
+  D:\SE\LAE-issue-73\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=================================== PASSES ====================================
+- generated xml file: D:\SE\Log-Anomaly-Explorer\docs\assignments\VT-013\evidence\green\focused-green.junit.xml -
+=========================== short test summary info ===========================
+PASSED tests/test_assistant_undo_contract.py::test_t03_send_response_exposes_revision_contract
+PASSED tests/test_assistant_undo_contract.py::test_t03_undo_first_send_persists_empty_history
+PASSED tests/test_assistant_undo_contract.py::test_t06_whitespace_message_is_rejected_without_side_effects[space]
+PASSED tests/test_assistant_undo_contract.py::test_t06_whitespace_message_is_rejected_without_side_effects[tabs-newlines]
+PASSED tests/test_assistant_undo_contract.py::test_t06_whitespace_message_is_rejected_without_side_effects[nonbreaking-space]
+PASSED tests/test_assistant_undo_contract.py::test_t11_read_failure_returns_503_and_preserves_history
+PASSED tests/test_assistant_undo_contract.py::test_t12_missing_index_raises_storage_error_in_actual_repository
+PASSED tests/test_assistant_undo_contract.py::test_t12_missing_index_returns_503_not_empty_success[GET]
+PASSED tests/test_assistant_undo_contract.py::test_t12_missing_index_returns_503_not_empty_success[POST]
+PASSED tests/test_assistant_undo_contract.py::test_t14_concurrent_sends_cannot_silently_overwrite[existing-document]
+PASSED tests/test_assistant_undo_contract.py::test_t14_concurrent_sends_cannot_silently_overwrite[first-creation]
+PASSED tests/test_assistant_undo_contract.py::test_fake_copies_documents_and_does_not_protect_unconditional_writes
+PASSED tests/test_assistant_undo_contract.py::test_fake_enforces_explicit_conditional_and_create_only_writes
+PASSED tests/test_assistant_undo_contract.py::test_fake_preserves_missing_index_exception_and_ignore_semantics
+======================== 14 passed, 1 warning in 3.72s ========================

@@ -35,6 +35,14 @@ class FakeIndices:
             self.owner.next_sequence.pop(index, None)
             return {"acknowledged": True}
 
+    def put_mapping(self, *, index, body):
+        with self.owner.lock:
+            if index not in self.owner.mappings:
+                raise NotFoundError(404, "index_not_found_exception", {})
+            mapping = self.owner.mappings[index].setdefault("mappings", {})
+            mapping.setdefault("properties", {}).update(deepcopy(body["properties"]))
+            return {"acknowledged": True}
+
 
 class RevisionedOpenSearch:
     def __init__(self):

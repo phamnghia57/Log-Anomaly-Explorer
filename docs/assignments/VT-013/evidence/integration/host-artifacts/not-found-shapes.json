@@ -1,0 +1,36 @@
+{
+  "document": {
+    "status": 404,
+    "error": "{\"_index\":\"vt013-b747e02ce8644bf9-e60017867f-conversations\",\"_id\":\"vt013-integration-cluster\",\"found\":false}",
+    "info": {
+      "_index": "vt013-b747e02ce8644bf9-e60017867f-conversations",
+      "_id": "vt013-integration-cluster",
+      "found": false
+    }
+  },
+  "index": {
+    "status": 404,
+    "error": "index_not_found_exception",
+    "info": {
+      "error": {
+        "root_cause": [
+          {
+            "type": "index_not_found_exception",
+            "reason": "no such index [vt013-b747e02ce8644bf9-e60017867f-missing]",
+            "index": "vt013-b747e02ce8644bf9-e60017867f-missing",
+            "resource.id": "vt013-b747e02ce8644bf9-e60017867f-missing",
+            "resource.type": "index_expression",
+            "index_uuid": "_na_"
+          }
+        ],
+        "type": "index_not_found_exception",
+        "reason": "no such index [vt013-b747e02ce8644bf9-e60017867f-missing]",
+        "index": "vt013-b747e02ce8644bf9-e60017867f-missing",
+        "resource.id": "vt013-b747e02ce8644bf9-e60017867f-missing",
+        "resource.type": "index_expression",
+        "index_uuid": "_na_"
+      },
+      "status": 404
+    }
+  }
+}

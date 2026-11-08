@@ -1,0 +1,29 @@
+{
+  "index": "vt013-b747e02ce8644bf9-bdfd01545b-conversations",
+  "document": {
+    "_index": "vt013-b747e02ce8644bf9-bdfd01545b-conversations",
+    "_id": "vt013-integration-cluster",
+    "_version": 3,
+    "_seq_no": 2,
+    "_primary_term": 1,
+    "found": true,
+    "_source": {
+      "cluster_id": "vt013-integration-cluster",
+      "created_at": "2026-11-08T14:59:38.003482+00:00",
+      "updated_at": "2026-11-08T14:59:39.758931+00:00",
+      "messages": [
+        {
+          "role": "user",
+          "content": "First",
+          "created_at": "2026-11-08T00:00:00+00:00"
+        },
+        {
+          "role": "assistant",
+          "content": "Deterministic integration answer.",
+          "created_at": "2026-11-08T00:00:00+00:00"
+        }
+      ],
+      "undo": null
+    }
+  }
+}

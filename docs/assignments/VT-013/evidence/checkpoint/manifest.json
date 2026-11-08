@@ -1,0 +1,754 @@
+{
+  "recorded_at_utc": "2026-11-08T15:57:07.533463+00:00",
+  "branch": "feat/vt013-undo-manhpd",
+  "parent_head": "4487c1d93c77c117b1c18c0f611cd76152e3a011",
+  "commit_message": "feat(vt013): implement and verify version-safe assistant undo",
+  "hash_kind": "SHA-256 of original working-tree bytes before Git line-ending normalization; manifest excludes its own recursive hash",
+  "file_count_including_manifest": 95,
+  "selected_files": [
+    {
+      "path": "docs/architect/contracts/api-contract.md",
+      "bytes": 15287,
+      "worktree_sha256": "53b562d70c6aa4af4054e9203641b5c8e6fa97a693602dbe050a9d61b3bf5099"
+    },
+    {
+      "path": "docs/architect/contracts/assistant-conversation-schema.json",
+      "bytes": 2438,
+      "worktree_sha256": "d09e6ec37736178df8277b2f79f303b945d60961b43e3531a5d40f484ddb85e1"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/checkpoint/README.md",
+      "bytes": 2645,
+      "worktree_sha256": "134b014cf822d799b27339cbaed9e6ac5de5a5c5f15816319971ed313fef9db2"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/green/README.md",
+      "bytes": 9856,
+      "worktree_sha256": "2201a12e9457e2614cf09dbf6d01bbcb4e43eab164134f6f033bcb08efc3914d"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/green/assistant-regression.junit.xml",
+      "bytes": 3370,
+      "worktree_sha256": "9092c5ab1d859b11f4ecea661b974ede79bf9bb9432c13b59b96003e8ca83b5c"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/green/assistant-regression.log",
+      "bytes": 8140,
+      "worktree_sha256": "b8f614609581a128bb10aa15fb289b21a89a246c5acd09a241aeb93412f51097"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/green/backend-contracts-initial.junit.xml",
+      "bytes": 9490,
+      "worktree_sha256": "9d086ad94e7bef7b62babb8bca16e737ca52128e7e0f4854b6b08934a0b625c0"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/green/backend-contracts-initial.log",
+      "bytes": 15967,
+      "worktree_sha256": "4e6ab790c7d070d351a0811ffef6a53a113a88b02bc12d717d8c1d1188d4ee34"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/green/backend-contracts.junit.xml",
+      "bytes": 7635,
+      "worktree_sha256": "74b83e1135b4ce26f31751de91c61bce66741eadd7e84440e0004bcbf86a3c74"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/green/backend-contracts.log",
+      "bytes": 13386,
+      "worktree_sha256": "bdf56a9bd703bfb9c8d32a108ea4d35a41ca34a4a240789be5d592368ff7b89c"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/green/combined-backend.junit.xml",
+      "bytes": 12765,
+      "worktree_sha256": "1e4a5b0d8d8727e72f296e11fee88d4bc2aea0b1903a7c36cc059a339ed0a199"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/green/combined-backend.log",
+      "bytes": 23117,
+      "worktree_sha256": "a20e272701f38043a57d91ed2398db116869e4a2bf178e335e5d34715dfe4005"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/green/focused-green.junit.xml",
+      "bytes": 2242,
+      "worktree_sha256": "ec4ae659945d7c4e304e710dc705ad901d403ae55ac505c37b4dc9485a83388a"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/green/focused-green.log",
+      "bytes": 4835,
+      "worktree_sha256": "c54657d672040f6397c34087200b5fae4e11a9be645ad82e186f3b1f6475ccbc"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/green/initial-results.json",
+      "bytes": 18457,
+      "worktree_sha256": "5a1912855846cd14386fe5411aafad9f22ec754c308ea0ccc78a3c614079dc40"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/green/results.json",
+      "bytes": 33034,
+      "worktree_sha256": "50dc9b21157b7c7cd41993e2b7a0eb49783de7e2a5c12fbd3778255808874735"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/green/run_green.py",
+      "bytes": 9961,
+      "worktree_sha256": "9d9b54cb9dfa07742dec4290b494c39325cdde3185e279cadf0d4564e4d68e1b"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/green/test-results.md",
+      "bytes": 23309,
+      "worktree_sha256": "21c09174862dc53c766199943fa918e133f9acef8c7cdb8e115de82e080acddb"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/Dockerfile.verify",
+      "bytes": 114,
+      "worktree_sha256": "3517145c38e20dc05d2090cdc697e2cea6c1627d62419fd78b9201975c080a68"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/README.md",
+      "bytes": 10793,
+      "worktree_sha256": "178a125fa3b13580b8a7f5dc9a1ad6518c2ea3a6c0386f8db41ee6edc7be38bd"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/backend-regression.junit.xml",
+      "bytes": 12765,
+      "worktree_sha256": "b9cf1f6bae2a58c5944f843c320fb8dec4eb64f7cf49134110846172042d37fe"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/backend-regression.log",
+      "bytes": 23133,
+      "worktree_sha256": "803c8ee94febf9ea4b4427f952bb30442f683ab8da53b7a0593900e3e2403ec5"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/cleanup-ownership.log",
+      "bytes": 8949,
+      "worktree_sha256": "2a0d67427cd30eabb176011340effd52db46067552d76f03afa88d9110fdb071"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/docker-version.log",
+      "bytes": 1346,
+      "worktree_sha256": "eabe127ccae0e311913a5661f406515fe4ba2d813470d764cc6bed8ed24a5c4d"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/mapping-upgrade.json",
+      "bytes": 710,
+      "worktree_sha256": "03a7acd702887b841765f7ea85f3c73edce3f0e5bf5ef12c154487d0de56fbd8"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/not-found-shapes.json",
+      "bytes": 1212,
+      "worktree_sha256": "fb005962d64a1210676fba4e69e1aa028d1b2461e21b8ed923e8b09d5c10c5fd"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/processes.jsonl",
+      "bytes": 1251,
+      "worktree_sha256": "604e31761abb2940d12c43ffe9716829f881c2b5c32ca569b853bbe9fe44f411"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i01_create_send_undo_get.persisted.json",
+      "bytes": 793,
+      "worktree_sha256": "0a445bc0781eaf1b4e476de8b2dc4641cfa8aa43eec5d068172ecb34133a2a21"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i02_restore_exact_tool_history.persisted.json",
+      "bytes": 1274,
+      "worktree_sha256": "0e58075af37f64bab99214900cba4520c478d2af5f0f49108e8f484c47a1c956"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i03_first_send_restores_persisted_empty.persisted.json",
+      "bytes": 496,
+      "worktree_sha256": "8678b71b6e0008a5154d920f8061bcc26db4fcd6d2ecaa0a218fffce330ad701"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i04_restart_api_process_recovers_restored_history.persisted.json",
+      "bytes": 1274,
+      "worktree_sha256": "9c0a1266b474d61ae040257ccb01d8f3a6371b97268cb3241fce29bf2df472d1"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i05_concurrent_sends_have_one_commit[conditional-update].persisted.json",
+      "bytes": 2442,
+      "worktree_sha256": "09ce55f3c940b2330b8f4651d672c19c9d90013c803446366d82f504016ac1b0"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i05_concurrent_sends_have_one_commit[create-only].persisted.json",
+      "bytes": 825,
+      "worktree_sha256": "701640d41f4580d013b13da14b087ca6af1b66ca4157b0b1b77017d257472ee0"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i06_concurrent_undos_have_one_commit.persisted.json",
+      "bytes": 1274,
+      "worktree_sha256": "4b42550c42479611cf3fa65dec548415bb3a514fe5deef1a1b42d9865c877d6a"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i07_missing_document_versus_missing_index.persisted.json",
+      "bytes": 210,
+      "worktree_sha256": "5f813df2c53500c82da48e4559ebaddb0d54c3656cd1b8fdf2a380232b95594c"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i08_existing_strict_mapping_is_upgraded_additively.persisted.json",
+      "bytes": 1274,
+      "worktree_sha256": "0d7cd75b1051d9488592d519c456f45d3feb35b85398428960c757aea46b7ac4"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i09_legacy_document_remains_readable.persisted.json",
+      "bytes": 1247,
+      "worktree_sha256": "6f5f2596c93ae35ed32cfb1f7929c103fd88c0667efcc54182066cb9bf1efd78"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i10_real_connection_failure_propagates_without_data_loss.persisted.json",
+      "bytes": 1247,
+      "worktree_sha256": "799a417dc95b39455f33385d9d918eacd81c09d827538fede3f7bb9f492c663f"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i11_real_write_rejection_preserves_snapshot.persisted.json",
+      "bytes": 2435,
+      "worktree_sha256": "89f684c8cd6d061e17df40c2fada708807e40a3c1e2d624aa9f0aa4d20ccf5e5"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i12_validation_and_admin_auth_remain_enforced.persisted.json",
+      "bytes": 17418,
+      "worktree_sha256": "db99e43c0bcdc918cf16bc8bae8e4c248cb49a26f9997e4dd256ff774dd33e03"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/initial-attempt/backend-regression.junit.xml",
+      "bytes": 12765,
+      "worktree_sha256": "381bcbda2815189238dda5d93e0e4790d75992f31e0a779195899e3b4355af39"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/initial-attempt/backend-regression.log",
+      "bytes": 23134,
+      "worktree_sha256": "52bde9cb684e17eecaa6db0c65187fe0a6f90603416996c9daf5ed2b8a8434b3"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/initial-attempt/instance.json",
+      "bytes": 218,
+      "worktree_sha256": "6a7dc1a020b1475dbf310d016ed65a34edaecf61f562ac76a5f49c61f0c60eea"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/initial-attempt/opensearch-cleanup.log",
+      "bytes": 304,
+      "worktree_sha256": "7f45f527fb4d8cffe719e359d289def97f82cc6cc80a9d4da4dbecd88c1437c6"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/initial-attempt/real-opensearch.junit.xml",
+      "bytes": 3753,
+      "worktree_sha256": "97706fa3f347c00ed47e89c7aa4bb521cf27f5ff134fa33304e8a9913fdae4eb"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/initial-attempt/real-opensearch.log",
+      "bytes": 6897,
+      "worktree_sha256": "f219a16776143d64aff45c77f2ac82d2cb7004ac6a2605f13e0cb9764bd88180"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/initial-attempt/results.json",
+      "bytes": 23100,
+      "worktree_sha256": "d781b1108cc005c953018ba6a0f6a17cbb68dde299690a7c7de8be9c5b27cbd4"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/initial-attempt/test_assistant_undo_integration.py.snapshot",
+      "bytes": 21391,
+      "worktree_sha256": "d16bd4304f282a3b935e35a8eeafa049770960514df70552c380b4976d64fcaf"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/instance-python311.json",
+      "bytes": 217,
+      "worktree_sha256": "daab3620bd9b747e21c10e4b4446cadef74ee5eb6c00c4c0d055f943027bd220"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/instance.json",
+      "bytes": 218,
+      "worktree_sha256": "7fa2e2f71c59be87fac616159f2a127de6b612214520115e2c2bb74e4f09a229"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/integrity.json",
+      "bytes": 367,
+      "worktree_sha256": "c7c9bcdf0f9af8bbd404c84451d677f0f089d764abfbcae2d60b78f8b28c354f"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/opensearch-cleanup.log",
+      "bytes": 304,
+      "worktree_sha256": "d72c12b7ac652ef5038ac17492cb3ab1e84950337a15a5967eb0cd5f18499f2d"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/opensearch-image.log",
+      "bytes": 2526,
+      "worktree_sha256": "93d2f97890f24f063adaee91320a969d5e8800c6d638b9cb0a4d438c8b6d4401"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/opensearch-inspect.log",
+      "bytes": 8949,
+      "worktree_sha256": "37ba315fa5634e64ea309be21db03c3aec4e55da5cbe7b371cb624606cd27766"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/opensearch-start.log",
+      "bytes": 843,
+      "worktree_sha256": "36935c58582b969325b5ad749293b4c8a49611b3902ea9633c8c3fd2273e7d33"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/mapping-upgrade.json",
+      "bytes": 710,
+      "worktree_sha256": "03a7acd702887b841765f7ea85f3c73edce3f0e5bf5ef12c154487d0de56fbd8"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/not-found-shapes.json",
+      "bytes": 1212,
+      "worktree_sha256": "dbcb20f0270653027d8e4f29979b75455b33c5daf096bb37ba63033e36af857a"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/processes.jsonl",
+      "bytes": 1217,
+      "worktree_sha256": "59f13e1ebd56ab13c8bd240f1905a786bfd7d5e25693933e7dbf3d0a5c29fe89"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i01_create_send_undo_get.persisted.json",
+      "bytes": 793,
+      "worktree_sha256": "20f75419c7ad4e52176623221c611ecc2e3e182612c38314ca37cd2373cb0250"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i02_restore_exact_tool_history.persisted.json",
+      "bytes": 1274,
+      "worktree_sha256": "a98a884040fe1d8cae81d239b50bcd4d49816dd2cf9215252b48015d0e759420"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i03_first_send_restores_persisted_empty.persisted.json",
+      "bytes": 496,
+      "worktree_sha256": "f492e04477c339bb4ff6c2b8050747f807f9a5235e464a7451d599b2ec69ad56"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i04_restart_api_process_recovers_restored_history.persisted.json",
+      "bytes": 1274,
+      "worktree_sha256": "cf1956106c0466442865894b0556c77d13f1e1695cad90ba3d6a1bc8b67bfe48"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i05_concurrent_sends_have_one_commit[conditional-update].persisted.json",
+      "bytes": 2442,
+      "worktree_sha256": "79844f23eefa4d1e54fda84855d6561360000c2c6ed3bb26e01651ef821e70d6"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i05_concurrent_sends_have_one_commit[create-only].persisted.json",
+      "bytes": 825,
+      "worktree_sha256": "3e924bd9c0d158ea1d043c8cb9f10d600cb28d4feffc58302c7ae8096dea67af"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i06_concurrent_undos_have_one_commit.persisted.json",
+      "bytes": 1274,
+      "worktree_sha256": "856c502921310c7c3d1d5c6af3d2449be97a2da44e0b3757d141eea52d43ef48"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i07_missing_document_versus_missing_index.persisted.json",
+      "bytes": 210,
+      "worktree_sha256": "ad652f734ce002d1bc2f246c2b536b290e5a94c6d3d0c3f118e2739c679dad6e"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i08_existing_strict_mapping_is_upgraded_additively.persisted.json",
+      "bytes": 1274,
+      "worktree_sha256": "efefee67bcba5df79a4bdf4eae81e3a3413f2536aae13dd8423bd4f6fedef59a"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i09_legacy_document_remains_readable.persisted.json",
+      "bytes": 1247,
+      "worktree_sha256": "acae54815edf36c9883116e3b732ec6f3041f081aef9bcfb1e48ea8dea8490bc"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i10_real_connection_failure_propagates_without_data_loss.persisted.json",
+      "bytes": 1247,
+      "worktree_sha256": "3827acc25fa1153113c3b35a74674d43332f39b71e86de9b89e5e586cdd86815"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i11_real_write_rejection_preserves_snapshot.persisted.json",
+      "bytes": 2435,
+      "worktree_sha256": "88e010a2ed21c82f0006b866dcdea25d0f6c988a336ef563ef438a61a2853f68"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i12_validation_and_admin_auth_remain_enforced.persisted.json",
+      "bytes": 17418,
+      "worktree_sha256": "d34e044ff196360fdbce627bf39aaba6d645bd3a0eefb19a1a11ac643f0d96a7"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-test-image-build.log",
+      "bytes": 3709,
+      "worktree_sha256": "f9c45d40ce553c072c4fe3382274b26fc4131c9f4de3f172e7fdf39ce930a1db"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-tests.junit.xml",
+      "bytes": 14473,
+      "worktree_sha256": "2024d264cc6f71ab31138a9526835c6127e30bb63e2fbb44ac9a84407bc48fc6"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/python311-tests.log",
+      "bytes": 27562,
+      "worktree_sha256": "6a864dc665d6c2265e74d7a3ea622c1122d0f40164e21dc72671cecb8c7739b4"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/query-api-build.log",
+      "bytes": 36256,
+      "worktree_sha256": "b5242be02c28c8a6b79c920ce49a45440735c03ebc6ae48d51c3c578fd8510ad"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/query-api-image.log",
+      "bytes": 2325,
+      "worktree_sha256": "afe0cabdd03f7e6a3fa9dfacdc91795da3f5753a3dea999a590de9374a444286"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/real-opensearch.junit.xml",
+      "bytes": 1951,
+      "worktree_sha256": "782fb7d2471cdbd8d42e0bdd2d065be1e98cd3576a58b20fa98eedabc2fd0aef"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/real-opensearch.log",
+      "bytes": 4969,
+      "worktree_sha256": "13ac10b25df2c1458e3fe26f662356963873384b915cdd23d65c8bfc246615a3"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/results.json",
+      "bytes": 26846,
+      "worktree_sha256": "a745ce6d6bd83001cd5cefc32e33415e699c122d913f3fded71ae5058aea7b7b"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/review.md",
+      "bytes": 8013,
+      "worktree_sha256": "7d8dd91c60e8d5583566c736cf8f7841ff427ebce62e17249d3d74767ae88924"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/reviewed-production.diff",
+      "bytes": 18455,
+      "worktree_sha256": "0176cff807d1292ec5118593863acd149aa391f890b49dbf1ff4da9fbdd51fa9"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/run_integration.py",
+      "bytes": 11558,
+      "worktree_sha256": "ff9a8198771275ff7925c2c69fedbcc31a06a9546fa025a9f4e1851b03bd57af"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/runtime-schema.log",
+      "bytes": 1009,
+      "worktree_sha256": "9f0448a33a1a063339b14cac424b22f46dc54dfa29cb52cd18e2932d98555a66"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/test-results.md",
+      "bytes": 5950,
+      "worktree_sha256": "367ef05e5350f0bd33edabac8a8daadbe159656f0829fbf110c5c6a4c7a07ff2"
+    },
+    {
+      "path": "docs/assignments/VT-013/evidence/integration/verification-summary.json",
+      "bytes": 21889,
+      "worktree_sha256": "60e32b22fce6528da19e3a3711ceb4f19bc9de3577d80c2c4a8d2a6f079ab0c8"
+    },
+    {
+      "path": "query-api/Dockerfile",
+      "bytes": 831,
+      "worktree_sha256": "8618ae0ffca2b8f25ffbf030d3f81cb39811cab83f47532f514ec28b2827f98f"
+    },
+    {
+      "path": "query-api/src/assistant/router.py",
+      "bytes": 5631,
+      "worktree_sha256": "339e851612f52990a2d0292c71b034c9e5981f19813f19cc3d3b7e51ab241968"
+    },
+    {
+      "path": "query-api/src/assistant/storage.py",
+      "bytes": 8092,
+      "worktree_sha256": "ddaaf6057906c6d7242b1ebcdc79ff43101606d127c31f56575504ea1b2240e2"
+    },
+    {
+      "path": "query-api/tests/test_assistant.py",
+      "bytes": 15362,
+      "worktree_sha256": "5521e1c912064dd3c58dcf4adbe47726eae8fc2dbc5a248257d5f87deb984ba6"
+    },
+    {
+      "path": "query-api/tests/test_assistant_storage.py",
+      "bytes": 3284,
+      "worktree_sha256": "813ae9554514ccb77485f988fca424d515bae13d12a0f6848cda711f64bfdce3"
+    },
+    {
+      "path": "query-api/tests/test_assistant_undo_backend.py",
+      "bytes": 10945,
+      "worktree_sha256": "eb895f1c981108ae1e8f56a4f3e36478929a6c89075b2774edc63fa4b0af62a3"
+    },
+    {
+      "path": "query-api/tests/test_assistant_undo_integration.py",
+      "bytes": 21671,
+      "worktree_sha256": "a34c19406c89f307553521caeaf089c3bf35f8b4c3a0789fd70991e38a00a02c"
+    },
+    {
+      "path": "query-api/tests/vt013_integration_server.py",
+      "bytes": 3028,
+      "worktree_sha256": "f9b9c4ff33392b7c033668eb4f57d4619d170c6e2c0eba6204ba299e44487b44"
+    },
+    {
+      "path": "query-api/tests/vt013_opensearch_fake.py",
+      "bytes": 5324,
+      "worktree_sha256": "34f48dae9da3d826dac4b1c3e650fc16c5bb219886d7e8fc2aab7a5f886981b8"
+    }
+  ],
+  "verification": {
+    "source_hashes_match_recorded_green_and_integration": true,
+    "historical_executed_counts": {
+      "real-opensearch": 13,
+      "backend-regression": 90,
+      "python311-tests": 103
+    },
+    "tests_rerun_for_checkpoint": false,
+    "docker_build_and_schema_probe": "previous VERIFY run PASS; unchanged production and tested sources",
+    "git_diff_check_exit_code": 0
+  },
+  "secret_review": {
+    "method": "UTF-8/text-only check; targeted private key, JWT, common provider/Slack token, credential URL, sensitive literal and environment-style credential patterns; manual review of matches and synthetic fixtures",
+    "blocking_findings": [],
+    "reviewed_dummy_findings": [
+      {
+        "path": "docs/assignments/VT-013/evidence/integration/initial-attempt/test_assistant_undo_integration.py.snapshot",
+        "line": 93,
+        "kind": "sensitive_literal",
+        "matched_length": 26,
+        "classification": "reviewed explicit dummy Azure key in deterministic test-process environment; no live credential"
+      },
+      {
+        "path": "query-api/tests/test_assistant_undo_integration.py",
+        "line": 93,
+        "kind": "sensitive_literal",
+        "matched_length": 26,
+        "classification": "reviewed explicit dummy Azure key in deterministic test-process environment; no live credential"
+      }
+    ],
+    "limitations": "targeted review, not a guarantee for every secret format"
+  },
+  "other_worktree": {
+    "path": "D:\\SE\\LAE-issue-73",
+    "branch": "dev/manhpd",
+    "head": "6ac9afe9c1d79fa94c10439a60417ff286658388",
+    "working_tree_clean": true,
+    "inspected_read_only": true
+  },
+  "excluded_local_evidence_files": [
+    "docs/assignments/VT-013/evidence/integration/diff-review.log",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-1cf8179550-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-211d1f90ee-concurrent-send.api.log",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-211d1f90ee-concurrent-send.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-3bd3e6194f-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-3bd3e6194f-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-5a754c463e-concurrent-undo.api.log",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-70f046b215-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-70f046b215-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-71d908e616-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-71d908e616-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-7219c85908-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-7219c85908-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-bdfd01545b-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-bdfd01545b-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-d469fad888-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-e49c5f11f1-concurrent-send.api.log",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-e49c5f11f1-concurrent-send.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-e60017867f-missing-index.api.log",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-e60017867f-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-f1f647360d-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-f1f647360d-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-f5d7701ed5-read-failure.api.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/cleanup-ownership.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/docker-version.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/mapping-upgrade.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/not-found-shapes.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/processes.jsonl",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i01_create_send_undo_get.persisted.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i02_restore_exact_tool_history.persisted.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i03_first_send_restores_persisted_empty.persisted.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i04_restart_api_process_recovers_restored_history.persisted.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i05_concurrent_sends_have_one_commit[conditional-update].persisted.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i05_concurrent_sends_have_one_commit[create-only].persisted.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i06_concurrent_undos_have_one_commit.persisted.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i07_missing_document_versus_missing_index.persisted.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i08_existing_strict_mapping_is_upgraded_additively.persisted.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i09_legacy_document_remains_readable.persisted.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i10_real_connection_failure_propagates_without_data_loss.persisted.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i11_real_write_rejection_preserves_snapshot.persisted.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i12_validation_and_admin_auth_remain_enforced.persisted.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-16687ededf-read-failure.api.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-3c25d84547-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-3c25d84547-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-43b3a803f7-concurrent-send.api.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-43b3a803f7-concurrent-send.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-4b79fa2e60-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-696ea8fb30-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-6ec32d481a-concurrent-undo.api.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-827309b27f-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-827309b27f-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-832faf9cda-concurrent-send.api.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-832faf9cda-concurrent-send.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-ac4b6ac944-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-ac4b6ac944-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-bcdfbe4817-missing-index.api.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-bcdfbe4817-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-c7fcb61279-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-c7fcb61279-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-cfec8721c1-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-cfec8721c1-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-f2cefc94b3-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/opensearch-image.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/opensearch-inspect.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/opensearch-server.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/opensearch-start.log",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/run_integration.py.snapshot",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/vt013_integration_server.py",
+    "docs/assignments/VT-013/evidence/integration/opensearch-server.log",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-17b7e8e9b7-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-17b7e8e9b7-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-2a920237ea-concurrent-send.api.log",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-2a920237ea-concurrent-send.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-450471ae5c-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-450471ae5c-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-4e55947ad3-read-failure.api.log",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-7c5a3685f9-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-7c5a3685f9-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-7da3838268-concurrent-undo.api.log",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-8ac4270ffd-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-8ac4270ffd-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-8c8b812cbd-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-8c8b812cbd-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-8ecc10a816-missing-index.api.log",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-8ecc10a816-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-b0148f2c16-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-d41474a85e-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-d41474a85e-normal.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-df8b9a67bb-concurrent-send.api.log",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-df8b9a67bb-concurrent-send.events.jsonl",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-fc8d0753ad-normal.api.log",
+    "docs/assignments/VT-013/evidence/integration/working-tree-review.json",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/test_assistant_undo_integration.py"
+  ],
+  "unrelated_untracked_file_hashes": {
+    "docs/chatgpt-context-vi.md": "37799cd89ec239b0a3316e6fa2a16bc5d843ab8e6602d0275d2825eae9f74ce2",
+    "graphify-out/.graphify_labels.json": "bfd0bafe97999a0db761a9527324c5981dcdfbb64e27376ec55faf2f4961b1cd",
+    "graphify-out/.graphify_learning.json": "26b4d238001255b2fb2ad46329eafc47bade11d12b088a1072a2b6735685b79d",
+    "graphify-out/.graphify_python": "3536180cf21d132635fb6bddda9c2ddfe8bdf4b48615510b9a40e1cbafd4d8ea",
+    "graphify-out/.graphify_root": "180740f3b9a06470f425d2bd228829eca37085c506deb476e876cb21ce2aa7e8",
+    "graphify-out/.vocab.txt": "49446d89f35fae0035028281bd2b5d10b85e9120482370b8be9dc7f7df89a157",
+    "graphify-out/GRAPH_REPORT.md": "aee82150ae25d5aedcd7c751173700c3868beecde373af39d4b26cbe76732532",
+    "graphify-out/build-context.json": "812ebbf6316bda755aae9f0847553370d21967b0d4ac4704b9ab9776cb98f2f1",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/0054e6573564bcae036f9855bdcdea7ca742ff45481d3539f98736f3071404b7.json": "033eba0a1d3b4ac2e8f3b22d5eef67e089690e53a1ea8e316228418ddd36a436",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/093e4f3583b6c934db3c114f3ced2117278a65d32c218bf73ea102e48b3b00b5.json": "d53c8b03a490e89851d6017349772eaf441c00145026ee2b33c1090ae8e92643",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/0b8832a74ae1814cb480db9a37f607665255dfcf72464e3bc2bb6f4c65da4f1c.json": "55f1f18334d1d4d265cfd8da94d635e62252472b1bf16d2a59d4c0262310fd8d",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/0bfb64c137c572f11e5aac78ab70bc6f9c4ce1aae5b03df1598dff01ce3dea46.json": "926bb3e0f520d681654dcc4cbca8c564e71b6f22fab2e4152bfb04e69d655a62",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/0d160f5f111a65b5eff47e030d5716d19f978b59102329022802fd627a2a050b.json": "1212bd722a3df0d3d286075cf1032eaf3909ce635a0b2bbaba723ae16655d72b",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/0f94988e1f5cd4bbab42be66658c7b5116715381f01424cc817bf08743952cf4.json": "436b073b1a2c5e3a10ba314bda87a18b7fe7deedf14c79b99583a5b4457f9e52",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/143dc0f6d8b927eb50bcdddd3077ce65896a132d854d3e2e92ca4d03cc0e65ef.json": "77262a78b7bb86aa9b5ba9d77815db20b0cfbe1823ce70135ac793793cca22c5",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/157cd9ef70a3e212b5794e39e79776a45257834294e77c35eb2ec60e24533aa4.json": "fe029639fb187a2ccfa56387e79ad0b023e2a627f5b853d0a732007fc3815d05",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/188f880506ce8b11f0488b8992cd1ce8a68e9e1d7d51b9f57aabde828c9b12ed.json": "55f7af24f5195530200794b5c7e82de6cac7eea3cd94eb6d2e42411bd632d3c9",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/18f8096fc24868849e35aac812e4e762feecd65a6a0af167736f7b31cf532a46.json": "436b073b1a2c5e3a10ba314bda87a18b7fe7deedf14c79b99583a5b4457f9e52",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/1b8e49a8b7d83aeac5f0eb8b1830df422f452e81d1dd89412b3b243ffeed9816.json": "7dbcacbce76a32af33420130ff493b0ed4c10d246a89a6cbdb1ce28fefef2ad5",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/1c0b7186c83a4f8562e8a9f81e1038eef5931a18966c82870348bb507bc2362c.json": "a4d6d6c97303f62f893809196f13cb4fb4432697c692f9ef70985d37a2426dc4",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/1f1ed3ff68bf58621b8b4c7a97b27df06ea782a727d92ab57150d603b9ece2a7.json": "6c774805820ba0616ed608caf68ca03e5c94b8a894ee39c79ce5f546ae39d650",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/2019949309affd5c5a58fa63dcc74227a257b49e5a2ddc4fc1850e6bbad6bbce.json": "cc4fc94239fb2baba8b41c8c0e02fd09a15dd4fefcfb4c6f9e6767c8600184b3",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/21ee3a79ca5eb94c4328a112a193df9cb21bf0bd76d95f25a5a7c6867d204f64.json": "436b073b1a2c5e3a10ba314bda87a18b7fe7deedf14c79b99583a5b4457f9e52",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/2bfe19589bed9ea848fd77714a6af7f3cd543384cd18649fbace79d355ddbede.json": "56bd48fce03942976ab9af915b2ea3146a42f636c628df121874ebded3d62625",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/2cd99bc3e7b712ed901982ed2ebbba2a3596f4855ad03f75130c4e58906d3ded.json": "436b073b1a2c5e3a10ba314bda87a18b7fe7deedf14c79b99583a5b4457f9e52",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/2e4d13ae68526b71b7c5666efde31a4fd18d66d00ab48d6892a096cafa3d87c6.json": "1a5a16825f161a43e0b10ec65aeb2530513478745edc6681995456ed03e7aaae",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/2f2fd5676e0b96241aaca714aa19118ed3aff61cd082d158569f41b657d6ba24.json": "1a887b7d26e43a548a61cd14ddbc3a6bd9382b843119e550f65363f63e0eeec2",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/313285779d5851d2d443329e56ffbab1ce9b7bc00df5870a6aa91dc04143d70a.json": "976b59d948bc10954d6ad5f7a62e45ed7c2aefad84666418b600e87e58d16219",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/31957f0c37a4588b30477740af6ff0c287b05d4a27b0269e33ff6b24724478a9.json": "52eae7d0356fd393e9708aaa515f15189c4c1d570ae5519f8a3bddcb60a9cab5",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/34ff512ec9dbe39df4290a8e0aa4621576bbb434055f8b256b21b53456c8f4a1.json": "b2b45ec17c1eaebc3bf2732b7de57fcf825f27dbb455c45d976dcc515cccba12",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/36195092b75bb7a7dcacf41a160d606011e8017ed8e252aed026ba7ccce30b06.json": "436b073b1a2c5e3a10ba314bda87a18b7fe7deedf14c79b99583a5b4457f9e52",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/3c4394ebb3200efaa765b377b37a9698d65b44d7a8bb3748c88992100f42d845.json": "eb288fd04dc62b0d4c36ab20c444421879c48439bb1944ff44cd148e2b4da098",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/42b39d57b314aa3ebf44df3bc9d45db58345b929fbf6a2ee9e6f5116adb79c4e.json": "110c89579f02cd9816b3563e4c5f92680df237e3fd714f5fefe786fd9991b865",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/42d382f981fbff82398b2d3d77b2f1ad23d7ab490105188c20767acf5e050fb3.json": "b2b45ec17c1eaebc3bf2732b7de57fcf825f27dbb455c45d976dcc515cccba12",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/457c4a919845411dfb5d8ca1e7cd161789a2041964256401a9941e337a69dc22.json": "ac6a07a943a40863f31a59eb65c79e246e0a0740863b046b5d0bd04ad97c9d72",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/4848da218509095f1f6c75884c88108d42f7b0fa9ccb4979956b0eca19b19d81.json": "5f64fc245cc067b6e9bc8a3868ec3aa396314c76cd09629433b39d34f792dc13",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/48eff28ada48e72f67b96a84a57713d30a9a08972aa2ddfa95771686282f50b1.json": "e8c38a32b0770fe1230a85b5c88d5870d0aef9c94fb68b765e2ed8085bf17d5c",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/5198b9c48029235ceed01959544472edb0b2bd25af56525702ed43f09887cf53.json": "e404a24cad00adf2518afaa0ad0b5227ebd5553828e7557935078c8dc70e6113",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/571be37339024b620bbac92a47ffa5412249780d6af654ee4d100285ebdf8f6d.json": "38f9de68c379a5ee73d0487bc681fed1020f70cabaad4454fa64b150c90d244f",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/5a5c16762b75900dff78e20fc61ee84f77e34bc35b049139f3ead00ff17e81ec.json": "f5f4d5505b10b8576502040e11b29028e794a81bd5b5de18a2227b4a970be21d",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/5ba10265bd3f2dd091c7e29823799de91f43f28852ad720e51ce969b773e7e8f.json": "25c0214a5fd6485b2a2397ef551389ac6faa7c86983389b9030b9c30ca2e5688",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/5ef049807b172c20d19320ad3f026f2d8c1abdba7531d4f28280c594f1984cfc.json": "b2b45ec17c1eaebc3bf2732b7de57fcf825f27dbb455c45d976dcc515cccba12",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/5fe177963e8edaee3d4cac4f3d8a7d83f8b60a40d50f04397b5659a42abdcde3.json": "5a733976a02c116979d92cf9c501f6fbe44473d20ba4c8e4f69fd3fc1443c263",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/67a6eef42fb6051263bff83765684ee51ff71dbb9684b501fc855d1bfaebd31e.json": "e98a72146788f6530b4e4d9c75676ad39a866f0343ac2255ee95f3b21381bb6b",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/682a86ec2958b6ce17b4feaacca8e008da37a958a0d3ef37babedafa16c3ddf5.json": "383718e9abc65b50770ee8f2a12efee45d78b70991486d5513ae19f44574b9dd",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/6b86a51976cdb16b311f2d0f0fdf8c0796649b9c8f9ddd62286e0100520ce7f1.json": "eb51bc08ec2de2457346936c2c32eba436dcfc3601f94520ff992a3e54800258",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/6e0ef03e4b9c148018bd9caa09ecf0f7093b97ccc584665c5e99721fc1697498.json": "47c1a3bb6f0496c375d34b446c0bad67e338fe4f1ded26a6764739adee4fb17b",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/6ffdeae07edb543bd783233f3d93225c2dd875b91a8cc89740e8f65c477e3bd9.json": "3de224eac7582ca2dca9c6d2f990d91f323db2be155a333d72d3fd98d6d260ad",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/70758e2d90f09b10db5fe7e9243505061fb6cbbc16da254b71a74ef9b95a518a.json": "722af42d5607b30aa9edfce3debb84b028fc909252c52a7e6e90e8944423f770",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/72dd80843be428dd80a8c549ae175db0c85b731d9927297bc7350b48316f7e28.json": "436b073b1a2c5e3a10ba314bda87a18b7fe7deedf14c79b99583a5b4457f9e52",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/776e921561ee7c60c4fc837f020b2d8db957aa0f1afbffd7678c03497f5af090.json": "722acd4b9e4c4c786c2c3c8a80ce208d358d0b72704d832520c3a7203351da4f",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/7862c33bcd54c448179fa05b4480f74978927564ab2360dd1ed57ffaa0460c48.json": "5a28e1e379bc6f72a40df61d4fd982ab386fcd338a7d5637a729af1ad94e5080",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/7bf18d71c09448e62e17d70f1a0b063c66a2f27cc9ad5857e44e4b390d232f79.json": "e4f86753f52b1477efa60255345612603304ee5b0c1c0c95ba6c31fae9389ef7",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/7d8373e1448959c2cc3b4cb25b3c9b1bdc5a504527111ecff81e3330d8b3ec7e.json": "9c01905acd398495b7588df1f6132debe49f9534fbdecae33fc6fb2394c1dc6b",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/80353554a9fc44f148509e770c0a200416185c3cc18123fe632f23a7506732e6.json": "81f6eb63d0400de913ccd3af9118d4a5e3b7ea1e9045ff4efd51fc21139ef513",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/843f97d43da97a62f7c60aa63c26562c5a28648b9ee5089baeeda5a933072e00.json": "8c7cfe47150c1fb47623646be745f375fa04ff9fe8e0d840657dc5d101d23bac",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/8458dc008f72ae5fccfc050db70c0ef5bcc2b33409ebef1148ee0f74d28d568c.json": "19abbf580fdf767bc13371fdbcde6b9ef9031d56e1aa47bb58845839b62f00f2",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/85a872d6ec814edee521ba45d07791f691237ce55a185bce5dd7b6fba444dc61.json": "b2b45ec17c1eaebc3bf2732b7de57fcf825f27dbb455c45d976dcc515cccba12",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/898c30539a69c15524482e322895e5d09973fe1efdb19a392dd82802101ca133.json": "07cd92fdf9d20aa470a1b3b6908b0ef1017fac33a733d8f8b03f698affdc9ea8",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/8b1a7db745e32fc19b8cbc0f0ce498effb42875411583b2bbad808867cbf762e.json": "436b073b1a2c5e3a10ba314bda87a18b7fe7deedf14c79b99583a5b4457f9e52",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/8e7065c76c07cbc62f647adb31766fc1efc8fcc234f9149c460b6845c7e207c2.json": "26aa3616e63a76212056788e15b0c3b87a9f6f76aa3a4a833cc2b93546069ff8",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/8fec086c25752d87b0fba242f177d53fc1da7cb40b8004882d182fb5165a3340.json": "385b71fe04e905c69a6fbefbb37a6e92d9d24366cdefb6ab85d0a4c9c4ff3c41",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/917962c53cd8c94f14f93b1663788657b6c9c8dbdbf9375ecc6941b0e82a3a53.json": "f00702936cdf731c7a1e065735a76d669660b566c2b4cd2b6a4239bb86abf726",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/9242801049557a540ca9bd2543c546d036eed4b247f0f9d733c80cf458c7f806.json": "28ba71b214c0461bab3c0e836d9633c460b0d94cdd93989aa8fd95aa1b7979e9",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/a3254459792bc3574ade04b71ab6304a18fa00976e92eb2c9bb8b8d846310fc3.json": "836aa5a4421c86616e095623e671fc572a5d253277684063adc695d5649ead27",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/a499dc22d979c20596bad43f7721a05bc8f3d590f6498192218d14ad2808e015.json": "450d4dde96c715ce4576f2440c00a5b81e7ed09ca88dc1ad0bd5273fdaf7fc3e",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/a4b1ef76fc549145933074939f2cb022beb6d62cb4ef6fb2e2c844eb8ff402c9.json": "7a2f38b7a86ae5856f227e229d3218bad2d58f4d742f8953dcf1b1a78b6fc823",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/a89cf2b7f72b3df83b6c206983101ca1dcc23c45253020d97e2508b9f28adcd6.json": "b0e2f82fbc06a83d84c0591cfe5ae5b5baf8bf0a0194c1b42e70ac2a45f7d3e6",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/b256c1dcd90e91e0d25d55e1abb390cf77bc7846dd6c786a2646dc8639b6e86b.json": "436b073b1a2c5e3a10ba314bda87a18b7fe7deedf14c79b99583a5b4457f9e52",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/b735b05336f20627c06cbf0c9ee10d627f7e1116734588e56525bd0d2e50a3df.json": "ddc452a7cb1de109d8d20d5b13ca5d78b36e50512dbe16cb1618178fbc68f094",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/c0277e2a49aabad693a7467d9ded8537c14c20f916c1be5571afdb68d7cf928d.json": "b0670171cf6db45a16f7bf4788a8e76097fdc7e92231478793ec0e474ad3e940",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/c0a279c92dc911cb63c7f4016fdc7464d6664ee7362975eeb9e6146d28dc5f5f.json": "4d6f385d4d8834b9ec7e3c9b996525e07c3ffb18e95770dba47479d768b0f628",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/c9e7a76e3888201b8c4b917e36101503b6699be445d91e28e5483e43ac1ece75.json": "daf1c065602f4bbfac3e47eca8989c962d1fea871987fbe80779b513d54bf04b",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/ce5fdb3dfe681cadc0987fa86e25f208fad79942a3cea6b7ded94cf07c551cf1.json": "8cab97a8300a09810dc69944e3fbada1a28b9a41a6bdb5e31382ca5ae92fb17b",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/ce800d96321f6412007f538d762d5d78e590238168bb9d2dc06330b24b5cf11c.json": "0126481f6094dbc76f41ee7f04185802ed723ce2cdd3b2e0907d69cc9ffc16c0",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/d3a67d59fadb3319bc9093f155d9faf0ec0fadf344d07059b4b57f33b5fbda6e.json": "f682c9afc20948948d251ff63bc97295d5f90a04b80f19bb1c80c778fe9dbf15",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/d3b890abc770034a6aad800d44d25ecb7bd2f2757c92ef45449db1c80be37175.json": "436b073b1a2c5e3a10ba314bda87a18b7fe7deedf14c79b99583a5b4457f9e52",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/d7f5e99949efc5450c374891932b40c3103e50ebb819cf2ac65fcdf36ea32fc5.json": "a191d22d8b25dc043b889acf873443c8945dcf386e0a39f2c461fe18cfb28f2c",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/d8109e6a9ce39375e51dd6948349a9f259c77be586c686997fe9c7322a43a2fa.json": "4f5e572d0db7c8a30a98770f006a49324bc1588b4ece21a9888a63df831f63c7",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/d8adf026e4ac3de4feccde796f90c737c228dab996354a821b6f6e9d97be1f08.json": "d8f7dee8d7c8c9c0198d6c9a7a67f4f9d3fdbdaf0315e6bb44d0e156227d3f01",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/dbb843a72bcc43f37f9472fe3711cff8019758bfb7c34f028baa0e12b1465b16.json": "436b073b1a2c5e3a10ba314bda87a18b7fe7deedf14c79b99583a5b4457f9e52",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/e42a0a01e860846fddf01cea8e703a2b5f3b40070aa0c7b832219f4e8835d92b.json": "65f1e683320566faa9305ed20d61a126df2ba5d6e16767b96665364bef8b57e8",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/e87b7784b60da7dfb557ca59702ac57d1da5f926615bf7c7a3d688559394d7a1.json": "436b073b1a2c5e3a10ba314bda87a18b7fe7deedf14c79b99583a5b4457f9e52",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/e89605678f63fe185cd12953d74ac276a3131b83cd642a420f6f711575ca9fa1.json": "98fdb9f6fa6c08a5b79641a822babde63534f9624d61ccd41a5c2fd6d61f6728",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/ede79670cd9194292c790941c8da35788d27a640bed6c01ef74340413f67b235.json": "a9d96fd167b39ab3088b5af368036c429a3306fa932a7e902773aaf5531c58ae",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/ee95b9109fd052429552b3e5606a43ba8a68f9eaf7e22090410191b17f6faa69.json": "ec06f2356f5d05abd68e415ef97ccbface337479f46aad8e1c5a4384ecaee3ea",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/eebca31fbd8f85924aadcdad35cd322bc45da2a069f35d7bcb89eb37c3c696f4.json": "03453a42e4e0e2da56121a343e09cdee31633712f4d74db55d89e9a82f848c69",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/ef2db8801ca662998faa2b30da18268894b1e11ac20ed70d1aae10b05ca2e1a0.json": "e68fb871a5a7a409229c6cf2c21234b259b1977de705e3209e8d296bac038f0f",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/f1e2a3373fa61d1ab38644d5765e2fc2dfa98239cd397fac2433ed5f8734cba2.json": "fbd1e799464e5cb50e3c22a5dc1d2dad833c60dda87fa626e5d5b741a67dc47c",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/f43926859756faeb72e63bc08c5158b6173f8751fd801aff575e8e909eeaac40.json": "0bf9d3491f57707210842f5b52db9d86367c9c1b075b0fec491bf88c4ca6eb28",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/f4bb6cabf2a84942be7f60883cb89d288a91c7703cede599d095fa0431fb202a.json": "e0547440ba27a4ad0ea21df505bfc96c7999044c8eb405e9d1ff62bd14418cbb",
+    "graphify-out/cache/ast/v0.9.97-s29-g7154a062ba57/f9ce939a8367e89db3500eeb5d1cc00cde58087fa01c52b87f26b684f8dc1ae2.json": "6d585f16c4a610d4e064c1d3d8d07f4390c21fa9dfd3458b457a002a0b5f8d2a",
+    "graphify-out/cache/last_query_stamp": "c5a47138c4ebb4c3357c16edef6ca905323cc4b2cbdaa8a46209f3046be83ac7",
+    "graphify-out/cache/semantic/p3e5ba76addee/132a472b8cc602b7a5f590ea3eafc9dd93b1bc0d771591584f11b4dc4a3398c3.json": "76ec321ae66a354f5e1f910fb096263c591f89b51f4a908d99d311d9fd1ffc45",
+    "graphify-out/cache/semantic/p3e5ba76addee/149f0765ae3c20abf0d50ede0b380516ef6d77443e0acb88a4465d1bcfb32a7a.json": "fd01f914d95d94f3888e2152c681b0970576f80b93ecb607e06db3bc726e72ee",
+    "graphify-out/cache/semantic/p3e5ba76addee/1d2b26265fc0da6d9b7c61f218ff2cccd231279c0e3c23e11ef8fcf112f197e4.json": "57f3ee0173c4efc64c03c9511064eadac17710079dca08991010eca8dcb23eed",
+    "graphify-out/cache/semantic/p3e5ba76addee/23e879857a67b164b1d44229e2095780357fcce7b9a618bcb4e949167754db13.json": "6de7c111131467470dcec303702ae3b8eabad71c05e3058c1980df2c7e86abbc",
+    "graphify-out/cache/semantic/p3e5ba76addee/28d999e689062200e3b9144d1aa6a47b341a4b2d70561c7ad399ea4e8e066a11.json": "4100f410a315222f961df0e48b692653dfbacb651e254c7ea28d9351dcb20599",
+    "graphify-out/cache/semantic/p3e5ba76addee/2c59e92cbf3bd8cf7e899c928b2f02bacbe426086a28efbdbb2851dae255ac90.json": "1d41291a9f49723fca5842a23034d100194776159075f0d26a3fa3bc33ac5cba",
+    "graphify-out/cache/semantic/p3e5ba76addee/3a15d3f312f27eba36cfe883321af38f33982fc6e902d86b43c8174f1ccff1bd.json": "85a3bf65db08af13dfd918389521820e17e6c8a5d448a242fb58406a023b515a",
+    "graphify-out/cache/semantic/p3e5ba76addee/3b76acc69a1ce0694b39521d3bf8ee40f2c35972990056186cf058f3d94a198a.json": "116380a2689956bf2fd46b2865a34eef7dde90d41094fcd3b3aa2fd0e8da9f46",
+    "graphify-out/cache/semantic/p3e5ba76addee/3b9915369e4bb3308c8884066f0ce12a342644f0fe037c724a9b9218243ef0b7.json": "c04a2514530f9172f123794afb825037b8c1ccf39a6e2abc50eb496a974ac510",
+    "graphify-out/cache/semantic/p3e5ba76addee/3ec90d06cb55a04fd457c1029dd630e894247825563ed64d6021ee3db03e5f19.json": "672f0c164639b8f866f135aa4779b8fd4ad0b180575600a5298f2f9c1d9c47b6",
+    "graphify-out/cache/semantic/p3e5ba76addee/48dc4bbf2e62e40c6f91add6e1bc2d1c410928fc1c41d471ec808a00f599cf0c.json": "cab6186945317d6582a7f431aa5ab55c163a11de585e7a3f1efd195e44cc9264",
+    "graphify-out/cache/semantic/p3e5ba76addee/4c4427889fe1fda9991bccd64fabd8e193fe686ad69936370be9f7099efdb5d9.json": "4d7b505e2f4f99f2ff9b47d06132428cff87a07b7883530825e1ef892ce43b35",
+    "graphify-out/cache/semantic/p3e5ba76addee/4dce8f06ce017a856b0ae8f683578158f9b481f0412bc5a400d94ac0f2c5cd0f.json": "0130ed789d6d23fd1ebd5bd7c39cf1067d54d47e1ebd6e6a7a733385d49efddf",
+    "graphify-out/cache/semantic/p3e5ba76addee/57944b16c25de6a0547ec2a091118f8bfe664a2e93f5e388ed5ff7b194a65895.json": "95764bc6f35b71d9ed1c36699d535157406042e17e2a846ca7b150b9fd733ff7",
+    "graphify-out/cache/semantic/p3e5ba76addee/59eb93e009a6c3f7a5a5132975ad05588b4db60d205f97a527cff5d6c78c50fa.json": "0edb740b4dd43accfa37f30c3c1b339eea64fca53ceb19adc15e352ad063e6e3",
+    "graphify-out/cache/semantic/p3e5ba76addee/6c3675cadeeff1d3d956a74605942bfee20c93d592f232c796de8d6d1a8d013b.json": "95e2ab832cf6130d243e29d90b77e66e5824f09025c1ed443e47a890c3292ba6",
+    "graphify-out/cache/semantic/p3e5ba76addee/6d05dac8e6ca701fb5f3dbe58cf53da12ff5740c86a3162e880a9834fc15e668.json": "d9fb653e1d443962ef1ce45529766206cb2fa7f58cd1cd2ea8c119486e510f63",
+    "graphify-out/cache/semantic/p3e5ba76addee/71e5905fabb29ba7603fdd961462e0facf1d51d447778588538b39c628588fb1.json": "a21c65a47b0ac1c313e12e619f351ff5eb305a646afb4da734be6ac64ee59b59",
+    "graphify-out/cache/semantic/p3e5ba76addee/8acb9e5af6aab5999896e4fbf77bb53c456debf072be8535da056af8be003c21.json": "42e289ce5b3b226e56d937b55b1cce28631d161e081a858b2a8b5cfb616809f1",
+    "graphify-out/cache/semantic/p3e5ba76addee/8c98f14c49b52a34cdcf04c0ccb735c1a56405c02d26b99d77d53112cf03a4f3.json": "2c7a606aeab90782fc19831df8a47d033fc26c72cd24927012aecd40710eab3b",
+    "graphify-out/cache/semantic/p3e5ba76addee/8df91f8c2a59dcb9d274f6199ac9d964a6feef96bba5bcb2ead67cb873e8a4d5.json": "f076e5eff72adfe42bf97ed3cda729db9a9f223da87a1c8272131f9ba1db0940",
+    "graphify-out/cache/semantic/p3e5ba76addee/8ef9cce235b725b84014a3608d07f1ba0870038bb77b51580fc9dd404926a0b9.json": "b82136045c8c5ee0fa9d7f68750933cdc217b541df8891804d17a85c2925adc8",
+    "graphify-out/cache/semantic/p3e5ba76addee/aa1ff18269dcf65ea09e4011d03b727fe0ff933fa438dbc893acaed318db4145.json": "2201badaf2411beaa2c95d39f1e6cb807ae8f9d49e59d14c9dd0eadc8985c645",
+    "graphify-out/cache/semantic/p3e5ba76addee/b2bd5d193d190b70b627713574768bc6a38f35badddef22470f3cd744d795a14.json": "705649a1c4502203535dc1a98877c90e0937426f9b86bd3efd77eb1bc7da1d5a",
+    "graphify-out/cache/semantic/p3e5ba76addee/c7402ffd19ee08debaeaedcb08e7602778cfc386d568666bed65f51d2a42425b.json": "5b86da00cce7338558e359941319610818e906ab93851a111fb16eb05af78e1d",
+    "graphify-out/cache/semantic/p3e5ba76addee/dbe4314014ed346a081c83da769f0e470e40834fcca17336845022d5d93fcd54.json": "61dbed44b7baf17973d5c82a3c6f5b9b06cdbe41a911dbfcd9ee89ef64c04634",
+    "graphify-out/cache/semantic/p3e5ba76addee/f39848604709228be4cc5e3f32dd603890601e8fc3135a1d96569f583e425442.json": "56219f84a5e39f03c9951f622ca55c54f7b4af2b5e5bbcb10aa151744dd436e9",
+    "graphify-out/cache/semantic/p3e5ba76addee/fd724ace1e4bcd5209e28b7152a55ae3b23fd00a6be83dda3f5376788fb44dec.json": "7edaa79fdeff4e31384e1b42ee00ea616b46dba2b4d788549b64726ad9e9d2ac",
+    "graphify-out/cache/stat-index.json": "64df9dd58988459abb1b65c2e4036a4d73a1f75179eec8e30039c8f33582eebb",
+    "graphify-out/cost.json": "334bf79ce6fef6876ee347b77caa2a7c55474852c7cc79798784458e56cc983d",
+    "graphify-out/graph-diff.json": "7b4dd18e9090f991fcd3f51e0aa56677e66d459da58a199f7db41022d2a1eb8b",
+    "graphify-out/graph-health.json": "ddab325c4c571f8052fcaedcb7c411244945f20da8f1fdd493e99c960130f51d",
+    "graphify-out/graph.html": "7a96c4389cb7176298d7d3fb34cf30e980e9ccde7c3cfafa1f8c568f79dc8a6c",
+    "graphify-out/graph.json": "1b6dd92da810773b173ac048a5b5e912a1f3644527f014e9d8be6325c442db3d",
+    "graphify-out/manifest.json": "8c6fba06512cb34b339cde5c648bf3e83ba0246ad8a24456ee01092bf6c16cf9",
+    "graphify-out/memory/query_20261104_104857_6a8ceba9_pull_main_m\u1edbi_nh\u1ea5t_v\u00e0o_nh\u00e1nh_dev_manhpd_v\u00e0_t\u00f3m_t\u1eaft.md": "4aba0298da7ac391cd26d751e007b32673abb4b0b338615bd637eed8e63dd8c7",
+    "graphify-out/reflections/LESSONS.md": "75e40f35b5db7106d52c65d00b5801812c23225313fd4ebae9667c54b1df5298",
+    "upgrade_assignment.md": "b5d99783d01322dbd9afe371cb68e485b7401314913906e55c15c94c48c428d1",
+    "upgrade_assignment_new.md": "d1195b159d9cde8dad5fff81d164802558e46bb87fef33374ca0229ed07c2be8"
+  },
+  "scope_notes": [
+    "No production/test changes during checkpoint preparation",
+    "Only integration evidence README clarified; checkpoint README/manifest added",
+    "No push, merge, PR, frontend, mutation or performance action",
+    "Archived failing test copied unchanged to .py.snapshot so repository-wide pytest discovery cannot collect a duplicate active test module; original local file left untouched"
+  ]
+}

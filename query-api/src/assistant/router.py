@@ -7,14 +7,16 @@ trong main.py, vi day la du lieu log/stack trace noi bo va goi API OpenAI co phi
 from __future__ import annotations
 
 import logging
+from copy import deepcopy
 
 from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 
 from ingestion.src.storage import StorageError
 
 from . import config
 from .service import run_chat_turn
+from .storage import ConversationConflict, ConversationState, parse_revision
 
 logger = logging.getLogger("query-api.assistant")
 
@@ -22,7 +24,35 @@ router = APIRouter(prefix="/assistant", tags=["assistant"])
 
 
 class ChatRequest(BaseModel):
-    message: str = Field(min_length=1, max_length=4000)
+    model_config = ConfigDict(extra="forbid")
+    message: StrictStr = Field(min_length=1, max_length=4000)
+
+    @field_validator("message")
+    @classmethod
+    def meaningful_message(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("Assistant message must not be blank")
+        return value
+
+
+class UndoRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_revision: StrictStr = Field(min_length=3, max_length=39)
+
+    @field_validator("expected_revision")
+    @classmethod
+    def valid_revision(cls, value: str) -> str:
+        parse_revision(value)
+        return value
+
+
+def _conversation_response(cluster_id: str, state: ConversationState | None) -> dict:
+    return {
+        "cluster_id": cluster_id,
+        "messages": state.document["messages"] if state is not None else [],
+        "revision": state.revision if state is not None else None,
+        "undo_available": state is not None and state.document.get("undo") is not None,
+    }
 
 
 def _require_cluster_store(request: Request):
@@ -57,7 +87,7 @@ def get_conversation(cluster_id: str, request: Request):
 
     repository = _require_conversation_repository(request)
     conversation = repository.get(cluster_id)
-    return {"cluster_id": cluster_id, "messages": conversation["messages"] if conversation else []}
+    return _conversation_response(cluster_id, conversation)
 
 
 @router.post("/clusters/{cluster_id}/conversation/messages")
@@ -80,7 +110,7 @@ def post_message(cluster_id: str, payload: ChatRequest, request: Request):
 
     repository = _require_conversation_repository(request)
     existing = repository.get(cluster_id)
-    history = existing["messages"] if existing else []
+    history = deepcopy(existing.document["messages"]) if existing is not None else []
 
     try:
         new_messages = run_chat_turn(
@@ -94,5 +124,20 @@ def post_message(cluster_id: str, payload: ChatRequest, request: Request):
         raise HTTPException(status_code=502, detail=f"AI Assistant loi: {type(exc).__name__}") from None
 
     all_messages = history + new_messages
-    saved = repository.save(cluster_id, all_messages, created_at=existing["created_at"] if existing else None)
-    return {"cluster_id": cluster_id, "messages": saved["messages"]}
+    try:
+        saved = repository.save(cluster_id, all_messages, previous=existing)
+    except ConversationConflict as exc:
+        raise HTTPException(status_code=409, detail=exc.reason) from None
+    return _conversation_response(cluster_id, saved)
+
+
+@router.post("/clusters/{cluster_id}/conversation/undo")
+def undo_send(cluster_id: str, payload: UndoRequest, request: Request):
+    cluster_store = _require_cluster_store(request)
+    _get_cluster_or_404(cluster_store, cluster_id)
+    repository = _require_conversation_repository(request)
+    try:
+        restored = repository.undo(cluster_id, payload.expected_revision)
+    except ConversationConflict as exc:
+        raise HTTPException(status_code=409, detail=exc.reason) from None
+    return _conversation_response(cluster_id, restored)
