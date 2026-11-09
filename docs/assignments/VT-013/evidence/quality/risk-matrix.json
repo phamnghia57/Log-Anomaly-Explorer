@@ -1,0 +1,155 @@
+[
+  {
+    "ac": "AC-01",
+    "tests": [
+      "T-02",
+      "T-03",
+      "T-04",
+      "T-05",
+      "T-18",
+      "F-03",
+      "F-07",
+      "F-E2E"
+    ],
+    "files": [
+      "query-api/tests/test_assistant_undo_backend.py",
+      "query-api/tests/test_assistant_undo_contract.py",
+      "web/src/components/incident/AssistantPanel.test.tsx",
+      "web/e2e/integration/assistant-undo.pw.ts"
+    ],
+    "levels": [
+      "API/repository with fake transport",
+      "component with real hooks/mocked HTTP",
+      "real browser/API/OpenSearch"
+    ],
+    "executed": [
+      "Current 90-case Python coverage PASS",
+      "Current frontend 140-case coverage and two shuffled runs PASS",
+      "Current repeated real E2E; final totals in final-summary.json",
+      "Prior integration I-01 through I-04: PASS (historical, not rerun for coverage)"
+    ],
+    "remaining": [
+      "No real OpenSearch node restart/failover",
+      "E2E restores nonempty seeded tool history; first-Send empty persistence covered by historical real I-03 plus current fake/consumer tests"
+    ]
+  },
+  {
+    "ac": "AC-02",
+    "tests": [
+      "T-06",
+      "T-07",
+      "F-01",
+      "I-12"
+    ],
+    "files": [
+      "query-api/tests/test_assistant_undo_contract.py",
+      "query-api/tests/test_assistant_undo_backend.py",
+      "web/src/lib/assistant-undo.test.ts",
+      "web/src/components/incident/AssistantPanel.test.tsx"
+    ],
+    "levels": [
+      "API fake-backed",
+      "API consumer/component",
+      "historical real API"
+    ],
+    "executed": [
+      "Current Python 90-case and frontend 140-case coverage PASS",
+      "Prior integration I-12 valid/invalid boundaries PASS"
+    ],
+    "remaining": [
+      "Full malformed stored-document/input shape space not exhaustively covered",
+      "Python pre-write schema rejection path not hit by this suite"
+    ]
+  },
+  {
+    "ac": "AC-03",
+    "tests": [
+      "T-04",
+      "T-08",
+      "T-09",
+      "T-10",
+      "F-01",
+      "F-04"
+    ],
+    "files": [
+      "query-api/tests/test_assistant_undo_backend.py",
+      "web/src/lib/assistant-undo.test.ts",
+      "web/src/components/incident/AssistantPanel.test.tsx"
+    ],
+    "levels": [
+      "API fake-backed",
+      "consumer/component with mocked HTTP"
+    ],
+    "executed": [
+      "Current Python and frontend coverage PASS; shuffled orders PASS",
+      "Current real E2E forwards server revision and consumes snapshot"
+    ],
+    "remaining": [
+      "Primary-term change/failover not induced",
+      "Frontend manual direct invalid handler call bypassing disabled UI is unhit"
+    ]
+  },
+  {
+    "ac": "AC-04",
+    "tests": [
+      "T-11",
+      "T-12",
+      "T-13",
+      "T-18",
+      "T-22",
+      "F-05",
+      "M-01"
+    ],
+    "files": [
+      "query-api/tests/test_assistant_undo_contract.py",
+      "query-api/tests/test_assistant_undo_backend.py",
+      "web/src/components/incident/AssistantPanel.test.tsx"
+    ],
+    "levels": [
+      "actual repository/API over fake transport",
+      "consumer/component",
+      "historical real SDK/network/write-block integration"
+    ],
+    "executed": [
+      "Current storage-read/write/index/metadata error tests PASS",
+      "Historical M-01 KILLED: 4 assertions; not repeated here",
+      "Historical I-07/I-10/I-11 real missing-index/connection/write failures PASS"
+    ],
+    "remaining": [
+      "New-index non-ack/create-error, malformed successful Get response and pre-write validation not hit",
+      "Missing store configuration and generation StorageError/502 router branches not hit",
+      "Ordinary Send failure draft restoration, Undo/Send mutation 401 early-return branches not hit in frontend coverage"
+    ]
+  },
+  {
+    "ac": "AC-05",
+    "tests": [
+      "T-14",
+      "T-15",
+      "T-16",
+      "F-06",
+      "F-09",
+      "F-10"
+    ],
+    "files": [
+      "query-api/tests/test_assistant_undo_contract.py",
+      "query-api/tests/test_assistant_undo_backend.py",
+      "web/src/components/incident/AssistantPanel.test.tsx"
+    ],
+    "levels": [
+      "barrier-synchronized API/repository fake transport",
+      "real hooks/component cache",
+      "historical real OpenSearch CAS"
+    ],
+    "executed": [
+      "Current 400/400 race cases PASS: 100 per variant, no retries",
+      "Current cache stale-GET and logout race tests PASS",
+      "Historical real I-05/I-06 concurrent Create/Send/Undo PASS"
+    ],
+    "remaining": [
+      "100 repetitions are fake-backed, not 100 real-server races",
+      "Cross-tab/network lost-response timing and real mixed Send/Undo remain unverified",
+      "Different request winners are valid; tests assert winner-state consistency, not a fixed winner"
+    ]
+  }
+]

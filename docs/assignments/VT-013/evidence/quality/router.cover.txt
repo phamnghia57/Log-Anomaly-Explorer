@@ -1,0 +1,143 @@
+   1 HIT: """Endpoint AI Assistant - dieu tra & de xuat cach sua cho 1 cum, giong vai
+   2     : tro cua Elastic Observability AI Assistant nhung thu gon cho du an nay (xem
+   3     : README.md muc "AI Assistant"). JWT admin duoc gan cho ca router khi include
+   4     : trong main.py, vi day la du lieu log/stack trace noi bo va goi API OpenAI co phi.
+   5     : """
+   6     :
+   7 HIT: from __future__ import annotations
+   8     :
+   9 HIT: import logging
+  10 HIT: from copy import deepcopy
+  11     :
+  12 HIT: from fastapi import APIRouter, HTTPException, Request
+  13 HIT: from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
+  14     :
+  15 HIT: from ingestion.src.storage import StorageError
+  16     :
+  17 HIT: from . import config
+  18 HIT: from .service import run_chat_turn
+  19 HIT: from .storage import ConversationConflict, ConversationState, parse_revision
+  20     :
+  21 HIT: logger = logging.getLogger("query-api.assistant")
+  22     :
+  23 HIT: router = APIRouter(prefix="/assistant", tags=["assistant"])
+  24     :
+  25     :
+  26 HIT: class ChatRequest(BaseModel):
+  27 HIT:     model_config = ConfigDict(extra="forbid")
+  28 HIT:     message: StrictStr = Field(min_length=1, max_length=4000)
+  29     :
+  30 HIT:     @field_validator("message")
+  31 HIT:     @classmethod
+  32 HIT:     def meaningful_message(cls, value: str) -> str:
+  33 HIT:         if not value.strip():
+  34 HIT:             raise ValueError("Assistant message must not be blank")
+  35 HIT:         return value
+  36     :
+  37     :
+  38 HIT: class UndoRequest(BaseModel):
+  39 HIT:     model_config = ConfigDict(extra="forbid")
+  40 HIT:     expected_revision: StrictStr = Field(min_length=3, max_length=39)
+  41     :
+  42 HIT:     @field_validator("expected_revision")
+  43 HIT:     @classmethod
+  44 HIT:     def valid_revision(cls, value: str) -> str:
+  45 HIT:         parse_revision(value)
+  46 HIT:         return value
+  47     :
+  48     :
+  49 HIT: def _conversation_response(cluster_id: str, state: ConversationState | None) -> dict:
+  50 HIT:     return {
+  51 HIT:         "cluster_id": cluster_id,
+  52 HIT:         "messages": state.document["messages"] if state is not None else [],
+  53 HIT:         "revision": state.revision if state is not None else None,
+  54 HIT:         "undo_available": state is not None and state.document.get("undo") is not None,
+  55     :     }
+  56     :
+  57     :
+  58 HIT: def _require_cluster_store(request: Request):
+  59 HIT:     cluster_store = request.app.state.cluster_store
+  60 HIT:     if cluster_store is None:
+  61 MISS:         raise HTTPException(
+  62 MISS:             status_code=503,
+  63 MISS:             detail="cluster store chua san sang (can STORAGE_BACKEND=opensearch va OpenSearch dang chay)",
+  64     :         )
+  65 HIT:     return cluster_store
+  66     :
+  67     :
+  68 HIT: def _require_conversation_repository(request: Request):
+  69 HIT:     repository = request.app.state.assistant_conversations
+  70 HIT:     if repository is None:
+  71 MISS:         raise HTTPException(status_code=503, detail="assistant storage chua san sang")
+  72 HIT:     return repository
+  73     :
+  74     :
+  75 HIT: def _get_cluster_or_404(cluster_store, cluster_id: str) -> dict:
+  76 HIT:     cluster = cluster_store.get_cluster(cluster_id)
+  77 HIT:     if cluster is None:
+  78 HIT:         raise HTTPException(status_code=404, detail="cluster not found")
+  79 HIT:     return cluster
+  80     :
+  81     :
+  82 HIT: @router.get("/clusters/{cluster_id}/conversation")
+  83 HIT: def get_conversation(cluster_id: str, request: Request):
+  84     :     """Hoi thoai dieu tra hien co cho 1 cum, hoac messages rong neu chua ai hoi AI lan nao."""
+  85 HIT:     cluster_store = _require_cluster_store(request)
+  86 HIT:     _get_cluster_or_404(cluster_store, cluster_id)
+  87     :
+  88 HIT:     repository = _require_conversation_repository(request)
+  89 HIT:     conversation = repository.get(cluster_id)
+  90 HIT:     return _conversation_response(cluster_id, conversation)
+  91     :
+  92     :
+  93 HIT: @router.post("/clusters/{cluster_id}/conversation/messages")
+  94 HIT: def post_message(cluster_id: str, payload: ChatRequest, request: Request):
+  95     :     """Gui 1 tin nhan, AI co the tu goi tool de dieu tra truoc khi tra loi.
+  96     :     Tra ve TOAN BO hoi thoai (da luu) sau luot nay, khong chi tin nhan moi."""
+  97 HIT:     cluster_store = _require_cluster_store(request)
+  98 HIT:     cluster = _get_cluster_or_404(cluster_store, cluster_id)
+  99     :
+ 100 HIT:     try:
+ 101 HIT:         config.require_azure_openai_api_key()
+ 102 HIT:     except ValueError:
+ 103 HIT:         raise HTTPException(
+ 104 HIT:             status_code=503,
+ 105 HIT:             detail="AI Assistant chua duoc cau hinh (thieu AZURE_OPENAI_API_KEY/AZURE_OPENAI_ENDPOINT)",
+ 106 HIT:         ) from None
+ 107     :
+ 108 HIT:     store = request.app.state.store
+ 109 HIT:     logs = store.get_logs((cluster.get("log_ids") or [])[:20])
+ 110     :
+ 111 HIT:     repository = _require_conversation_repository(request)
+ 112 HIT:     existing = repository.get(cluster_id)
+ 113 HIT:     history = deepcopy(existing.document["messages"]) if existing is not None else []
+ 114     :
+ 115 HIT:     try:
+ 116 HIT:         new_messages = run_chat_turn(
+ 117 HIT:             cluster=cluster, logs=logs, history=history, user_message=payload.message,
+ 118 HIT:             store=store, cluster_store=cluster_store, cluster_id=cluster_id,
+ 119     :         )
+ 120 MISS:     except StorageError:
+ 121 MISS:         raise
+ 122 MISS:     except Exception as exc:  # noqa: BLE001 - loi tu OpenAI/Langfuse khong duoc lam sap service
+ 123 MISS:         logger.exception("Assistant chat that bai cho cum %s", cluster_id)
+ 124 MISS:         raise HTTPException(status_code=502, detail=f"AI Assistant loi: {type(exc).__name__}") from None
+ 125     :
+ 126 HIT:     all_messages = history + new_messages
+ 127 HIT:     try:
+ 128 HIT:         saved = repository.save(cluster_id, all_messages, previous=existing)
+ 129 HIT:     except ConversationConflict as exc:
+ 130 HIT:         raise HTTPException(status_code=409, detail=exc.reason) from None
+ 131 HIT:     return _conversation_response(cluster_id, saved)
+ 132     :
+ 133     :
+ 134 HIT: @router.post("/clusters/{cluster_id}/conversation/undo")
+ 135 HIT: def undo_send(cluster_id: str, payload: UndoRequest, request: Request):
+ 136 HIT:     cluster_store = _require_cluster_store(request)
+ 137 HIT:     _get_cluster_or_404(cluster_store, cluster_id)
+ 138 HIT:     repository = _require_conversation_repository(request)
+ 139 HIT:     try:
+ 140 HIT:         restored = repository.undo(cluster_id, payload.expected_revision)
+ 141 HIT:     except ConversationConflict as exc:
+ 142 HIT:         raise HTTPException(status_code=409, detail=exc.reason) from None
+ 143 HIT:     return _conversation_response(cluster_id, restored)

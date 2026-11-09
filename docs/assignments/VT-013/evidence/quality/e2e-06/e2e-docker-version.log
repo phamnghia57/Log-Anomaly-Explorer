@@ -1,0 +1,13 @@
+{
+  "command": [
+    "docker",
+    "version",
+    "--format",
+    "{{json .}}"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 1
+}
+
+{"Client":{"Version":"29.9.2","ApiVersion":"1.56","DefaultAPIVersion":"1.56","GitCommit":"a82e528","GoVersion":"go1.26.10","Os":"windows","Arch":"amd64","BuildTime":"Tue Oct 20 19:44:07 2026","Context":"desktop-linux"},"Server":null}
+failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.

@@ -1,0 +1,34 @@
+{
+  "command": [
+    "docker",
+    "run",
+    "-d",
+    "--name",
+    "vt013-frontend-7328e2a3ae0245e1",
+    "--label",
+    "vt013.frontend=7328e2a3ae0245e1",
+    "--publish",
+    "127.0.0.1::9200",
+    "--memory",
+    "2g",
+    "--ulimit",
+    "nofile=65536:65536",
+    "--tmpfs",
+    "/usr/share/opensearch/data:rw,uid=1000,gid=1000,size=1g",
+    "--env",
+    "discovery.type=single-node",
+    "--env",
+    "cluster.name=vt013-frontend-7328e2a3ae0245e1",
+    "--env",
+    "DISABLE_SECURITY_PLUGIN=true",
+    "--env",
+    "DISABLE_INSTALL_DEMO_CONFIG=true",
+    "--env",
+    "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m",
+    "opensearchproject/opensearch:2.17.1"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 0
+}
+
+1bcae2df4530d5bf7a63b2d694d32f5e67ff0476be74658ac03accaf1f7f9e4b

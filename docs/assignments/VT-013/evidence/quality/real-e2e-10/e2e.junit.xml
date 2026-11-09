@@ -1,0 +1,6 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="5.979041">
+<testsuite name="assistant-undo.pw.ts" timestamp="2026-11-09T07:56:59.634Z" hostname="chromium" tests="1" failures="0" skipped="0" time="4.153" errors="0">
+<testcase name="F-E2E real admin login, Send, Undo and reload restore durable exact history" classname="assistant-undo.pw.ts" time="4.153">
+</testcase>
+</testsuite>
+</testsuites>

@@ -1,0 +1,655 @@
+{
+  "name": "frontend-coverage",
+  "command": [
+    "node",
+    "D:/SE/vt013-quality-tools/node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "D:\\SE\\Log-Anomaly-Explorer\\web\\vitest.config.ts",
+    "--coverage.enabled",
+    "--coverage.provider=v8",
+    "--coverage.reporter=json",
+    "--coverage.reporter=text",
+    "--coverage.reporter=lcov",
+    "--coverage.reportsDirectory=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\frontend-coverage",
+    "--coverage.include=src/lib/api.ts",
+    "--coverage.include=src/lib/queries.ts",
+    "--coverage.include=src/components/incident/AssistantPanel.tsx"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 1
+}
+
+
+ RUN  v5.0.3 D:/SE/Log-Anomaly-Explorer/web
+      Coverage enabled with v8
+
+ ❯ src/components/StatusBadge.test.tsx (4 tests | 4 failed) 111ms
+   ❯ ClusterStatusBadge (3)
+     × hien dung nhan cho status=normal 89ms
+     × hien dung nhan cho status=anomalous 5ms
+     × hien dung nhan cho status=alerted 6ms
+   ❯ LevelTag (1)
+     × hien dung text level 5ms
+ ❯ src/components/incident/AssistantPanel.test.tsx (23 tests | 22 failed) 4543ms
+   ❯ VT-013 Assistant Undo UI and React Query cache (23)
+     × F-01 Undo availability flag=true revision="1:0" 433ms
+     × F-01 Undo availability flag=true revision="9223372036854775807:9223372036854775807" 97ms
+     × F-01 Undo availability flag=false revision="1:7" 78ms
+     × F-01 Undo availability flag=true revision=null 90ms
+     × F-01 Undo availability flag=true revision="" 90ms
+     × F-01 Undo availability flag=true revision="01:0" 52ms
+     × F-01 Undo availability flag=true revision="1:0\n" 50ms
+     × F-01 Undo availability flag=true revision="1:9223372036854775808" 77ms
+     × F-01 Undo availability flag=true revision=7 84ms
+     × F-01 Undo availability flag="true" revision="1:7" 63ms
+     × F-01 Undo availability flag=undefined revision=undefined 75ms
+     × F-02/03 keyboard Undo uses current authenticated revision and exact server history, without optimistic deletion 134ms
+     × F-03 first-Send Undo accepts the server's persisted empty history 144ms
+     × F-04 HTTP 409 GET-reconciles newer messages, never guesses or retries Undo 131ms
+     × F-05 503 preserves history until GET confirms the uncertain outcome 108ms
+     × F-05 network preserves history until GET confirms the uncertain outcome 115ms
+     × F-05 failed reconciliation retains messages and disables stale Undo until a manual GET succeeds 106ms
+     × F-06 pending Undo blocks double-clicks, Send and Enter without discarding the draft 440ms
+     × F-06 pending Send blocks Undo and duplicate Sends 287ms
+     × F-07 a new QueryClient remount loads the restored history using GET 145ms
+     × F-08 Stop aborts only Send, restores draft, GET-reconciles and never calls Undo 1472ms
+     × F-09 a late GET started before Undo cannot overwrite its confirmed response 130ms
+ ❯ src/pages/LoginPage.test.tsx (13 tests | 13 failed) 5840ms
+   ❯ admin login page (13)
+     × renders an accessible password form and validates required fields without a request 347ms
+     × logs in, persists only the session, clears old query data and replaces the route with dashboard 547ms
+     × shows pending state, disables duplicate submissions and recovers after rejection 540ms
+     × returns to a safe protected page after login: /search?trace_id=abc#results 439ms
+     × returns to a safe protected page after login: /clusters/c1 482ms
+     × returns to a safe protected page after login: //external.example 506ms
+     × returns to a safe protected page after login: https://external.example 457ms
+     × returns to a safe protected page after login: /login 477ms
+     × uses a generic error for invalid credentials and removes any previous session 529ms
+     × shows a clear network error and allows retry 529ms
+     × handles unavailable authentication without displaying backend error details 482ms
+     × explains an expired restored session and accepts a fresh login 21ms
+     × never redirects or persists an already expired response 475ms
+ ❯ src/App.test.tsx (12 tests | 12 failed) 1031ms
+   ❯ frontend authentication integration (12)
+     × redirects anonymous users from / before rendering or fetching protected data 253ms
+     × redirects anonymous users from /search?trace_id=abc#results before rendering or fetching protected data 21ms
+     × redirects anonymous users from /clusters/c1 before rendering or fetching protected data 31ms
+     × allows an admin to load the dashboard and use the existing sidebar navigation 141ms
+     × clears the rejected session and all cached data on 401, redirects once, and does not retry 77ms
+     × expires an open protected page, clears private cache and returns to login 51ms
+     × never treats an expired session as authenticated even when its timer has not run 18ms
+     × logs out through the admin menu, aborts pending requests and clears query/mutation caches 291ms
+     × handles logout/storage clear in another tab (log-anomaly-explorer.auth) and clears private cache 39ms
+     × handles logout/storage clear in another tab (null) and clears private cache 50ms
+     × keeps a valid logged-in admin out of /login without making a loop 47ms
+     × shows a login link rather than the admin menu when anonymous 9ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 51 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/App.test.tsx > frontend authentication integration > redirects anonymous users from / before rendering or fetching protected data
+ FAIL  src/App.test.tsx > frontend authentication integration > redirects anonymous users from /search?trace_id=abc#results before rendering or fetching protected data
+ FAIL  src/App.test.tsx > frontend authentication integration > redirects anonymous users from /clusters/c1 before rendering or fetching protected data
+Error: Invalid Chai property: toBeVisible
+ ❯ src/App.test.tsx:71:81
+     69|       renderApp(path);
+     70|
+     71|       expect(await screen.findByRole("heading", { name: "Đăng nhập quả…
+       |                                                                                 ^
+     72|       expect(JSON.parse(screen.getByTestId("location").textContent!)).…
+     73|       expect(fetchMock).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/51]⎯
+
+ FAIL  src/App.test.tsx > frontend authentication integration > allows an admin to load the dashboard and use the existing sidebar navigation
+Error: Invalid Chai property: toBeVisible
+ ❯ src/App.test.tsx:83:70
+     81|     const user = userEvent.setup();
+     82|
+     83|     expect(await screen.findByRole("heading", { name: "Dashboard" })).…
+       |                                                                      ^
+     84|     await waitFor(() => expect(queryClient.getQueriesData({ queryKey: …
+     85|       .toEqual([{ total: 0, clusters: [] }]));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/51]⎯
+
+ FAIL  src/App.test.tsx > frontend authentication integration > clears the rejected session and all cached data on 401, redirects once, and does not retry
+Error: Invalid Chai property: toBeVisible
+ ❯ src/App.test.tsx:102:79
+    100|     renderApp("/search?trace_id=abc");
+    101|
+    102|     expect(await screen.findByRole("heading", { name: "Đăng nhập quản …
+       |                                                                               ^
+    103|     expect(screen.getByRole("status")).toHaveTextContent(SESSION_EXPIR…
+    104|     expect(getSession()).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/51]⎯
+
+ FAIL  src/App.test.tsx > frontend authentication integration > expires an open protected page, clears private cache and returns to login
+Error: Invalid Chai property: toBeVisible
+ ❯ src/App.test.tsx:116:64
+    114|     renderApp("/search");
+    115|     cachePrivateState();
+    116|     expect(screen.getByRole("heading", { name: "Search log" })).toBeVi…
+       |                                                                ^
+    117|
+    118|     act(() => { vi.advanceTimersByTime(2_000); });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/51]⎯
+
+ FAIL  src/App.test.tsx > frontend authentication integration > never treats an expired session as authenticated even when its timer has not run
+Error: Invalid Chai property: toBeVisible
+ ❯ src/App.test.tsx:134:72
+    132|     renderApp();
+    133|
+    134|     expect(screen.getByRole("heading", { name: "Đăng nhập quản trị" })…
+       |                                                                        ^
+    135|     expect(getSession()).toBeNull();
+    136|     expect(fetchMock).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/51]⎯
+
+ FAIL  src/App.test.tsx > frontend authentication integration > logs out through the admin menu, aborts pending requests and clears query/mutation caches
+Error: Invalid Chai property: toBeVisible
+ ❯ src/App.test.tsx:151:48
+    149|
+    150|     await user.click(screen.getByRole("button", { name: "Menu quản trị…
+    151|     expect(screen.getByText("Tài khoản admin")).toBeVisible();
+       |                                                ^
+    152|     await user.click(screen.getByRole("menuitem", { name: "Đăng xuất" …
+    153|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/51]⎯
+
+ FAIL  src/App.test.tsx > frontend authentication integration > handles logout/storage clear in another tab (log-anomaly-explorer.auth) and clears private cache
+ FAIL  src/App.test.tsx > frontend authentication integration > handles logout/storage clear in another tab (null) and clears private cache
+Error: Invalid Chai property: toBeVisible
+ ❯ src/App.test.tsx:173:79
+    171|     });
+    172|
+    173|     expect(await screen.findByRole("heading", { name: "Đăng nhập quản …
+       |                                                                               ^
+    174|     expectEmptyCache();
+    175|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/51]⎯
+
+ FAIL  src/App.test.tsx > frontend authentication integration > keeps a valid logged-in admin out of /login without making a loop
+Error: Invalid Chai property: toBeVisible
+ ❯ src/App.test.tsx:182:71
+    180|     fetchMock.mockResolvedValue(new Response(JSON.stringify({ total: 0…
+    181|
+    182|     expect(await screen.findByRole("heading", { name: "Search log" }))…
+       |                                                                       ^
+    183|     expect(screen.queryByRole("heading", { name: "Đăng nhập quản trị" …
+    184|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/51]⎯
+
+ FAIL  src/App.test.tsx > frontend authentication integration > shows a login link rather than the admin menu when anonymous
+Error: Invalid Chai property: toHaveAttribute
+ ❯ src/App.test.tsx:188:60
+    186|   it("shows a login link rather than the admin menu when anonymous", (…
+    187|     render(<QueryClientProvider client={queryClient}><MemoryRouter><Ad…
+    188|     expect(screen.getByRole("link", { name: "Đăng nhập" })).toHaveAttr…
+       |                                                            ^
+    189|     expect(screen.queryByRole("button", { name: "Menu quản trị" })).no…
+    190|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/51]⎯
+
+ FAIL  src/components/StatusBadge.test.tsx > ClusterStatusBadge > hien dung nhan cho status=normal
+ FAIL  src/components/StatusBadge.test.tsx > ClusterStatusBadge > hien dung nhan cho status=anomalous
+ FAIL  src/components/StatusBadge.test.tsx > ClusterStatusBadge > hien dung nhan cho status=alerted
+Error: Invalid Chai property: toBeInTheDocument
+ ❯ src/components/StatusBadge.test.tsx:12:36
+     10|   ] as const)("hien dung nhan cho status=%s", (status, label) => {
+     11|     render(<ClusterStatusBadge status={status} />);
+     12|     expect(screen.getByText(label)).toBeInTheDocument();
+       |                                    ^
+     13|   });
+     14| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/51]⎯
+
+ FAIL  src/components/StatusBadge.test.tsx > LevelTag > hien dung text level
+Error: Invalid Chai property: toBeInTheDocument
+ ❯ src/components/StatusBadge.test.tsx:19:38
+     17|   it("hien dung text level", () => {
+     18|     render(<LevelTag level="ERROR" />);
+     19|     expect(screen.getByText("ERROR")).toBeInTheDocument();
+       |                                      ^
+     20|   });
+     21| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/51]⎯
+
+ FAIL  src/pages/LoginPage.test.tsx > admin login page > renders an accessible password form and validates required fields without a request
+Error: Invalid Chai property: toBeVisible
+ ❯ src/pages/LoginPage.test.tsx:56:72
+     54|   it("renders an accessible password form and validates required field…
+     55|     const { user } = renderLogin();
+     56|     expect(screen.getByRole("heading", { name: "Đăng nhập quản trị" })…
+       |                                                                        ^
+     57|     expect(screen.getByLabelText("Mật khẩu")).toHaveAttribute("type", …
+     58|     expect(screen.getByLabelText("Mật khẩu")).toHaveAttribute("autocom…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/51]⎯
+
+ FAIL  src/pages/LoginPage.test.tsx > admin login page > logs in, persists only the session, clears old query data and replaces the route with dashboard
+Error: Invalid Chai property: toBeVisible
+ ❯ src/pages/LoginPage.test.tsx:75:70
+     73|     await user.click(screen.getByRole("button", { name: "Đăng nhập" })…
+     74|
+     75|     expect(await screen.findByRole("heading", { name: "Dashboard" })).…
+       |                                                                      ^
+     76|     expect(fetchMock).toHaveBeenCalledWith(`${API_BASE_URL}/auth/login…
+     77|       method: "POST", body: JSON.stringify({ username: "test-admin", p…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/51]⎯
+
+ FAIL  src/pages/LoginPage.test.tsx > admin login page > shows pending state, disables duplicate submissions and recovers after rejection
+Error: Invalid Chai property: toBeDisabled
+ ❯ src/pages/LoginPage.test.tsx:93:20
+     91|
+     92|     const pending = await screen.findByRole("button", { name: "Đang đă…
+     93|     expect(pending).toBeDisabled();
+       |                    ^
+     94|     expect(screen.getByLabelText("Tên đăng nhập")).toBeDisabled();
+     95|     expect(screen.getByLabelText("Mật khẩu")).toBeDisabled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/51]⎯
+
+ FAIL  src/pages/LoginPage.test.tsx > admin login page > returns to a safe protected page after login: /search?trace_id=abc#results
+ FAIL  src/pages/LoginPage.test.tsx > admin login page > returns to a safe protected page after login: /clusters/c1
+ FAIL  src/pages/LoginPage.test.tsx > admin login page > returns to a safe protected page after login: //external.example
+ FAIL  src/pages/LoginPage.test.tsx > admin login page > returns to a safe protected page after login: https://external.example
+ FAIL  src/pages/LoginPage.test.tsx > admin login page > returns to a safe protected page after login: /login
+Error: Invalid Chai property: toBeVisible
+ ❯ src/pages/LoginPage.test.tsx:120:66
+    118|     await user.click(screen.getByRole("button", { name: "Đăng nhập" })…
+    119|
+    120|     expect(await screen.findByRole("heading", { name: heading })).toBe…
+       |                                                                  ^
+    121|   });
+    122|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/51]⎯
+
+ FAIL  src/pages/LoginPage.test.tsx > admin login page > uses a generic error for invalid credentials and removes any previous session
+Error: Invalid Chai property: toHaveTextContent
+ ❯ src/pages/LoginPage.test.tsx:132:18
+    130|
+    131|     const alert = await screen.findByRole("alert");
+    132|     expect(alert).toHaveTextContent("Đăng nhập không thành công.");
+       |                  ^
+    133|     expect(alert).not.toHaveTextContent("username does not exist");
+    134|     expect(getSession()).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/51]⎯
+
+ FAIL  src/pages/LoginPage.test.tsx > admin login page > shows a clear network error and allows retry
+Error: Invalid Chai property: toHaveTextContent
+ ❯ src/pages/LoginPage.test.tsx:146:45
+    144|     await user.click(screen.getByRole("button", { name: "Đăng nhập" })…
+    145|
+    146|     expect(await screen.findByRole("alert")).toHaveTextContent("Không …
+       |                                             ^
+    147|     expect(screen.getByRole("button", { name: "Đăng nhập" })).toBeEnab…
+    148|     expect(getSession()).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/51]⎯
+
+ FAIL  src/pages/LoginPage.test.tsx > admin login page > handles unavailable authentication without displaying backend error details
+Error: Invalid Chai property: toHaveTextContent
+ ❯ src/pages/LoginPage.test.tsx:159:18
+    157|
+    158|     const alert = await screen.findByRole("alert");
+    159|     expect(alert).toHaveTextContent("Dịch vụ đăng nhập tạm thời không …
+       |                  ^
+    160|     expect(alert).not.toHaveTextContent("private backend diagnostics");
+    161|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/51]⎯
+
+ FAIL  src/pages/LoginPage.test.tsx > admin login page > explains an expired restored session and accepts a fresh login
+Error: Invalid Chai property: toHaveTextContent
+ ❯ src/pages/LoginPage.test.tsx:167:39
+    165|     restoreSession();
+    166|     const { user } = renderLogin();
+    167|     expect(screen.getByRole("status")).toHaveTextContent(SESSION_EXPIR…
+       |                                       ^
+    168|     const fresh = session();
+    169|     fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(fresh)…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/51]⎯
+
+ FAIL  src/pages/LoginPage.test.tsx > admin login page > never redirects or persists an already expired response
+Error: Invalid Chai property: toHaveTextContent
+ ❯ src/pages/LoginPage.test.tsx:185:45
+    183|     await user.click(screen.getByRole("button", { name: "Đăng nhập" })…
+    184|
+    185|     expect(await screen.findByRole("alert")).toHaveTextContent(SESSION…
+       |                                             ^
+    186|     expect(screen.getByRole("heading", { name: "Đăng nhập quản trị" })…
+    187|     expect(getSession()).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/51]⎯
+
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision="1:0"
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision="9223372036854775807:9223372036854775807"
+Error: Invalid Chai property: toBeEnabled. Did you mean "toBeCalled"?
+ ❯ src/components/incident/AssistantPanel.test.tsx:91:38
+     89|     read = () => json({ ...completed, undo_available: available, revis…
+     90|     await loaded();
+     91|     if (enabled) expect(undoButton()).toBeEnabled();
+       |                                      ^
+     92|     else expect(undoButton()).toBeDisabled();
+     93|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/51]⎯
+
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=false revision="1:7"
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision=null
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision=""
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision="01:0"
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision="1:0\n"
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision=7
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag="true" revision="1:7"
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=undefined revision=undefined
+Error: Invalid Chai property: toBeDisabled
+ ❯ src/components/incident/AssistantPanel.test.tsx:92:30
+     90|     await loaded();
+     91|     if (enabled) expect(undoButton()).toBeEnabled();
+     92|     else expect(undoButton()).toBeDisabled();
+       |                              ^
+     93|   });
+     94|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/51]⎯
+
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision="1:9223372036854775808"
+Error: Invalid Chai property: toBeDisabled
+ ❯ src/components/incident/AssistantPanel.test.tsx:92:30
+     90|     await loaded();
+     91|     if (enabled) expect(undoButton()).toBeEnabled();
+     92|     else expect(undoButton()).toBeDisabled();
+       |                              ^
+     93|   });
+     94|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/51]⎯
+
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-02/03 keyboard Undo uses current authenticated revision and exact server history, without optimistic deletion
+Error: Invalid Chai property: toBeVisible
+ ❯ src/components/incident/AssistantPanel.test.tsx:108:46
+    106|     });
+    107|     expect(client.getQueryData(KEY)).toEqual(completed);
+    108|     expect(screen.getByText("Latest answer")).toBeVisible();
+       |                                              ^
+    109|     await act(async () => pending.resolve(json(restored)));
+    110|     await waitFor(() => expect(client.getQueryData(KEY)).toEqual(resto…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/51]⎯
+
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-03 first-Send Undo accepts the server's persisted empty history
+Error: Invalid Chai property: toBeInTheDocument
+ ❯ src/components/incident/AssistantPanel.test.tsx:122:51
+    120|     await userEvent.click(undoButton());
+    121|     await waitFor(() => expect(client.getQueryData(KEY)).toEqual({ ...…
+    122|     expect(screen.queryByText("Original answer")).not.toBeInTheDocumen…
+       |                                                   ^
+    123|     expect(undoButton()).toBeDisabled();
+    124|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/51]⎯
+
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-04 HTTP 409 GET-reconciles newer messages, never guesses or retries Undo
+Error: Invalid Chai property: toBeDisabled
+ ❯ src/components/incident/AssistantPanel.test.tsx:135:25
+    133|     await waitFor(() => expect(fetchMock.mock.calls.filter(([url]) => …
+    134|     expect(client.getQueryData(KEY)).toEqual(completed);
+    135|     expect(undoButton()).toBeDisabled();
+       |                         ^
+    136|     await act(async () => refresh.resolve(json(newer)));
+    137|     await screen.findByText("Another admin's answer");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/51]⎯
+
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-05 503 preserves history until GET confirms the uncertain outcome
+Error: Invalid Chai property: toBeVisible
+ ❯ src/components/incident/AssistantPanel.test.tsx:151:46
+    149|     await waitFor(() => expect(fetchMock.mock.calls.filter(([url]) => …
+    150|     expect(client.getQueryData(KEY)).toEqual(completed);
+    151|     expect(screen.getByText("Latest answer")).toBeVisible();
+       |                                              ^
+    152|     // The mutation may have committed before its response was lost.
+    153|     await act(async () => refresh.resolve(json(restored)));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/51]⎯
+
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-05 network preserves history until GET confirms the uncertain outcome
+Error: Invalid Chai property: toBeVisible
+ ❯ src/components/incident/AssistantPanel.test.tsx:151:46
+    149|     await waitFor(() => expect(fetchMock.mock.calls.filter(([url]) => …
+    150|     expect(client.getQueryData(KEY)).toEqual(completed);
+    151|     expect(screen.getByText("Latest answer")).toBeVisible();
+       |                                              ^
+    152|     // The mutation may have committed before its response was lost.
+    153|     await act(async () => refresh.resolve(json(restored)));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/51]⎯
+
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-05 failed reconciliation retains messages and disables stale Undo until a manual GET succeeds
+Error: Invalid Chai property: toBeVisible
+ ❯ src/components/incident/AssistantPanel.test.tsx:165:46
+    163|     await userEvent.click(undoButton());
+    164|     await screen.findByRole("alert");
+    165|     expect(screen.getByText("Latest answer")).toBeVisible();
+       |                                              ^
+    166|     expect(client.getQueryData(KEY)).toEqual(completed);
+    167|     expect(undoButton()).toBeDisabled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/51]⎯
+
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-06 pending Undo blocks double-clicks, Send and Enter without discarding the draft
+Error: Invalid Chai property: toBeDisabled
+ ❯ src/components/incident/AssistantPanel.test.tsx:181:25
+    179|     await userEvent.type(input, "Keep this draft");
+    180|     await userEvent.dblClick(undoButton());
+    181|     expect(undoButton()).toBeDisabled();
+       |                         ^
+    182|     expect(input).toBeDisabled();
+    183|     expect(screen.getByRole("button", { name: "Gửi câu hỏi" })).toBeDi…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/51]⎯
+
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-06 pending Send blocks Undo and duplicate Sends
+Error: Invalid Chai property: toBeDisabled
+ ❯ src/components/incident/AssistantPanel.test.tsx:199:25
+    197|     await userEvent.type(input, "Question");
+    198|     await userEvent.dblClick(screen.getByRole("button", { name: "Gửi c…
+    199|     expect(undoButton()).toBeDisabled();
+       |                         ^
+    200|     fireEvent.click(undoButton());
+    201|     fireEvent.keyDown(input, { key: "Enter" });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/51]⎯
+
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-07 a new QueryClient remount loads the restored history using GET
+Error: Invalid Chai property: toBeInTheDocument
+ ❯ src/components/incident/AssistantPanel.test.tsx:217:49
+    215|     mount();
+    216|     await screen.findByText("Original answer");
+    217|     expect(screen.queryByText("Latest answer")).not.toBeInTheDocument(…
+       |                                                 ^
+    218|     expect(client.getQueryData(KEY)).toEqual(restored);
+    219|     expect(undoButton()).toBeDisabled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/51]⎯
+
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-08 Stop aborts only Send, restores draft, GET-reconciles and never calls Undo
+Error: Invalid Chai property: toBeEnabled. Did you mean "toBeCalled"?
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex h-[28rem] flex-col rounded-xl border bg-card"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex flex-wrap items-center justify-between gap-2 border-b px-4 py-2.5"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5 text-sm font-semibold text-muted-foreground"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-bot h-4 w-4"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M12 8V4H8"[39m
+              [36m/>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"12"[39m
+                [33mrx[39m=[32m"2"[39m
+                [33mwidth[39m=[32m"16"[39m
+                [33mx[39m=[32m"4"[39m
+                [33my[39m=[32m"8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 14h2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M20 14h2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 13v2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M9 13v2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [0mĐiều tra với AI Assistant[0m
+          [36m</h2>[39m
+          [36m<button[39m
+            [33maria-busy[39m=[32m"false"[39m
+            [33maria-label[39m=[32m"Hoàn tác lượt gửi"[39m
+            [33mclass[39m=[32m"group/button inline-flex shrink-0 items-center justify-center border border-transparent bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50 h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5"[39m
+            [33mdata-size[39m=[32m"sm"[39m
+            [33mdata-slot[39m=[32m"button"[39m
+            [33mdata-variant[39m=[32m"ghost"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-undo-2 h-3.5 w-3.5"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M9 14 4 9l5-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [0mHoàn tác lượt gửi[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"relative flex-1 px-4"[39m
+          [33mdata-slot[39m=[32m"scroll-area"[39m
+          [33mdir[39m=[32m"ltr"[39m
+          [33mstyle[39m=[32m"position: relative; --radix-scroll-area-corner-width: 0px; --radix-scroll-area-corner-height: 0px;"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1"[39m
+            [33mdata-radix-scroll-area-viewport[39m=[32m""[39m
+            [33mdata-slot[39m=[32m"scroll-area-viewport"[39m
+            [33mstyle[39m=[32m"overflow-x: hidden; overflow-y: scroll;"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mstyle[39m=[32m"min-width: 100%; display: table;"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"py-2"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-2 py-1.5 flex-row-reverse"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted"[39m
+                  [36m>[39m
+                    [36m<svg[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                      [33mclass[39m=[32m"lucide lucide-user h-3.5 w-3.5"[39m
+                      [33mfill[39m=[32m"none"[39m
+                      [33mheight[39m=[32m"24"[39m
+                      [33mstroke[39m=[32m"currentColor"[39m
+                      [33mstroke-linecap[39m=[32m"round"[39m
+                      [33mstroke-linejoin[39m=[32m"round"[39m
+                      [33mstroke-width[39m=[32m"2"[39m
+                      [33mviewBox[39m=[32m"0 0 24 24"[39m
+                      [33mwidth[39m=[32m"24"[39m
+                      [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                    [36m>[39m
+                      [36m<path[39m
+                        [33md[39m=[32m"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"[39m
+                      [36m/>[39m
+                      [36m<circle[39m
+                        [33mcx[39m=[32m"12"[39m
+                        [33mcy[39m=[32m"7"[39m
+                        [33mr[39m=[32m"4"[39m
+                      [36m/>[39m
+                    [36m</svg>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"max-w-[85%] roun...
+ ❯ src/components/incident/AssistantPanel.test.tsx:234:38
+    232|     await userEvent.click(await screen.findByRole("button", { name: "D…
+    233|     expect(signal?.aborted).toBe(true);
+    234|     await waitFor(() => expect(input).toBeEnabled());
+       |                                      ^
+    235|     expect(input).toHaveValue("Stop this wait");
+    236|     expect(posts("undo")).toHaveLength(0);
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/51]⎯
+
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-09 a late GET started before Undo cannot overwrite its confirmed response
+Error: Invalid Chai property: toBeInTheDocument
+ ❯ src/components/incident/AssistantPanel.test.tsx:255:49
+    253|     await refresh;
+    254|     await waitFor(() => expect(client.getQueryData(KEY)).toEqual(resto…
+    255|     expect(screen.queryByText("Latest answer")).not.toBeInTheDocument(…
+       |                                                 ^
+    256|   });
+    257|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/51]⎯
+
+
+ Test Files  4 failed | 5 passed (9)
+      Tests  51 failed | 89 passed (140)
+   Start at  14:52:43
+   Duration  13.65s (environment 46%, import 19%, tests 18%, setup 12%, transform 4%, worker 2%)

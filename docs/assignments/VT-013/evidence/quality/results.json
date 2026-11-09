@@ -1,0 +1,212 @@
+{
+  "started_at_utc": "2026-11-09T07:48:23.261531+00:00",
+  "runs": [
+    {
+      "name": "python-coverage",
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\python_coverage.py"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 1
+    },
+    {
+      "name": "backend-reverse",
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "-m",
+        "pytest",
+        "-v",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\backend-reverse.junit.xml",
+        "tests/test_assistant_storage.py",
+        "tests/test_assistant.py",
+        "tests/test_assistant_undo_backend.py",
+        "tests/test_assistant_undo_contract.py"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+      "exit_code": 0
+    },
+    {
+      "name": "backend-focused",
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "-m",
+        "pytest",
+        "-v",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\backend-focused.junit.xml",
+        "tests/test_assistant_undo_contract.py"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+      "exit_code": 0
+    },
+    {
+      "name": "repository-alone",
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "-m",
+        "pytest",
+        "-v",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\repository-alone.junit.xml",
+        "tests/test_assistant_storage.py"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+      "exit_code": 0
+    },
+    {
+      "name": "races-100",
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "-m",
+        "pytest",
+        "-v",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "-p",
+        "repeat_plugin",
+        "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\races-100.junit.xml",
+        "tests/test_assistant_undo_contract.py::test_t14_concurrent_sends_cannot_silently_overwrite",
+        "tests/test_assistant_undo_backend.py::test_t15_t16_competing_undo_mutations_use_the_same_version"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-order-13013",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--sequence.shuffle",
+        "--sequence.seed=13013",
+        "--reporter=default",
+        "--reporter=junit",
+        "--outputFile=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\frontend-order-13013.junit.xml"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-order-13014",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--sequence.shuffle",
+        "--sequence.seed=13014",
+        "--reporter=default",
+        "--reporter=junit",
+        "--outputFile=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\frontend-order-13014.junit.xml"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-coverage",
+      "command": [
+        "node",
+        "D:\\SE\\vt013-quality-tools\\node_modules\\vitest\\vitest.mjs",
+        "run",
+        "--config",
+        "D:\\SE\\Log-Anomaly-Explorer\\web\\vitest.config.ts",
+        "--coverage.enabled",
+        "--coverage.provider=v8",
+        "--coverage.reporter=json",
+        "--coverage.reporter=text",
+        "--coverage.reporter=lcov",
+        "--coverage.reportsDirectory=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\frontend-coverage",
+        "--coverage.include=src/lib/api.ts",
+        "--coverage.include=src/lib/queries.ts",
+        "--coverage.include=src/components/incident/AssistantPanel.tsx"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 1
+    }
+  ],
+  "e2e": [
+    {
+      "iteration": 1,
+      "exit_code": 1,
+      "result": "NOT VERIFIED",
+      "owned_container_removed": false
+    },
+    {
+      "iteration": 2,
+      "exit_code": 1,
+      "result": "NOT VERIFIED",
+      "owned_container_removed": false
+    },
+    {
+      "iteration": 3,
+      "exit_code": 1,
+      "result": "NOT VERIFIED",
+      "owned_container_removed": false
+    },
+    {
+      "iteration": 4,
+      "exit_code": 1,
+      "result": "NOT VERIFIED",
+      "owned_container_removed": false
+    },
+    {
+      "iteration": 5,
+      "exit_code": 1,
+      "result": "NOT VERIFIED",
+      "owned_container_removed": false
+    },
+    {
+      "iteration": 6,
+      "exit_code": 1,
+      "result": "NOT VERIFIED",
+      "owned_container_removed": false
+    },
+    {
+      "iteration": 7,
+      "exit_code": 1,
+      "result": "NOT VERIFIED",
+      "owned_container_removed": false
+    },
+    {
+      "iteration": 8,
+      "exit_code": 1,
+      "result": "NOT VERIFIED",
+      "owned_container_removed": false
+    },
+    {
+      "iteration": 9,
+      "exit_code": 1,
+      "result": "NOT VERIFIED",
+      "owned_container_removed": false
+    },
+    {
+      "iteration": 10,
+      "exit_code": 1,
+      "result": "NOT VERIFIED",
+      "owned_container_removed": false
+    }
+  ],
+  "branch": "feat/vt013-undo-manhpd",
+  "head": "bc735253920db6bc51d19f12b0fb3d92f210a8c2",
+  "changed_preexisting_files": [],
+  "preexisting_files_verified": 599,
+  "finished_at_utc": "2026-11-09T07:50:40.072890+00:00"
+}

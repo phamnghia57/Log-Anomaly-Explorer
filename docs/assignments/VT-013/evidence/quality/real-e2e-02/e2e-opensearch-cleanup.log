@@ -1,0 +1,12 @@
+{
+  "command": [
+    "docker",
+    "rm",
+    "-f",
+    "9c20fa40b1fb8123d07f2b112307acc95cc3f7befa3f3ae6ac38240285ac48d3"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 0
+}
+
+9c20fa40b1fb8123d07f2b112307acc95cc3f7befa3f3ae6ac38240285ac48d3

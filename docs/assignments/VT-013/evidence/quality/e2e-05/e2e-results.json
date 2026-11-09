@@ -1,0 +1,24 @@
+{
+  "started_at_utc": "2026-11-09T07:50:38.980241+00:00",
+  "commands": [
+    {
+      "command": [
+        "docker",
+        "version",
+        "--format",
+        "{{json .}}"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 1
+    }
+  ],
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "opensearch-py": "3.2.0",
+  "result": "NOT VERIFIED",
+  "backend_source_sha256": {
+    "query-api/src/assistant/router.py": "339e851612f52990a2d0292c71b034c9e5981f19813f19cc3d3b7e51ab241968",
+    "query-api/src/assistant/storage.py": "ddaaf6057906c6d7242b1ebcdc79ff43101606d127c31f56575504ea1b2240e2"
+  },
+  "failure_or_blocker": "RuntimeError: e2e-docker-version exited 1",
+  "finished_at_utc": "2026-11-09T07:50:39.159083+00:00"
+}

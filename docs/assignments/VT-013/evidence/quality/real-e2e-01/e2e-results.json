@@ -1,0 +1,129 @@
+{
+  "started_at_utc": "2026-11-09T07:52:01.295751+00:00",
+  "commands": [
+    {
+      "command": [
+        "docker",
+        "version",
+        "--format",
+        "{{json .}}"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "run",
+        "-d",
+        "--name",
+        "vt013-frontend-4d1826924a02425c",
+        "--label",
+        "vt013.frontend=4d1826924a02425c",
+        "--publish",
+        "127.0.0.1::9200",
+        "--memory",
+        "2g",
+        "--ulimit",
+        "nofile=65536:65536",
+        "--tmpfs",
+        "/usr/share/opensearch/data:rw,uid=1000,gid=1000,size=1g",
+        "--env",
+        "discovery.type=single-node",
+        "--env",
+        "cluster.name=vt013-frontend-4d1826924a02425c",
+        "--env",
+        "DISABLE_SECURITY_PLUGIN=true",
+        "--env",
+        "DISABLE_INSTALL_DEMO_CONFIG=true",
+        "--env",
+        "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m",
+        "opensearchproject/opensearch:2.17.1"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "inspect",
+        "05e050323d1ab949ea57ec99b5b370f421036271eaa35b4ca5dfd5b9ae885983"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\playwright.quality.config.ts"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 1
+    },
+    {
+      "command": [
+        "docker",
+        "inspect",
+        "05e050323d1ab949ea57ec99b5b370f421036271eaa35b4ca5dfd5b9ae885983"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "rm",
+        "-f",
+        "05e050323d1ab949ea57ec99b5b370f421036271eaa35b4ca5dfd5b9ae885983"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0
+    }
+  ],
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "opensearch-py": "3.2.0",
+  "result": "NOT VERIFIED",
+  "backend_source_sha256": {
+    "query-api/src/assistant/router.py": "339e851612f52990a2d0292c71b034c9e5981f19813f19cc3d3b7e51ab241968",
+    "query-api/src/assistant/storage.py": "ddaaf6057906c6d7242b1ebcdc79ff43101606d127c31f56575504ea1b2240e2"
+  },
+  "opensearch": {
+    "name": "05e050323d1a",
+    "cluster_name": "vt013-frontend-4d1826924a02425c",
+    "cluster_uuid": "sTSBjioGQbW3d79yrr2ZMA",
+    "version": {
+      "distribution": "opensearch",
+      "number": "2.17.1",
+      "build_type": "tar",
+      "build_hash": "1893d20797e30110e5877170e44d42275ce5951e",
+      "build_date": "2024-09-26T21:59:32.078798875Z",
+      "build_snapshot": false,
+      "lucene_version": "9.11.1",
+      "minimum_wire_compatibility_version": "7.10.0",
+      "minimum_index_compatibility_version": "7.0.0"
+    },
+    "tagline": "The OpenSearch Project: https://opensearch.org/"
+  },
+  "vite_command": [
+    "node",
+    "node_modules/vite/bin/vite.js",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "59228",
+    "--strictPort"
+  ],
+  "isolation": {
+    "container_id": "05e050323d1ab949ea57ec99b5b370f421036271eaa35b4ca5dfd5b9ae885983",
+    "cluster_name": "vt013-frontend-4d1826924a02425c",
+    "url": "http://127.0.0.1:54634",
+    "index_prefix": "vt013-frontend-4d1826924a02425c",
+    "api_url": "http://127.0.0.1:63740",
+    "web_url": "http://127.0.0.1:59228"
+  },
+  "failure_or_blocker": "RuntimeError: e2e-playwright exited 1",
+  "owned_container_removed": true,
+  "finished_at_utc": "2026-11-09T07:52:34.449871+00:00"
+}

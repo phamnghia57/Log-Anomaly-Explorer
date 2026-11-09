@@ -1,0 +1,33 @@
+{
+  "name": "repository-alone",
+  "command": [
+    "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+    "-u",
+    "-B",
+    "-m",
+    "pytest",
+    "-v",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\repository-alone.junit.xml",
+    "tests/test_assistant_storage.py"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+  "exit_code": 0
+}
+
+============================= test session starts =============================
+platform win32 -- Python 3.14.6, pytest-9.2.0, pluggy-1.7.0 -- D:\SE\LAE-issue-73\.venv\Scripts\python.exe
+rootdir: D:\SE\Log-Anomaly-Explorer\query-api
+collecting ... collected 6 items
+
+tests/test_assistant_storage.py::test_ensure_ready_tao_index_voi_mapping_strict PASSED [ 16%]
+tests/test_assistant_storage.py::test_get_chua_co_conversation_tra_none PASSED [ 33%]
+tests/test_assistant_storage.py::test_save_roi_get_lai_dung_du_lieu PASSED [ 50%]
+tests/test_assistant_storage.py::test_save_lan_2_giu_nguyen_created_at_ban_dau PASSED [ 66%]
+tests/test_assistant_storage.py::test_ensure_ready_goi_lai_khong_nem_loi PASSED [ 83%]
+tests/test_assistant_storage.py::test_ensure_ready_bo_qua_loi_index_da_ton_tai_tu_worker_khac PASSED [100%]
+
+- generated xml file: D:\SE\Log-Anomaly-Explorer\docs\assignments\VT-013\evidence\quality\repository-alone.junit.xml -
+============================== 6 passed in 0.76s ==============================

@@ -1,0 +1,246 @@
+{
+  "name": "frontend-coverage",
+  "command": [
+    "node",
+    "D:\\SE\\vt013-quality-tools\\node_modules\\vitest\\vitest.mjs",
+    "run",
+    "--config",
+    "D:\\SE\\Log-Anomaly-Explorer\\web\\vitest.config.ts",
+    "--coverage.enabled",
+    "--coverage.provider=v8",
+    "--coverage.reporter=json",
+    "--coverage.reporter=text",
+    "--coverage.reporter=lcov",
+    "--coverage.reportsDirectory=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\frontend-coverage",
+    "--coverage.include=src/lib/api.ts",
+    "--coverage.include=src/lib/queries.ts",
+    "--coverage.include=src/components/incident/AssistantPanel.tsx"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 1
+}
+
+
+ RUN  v5.0.3 D:/SE/Log-Anomaly-Explorer/web
+      Coverage enabled with v8
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 9 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files D:/SE/Log-Anomaly-Explorer/web/src/pages/LoginPage.test.tsx.
+ ❯ ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:94
+ ❯ process.processTicksAndRejections node:internal/process/task_queues:104:5
+ ❯ Pool.schedule ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:5
+
+Caused by: Error: Cannot find package 'jsdom' imported from D:\SE\vt013-quality-tools\node_modules\vitest\dist\chunks\index.k8L_ZRzq.js
+ ❯ Object.getPackageJSONURL node:internal/modules/package_json_reader:301:9
+ ❯ packageResolve node:internal/modules/esm/resolve:764:81
+ ❯ moduleResolve node:internal/modules/esm/resolve:855:18
+ ❯ defaultResolve node:internal/modules/esm/resolve:988:11
+ ❯ #cachedDefaultResolve node:internal/modules/esm/loader:697:20
+ ❯ #resolveAndMaybeBlockOnLoaderThread node:internal/modules/esm/loader:714:38
+ ❯ ModuleLoader.resolveSync node:internal/modules/esm/loader:746:52
+ ❯ #resolve node:internal/modules/esm/loader:679:17
+ ❯ ModuleLoader.getOrCreateModuleJob node:internal/modules/esm/loader:599:35
+ ❯ node:internal/modules/esm/loader:628:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_MODULE_NOT_FOUND' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files D:/SE/Log-Anomaly-Explorer/web/src/components/incident/AssistantPanel.test.tsx.
+ ❯ ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:94
+ ❯ process.processTicksAndRejections node:internal/process/task_queues:104:5
+ ❯ Pool.schedule ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:5
+
+Caused by: Error: Cannot find package 'jsdom' imported from D:\SE\vt013-quality-tools\node_modules\vitest\dist\chunks\index.k8L_ZRzq.js
+ ❯ Object.getPackageJSONURL node:internal/modules/package_json_reader:301:9
+ ❯ packageResolve node:internal/modules/esm/resolve:764:81
+ ❯ moduleResolve node:internal/modules/esm/resolve:855:18
+ ❯ defaultResolve node:internal/modules/esm/resolve:988:11
+ ❯ #cachedDefaultResolve node:internal/modules/esm/loader:697:20
+ ❯ #resolveAndMaybeBlockOnLoaderThread node:internal/modules/esm/loader:714:38
+ ❯ ModuleLoader.resolveSync node:internal/modules/esm/loader:746:52
+ ❯ #resolve node:internal/modules/esm/loader:679:17
+ ❯ ModuleLoader.getOrCreateModuleJob node:internal/modules/esm/loader:599:35
+ ❯ node:internal/modules/esm/loader:628:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_MODULE_NOT_FOUND' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files D:/SE/Log-Anomaly-Explorer/web/src/App.test.tsx.
+ ❯ ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:94
+ ❯ process.processTicksAndRejections node:internal/process/task_queues:104:5
+ ❯ Pool.schedule ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:5
+
+Caused by: Error: Cannot find package 'jsdom' imported from D:\SE\vt013-quality-tools\node_modules\vitest\dist\chunks\index.k8L_ZRzq.js
+ ❯ Object.getPackageJSONURL node:internal/modules/package_json_reader:301:9
+ ❯ packageResolve node:internal/modules/esm/resolve:764:81
+ ❯ moduleResolve node:internal/modules/esm/resolve:855:18
+ ❯ defaultResolve node:internal/modules/esm/resolve:988:11
+ ❯ #cachedDefaultResolve node:internal/modules/esm/loader:697:20
+ ❯ #resolveAndMaybeBlockOnLoaderThread node:internal/modules/esm/loader:714:38
+ ❯ ModuleLoader.resolveSync node:internal/modules/esm/loader:746:52
+ ❯ #resolve node:internal/modules/esm/loader:679:17
+ ❯ ModuleLoader.getOrCreateModuleJob node:internal/modules/esm/loader:599:35
+ ❯ node:internal/modules/esm/loader:628:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_MODULE_NOT_FOUND' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files D:/SE/Log-Anomaly-Explorer/web/src/components/StatusBadge.test.tsx.
+ ❯ ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:94
+ ❯ process.processTicksAndRejections node:internal/process/task_queues:104:5
+ ❯ Pool.schedule ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:5
+
+Caused by: Error: Cannot find package 'jsdom' imported from D:\SE\vt013-quality-tools\node_modules\vitest\dist\chunks\index.k8L_ZRzq.js
+ ❯ Object.getPackageJSONURL node:internal/modules/package_json_reader:301:9
+ ❯ packageResolve node:internal/modules/esm/resolve:764:81
+ ❯ moduleResolve node:internal/modules/esm/resolve:855:18
+ ❯ defaultResolve node:internal/modules/esm/resolve:988:11
+ ❯ #cachedDefaultResolve node:internal/modules/esm/loader:697:20
+ ❯ #resolveAndMaybeBlockOnLoaderThread node:internal/modules/esm/loader:714:38
+ ❯ ModuleLoader.resolveSync node:internal/modules/esm/loader:746:52
+ ❯ #resolve node:internal/modules/esm/loader:679:17
+ ❯ ModuleLoader.getOrCreateModuleJob node:internal/modules/esm/loader:599:35
+ ❯ node:internal/modules/esm/loader:628:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_MODULE_NOT_FOUND' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files D:/SE/Log-Anomaly-Explorer/web/src/lib/api.test.ts.
+ ❯ ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:94
+ ❯ process.processTicksAndRejections node:internal/process/task_queues:104:5
+ ❯ Pool.schedule ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:5
+
+Caused by: Error: Cannot find package 'jsdom' imported from D:\SE\vt013-quality-tools\node_modules\vitest\dist\chunks\index.k8L_ZRzq.js
+ ❯ Object.getPackageJSONURL node:internal/modules/package_json_reader:301:9
+ ❯ packageResolve node:internal/modules/esm/resolve:764:81
+ ❯ moduleResolve node:internal/modules/esm/resolve:855:18
+ ❯ defaultResolve node:internal/modules/esm/resolve:988:11
+ ❯ #cachedDefaultResolve node:internal/modules/esm/loader:697:20
+ ❯ #resolveAndMaybeBlockOnLoaderThread node:internal/modules/esm/loader:714:38
+ ❯ ModuleLoader.resolveSync node:internal/modules/esm/loader:746:52
+ ❯ #resolve node:internal/modules/esm/loader:679:17
+ ❯ ModuleLoader.getOrCreateModuleJob node:internal/modules/esm/loader:599:35
+ ❯ node:internal/modules/esm/loader:628:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_MODULE_NOT_FOUND' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files D:/SE/Log-Anomaly-Explorer/web/src/lib/auth.test.ts.
+ ❯ ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:94
+ ❯ process.processTicksAndRejections node:internal/process/task_queues:104:5
+ ❯ Pool.schedule ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:5
+
+Caused by: Error: Cannot find package 'jsdom' imported from D:\SE\vt013-quality-tools\node_modules\vitest\dist\chunks\index.k8L_ZRzq.js
+ ❯ Object.getPackageJSONURL node:internal/modules/package_json_reader:301:9
+ ❯ packageResolve node:internal/modules/esm/resolve:764:81
+ ❯ moduleResolve node:internal/modules/esm/resolve:855:18
+ ❯ defaultResolve node:internal/modules/esm/resolve:988:11
+ ❯ #cachedDefaultResolve node:internal/modules/esm/loader:697:20
+ ❯ #resolveAndMaybeBlockOnLoaderThread node:internal/modules/esm/loader:714:38
+ ❯ ModuleLoader.resolveSync node:internal/modules/esm/loader:746:52
+ ❯ #resolve node:internal/modules/esm/loader:679:17
+ ❯ ModuleLoader.getOrCreateModuleJob node:internal/modules/esm/loader:599:35
+ ❯ node:internal/modules/esm/loader:628:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_MODULE_NOT_FOUND' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files D:/SE/Log-Anomaly-Explorer/web/src/lib/assistant-undo.test.ts.
+ ❯ ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:94
+ ❯ process.processTicksAndRejections node:internal/process/task_queues:104:5
+ ❯ Pool.schedule ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:5
+
+Caused by: Error: Cannot find package 'jsdom' imported from D:\SE\vt013-quality-tools\node_modules\vitest\dist\chunks\index.k8L_ZRzq.js
+ ❯ Object.getPackageJSONURL node:internal/modules/package_json_reader:301:9
+ ❯ packageResolve node:internal/modules/esm/resolve:764:81
+ ❯ moduleResolve node:internal/modules/esm/resolve:855:18
+ ❯ defaultResolve node:internal/modules/esm/resolve:988:11
+ ❯ #cachedDefaultResolve node:internal/modules/esm/loader:697:20
+ ❯ #resolveAndMaybeBlockOnLoaderThread node:internal/modules/esm/loader:714:38
+ ❯ ModuleLoader.resolveSync node:internal/modules/esm/loader:746:52
+ ❯ #resolve node:internal/modules/esm/loader:679:17
+ ❯ ModuleLoader.getOrCreateModuleJob node:internal/modules/esm/loader:599:35
+ ❯ node:internal/modules/esm/loader:628:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_MODULE_NOT_FOUND' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files D:/SE/Log-Anomaly-Explorer/web/src/components/dashboard/TimeRangeControl.test.ts.
+ ❯ ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:94
+ ❯ process.processTicksAndRejections node:internal/process/task_queues:104:5
+ ❯ Pool.schedule ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:5
+
+Caused by: Error: Cannot find package 'jsdom' imported from D:\SE\vt013-quality-tools\node_modules\vitest\dist\chunks\index.k8L_ZRzq.js
+ ❯ Object.getPackageJSONURL node:internal/modules/package_json_reader:301:9
+ ❯ packageResolve node:internal/modules/esm/resolve:764:81
+ ❯ moduleResolve node:internal/modules/esm/resolve:855:18
+ ❯ defaultResolve node:internal/modules/esm/resolve:988:11
+ ❯ #cachedDefaultResolve node:internal/modules/esm/loader:697:20
+ ❯ #resolveAndMaybeBlockOnLoaderThread node:internal/modules/esm/loader:714:38
+ ❯ ModuleLoader.resolveSync node:internal/modules/esm/loader:746:52
+ ❯ #resolve node:internal/modules/esm/loader:679:17
+ ❯ ModuleLoader.getOrCreateModuleJob node:internal/modules/esm/loader:599:35
+ ❯ node:internal/modules/esm/loader:628:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_MODULE_NOT_FOUND' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files D:/SE/Log-Anomaly-Explorer/web/src/lib/auth-navigation.test.ts.
+ ❯ ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:94
+ ❯ process.processTicksAndRejections node:internal/process/task_queues:104:5
+ ❯ Pool.schedule ../../vt013-quality-tools/node_modules/vitest/dist/chunks/index.DpLw24bj.js:11538:5
+
+Caused by: Error: Cannot find package 'jsdom' imported from D:\SE\vt013-quality-tools\node_modules\vitest\dist\chunks\index.k8L_ZRzq.js
+ ❯ Object.getPackageJSONURL node:internal/modules/package_json_reader:301:9
+ ❯ packageResolve node:internal/modules/esm/resolve:764:81
+ ❯ moduleResolve node:internal/modules/esm/resolve:855:18
+ ❯ defaultResolve node:internal/modules/esm/resolve:988:11
+ ❯ #cachedDefaultResolve node:internal/modules/esm/loader:697:20
+ ❯ #resolveAndMaybeBlockOnLoaderThread node:internal/modules/esm/loader:714:38
+ ❯ ModuleLoader.resolveSync node:internal/modules/esm/loader:746:52
+ ❯ #resolve node:internal/modules/esm/loader:679:17
+ ❯ ModuleLoader.getOrCreateModuleJob node:internal/modules/esm/loader:599:35
+ ❯ node:internal/modules/esm/loader:628:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_MODULE_NOT_FOUND' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  no tests
+      Tests  no tests
+     Errors  9 errors
+   Start at  14:50:36
+   Duration  505ms
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-------------------|---------|----------|---------|---------|-------------------
+All files          |       0 |        0 |       0 |       0 |
+ ...nents/incident |       0 |        0 |       0 |       0 |
+  ...tantPanel.tsx |       0 |        0 |       0 |       0 | 11-228
+ lib               |       0 |        0 |       0 |       0 |
+  api.ts           |       0 |        0 |       0 |       0 | 13-249
+  queries.ts       |       0 |        0 |       0 |       0 | 19-114
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 0% ( 0/165 )
+Branches     : 0% ( 0/144 )
+Functions    : 0% ( 0/47 )
+Lines        : 0% ( 0/147 )
+================================================================================

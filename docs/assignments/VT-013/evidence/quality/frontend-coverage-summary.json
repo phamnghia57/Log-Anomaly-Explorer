@@ -1,0 +1,682 @@
+{
+  "D:\\SE\\Log-Anomaly-Explorer\\web\\src\\components\\incident\\AssistantPanel.tsx": {
+    "lines": {
+      "hit": 58,
+      "total": 60
+    },
+    "branches": {
+      "hit": 65,
+      "total": 73
+    },
+    "missing_statements": [
+      {
+        "start": {
+          "line": 89,
+          "column": 6
+        },
+        "end": {
+          "line": 89,
+          "column": null
+        }
+      },
+      {
+        "start": {
+          "line": 90,
+          "column": 6
+        },
+        "end": {
+          "line": 90,
+          "column": null
+        }
+      },
+      {
+        "start": {
+          "line": 116,
+          "column": 79
+        },
+        "end": {
+          "line": 116,
+          "column": null
+        }
+      }
+    ],
+    "missing_branches": [
+      {
+        "location": {
+          "loc": {
+            "start": {
+              "line": 24,
+              "column": 9
+            },
+            "end": {
+              "line": 24,
+              "column": null
+            }
+          },
+          "type": "binary-expr",
+          "locations": [
+            {
+              "start": {
+                "line": 24,
+                "column": 9
+              },
+              "end": {
+                "line": 24,
+                "column": 44
+              }
+            },
+            {
+              "start": {
+                "line": 24,
+                "column": 44
+              },
+              "end": {
+                "line": 24,
+                "column": null
+              }
+            }
+          ],
+          "line": 24
+        },
+        "counts": [
+          83,
+          0
+        ]
+      },
+      {
+        "location": {
+          "loc": {
+            "start": {
+              "line": 24,
+              "column": 21
+            },
+            "end": {
+              "line": 24,
+              "column": 44
+            }
+          },
+          "type": "binary-expr",
+          "locations": [
+            {
+              "start": {
+                "line": 24,
+                "column": 21
+              },
+              "end": {
+                "line": 24,
+                "column": 37
+              }
+            },
+            {
+              "start": {
+                "line": 24,
+                "column": 37
+              },
+              "end": {
+                "line": 24,
+                "column": 44
+              }
+            }
+          ],
+          "line": 24
+        },
+        "counts": [
+          83,
+          0
+        ]
+      },
+      {
+        "location": {
+          "loc": {
+            "start": {
+              "line": 88,
+              "column": 4
+            },
+            "end": {
+              "line": 91,
+              "column": null
+            }
+          },
+          "type": "if",
+          "locations": [
+            {
+              "start": {
+                "line": 88,
+                "column": 4
+              },
+              "end": {
+                "line": 91,
+                "column": null
+              }
+            },
+            {
+              "start": {},
+              "end": {}
+            }
+          ],
+          "line": 88
+        },
+        "counts": [
+          0,
+          25
+        ]
+      },
+      {
+        "location": {
+          "loc": {
+            "start": {
+              "line": 88,
+              "column": 8
+            },
+            "end": {
+              "line": 88,
+              "column": 69
+            }
+          },
+          "type": "binary-expr",
+          "locations": [
+            {
+              "start": {
+                "line": 88,
+                "column": 8
+              },
+              "end": {
+                "line": 88,
+                "column": 28
+              }
+            },
+            {
+              "start": {
+                "line": 88,
+                "column": 28
+              },
+              "end": {
+                "line": 88,
+                "column": 45
+              }
+            },
+            {
+              "start": {
+                "line": 88,
+                "column": 45
+              },
+              "end": {
+                "line": 88,
+                "column": 69
+              }
+            }
+          ],
+          "line": 88
+        },
+        "counts": [
+          25,
+          1,
+          0
+        ]
+      },
+      {
+        "location": {
+          "loc": {
+            "start": {
+              "line": 116,
+              "column": 4
+            },
+            "end": {
+              "line": 116,
+              "column": null
+            }
+          },
+          "type": "if",
+          "locations": [
+            {
+              "start": {
+                "line": 116,
+                "column": 4
+              },
+              "end": {
+                "line": 116,
+                "column": null
+              }
+            },
+            {
+              "start": {},
+              "end": {}
+            }
+          ],
+          "line": 116
+        },
+        "counts": [
+          0,
+          10
+        ]
+      },
+      {
+        "location": {
+          "loc": {
+            "start": {
+              "line": 187,
+              "column": 9
+            },
+            "end": {
+              "line": 195,
+              "column": null
+            }
+          },
+          "type": "binary-expr",
+          "locations": [
+            {
+              "start": {
+                "line": 187,
+                "column": 9
+              },
+              "end": {
+                "line": 187,
+                "column": 29
+              }
+            },
+            {
+              "start": {
+                "line": 187,
+                "column": 29
+              },
+              "end": {
+                "line": 187,
+                "column": null
+              }
+            },
+            {
+              "start": {
+                "line": 188,
+                "column": 10
+              },
+              "end": {
+                "line": 195,
+                "column": null
+              }
+            }
+          ],
+          "line": 187
+        },
+        "counts": [
+          110,
+          1,
+          0
+        ]
+      },
+      {
+        "location": {
+          "loc": {
+            "start": {
+              "line": 191,
+              "column": 15
+            },
+            "end": {
+              "line": 191,
+              "column": null
+            }
+          },
+          "type": "cond-expr",
+          "locations": [
+            {
+              "start": {
+                "line": 191,
+                "column": 49
+              },
+              "end": {
+                "line": 191,
+                "column": 74
+              }
+            },
+            {
+              "start": {
+                "line": 191,
+                "column": 74
+              },
+              "end": {
+                "line": 191,
+                "column": null
+              }
+            }
+          ],
+          "line": 191
+        },
+        "counts": [
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  "D:\\SE\\Log-Anomaly-Explorer\\web\\src\\lib\\api.ts": {
+    "lines": {
+      "hit": 51,
+      "total": 51
+    },
+    "branches": {
+      "hit": 52,
+      "total": 54
+    },
+    "missing_statements": [
+      {
+        "start": {
+          "line": 139,
+          "column": 46
+        },
+        "end": {
+          "line": 139,
+          "column": 48
+        }
+      }
+    ],
+    "missing_branches": [
+      {
+        "location": {
+          "loc": {
+            "start": {
+              "line": 13,
+              "column": 29
+            },
+            "end": {
+              "line": 14,
+              "column": null
+            }
+          },
+          "type": "binary-expr",
+          "locations": [
+            {
+              "start": {
+                "line": 13,
+                "column": 29
+              },
+              "end": {
+                "line": 14,
+                "column": 26
+              }
+            },
+            {
+              "start": {
+                "line": 14,
+                "column": 26
+              },
+              "end": {
+                "line": 14,
+                "column": null
+              }
+            }
+          ],
+          "line": 13
+        },
+        "counts": [
+          8,
+          0
+        ]
+      },
+      {
+        "location": {
+          "loc": {
+            "start": {
+              "line": 140,
+              "column": 23
+            },
+            "end": {
+              "line": 140,
+              "column": 63
+            }
+          },
+          "type": "binary-expr",
+          "locations": [
+            {
+              "start": {
+                "line": 140,
+                "column": 23
+              },
+              "end": {
+                "line": 140,
+                "column": 31
+              }
+            },
+            {
+              "start": {
+                "line": 140,
+                "column": 31
+              },
+              "end": {
+                "line": 140,
+                "column": 63
+              }
+            }
+          ],
+          "line": 140
+        },
+        "counts": [
+          8,
+          0
+        ]
+      }
+    ]
+  },
+  "D:\\SE\\Log-Anomaly-Explorer\\web\\src\\lib\\queries.ts": {
+    "lines": {
+      "hit": 32,
+      "total": 36
+    },
+    "branches": {
+      "hit": 13,
+      "total": 17
+    },
+    "missing_statements": [
+      {
+        "start": {
+          "line": 27,
+          "column": 2
+        },
+        "end": {
+          "line": 33,
+          "column": null
+        }
+      },
+      {
+        "start": {
+          "line": 31,
+          "column": 29
+        },
+        "end": {
+          "line": 31,
+          "column": null
+        }
+      },
+      {
+        "start": {
+          "line": 37,
+          "column": 2
+        },
+        "end": {
+          "line": 41,
+          "column": null
+        }
+      },
+      {
+        "start": {
+          "line": 39,
+          "column": 29
+        },
+        "end": {
+          "line": 39,
+          "column": null
+        }
+      },
+      {
+        "start": {
+          "line": 82,
+          "column": 61
+        },
+        "end": {
+          "line": 82,
+          "column": null
+        }
+      },
+      {
+        "start": {
+          "line": 110,
+          "column": 61
+        },
+        "end": {
+          "line": 110,
+          "column": null
+        }
+      }
+    ],
+    "missing_branches": [
+      {
+        "location": {
+          "loc": {
+            "start": {
+              "line": 77,
+              "column": 6
+            },
+            "end": {
+              "line": 79,
+              "column": null
+            }
+          },
+          "type": "if",
+          "locations": [
+            {
+              "start": {
+                "line": 77,
+                "column": 6
+              },
+              "end": {
+                "line": 79,
+                "column": null
+              }
+            },
+            {
+              "start": {},
+              "end": {}
+            }
+          ],
+          "line": 77
+        },
+        "counts": [
+          1,
+          0
+        ]
+      },
+      {
+        "location": {
+          "loc": {
+            "start": {
+              "line": 82,
+              "column": 6
+            },
+            "end": {
+              "line": 82,
+              "column": null
+            }
+          },
+          "type": "if",
+          "locations": [
+            {
+              "start": {
+                "line": 82,
+                "column": 6
+              },
+              "end": {
+                "line": 82,
+                "column": null
+              }
+            },
+            {
+              "start": {},
+              "end": {}
+            }
+          ],
+          "line": 82
+        },
+        "counts": [
+          0,
+          1
+        ]
+      },
+      {
+        "location": {
+          "loc": {
+            "start": {
+              "line": 82,
+              "column": 10
+            },
+            "end": {
+              "line": 82,
+              "column": 61
+            }
+          },
+          "type": "binary-expr",
+          "locations": [
+            {
+              "start": {
+                "line": 82,
+                "column": 10
+              },
+              "end": {
+                "line": 82,
+                "column": 39
+              }
+            },
+            {
+              "start": {
+                "line": 82,
+                "column": 39
+              },
+              "end": {
+                "line": 82,
+                "column": 61
+              }
+            }
+          ],
+          "line": 82
+        },
+        "counts": [
+          1,
+          0
+        ]
+      },
+      {
+        "location": {
+          "loc": {
+            "start": {
+              "line": 110,
+              "column": 6
+            },
+            "end": {
+              "line": 110,
+              "column": null
+            }
+          },
+          "type": "if",
+          "locations": [
+            {
+              "start": {
+                "line": 110,
+                "column": 6
+              },
+              "end": {
+                "line": 110,
+                "column": null
+              }
+            },
+            {
+              "start": {},
+              "end": {}
+            }
+          ],
+          "line": 110
+        },
+        "counts": [
+          0,
+          4
+        ]
+      }
+    ]
+  }
+}

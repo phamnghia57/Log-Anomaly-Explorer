@@ -1,0 +1,54 @@
+{
+  "name": "frontend-order-13013",
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--sequence.shuffle",
+    "--sequence.seed=13013",
+    "--reporter=default",
+    "--reporter=junit",
+    "--outputFile=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\frontend-order-13013.junit.xml"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 0
+}
+
+
+ RUN  v5.0.3 D:/SE/Log-Anomaly-Explorer/web
+      Running tests with seed "13013"
+
+ ✓ src/lib/auth-navigation.test.ts (19 tests) 7ms
+ ✓ src/lib/auth.test.ts (12 tests) 18ms
+ ✓ src/lib/assistant-undo.test.ts (15 tests) 24ms
+ ✓ src/lib/api.test.ts (40 tests) 40ms
+ ✓ src/components/dashboard/TimeRangeControl.test.ts (2 tests) 10ms
+ ✓ src/components/StatusBadge.test.tsx (4 tests) 51ms
+ ✓ src/components/incident/AssistantPanel.test.tsx (23 tests) 2907ms
+   ✓ VT-013 Assistant Undo UI and React Query cache (23)
+     ✓ F-06 pending Undo blocks double-clicks, Send and Enter without discarding the draft 443ms
+     ✓ F-08 Stop aborts only Send, restores draft, GET-reconciles and never calls Undo 462ms
+ ✓ src/pages/LoginPage.test.tsx (13 tests) 6146ms
+   ✓ admin login page (13)
+     ✓ logs in, persists only the session, clears old query data and replaces the route with dashboard 678ms
+     ✓ shows pending state, disables duplicate submissions and recovers after rejection 595ms
+     ✓ returns to a safe protected page after login: /search?trace_id=abc#results 436ms
+     ✓ returns to a safe protected page after login: /clusters/c1 525ms
+     ✓ returns to a safe protected page after login: //external.example 504ms
+     ✓ returns to a safe protected page after login: https://external.example 484ms
+     ✓ returns to a safe protected page after login: /login 480ms
+     ✓ uses a generic error for invalid credentials and removes any previous session 461ms
+     ✓ shows a clear network error and allows retry 507ms
+     ✓ handles unavailable authentication without displaying backend error details 430ms
+     ✓ explains an expired restored session and accepts a fresh login 453ms
+     ✓ never redirects or persists an already expired response 496ms
+ ✓ src/App.test.tsx (12 tests) 1476ms
+   ✓ frontend authentication integration (12)
+     ✓ allows an admin to load the dashboard and use the existing sidebar navigation 504ms
+
+ Test Files  9 passed (9)
+      Tests  140 passed (140)
+   Start at  14:49:16
+   Duration  68.28s (environment 67%, setup 16%, import 13%, tests 3%, transform 1%)
+
+JUNIT report written to D:/SE/Log-Anomaly-Explorer/docs/assignments/VT-013/evidence/quality/frontend-order-13013.junit.xml

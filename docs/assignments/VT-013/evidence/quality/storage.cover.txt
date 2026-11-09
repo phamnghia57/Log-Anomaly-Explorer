@@ -1,0 +1,182 @@
+   1 HIT: """One versioned conversation per cluster, with one atomic Undo snapshot."""
+   2     :
+   3 HIT: from __future__ import annotations
+   4     :
+   5 HIT: from copy import deepcopy
+   6 HIT: from dataclasses import dataclass
+   7 HIT: from datetime import datetime, timezone
+   8 HIT: import json
+   9 HIT: from pathlib import Path
+  10 HIT: import re
+  11     :
+  12 HIT: from jsonschema import Draft7Validator, FormatChecker
+  13 HIT: from opensearchpy.exceptions import ConflictError, NotFoundError, RequestError
+  14     :
+  15 HIT: from ingestion.src.storage import OpenSearchLogStore, StorageError, build_store
+  16     :
+  17 HIT: from . import config
+  18     :
+  19 HIT: _MAX_VERSION = 2**63 - 1
+  20 HIT: _REVISION = re.compile(r"([1-9][0-9]{0,18}):(0|[1-9][0-9]{0,18})", re.ASCII)
+  21 HIT: _SCHEMA = Path(__file__).resolve().parents[3] / "docs/architect/contracts/assistant-conversation-schema.json"
+  22 HIT: _VALIDATOR = Draft7Validator(json.loads(_SCHEMA.read_text(encoding="utf-8")),
+  23 HIT:                              format_checker=FormatChecker())
+  24     :
+  25 HIT: UNDO_MAPPING = {"type": "object", "enabled": False}
+  26 HIT: CONVERSATION_MAPPING = {
+  27 HIT:     "dynamic": "strict",
+  28 HIT:     "properties": {
+  29 HIT:         "cluster_id": {"type": "keyword"},
+  30 HIT:         "created_at": {"type": "date"},
+  31 HIT:         "updated_at": {"type": "date"},
+  32 HIT:         "messages": {"type": "object", "dynamic": False},
+  33 HIT:         "undo": UNDO_MAPPING,
+  34     :     },
+  35     : }
+  36     :
+  37     :
+  38 HIT: def parse_revision(value: str) -> tuple[int, int]:
+  39     :     """Validate canonical primary-term:sequence-number, including sequence zero."""
+  40 HIT:     match = _REVISION.fullmatch(value) if isinstance(value, str) else None
+  41 HIT:     if match is None:
+  42 HIT:         raise ValueError("Invalid conversation revision")
+  43 HIT:     term, sequence = map(int, match.groups())
+  44 HIT:     if term > _MAX_VERSION or sequence > _MAX_VERSION:
+  45 HIT:         raise ValueError("Invalid conversation revision")
+  46 HIT:     return term, sequence
+  47     :
+  48     :
+  49 HIT: class ConversationConflict(Exception):
+  50 HIT:     def __init__(self, reason: str = "revision_conflict"):
+  51 HIT:         self.reason = reason
+  52 HIT:         super().__init__(reason)
+  53     :
+  54     :
+  55 HIT: @dataclass(frozen=True)
+  56 HIT: class ConversationState:
+  57 HIT:     document: dict
+  58 HIT:     seq_no: int
+  59 HIT:     primary_term: int
+  60     :
+  61 HIT:     @property
+  62 HIT:     def revision(self) -> str:
+  63 HIT:         return f"{self.primary_term}:{self.seq_no}"
+  64     :
+  65     :
+  66 HIT: def _state(cluster_id: str, document: dict, metadata: dict) -> ConversationState:
+  67 HIT:     try:
+  68 HIT:         _VALIDATOR.validate(document)
+  69 HIT:         if document["cluster_id"] != cluster_id:
+  70 MISS:             raise ValueError("Conversation identity mismatch")
+  71 HIT:         sequence, term = metadata["_seq_no"], metadata["_primary_term"]
+  72 HIT:         if type(sequence) is not int or type(term) is not int:
+  73 HIT:             raise ValueError("Invalid version metadata")
+  74 HIT:         parse_revision(f"{term}:{sequence}")
+  75 HIT:         return ConversationState(deepcopy(document), sequence, term)
+  76 HIT:     except Exception:
+  77 HIT:         raise StorageError("invalid conversation data or version metadata") from None
+  78     :
+  79     :
+  80 HIT: class ConversationRepository:
+  81 HIT:     def __init__(self, log_store=None):
+  82 HIT:         self.log_store = log_store if log_store is not None else build_store()
+  83 HIT:         if not isinstance(self.log_store, OpenSearchLogStore):
+  84 MISS:             raise ValueError("Assistant conversation storage requires STORAGE_BACKEND=opensearch")
+  85 HIT:         self.client = self.log_store.client
+  86 HIT:         self.index = config.CONVERSATIONS_INDEX
+  87     :
+  88 HIT:     def ensure_ready(self) -> None:
+  89     :         """Create a new index or add the optional field to an existing strict map."""
+  90 HIT:         try:
+  91 HIT:             if not self.client.indices.exists(index=self.index):
+  92 HIT:                 try:
+  93 HIT:                     result = self.client.indices.create(index=self.index, body={
+  94 HIT:                         "settings": self.log_store._settings(),
+  95 HIT:                         "mappings": CONVERSATION_MAPPING,
+  96     :                     })
+  97 HIT:                 except RequestError as exc:
+  98 HIT:                     if exc.error != "resource_already_exists_exception":
+  99 MISS:                         raise
+ 100     :                     # Another worker created the index; still ensure its mapping.
+ 101     :                 else:
+ 102 HIT:                     if not result.get("acknowledged"):
+ 103 MISS:                         raise StorageError("conversation index creation was not acknowledged")
+ 104 HIT:                     return
+ 105 HIT:             result = self.client.indices.put_mapping(index=self.index, body={
+ 106 HIT:                 "properties": {"undo": UNDO_MAPPING},
+ 107     :             })
+ 108 HIT:             if not result.get("acknowledged"):
+ 109 HIT:                 raise StorageError("conversation mapping update was not acknowledged")
+ 110 HIT:         except Exception:
+ 111 HIT:             raise StorageError("cannot prepare conversation storage") from None
+ 112     :
+ 113 HIT:     def get(self, cluster_id: str) -> ConversationState | None:
+ 114     :         """Only a genuine absent document means no conversation, never an index error."""
+ 115 HIT:         try:
+ 116 HIT:             response = self.client.get(index=self.index, id=cluster_id)
+ 117 HIT:             if response.get("found") is False and "error" not in response:
+ 118 MISS:                 return None
+ 119 HIT:             if response.get("found") is not True:
+ 120 MISS:                 raise StorageError("invalid conversation response")
+ 121 HIT:             return _state(cluster_id, response["_source"], response)
+ 122 HIT:         except NotFoundError as exc:
+ 123 HIT:             if (exc.error != "index_not_found_exception" and isinstance(exc.info, dict)
+ 124 HIT:                     and exc.info.get("found") is False and "error" not in exc.info):
+ 125 HIT:                 return None
+ 126 HIT:             raise StorageError("conversation storage is unavailable") from None
+ 127 HIT:         except Exception:
+ 128 HIT:             raise StorageError("cannot read conversation") from None
+ 129     :
+ 130 HIT:     def _write(self, cluster_id: str, document: dict,
+ 131 MISS:                previous: ConversationState | None) -> ConversationState:
+ 132     :         # Validate before any I/O. Version metadata is never stored in _source.
+ 133 HIT:         try:
+ 134 HIT:             _VALIDATOR.validate(document)
+ 135 MISS:         except Exception:
+ 136 MISS:             raise StorageError("invalid conversation data") from None
+ 137 HIT:         body = deepcopy(document)
+ 138 HIT:         try:
+ 139 HIT:             if previous is None:
+ 140 HIT:                 response = self.client.create(index=self.index, id=cluster_id,
+ 141 HIT:                                               body=body, refresh="wait_for")
+ 142     :             else:
+ 143 HIT:                 response = self.client.index(
+ 144 HIT:                     index=self.index, id=cluster_id, body=body, refresh="wait_for",
+ 145 HIT:                     if_seq_no=previous.seq_no, if_primary_term=previous.primary_term,
+ 146     :                 )
+ 147 HIT:         except ConflictError:
+ 148 HIT:             raise ConversationConflict() from None
+ 149 HIT:         except Exception:
+ 150 HIT:             raise StorageError("cannot save conversation") from None
+ 151     :         # A malformed write response has an uncertain outcome. Never fabricate
+ 152     :         # version metadata or retry the write; the caller must reconcile by GET.
+ 153 HIT:         return _state(cluster_id, body, response)
+ 154     :
+ 155 HIT:     def save(self, cluster_id: str, messages: list[dict], *,
+ 156 MISS:              previous: ConversationState | None) -> ConversationState:
+ 157     :         """Commit a completed Send and its previous history in the same document."""
+ 158 HIT:         now = datetime.now(timezone.utc).isoformat()
+ 159 HIT:         document = {
+ 160 HIT:             "cluster_id": cluster_id,
+ 161 HIT:             "created_at": previous.document["created_at"] if previous else now,
+ 162 HIT:             "updated_at": now,
+ 163 HIT:             "messages": deepcopy(messages),
+ 164 HIT:             "undo": {"messages": deepcopy(previous.document["messages"]) if previous else []},
+ 165     :         }
+ 166 HIT:         return self._write(cluster_id, document, previous)
+ 167     :
+ 168 HIT:     def undo(self, cluster_id: str, expected_revision: str) -> ConversationState:
+ 169 HIT:         parse_revision(expected_revision)
+ 170 HIT:         current = self.get(cluster_id)
+ 171 HIT:         if current is None or current.revision != expected_revision:
+ 172 HIT:             raise ConversationConflict()
+ 173 HIT:         snapshot = current.document.get("undo")
+ 174 HIT:         if snapshot is None:
+ 175 HIT:             raise ConversationConflict("nothing_to_undo")
+ 176 HIT:         document = deepcopy(current.document)
+ 177 HIT:         document.update(messages=deepcopy(snapshot["messages"]), undo=None,
+ 178 HIT:                         updated_at=datetime.now(timezone.utc).isoformat())
+ 179 HIT:         return self._write(cluster_id, document, current)
+ 180     :
+ 181 HIT:     def close(self) -> None:
+ 182 MISS:         self.client.close()

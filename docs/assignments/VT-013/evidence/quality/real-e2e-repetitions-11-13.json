@@ -1,0 +1,20 @@
+[
+  {
+    "iteration": 11,
+    "exit_code": 0,
+    "result": "PASS",
+    "owned_container_removed": true
+  },
+  {
+    "iteration": 12,
+    "exit_code": 0,
+    "result": "PASS",
+    "owned_container_removed": true
+  },
+  {
+    "iteration": 13,
+    "exit_code": 0,
+    "result": "PASS",
+    "owned_container_removed": true
+  }
+]

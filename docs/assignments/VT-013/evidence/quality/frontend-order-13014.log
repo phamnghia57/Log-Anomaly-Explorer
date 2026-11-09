@@ -1,0 +1,56 @@
+{
+  "name": "frontend-order-13014",
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--sequence.shuffle",
+    "--sequence.seed=13014",
+    "--reporter=default",
+    "--reporter=junit",
+    "--outputFile=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\frontend-order-13014.junit.xml"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 0
+}
+
+
+ RUN  v5.0.3 D:/SE/Log-Anomaly-Explorer/web
+      Running tests with seed "13014"
+
+ ✓ src/lib/auth-navigation.test.ts (19 tests) 10ms
+ ✓ src/lib/assistant-undo.test.ts (15 tests) 31ms
+ ✓ src/lib/auth.test.ts (12 tests) 34ms
+ ✓ src/lib/api.test.ts (40 tests) 74ms
+ ✓ src/components/dashboard/TimeRangeControl.test.ts (2 tests) 12ms
+ ✓ src/components/StatusBadge.test.tsx (4 tests) 98ms
+ ✓ src/components/incident/AssistantPanel.test.tsx (23 tests) 3060ms
+   ✓ VT-013 Assistant Undo UI and React Query cache (23)
+     ✓ F-01 Undo availability flag=true revision="01:0" 382ms
+     ✓ F-06 pending Undo blocks double-clicks, Send and Enter without discarding the draft 430ms
+     ✓ F-08 Stop aborts only Send, restores draft, GET-reconciles and never calls Undo 462ms
+ ✓ src/App.test.tsx (12 tests) 1191ms
+   ✓ frontend authentication integration (12)
+     ✓ allows an admin to load the dashboard and use the existing sidebar navigation 373ms
+     ✓ logs out through the admin menu, aborts pending requests and clears query/mutation caches 303ms
+ ✓ src/pages/LoginPage.test.tsx (13 tests) 6100ms
+   ✓ admin login page (13)
+     ✓ logs in, persists only the session, clears old query data and replaces the route with dashboard 518ms
+     ✓ shows pending state, disables duplicate submissions and recovers after rejection 948ms
+     ✓ returns to a safe protected page after login: /search?trace_id=abc#results 436ms
+     ✓ returns to a safe protected page after login: /clusters/c1 472ms
+     ✓ returns to a safe protected page after login: //external.example 416ms
+     ✓ returns to a safe protected page after login: https://external.example 464ms
+     ✓ returns to a safe protected page after login: /login 419ms
+     ✓ uses a generic error for invalid credentials and removes any previous session 396ms
+     ✓ shows a clear network error and allows retry 485ms
+     ✓ handles unavailable authentication without displaying backend error details 484ms
+     ✓ explains an expired restored session and accepts a fresh login 463ms
+     ✓ never redirects or persists an already expired response 515ms
+
+ Test Files  9 passed (9)
+      Tests  140 passed (140)
+   Start at  14:50:25
+   Duration  9.90s (environment 45%, tests 26%, import 18%, setup 7%, transform 4%, worker 1%)
+
+JUNIT report written to D:/SE/Log-Anomaly-Explorer/docs/assignments/VT-013/evidence/quality/frontend-order-13014.junit.xml

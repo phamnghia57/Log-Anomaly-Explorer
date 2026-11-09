@@ -1,0 +1,25 @@
+{
+  "started_at_utc": "2026-11-09T07:53:50.320254+00:00",
+  "runs": [
+    {
+      "name": "frontend-coverage",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--coverage.enabled",
+        "--coverage.provider=v8",
+        "--coverage.reporter=json",
+        "--coverage.reporter=text",
+        "--coverage.reporter=lcov",
+        "--coverage.reportsDirectory=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\frontend-coverage",
+        "--coverage.include=src/lib/api.ts",
+        "--coverage.include=src/lib/queries.ts",
+        "--coverage.include=src/components/incident/AssistantPanel.tsx"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0
+    }
+  ],
+  "e2e": []
+}

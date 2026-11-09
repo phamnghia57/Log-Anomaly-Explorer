@@ -1,0 +1,17 @@
+{
+  "started_at_utc": "2026-11-09T07:50:28.851892+00:00",
+  "runs": [
+    {
+      "name": "python-coverage",
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\python_coverage.py"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0
+    }
+  ],
+  "e2e": []
+}

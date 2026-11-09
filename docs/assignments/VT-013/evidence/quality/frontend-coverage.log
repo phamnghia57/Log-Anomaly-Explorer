@@ -1,0 +1,48 @@
+{
+  "name": "frontend-coverage",
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--coverage.enabled",
+    "--coverage.provider=v8",
+    "--coverage.reporter=json",
+    "--coverage.reporter=text",
+    "--coverage.reporter=lcov",
+    "--coverage.reportsDirectory=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\quality\\frontend-coverage",
+    "--coverage.include=src/lib/api.ts",
+    "--coverage.include=src/lib/queries.ts",
+    "--coverage.include=src/components/incident/AssistantPanel.tsx"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 0
+}
+
+
+ RUN  v5.0.3 D:/SE/Log-Anomaly-Explorer/web
+      Coverage enabled with v8
+
+
+ Test Files  9 passed (9)
+      Tests  140 passed (140)
+   Start at  14:53:51
+   Duration  14.65s (environment 45%, tests 18%, import 18%, setup 15%, transform 3%, worker 2%)
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   93.93 |    90.27 |   89.36 |   95.91 |
+ ...nents/incident |   95.45 |    89.04 |     100 |   96.66 |
+  ...tantPanel.tsx |   95.45 |    89.04 |     100 |   96.66 | 89-90
+ lib               |   92.92 |    91.54 |   85.29 |    95.4 |
+  api.ts           |   98.36 |    96.29 |   92.85 |     100 | 13,140
+  queries.ts       |   84.21 |    76.47 |      80 |   88.88 | 27-39
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 93.93% ( 155/165 )
+Branches     : 90.27% ( 130/144 )
+Functions    : 89.36% ( 42/47 )
+Lines        : 95.91% ( 141/147 )
+================================================================================
