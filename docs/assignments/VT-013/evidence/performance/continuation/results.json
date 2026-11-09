@@ -1,0 +1,944 @@
+{
+  "started_utc": "2026-11-09T08:23:55.334006+00:00",
+  "commands": [
+    {
+      "command": [
+        "docker",
+        "version",
+        "--format",
+        "{{json .}}"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "Get-CimInstance Win32_ComputerSystem | Select-Object NumberOfLogicalProcessors,TotalPhysicalMemory | ConvertTo-Json"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "run",
+        "-d",
+        "--name",
+        "vt013-perf-0edf3e855c954afe",
+        "--label",
+        "vt013.performance=0edf3e855c954afe",
+        "--publish",
+        "127.0.0.1::9200",
+        "--memory",
+        "2g",
+        "--ulimit",
+        "nofile=65536:65536",
+        "--tmpfs",
+        "/usr/share/opensearch/data:rw,uid=1000,gid=1000,size=1g",
+        "--env",
+        "discovery.type=single-node",
+        "--env",
+        "cluster.name=vt013-perf-0edf3e855c954afe",
+        "--env",
+        "DISABLE_SECURITY_PLUGIN=true",
+        "--env",
+        "DISABLE_INSTALL_DEMO_CONFIG=true",
+        "--env",
+        "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m",
+        "opensearchproject/opensearch:2.17.1"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "inspect",
+        "01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "stats",
+        "--no-stream",
+        "--format",
+        "{{json .}}",
+        "01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "stats",
+        "--no-stream",
+        "--format",
+        "{{json .}}",
+        "01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "stats",
+        "--no-stream",
+        "--format",
+        "{{json .}}",
+        "01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "stats",
+        "--no-stream",
+        "--format",
+        "{{json .}}",
+        "01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "inspect",
+        "01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "logs",
+        "01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "rm",
+        "-f",
+        "01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "classes": [
+    {
+      "history_size": 2,
+      "measured_requests": 3000,
+      "warmup_requests": 300,
+      "successful": 3000,
+      "statuses": {
+        "200": 3000
+      },
+      "timeouts": 0,
+      "errors": 0,
+      "correct_restorations_including_warmup": 3300,
+      "correctness_failures": 0,
+      "aborted_reason": null,
+      "mean_ms": 1485.8344429666508,
+      "p50_ms": 1072.561300000416,
+      "p95_ms": 2077.9645000002347,
+      "p99_ms": 2116.2638999999217,
+      "max_ms": 2964.031800000157,
+      "throughput_requests_s": 28.590065809070868,
+      "rounds": [
+        {
+          "round": 0,
+          "wall_seconds": 2.1030727000002116,
+          "success": 60
+        },
+        {
+          "round": 1,
+          "wall_seconds": 2.1588588999998137,
+          "success": 60
+        },
+        {
+          "round": 2,
+          "wall_seconds": 2.05476200000021,
+          "success": 60
+        },
+        {
+          "round": 3,
+          "wall_seconds": 2.0566180000000713,
+          "success": 60
+        },
+        {
+          "round": 4,
+          "wall_seconds": 2.0220813000000817,
+          "success": 60
+        },
+        {
+          "round": 5,
+          "wall_seconds": 2.093786999999793,
+          "success": 60
+        },
+        {
+          "round": 6,
+          "wall_seconds": 2.023788699999841,
+          "success": 60
+        },
+        {
+          "round": 7,
+          "wall_seconds": 2.046537400000034,
+          "success": 60
+        },
+        {
+          "round": 8,
+          "wall_seconds": 2.0784920999999486,
+          "success": 60
+        },
+        {
+          "round": 9,
+          "wall_seconds": 2.066757299999608,
+          "success": 60
+        },
+        {
+          "round": 10,
+          "wall_seconds": 2.083220699999856,
+          "success": 60
+        },
+        {
+          "round": 11,
+          "wall_seconds": 2.0536873000000924,
+          "success": 60
+        },
+        {
+          "round": 12,
+          "wall_seconds": 2.0688998999999058,
+          "success": 60
+        },
+        {
+          "round": 13,
+          "wall_seconds": 2.124082599999838,
+          "success": 60
+        },
+        {
+          "round": 14,
+          "wall_seconds": 2.103959600000053,
+          "success": 60
+        },
+        {
+          "round": 15,
+          "wall_seconds": 2.0087554000001546,
+          "success": 60
+        },
+        {
+          "round": 16,
+          "wall_seconds": 2.0067685999997593,
+          "success": 60
+        },
+        {
+          "round": 17,
+          "wall_seconds": 2.119879700000183,
+          "success": 60
+        },
+        {
+          "round": 18,
+          "wall_seconds": 2.098362100000031,
+          "success": 60
+        },
+        {
+          "round": 19,
+          "wall_seconds": 1.9602546000000984,
+          "success": 60
+        },
+        {
+          "round": 20,
+          "wall_seconds": 2.0579412000001867,
+          "success": 60
+        },
+        {
+          "round": 21,
+          "wall_seconds": 1.9957005000001118,
+          "success": 60
+        },
+        {
+          "round": 22,
+          "wall_seconds": 2.034994799999822,
+          "success": 60
+        },
+        {
+          "round": 23,
+          "wall_seconds": 2.0771725999998125,
+          "success": 60
+        },
+        {
+          "round": 24,
+          "wall_seconds": 2.036455500000102,
+          "success": 60
+        },
+        {
+          "round": 25,
+          "wall_seconds": 1.9834912999999688,
+          "success": 60
+        },
+        {
+          "round": 26,
+          "wall_seconds": 2.032897800000228,
+          "success": 60
+        },
+        {
+          "round": 27,
+          "wall_seconds": 2.053794899999957,
+          "success": 60
+        },
+        {
+          "round": 28,
+          "wall_seconds": 1.962912899999992,
+          "success": 60
+        },
+        {
+          "round": 29,
+          "wall_seconds": 2.0847970999998324,
+          "success": 60
+        },
+        {
+          "round": 30,
+          "wall_seconds": 2.014171599999827,
+          "success": 60
+        },
+        {
+          "round": 31,
+          "wall_seconds": 2.0418061000000307,
+          "success": 60
+        },
+        {
+          "round": 32,
+          "wall_seconds": 2.033713599999828,
+          "success": 60
+        },
+        {
+          "round": 33,
+          "wall_seconds": 2.0428045000003294,
+          "success": 60
+        },
+        {
+          "round": 34,
+          "wall_seconds": 2.0223488000001453,
+          "success": 60
+        },
+        {
+          "round": 35,
+          "wall_seconds": 2.031617599999663,
+          "success": 60
+        },
+        {
+          "round": 36,
+          "wall_seconds": 2.018178999999691,
+          "success": 60
+        },
+        {
+          "round": 37,
+          "wall_seconds": 2.0453725999996095,
+          "success": 60
+        },
+        {
+          "round": 38,
+          "wall_seconds": 2.0050884000002043,
+          "success": 60
+        },
+        {
+          "round": 39,
+          "wall_seconds": 2.116394599999694,
+          "success": 60
+        },
+        {
+          "round": 40,
+          "wall_seconds": 2.0055036000003383,
+          "success": 60
+        },
+        {
+          "round": 41,
+          "wall_seconds": 2.014881200000673,
+          "success": 60
+        },
+        {
+          "round": 42,
+          "wall_seconds": 2.0662263000003804,
+          "success": 60
+        },
+        {
+          "round": 43,
+          "wall_seconds": 2.0144830999997794,
+          "success": 60
+        },
+        {
+          "round": 44,
+          "wall_seconds": 2.022131600000648,
+          "success": 60
+        },
+        {
+          "round": 45,
+          "wall_seconds": 2.020920799999658,
+          "success": 60
+        },
+        {
+          "round": 46,
+          "wall_seconds": 2.1715101999998296,
+          "success": 60
+        },
+        {
+          "round": 47,
+          "wall_seconds": 1.9780620000001363,
+          "success": 60
+        },
+        {
+          "round": 48,
+          "wall_seconds": 2.034647700000278,
+          "success": 60
+        },
+        {
+          "round": 49,
+          "wall_seconds": 2.949542499999552,
+          "success": 60
+        },
+        {
+          "round": 50,
+          "wall_seconds": 2.983280100000229,
+          "success": 60
+        },
+        {
+          "round": 51,
+          "wall_seconds": 2.0135761000001366,
+          "success": 60
+        },
+        {
+          "round": 52,
+          "wall_seconds": 2.874822800000402,
+          "success": 60
+        },
+        {
+          "round": 53,
+          "wall_seconds": 2.0708880000001955,
+          "success": 60
+        },
+        {
+          "round": 54,
+          "wall_seconds": 2.0821883999997226,
+          "success": 60
+        }
+      ],
+      "history_json_utf8_bytes": 2205,
+      "target": "NOT MET"
+    },
+    {
+      "history_size": 100,
+      "measured_requests": 3000,
+      "warmup_requests": 300,
+      "successful": 3000,
+      "statuses": {
+        "200": 3000
+      },
+      "timeouts": 0,
+      "errors": 0,
+      "correct_restorations_including_warmup": 3300,
+      "correctness_failures": 0,
+      "aborted_reason": null,
+      "mean_ms": 1790.4843076666687,
+      "p50_ms": 1941.803699999582,
+      "p95_ms": 2602.9748999999356,
+      "p99_ms": 3168.851800000084,
+      "max_ms": 3594.107800000529,
+      "throughput_requests_s": 24.438755029862136,
+      "rounds": [
+        {
+          "round": 0,
+          "wall_seconds": 2.1968643000000156,
+          "success": 60
+        },
+        {
+          "round": 1,
+          "wall_seconds": 2.13754229999995,
+          "success": 60
+        },
+        {
+          "round": 2,
+          "wall_seconds": 2.2137848000002123,
+          "success": 60
+        },
+        {
+          "round": 3,
+          "wall_seconds": 2.201814799999738,
+          "success": 60
+        },
+        {
+          "round": 4,
+          "wall_seconds": 2.6422419999998965,
+          "success": 60
+        },
+        {
+          "round": 5,
+          "wall_seconds": 2.7169168000000354,
+          "success": 60
+        },
+        {
+          "round": 6,
+          "wall_seconds": 2.792702300000201,
+          "success": 60
+        },
+        {
+          "round": 7,
+          "wall_seconds": 2.183635299999878,
+          "success": 60
+        },
+        {
+          "round": 8,
+          "wall_seconds": 2.480992100000549,
+          "success": 60
+        },
+        {
+          "round": 9,
+          "wall_seconds": 2.3354349999999613,
+          "success": 60
+        },
+        {
+          "round": 10,
+          "wall_seconds": 2.1863571000003503,
+          "success": 60
+        },
+        {
+          "round": 11,
+          "wall_seconds": 2.1593448000003264,
+          "success": 60
+        },
+        {
+          "round": 12,
+          "wall_seconds": 2.190290599999571,
+          "success": 60
+        },
+        {
+          "round": 13,
+          "wall_seconds": 2.317181299999902,
+          "success": 60
+        },
+        {
+          "round": 14,
+          "wall_seconds": 2.5728395999994973,
+          "success": 60
+        },
+        {
+          "round": 15,
+          "wall_seconds": 2.3448856000004525,
+          "success": 60
+        },
+        {
+          "round": 16,
+          "wall_seconds": 2.6073691999999937,
+          "success": 60
+        },
+        {
+          "round": 17,
+          "wall_seconds": 2.3515202000007775,
+          "success": 60
+        },
+        {
+          "round": 18,
+          "wall_seconds": 2.310065300000133,
+          "success": 60
+        },
+        {
+          "round": 19,
+          "wall_seconds": 2.703061600000183,
+          "success": 60
+        },
+        {
+          "round": 20,
+          "wall_seconds": 2.0331106000003274,
+          "success": 60
+        },
+        {
+          "round": 21,
+          "wall_seconds": 2.137525000000096,
+          "success": 60
+        },
+        {
+          "round": 22,
+          "wall_seconds": 2.689005199999883,
+          "success": 60
+        },
+        {
+          "round": 23,
+          "wall_seconds": 2.1857497000000876,
+          "success": 60
+        },
+        {
+          "round": 24,
+          "wall_seconds": 2.2794169999997393,
+          "success": 60
+        },
+        {
+          "round": 25,
+          "wall_seconds": 2.745800099999542,
+          "success": 60
+        },
+        {
+          "round": 26,
+          "wall_seconds": 2.175862600000073,
+          "success": 60
+        },
+        {
+          "round": 27,
+          "wall_seconds": 2.4527060000000347,
+          "success": 60
+        },
+        {
+          "round": 28,
+          "wall_seconds": 2.547036100000696,
+          "success": 60
+        },
+        {
+          "round": 29,
+          "wall_seconds": 2.35015199999998,
+          "success": 60
+        },
+        {
+          "round": 30,
+          "wall_seconds": 2.720719299999473,
+          "success": 60
+        },
+        {
+          "round": 31,
+          "wall_seconds": 2.6232838999994783,
+          "success": 60
+        },
+        {
+          "round": 32,
+          "wall_seconds": 2.700485800000024,
+          "success": 60
+        },
+        {
+          "round": 33,
+          "wall_seconds": 1.854916599999342,
+          "success": 60
+        },
+        {
+          "round": 34,
+          "wall_seconds": 2.3864203000002817,
+          "success": 60
+        },
+        {
+          "round": 35,
+          "wall_seconds": 3.1885200999995504,
+          "success": 60
+        },
+        {
+          "round": 36,
+          "wall_seconds": 3.0434433999998873,
+          "success": 60
+        },
+        {
+          "round": 37,
+          "wall_seconds": 2.179662300000018,
+          "success": 60
+        },
+        {
+          "round": 38,
+          "wall_seconds": 2.1710627000002205,
+          "success": 60
+        },
+        {
+          "round": 39,
+          "wall_seconds": 2.152925299999879,
+          "success": 60
+        },
+        {
+          "round": 40,
+          "wall_seconds": 2.5686238000007506,
+          "success": 60
+        },
+        {
+          "round": 41,
+          "wall_seconds": 2.3743016999997053,
+          "success": 60
+        },
+        {
+          "round": 42,
+          "wall_seconds": 2.2685639999999694,
+          "success": 60
+        },
+        {
+          "round": 43,
+          "wall_seconds": 2.332153900000776,
+          "success": 60
+        },
+        {
+          "round": 44,
+          "wall_seconds": 2.324832599999354,
+          "success": 60
+        },
+        {
+          "round": 45,
+          "wall_seconds": 3.100953799999843,
+          "success": 60
+        },
+        {
+          "round": 46,
+          "wall_seconds": 2.691523800000141,
+          "success": 60
+        },
+        {
+          "round": 47,
+          "wall_seconds": 2.8799104999998235,
+          "success": 60
+        },
+        {
+          "round": 48,
+          "wall_seconds": 2.221782699999494,
+          "success": 60
+        },
+        {
+          "round": 49,
+          "wall_seconds": 2.1599174000002677,
+          "success": 60
+        },
+        {
+          "round": 50,
+          "wall_seconds": 2.2079641999998785,
+          "success": 60
+        },
+        {
+          "round": 51,
+          "wall_seconds": 2.800079100000403,
+          "success": 60
+        },
+        {
+          "round": 52,
+          "wall_seconds": 2.2121603999994477,
+          "success": 60
+        },
+        {
+          "round": 53,
+          "wall_seconds": 2.1326851000003444,
+          "success": 60
+        },
+        {
+          "round": 54,
+          "wall_seconds": 3.6099902000005386,
+          "success": 60
+        }
+      ],
+      "history_json_utf8_bytes": 109369,
+      "target": "NOT MET"
+    }
+  ],
+  "head": "d899b960ea898d841a54a3d091019603e3768337",
+  "branch": "feat/vt013-undo-manhpd",
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu_logical": 12,
+  "packages": {
+    "httpx": "0.28.1",
+    "opensearch-py": "3.2.0",
+    "fastapi": "0.162.2",
+    "uvicorn": "0.54.0"
+  },
+  "protocol": {
+    "workers": 60,
+    "warmup_rounds": 5,
+    "measured_rounds": 50,
+    "history_sizes": [
+      2,
+      100
+    ],
+    "percentile": "nearest rank across individual successful measured requests",
+    "client_timeout_s": 40,
+    "client_connections": 60,
+    "client_keepalive": 60,
+    "message_non_null_bytes": 1024,
+    "api_workers": 1,
+    "sdk_retries": "unchanged production defaults",
+    "payload_compressible": true
+  },
+  "contention": [
+    {
+      "kind": "undo-undo",
+      "cluster": "vt013-contention-undo-undo",
+      "eligible": {
+        "cluster_id": "vt013-contention-undo-undo",
+        "messages": [
+          {
+            "role": "user",
+            "content": "đxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "created_at": "2026-11-09T00:00:00+00:00"
+          },
+          {
+            "role": "assistant",
+            "content": "đxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "created_at": "2026-11-09T00:00:00+00:00"
+          }
+        ],
+        "revision": "1:13320",
+        "undo_available": true
+      },
+      "winning_operation": "undo",
+      "statuses": [
+        409,
+        200
+      ],
+      "persisted": {
+        "_index": "vt013-perf-0edf3e855c954afe-conversations",
+        "_id": "vt013-contention-undo-undo",
+        "_version": 2,
+        "_seq_no": 13322,
+        "_primary_term": 1,
+        "found": true,
+        "_source": {
+          "cluster_id": "vt013-contention-undo-undo",
+          "created_at": "2026-11-09T08:33:09.567477+00:00",
+          "updated_at": "2026-11-09T08:33:16.294791+00:00",
+          "messages": [],
+          "undo": null
+        }
+      },
+      "correct": true
+    },
+    {
+      "kind": "send-undo",
+      "cluster": "vt013-contention-send-undo",
+      "eligible": {
+        "cluster_id": "vt013-contention-send-undo",
+        "messages": [
+          {
+            "role": "user",
+            "content": "đxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "created_at": "2026-11-09T00:00:00+00:00"
+          },
+          {
+            "role": "assistant",
+            "content": "đxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "created_at": "2026-11-09T00:00:00+00:00"
+          }
+        ],
+        "revision": "1:13321",
+        "undo_available": true
+      },
+      "winning_operation": "undo",
+      "statuses": [
+        200,
+        409
+      ],
+      "persisted": {
+        "_index": "vt013-perf-0edf3e855c954afe-conversations",
+        "_id": "vt013-contention-send-undo",
+        "_version": 2,
+        "_seq_no": 13323,
+        "_primary_term": 1,
+        "found": true,
+        "_source": {
+          "cluster_id": "vt013-contention-send-undo",
+          "created_at": "2026-11-09T08:33:10.579002+00:00",
+          "updated_at": "2026-11-09T08:33:22.414558+00:00",
+          "messages": [],
+          "undo": null
+        }
+      },
+      "correct": true
+    }
+  ],
+  "resource_samples": [
+    {
+      "utc": "2026-11-09T08:24:19.463018+00:00",
+      "docker": {
+        "BlockIO": "0B / 0B",
+        "CPUPerc": "5.93%",
+        "Container": "01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f",
+        "ID": "01b90c5068b2",
+        "MemPerc": "46.82%",
+        "MemUsage": "958.9MiB / 2GiB",
+        "Name": "vt013-perf-0edf3e855c954afe",
+        "NetIO": "174kB / 33kB",
+        "PIDs": "104"
+      },
+      "api_pid": 26100
+    },
+    {
+      "utc": "2026-11-09T08:28:13.008892+00:00",
+      "docker": {
+        "BlockIO": "0B / 0B",
+        "CPUPerc": "1.48%",
+        "Container": "01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f",
+        "ID": "01b90c5068b2",
+        "MemPerc": "57.34%",
+        "MemUsage": "1.147GiB / 2GiB",
+        "Name": "vt013-perf-0edf3e855c954afe",
+        "NetIO": "40.8MB / 48.2MB",
+        "PIDs": "139"
+      },
+      "api_pid": 26100
+    },
+    {
+      "utc": "2026-11-09T08:28:15.019537+00:00",
+      "docker": {
+        "BlockIO": "0B / 0B",
+        "CPUPerc": "2.24%",
+        "Container": "01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f",
+        "ID": "01b90c5068b2",
+        "MemPerc": "58.14%",
+        "MemUsage": "1.163GiB / 2GiB",
+        "Name": "vt013-perf-0edf3e855c954afe",
+        "NetIO": "47.3MB / 48.2MB",
+        "PIDs": "139"
+      },
+      "api_pid": 26100
+    },
+    {
+      "utc": "2026-11-09T08:33:08.751787+00:00",
+      "docker": {
+        "BlockIO": "0B / 0B",
+        "CPUPerc": "1.24%",
+        "Container": "01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f",
+        "ID": "01b90c5068b2",
+        "MemPerc": "60.24%",
+        "MemUsage": "1.205GiB / 2GiB",
+        "Name": "vt013-perf-0edf3e855c954afe",
+        "NetIO": "1.15GB / 1.51GB",
+        "PIDs": "143"
+      },
+      "api_pid": 26100
+    }
+  ],
+  "opensearch": {
+    "name": "01b90c5068b2",
+    "cluster_name": "vt013-perf-0edf3e855c954afe",
+    "cluster_uuid": "4iMqeyibQseoJgXMiBB7rg",
+    "version": {
+      "distribution": "opensearch",
+      "number": "2.17.1",
+      "build_type": "tar",
+      "build_hash": "1893d20797e30110e5877170e44d42275ce5951e",
+      "build_date": "2024-09-26T21:59:32.078798875Z",
+      "build_snapshot": false,
+      "lucene_version": "9.11.1",
+      "minimum_wire_compatibility_version": "7.10.0",
+      "minimum_index_compatibility_version": "7.0.0"
+    },
+    "tagline": "The OpenSearch Project: https://opensearch.org/"
+  },
+  "isolation": {
+    "container_id": "01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f",
+    "cluster_name": "vt013-perf-0edf3e855c954afe",
+    "index_prefix": "vt013-perf-0edf3e855c954afe",
+    "opensearch_url": "http://127.0.0.1:58488"
+  },
+  "api_process": {
+    "pid": 26100,
+    "command": [
+      "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+      "-u",
+      "-B",
+      "D:\\SE\\Log-Anomaly-Explorer\\load-tests\\vt013_undo.py",
+      "--serve"
+    ]
+  },
+  "completed": true,
+  "owned_container_removed": true,
+  "changed_tracked_files": [],
+  "finished_utc": "2026-11-09T08:33:24.586634+00:00"
+}

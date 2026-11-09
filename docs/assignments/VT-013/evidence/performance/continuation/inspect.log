@@ -1,0 +1,243 @@
+{"command": ["docker", "inspect", "01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f"], "exit_code": 0}
+[
+    {
+        "Id": "01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f",
+        "Created": "2026-11-09T08:23:56.806638421Z",
+        "Path": "./opensearch-docker-entrypoint.sh",
+        "Args": [
+            "opensearch"
+        ],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 14670,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2026-11-09T08:23:56.908457839Z",
+            "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:1193b7c29c5d63028523728243cc4da047ac49f697a8f8105e5aeee2f89bcc4c",
+        "ResolvConfPath": "/var/lib/docker/containers/01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f/hostname",
+        "HostsPath": "/var/lib/docker/containers/01b90c5068b2ba345d398eadf5cd837ca26477b8e37b91a2dcef0c79778bb59f/hosts",
+        "LogPath": "",
+        "Name": "/vt013-perf-0edf3e855c954afe",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": null,
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "local",
+                "Config": {}
+            },
+            "NetworkMode": "bridge",
+            "PortBindings": {
+                "9200/tcp": [
+                    {
+                        "HostIp": "127.0.0.1",
+                        "HostPort": ""
+                    }
+                ]
+            },
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "CapAdd": null,
+            "CapDrop": null,
+            "CgroupnsMode": "host",
+            "Dns": null,
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": null,
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": null,
+            "Tmpfs": {
+                "/usr/share/opensearch/data": "rw,uid=1000,gid=1000,size=1g"
+            },
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 2147483648,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": [],
+            "BlkioDeviceReadBps": [],
+            "BlkioDeviceWriteBps": [],
+            "BlkioDeviceReadIOps": [],
+            "BlkioDeviceWriteIOps": [],
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "MemoryReservation": 0,
+            "MemorySwap": 4294967296,
+            "MemorySwappiness": null,
+            "OomKillDisable": false,
+            "PidsLimit": null,
+            "Ulimits": [
+                {
+                    "Name": "nofile",
+                    "Hard": 65536,
+                    "Soft": 65536
+                }
+            ],
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/acpi",
+                "/proc/asound",
+                "/proc/interrupts",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/sys/devices/virtual/powercap",
+                "/sys/firmware"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "Storage": {
+            "RootFS": {
+                "Snapshot": {
+                    "Name": "overlayfs"
+                }
+            }
+        },
+        "Mounts": [],
+        "Config": {
+            "Hostname": "01b90c5068b2",
+            "Domainname": "",
+            "User": "1000",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "ExposedPorts": {
+                "9200/tcp": {},
+                "9300/tcp": {},
+                "9600/tcp": {},
+                "9650/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "cluster.name=vt013-perf-0edf3e855c954afe",
+                "DISABLE_SECURITY_PLUGIN=true",
+                "DISABLE_INSTALL_DEMO_CONFIG=true",
+                "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m",
+                "discovery.type=single-node",
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/opensearch/jdk/bin:/usr/share/opensearch/bin",
+                "JAVA_HOME=/usr/share/opensearch/jdk",
+                "LD_LIBRARY_PATH=:/usr/share/opensearch/plugins/opensearch-knn/lib"
+            ],
+            "Cmd": [
+                "opensearch"
+            ],
+            "Image": "opensearchproject/opensearch:2.17.1",
+            "Volumes": null,
+            "WorkingDir": "/usr/share/opensearch",
+            "Entrypoint": [
+                "./opensearch-docker-entrypoint.sh"
+            ],
+            "Labels": {
+                "DOCKERFILE": "https://github.com/opensearch-project/opensearch-build/blob/main/docker/release/dockerfiles/opensearch.al2.dockerfile",
+                "org.label-schema.build-date": "2024-10-15T19:14:50Z",
+                "org.label-schema.description": "10332",
+                "org.label-schema.license": "Apache-2.0",
+                "org.label-schema.name": "opensearch",
+                "org.label-schema.schema-version": "1.0",
+                "org.label-schema.url": "https://opensearch.org",
+                "org.label-schema.vcs-url": "https://github.com/opensearch-project/OpenSearch",
+                "org.label-schema.vendor": "OpenSearch",
+                "org.label-schema.version": "2.17.1",
+                "vt013.performance": "0edf3e855c954afe"
+            }
+        },
+        "NetworkSettings": {
+            "SandboxID": "b03fc9cf484b22baf1bb9c607cb64b901c8c10da8a184c3287a2816670031c68",
+            "SandboxKey": "/var/run/docker/netns/b03fc9cf484b",
+            "Ports": {
+                "9200/tcp": [
+                    {
+                        "HostIp": "127.0.0.1",
+                        "HostPort": "58488"
+                    }
+                ]
+            },
+            "Networks": {
+                "bridge": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "0663029c27fc4791807c6eed43be208c35574b6107045403e5f937e95c672447",
+                    "EndpointID": "7a207745c63782da686d11ad4368bd346ffa0fe3a383ed2c361f42eaed164e0c",
+                    "Gateway": "172.17.0.1",
+                    "IPAddress": "172.17.0.2",
+                    "MacAddress": "52:11:32:98:d1:78",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": null
+                }
+            }
+        },
+        "ImageManifestDescriptor": {
+            "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+            "digest": "sha256:ab6db8c14062060cda5f0428364e76ffe2a6f03ad265589b70182c0cecb7f9d7",
+            "size": 1679,
+            "platform": {
+                "architecture": "amd64",
+                "os": "linux"
+            }
+        }
+    }
+]

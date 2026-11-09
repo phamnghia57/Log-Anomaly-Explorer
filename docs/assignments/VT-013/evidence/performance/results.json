@@ -1,0 +1,183 @@
+{
+  "started_utc": "2026-11-09T08:19:33.095005+00:00",
+  "commands": [
+    {
+      "command": [
+        "docker",
+        "version",
+        "--format",
+        "{{json .}}"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "Get-CimInstance Win32_ComputerSystem | Select-Object NumberOfLogicalProcessors,TotalPhysicalMemory | ConvertTo-Json"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "run",
+        "-d",
+        "--name",
+        "vt013-perf-c19bbc4c3a1942aa",
+        "--label",
+        "vt013.performance=c19bbc4c3a1942aa",
+        "--publish",
+        "127.0.0.1::9200",
+        "--memory",
+        "2g",
+        "--ulimit",
+        "nofile=65536:65536",
+        "--tmpfs",
+        "/usr/share/opensearch/data:rw,uid=1000,gid=1000,size=1g",
+        "--env",
+        "discovery.type=single-node",
+        "--env",
+        "cluster.name=vt013-perf-c19bbc4c3a1942aa",
+        "--env",
+        "DISABLE_SECURITY_PLUGIN=true",
+        "--env",
+        "DISABLE_INSTALL_DEMO_CONFIG=true",
+        "--env",
+        "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m",
+        "opensearchproject/opensearch:2.17.1"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "inspect",
+        "285f466f327036bb373479e7a78abede5c31c3714cd6241de841684068a82ebd"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "stats",
+        "--no-stream",
+        "--format",
+        "{{json .}}",
+        "285f466f327036bb373479e7a78abede5c31c3714cd6241de841684068a82ebd"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "inspect",
+        "285f466f327036bb373479e7a78abede5c31c3714cd6241de841684068a82ebd"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "logs",
+        "285f466f327036bb373479e7a78abede5c31c3714cd6241de841684068a82ebd"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "docker",
+        "rm",
+        "-f",
+        "285f466f327036bb373479e7a78abede5c31c3714cd6241de841684068a82ebd"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "classes": [],
+  "head": "d899b960ea898d841a54a3d091019603e3768337",
+  "branch": "feat/vt013-undo-manhpd",
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu_logical": 12,
+  "packages": {
+    "httpx": "0.28.1",
+    "opensearch-py": "3.2.0",
+    "fastapi": "0.162.2",
+    "uvicorn": "0.54.0"
+  },
+  "protocol": {
+    "workers": 60,
+    "warmup_rounds": 5,
+    "measured_rounds": 50,
+    "history_sizes": [
+      0,
+      2,
+      100
+    ],
+    "percentile": "nearest rank across individual successful measured requests",
+    "client_timeout_s": 40,
+    "client_connections": 60,
+    "client_keepalive": 60,
+    "message_non_null_bytes": 1024,
+    "api_workers": 1,
+    "sdk_retries": "unchanged production defaults",
+    "payload_compressible": true
+  },
+  "contention": [],
+  "resource_samples": [
+    {
+      "utc": "2026-11-09T08:20:01.014693+00:00",
+      "docker": {
+        "BlockIO": "0B / 0B",
+        "CPUPerc": "2.44%",
+        "Container": "285f466f327036bb373479e7a78abede5c31c3714cd6241de841684068a82ebd",
+        "ID": "285f466f3270",
+        "MemPerc": "53.04%",
+        "MemUsage": "1.061GiB / 2GiB",
+        "Name": "vt013-perf-c19bbc4c3a1942aa",
+        "NetIO": "29.4kB / 19.9kB",
+        "PIDs": "102"
+      },
+      "api_pid": 2524
+    }
+  ],
+  "opensearch": {
+    "name": "285f466f3270",
+    "cluster_name": "vt013-perf-c19bbc4c3a1942aa",
+    "cluster_uuid": "WU0jgEQZQ_22x2ZdMOn-ZA",
+    "version": {
+      "distribution": "opensearch",
+      "number": "2.17.1",
+      "build_type": "tar",
+      "build_hash": "1893d20797e30110e5877170e44d42275ce5951e",
+      "build_date": "2024-09-26T21:59:32.078798875Z",
+      "build_snapshot": false,
+      "lucene_version": "9.11.1",
+      "minimum_wire_compatibility_version": "7.10.0",
+      "minimum_index_compatibility_version": "7.0.0"
+    },
+    "tagline": "The OpenSearch Project: https://opensearch.org/"
+  },
+  "isolation": {
+    "container_id": "285f466f327036bb373479e7a78abede5c31c3714cd6241de841684068a82ebd",
+    "cluster_name": "vt013-perf-c19bbc4c3a1942aa",
+    "index_prefix": "vt013-perf-c19bbc4c3a1942aa",
+    "opensearch_url": "http://127.0.0.1:62393"
+  },
+  "api_process": {
+    "pid": 2524,
+    "command": [
+      "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+      "-u",
+      "-B",
+      "D:\\SE\\Log-Anomaly-Explorer\\load-tests\\vt013_undo.py",
+      "--serve"
+    ]
+  },
+  "failure_or_blocker": "RuntimeError: Incorrect restoration size 0 round 23; stop rather than contaminate later histories",
+  "owned_container_removed": true,
+  "changed_tracked_files": [],
+  "finished_utc": "2026-11-09T08:21:43.073102+00:00"
+}

@@ -1,0 +1,205 @@
+{
+  "workloads": [
+    {
+      "history_size": 0,
+      "workers": 60,
+      "warmup_requests": 300,
+      "planned_measured_requests": 3000,
+      "actual_measured_requests": 1140,
+      "successful": 1139,
+      "http_conflicts": 0,
+      "other_http_errors": 0,
+      "network_errors": 1,
+      "timeouts": 0,
+      "errors": 1,
+      "successful_restoration_mismatches": 0,
+      "failed_requests_not_restored": 1,
+      "mean_ms": 1536.4840003511888,
+      "p50_ms": 1117.2624000000724,
+      "p95_ms": 2097.89740000042,
+      "p99_ms": 2157.41190000017,
+      "max_success_ms": 2164.802299999792,
+      "max_all_attempts_ms": 2164.802299999792,
+      "throughput_requests_s": null,
+      "response_body_bytes_min": 83,
+      "response_body_bytes_max": 84,
+      "compact_request_body_bytes": [
+        29,
+        30
+      ],
+      "reason_for_reduced_count": "RuntimeError: Incorrect restoration size 0 round 23; stop rather than contaminate later histories",
+      "target": "NOT MET"
+    },
+    {
+      "history_size": 2,
+      "workers": 60,
+      "warmup_requests": 300,
+      "planned_measured_requests": 3000,
+      "actual_measured_requests": 3000,
+      "successful": 3000,
+      "http_conflicts": 0,
+      "other_http_errors": 0,
+      "network_errors": 0,
+      "timeouts": 0,
+      "errors": 0,
+      "successful_restoration_mismatches": 0,
+      "failed_requests_not_restored": 0,
+      "mean_ms": 1485.8344429666508,
+      "p50_ms": 1072.561300000416,
+      "p95_ms": 2077.9645000002347,
+      "p99_ms": 2116.2638999999217,
+      "max_success_ms": 2964.031800000157,
+      "max_all_attempts_ms": 2964.031800000157,
+      "throughput_requests_s": 28.590065809070868,
+      "response_body_bytes_min": 2275,
+      "response_body_bytes_max": 2276,
+      "compact_request_body_bytes": [
+        29,
+        30
+      ],
+      "reason_for_reduced_count": null,
+      "target": "NOT MET"
+    },
+    {
+      "history_size": 100,
+      "workers": 60,
+      "warmup_requests": 300,
+      "planned_measured_requests": 3000,
+      "actual_measured_requests": 3000,
+      "successful": 3000,
+      "http_conflicts": 0,
+      "other_http_errors": 0,
+      "network_errors": 0,
+      "timeouts": 0,
+      "errors": 0,
+      "successful_restoration_mismatches": 0,
+      "failed_requests_not_restored": 0,
+      "mean_ms": 1790.4843076666687,
+      "p50_ms": 1941.803699999582,
+      "p95_ms": 2602.9748999999356,
+      "p99_ms": 3168.851800000084,
+      "max_success_ms": 3594.107800000529,
+      "max_all_attempts_ms": 3594.107800000529,
+      "throughput_requests_s": 24.438755029862136,
+      "response_body_bytes_min": 108843,
+      "response_body_bytes_max": 108844,
+      "compact_request_body_bytes": [
+        30,
+        31
+      ],
+      "reason_for_reduced_count": null,
+      "target": "NOT MET"
+    }
+  ],
+  "overall": "NOT MET",
+  "raw_sample_count_including_warmup": 8040,
+  "measured_samples": 7140,
+  "errors_retained": [
+    {
+      "history_size": 0,
+      "round": 18,
+      "warmup": false,
+      "cluster": "vt013-0-57",
+      "latency_ms": 826.9826000000648,
+      "status": null,
+      "error": "ReadError",
+      "response_bytes": null,
+      "persisted_correct": false,
+      "expected_revision": "1:2800",
+      "restored_revision": null,
+      "sample_file": "samples.jsonl"
+    }
+  ],
+  "contention": [
+    {
+      "kind": "undo-undo",
+      "cluster": "vt013-contention-undo-undo",
+      "eligible": {
+        "cluster_id": "vt013-contention-undo-undo",
+        "messages": [
+          {
+            "role": "user",
+            "content": "\u00c4\u2018xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "created_at": "2026-11-09T00:00:00+00:00"
+          },
+          {
+            "role": "assistant",
+            "content": "\u00c4\u2018xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "created_at": "2026-11-09T00:00:00+00:00"
+          }
+        ],
+        "revision": "1:13320",
+        "undo_available": true
+      },
+      "winning_operation": "undo",
+      "statuses": [
+        409,
+        200
+      ],
+      "persisted": {
+        "_index": "vt013-perf-0edf3e855c954afe-conversations",
+        "_id": "vt013-contention-undo-undo",
+        "_version": 2,
+        "_seq_no": 13322,
+        "_primary_term": 1,
+        "found": true,
+        "_source": {
+          "cluster_id": "vt013-contention-undo-undo",
+          "created_at": "2026-11-09T08:33:09.567477+00:00",
+          "updated_at": "2026-11-09T08:33:16.294791+00:00",
+          "messages": [],
+          "undo": null
+        }
+      },
+      "correct": true
+    },
+    {
+      "kind": "send-undo",
+      "cluster": "vt013-contention-send-undo",
+      "eligible": {
+        "cluster_id": "vt013-contention-send-undo",
+        "messages": [
+          {
+            "role": "user",
+            "content": "\u00c4\u2018xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "created_at": "2026-11-09T00:00:00+00:00"
+          },
+          {
+            "role": "assistant",
+            "content": "\u00c4\u2018xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "created_at": "2026-11-09T00:00:00+00:00"
+          }
+        ],
+        "revision": "1:13321",
+        "undo_available": true
+      },
+      "winning_operation": "undo",
+      "statuses": [
+        200,
+        409
+      ],
+      "persisted": {
+        "_index": "vt013-perf-0edf3e855c954afe-conversations",
+        "_id": "vt013-contention-send-undo",
+        "_version": 2,
+        "_seq_no": 13323,
+        "_primary_term": 1,
+        "found": true,
+        "_source": {
+          "cluster_id": "vt013-contention-send-undo",
+          "created_at": "2026-11-09T08:33:10.579002+00:00",
+          "updated_at": "2026-11-09T08:33:22.414558+00:00",
+          "messages": [],
+          "undo": null
+        }
+      },
+      "correct": true
+    }
+  ],
+  "all_owned_containers_removed": true,
+  "tracked_source_preserved": true,
+  "raw_sha256": {
+    "samples.jsonl": "51352fe77db45023b3817ab5387b81206dc9f53b3ef2b5ecdea447217e767bff",
+    "continuation\\samples.jsonl": "8a8e8350200c945901d6345fc9e9848daa2684e01097e907707ba2f7efcf6b41"
+  }
+}

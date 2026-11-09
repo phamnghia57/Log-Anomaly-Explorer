@@ -1,0 +1,5 @@
+{"command": ["powershell", "-NoProfile", "-Command", "Get-CimInstance Win32_ComputerSystem | Select-Object NumberOfLogicalProcessors,TotalPhysicalMemory | ConvertTo-Json"], "exit_code": 0}
+{
+    "NumberOfLogicalProcessors":  12,
+    "TotalPhysicalMemory":  16890519552
+}

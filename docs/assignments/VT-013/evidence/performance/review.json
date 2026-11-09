@@ -1,0 +1,61 @@
+{
+  "head": "d899b960ea898d841a54a3d091019603e3768337",
+  "branch": "feat/vt013-undo-manhpd",
+  "checks": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--stat"
+      ],
+      "exit_code": 0,
+      "stdout": ""
+    }
+  ],
+  "regression_cases": 90,
+  "regression_exit_code": 0,
+  "source_changed": false,
+  "existing_assertions_changed": false,
+  "all_owned_containers_removed": true,
+  "known_processes_and_descendants_absent": true,
+  "secret_pattern_findings": [],
+  "new_harness_sha256": "0037b96c57cdf0308fc0402cc6b507cb65c5733577039970625cdc918af61d5a",
+  "execution_commands": [
+    {
+      "command": [
+        "D:/SE/LAE-issue-73/.venv/Scripts/python.exe",
+        "-u",
+        "-B",
+        "load-tests/vt013_undo.py"
+      ],
+      "environment": {},
+      "exit_code": 1,
+      "reason": "initial ReadError and unconfirmed restoration; stop without discarding samples"
+    },
+    {
+      "command": [
+        "D:/SE/LAE-issue-73/.venv/Scripts/python.exe",
+        "-u",
+        "-B",
+        "load-tests/vt013_undo.py"
+      ],
+      "environment": {
+        "VT013_PERF_OUTPUT": "D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\performance\\continuation",
+        "VT013_PERF_SIZES": "2,100"
+      },
+      "exit_code": 0,
+      "note": "experiment completion, not SLO success"
+    }
+  ],
+  "throughput_initial_class0": "NOT AVAILABLE: initial run aborted before round wall aggregates persisted",
+  "bottleneck_analysis": "inference from real 1s refresh setting, refresh wait writes, default 40-token sync worker limiter and observed latencies; no causal profile or production tuning"
+}

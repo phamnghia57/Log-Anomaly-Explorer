@@ -1,0 +1,2 @@
+{"command": ["docker", "stats", "--no-stream", "--format", "{{json .}}", "285f466f327036bb373479e7a78abede5c31c3714cd6241de841684068a82ebd"], "exit_code": 0}
+{"BlockIO":"0B / 0B","CPUPerc":"2.44%","Container":"285f466f327036bb373479e7a78abede5c31c3714cd6241de841684068a82ebd","ID":"285f466f3270","MemPerc":"53.04%","MemUsage":"1.061GiB / 2GiB","Name":"vt013-perf-c19bbc4c3a1942aa","NetIO":"29.4kB / 19.9kB","PIDs":"102"}

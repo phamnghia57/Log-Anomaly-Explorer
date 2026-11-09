@@ -1,0 +1,2 @@
+{"command": ["docker", "rm", "-f", "285f466f327036bb373479e7a78abede5c31c3714cd6241de841684068a82ebd"], "exit_code": 0}
+285f466f327036bb373479e7a78abede5c31c3714cd6241de841684068a82ebd
