@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="140" failures="0" errors="0" time="13.877683">
+    <testsuite name="src/App.test.tsx" timestamp="2026-11-08T16:30:57.094Z" hostname="PDM" tests="12" failures="0" errors="0" skipped="0" time="1.2310544">
+        <testcase classname="src/App.test.tsx" name="frontend authentication integration &gt; redirects anonymous users from / before rendering or fetching protected data" time="0.21005">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="frontend authentication integration &gt; redirects anonymous users from /search?trace_id=abc#results before rendering or fetching protected data" time="0.027632">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="frontend authentication integration &gt; redirects anonymous users from /clusters/c1 before rendering or fetching protected data" time="0.023987">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="frontend authentication integration &gt; allows an admin to load the dashboard and use the existing sidebar navigation" time="0.4449818">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="frontend authentication integration &gt; clears the rejected session and all cached data on 401, redirects once, and does not retry" time="0.0475781">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="frontend authentication integration &gt; expires an open protected page, clears private cache and returns to login" time="0.0330006">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="frontend authentication integration &gt; never treats an expired session as authenticated even when its timer has not run" time="0.0104533">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="frontend authentication integration &gt; logs out through the admin menu, aborts pending requests and clears query/mutation caches" time="0.2774938">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="frontend authentication integration &gt; handles logout/storage clear in another tab (log-anomaly-explorer.auth) and clears private cache" time="0.0475008">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="frontend authentication integration &gt; handles logout/storage clear in another tab (null) and clears private cache" time="0.0468801">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="frontend authentication integration &gt; keeps a valid logged-in admin out of /login without making a loop" time="0.0501532">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="frontend authentication integration &gt; shows a login link rather than the admin menu when anonymous" time="0.0053453">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/StatusBadge.test.tsx" timestamp="2026-11-08T16:30:57.107Z" hostname="PDM" tests="4" failures="0" errors="0" skipped="0" time="0.0506308">
+        <testcase classname="src/components/StatusBadge.test.tsx" name="ClusterStatusBadge &gt; hien dung nhan cho status=normal" time="0.0337015">
+        </testcase>
+        <testcase classname="src/components/StatusBadge.test.tsx" name="ClusterStatusBadge &gt; hien dung nhan cho status=anomalous" time="0.0048121">
+        </testcase>
+        <testcase classname="src/components/StatusBadge.test.tsx" name="ClusterStatusBadge &gt; hien dung nhan cho status=alerted" time="0.0047667">
+        </testcase>
+        <testcase classname="src/components/StatusBadge.test.tsx" name="LevelTag &gt; hien dung text level" time="0.0040282">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/dashboard/TimeRangeControl.test.ts" timestamp="2026-11-08T16:30:57.110Z" hostname="PDM" tests="2" failures="0" errors="0" skipped="0" time="0.0065596">
+        <testcase classname="src/components/dashboard/TimeRangeControl.test.ts" name="sinceFromRange &gt; tra ve thoi diem lui dung so giay cua moi range" time="0.0037651">
+        </testcase>
+        <testcase classname="src/components/dashboard/TimeRangeControl.test.ts" name="sinceFromRange &gt; moi key trong TIME_RANGES deu sinh duoc ISO string hop le" time="0.0013824">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/incident/AssistantPanel.test.tsx" timestamp="2026-11-08T16:30:57.111Z" hostname="PDM" tests="23" failures="0" errors="0" skipped="0" time="3.633875">
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;1:0&quot;" time="0.2106666">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;9223372036854775807:9223372036854775807&quot;" time="0.056142">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=false revision=&quot;1:7&quot;" time="0.0462839">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=null" time="0.0592344">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;&quot;" time="0.0600302">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;01:0&quot;" time="0.0464756">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;1:0\n&quot;" time="0.0402006">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;1:9223372036854775808&quot;" time="0.0475046">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=7" time="0.0535195">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=&quot;true&quot; revision=&quot;1:7&quot;" time="0.0303565">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=undefined revision=undefined" time="0.0395924">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-02/03 keyboard Undo uses current authenticated revision and exact server history, without optimistic deletion" time="0.1628421">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-03 first-Send Undo accepts the server&apos;s persisted empty history" time="0.112045">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-04 HTTP 409 GET-reconciles newer messages, never guesses or retries Undo" time="0.1532575">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-05 503 preserves history until GET confirms the uncertain outcome" time="0.1141934">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-05 network preserves history until GET confirms the uncertain outcome" time="0.1541753">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-05 failed reconciliation retains messages and disables stale Undo until a manual GET succeeds" time="0.2193433">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-06 pending Undo blocks double-clicks, Send and Enter without discarding the draft" time="0.609597">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-06 pending Send blocks Undo and duplicate Sends" time="0.3352123">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-07 a new QueryClient remount loads the restored history using GET" time="0.1884801">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-08 Stop aborts only Send, restores draft, GET-reconciles and never calls Undo" time="0.5715255">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-09 a late GET started before Undo cannot overwrite its confirmed response" time="0.1514775">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-10 logout during a confirmed Undo cache update cannot repopulate cleared private state" time="0.1677704">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/api.test.ts" timestamp="2026-11-08T16:30:57.120Z" hostname="PDM" tests="40" failures="0" errors="0" skipped="0" time="0.0605009">
+        <testcase classname="src/lib/api.test.ts" name="query-api client &gt; searchLogs: goi dung endpoint /search voi cac param duoc truyen" time="0.010482">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="query-api client &gt; searchLogs: khong gui param rong/undefined len query string" time="0.00141">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="query-api client &gt; listClusters: loc theo status dung tham so" time="0.0013472">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="query-api client &gt; getCluster: nem ApiError voi status 404 khi khong tim thay cum" time="0.0029771">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="query-api client &gt; getCluster: gui logs_limit khi can tai them log" time="0.0012531">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="query-api client &gt; getCluster: khong gui logs_limit/logs_offset khi khong truyen" time="0.0009245">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="query-api client &gt; getClusterHistory: goi dung endpoint /clusters/{id}/history" time="0.0011745">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="query-api client &gt; nem ApiError (status 0) khi fetch that bai hoan toan (vd. backend sap/mixed content)" time="0.0017535">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="query-api client &gt; getAssistantConversation: goi dung endpoint, tra ve messages rong khi chua hoi lan nao" time="0.0010684">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="query-api client &gt; sendAssistantMessage: POST dung body JSON, tra ve toan bo hoi thoai moi" time="0.0014385">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="query-api client &gt; sendAssistantMessage: nem ApiError voi status 503 khi thieu AZURE_OPENAI_API_KEY" time="0.0010741">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; posts JSON credentials to the configured API base URL without putting them in a URL" time="0.0022152">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; uses a generic login error for HTTP 401 and never saves its body" time="0.0010701">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; uses a generic login error for HTTP 403 and never saves its body" time="0.0006609">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; reports login network failures without exposing request details" time="0.0005996">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; rejects a malformed successful response" time="0.0007786">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; rejects a malformed successful response" time="0.0004188">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; rejects a malformed successful response" time="0.000304">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; attaches the current token to shared query requests" time="0.0004279">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; clears a rejected session on 401 so the router can redirect" time="0.0006947">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; does not let a late 401 from an old request erase a newer login" time="0.000914">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; sends Bearer auth only to the configured protected endpoint /search" time="0.0022598">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; sends Bearer auth only to the configured protected endpoint /clusters" time="0.0010631">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; sends Bearer auth only to the configured protected endpoint /clusters/c1" time="0.0008373">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; sends Bearer auth only to the configured protected endpoint /clusters/c1/history" time="0.0009879">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; sends Bearer auth only to the configured protected endpoint /assistant/clusters/c1/conversation" time="0.0010501">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; sends Bearer auth only to the configured protected endpoint /assistant/clusters/c1/conversation/messages" time="0.0014352">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; never attaches an existing token to the public login request" time="0.0014297">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; clears a rejected Assistant session through the shared authenticated client" time="0.0014826">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; clears a rejected Assistant session through the shared authenticated client" time="0.0010789">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; does not fetch when anonymous or expired" time="0.0028173">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; rejects cluster IDs that normalize outside the protected endpoint: .." time="0.0009458">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; rejects cluster IDs that normalize outside the protected endpoint: ." time="0.0008011">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; keeps URL-like cluster IDs on the configured API, never the external service" time="0.000651">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; does not return data from a request that finishes after logout" time="0.0006985">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="admin login and authenticated API requests &gt; passes cancellation through to fetch without changing AbortError to a network error" time="0.0014514">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="getJaegerTraceUrl &gt; tra ve null khi VITE_JAEGER_URL khong duoc cau hinh (mac dinh luc test)" time="0.0003028">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="getJaegerTraceUrl &gt; tra ve null khi trace_id rong, du da cau hinh JAEGER_URL" time="0.00203">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="getJaegerTraceUrl &gt; ghep dung duong dan /trace/{id} khi da cau hinh JAEGER_URL" time="0.0011969">
+        </testcase>
+        <testcase classname="src/lib/api.test.ts" name="getJaegerTraceUrl &gt; bo dau / cuoi cua VITE_JAEGER_URL neu co, tranh duong dan bi lap dau //" time="0.0010628">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/assistant-undo.test.ts" timestamp="2026-11-08T16:30:57.129Z" hostname="PDM" tests="15" failures="0" errors="0" skipped="0" time="0.026122">
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-02 sends the current opaque revision and existing Bearer header to encoded cluster path" time="0.0111384">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 accepts valid revision boundary 1:0 unchanged" time="0.0011283">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 accepts valid revision boundary 9223372036854775807:9223372036854775807 unchanged" time="0.0007191">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;&quot; before a request" time="0.0017759">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;0:0&quot; before a request" time="0.0007898">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;01:0&quot; before a request" time="0.0006484">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;1:00&quot; before a request" time="0.0006568">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;1:-1&quot; before a request" time="0.0006399">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;1:0\n&quot; before a request" time="0.0006115">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;１:0&quot; before a request" time="0.0008778">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;1:9223372036854775808&quot; before a request" time="0.0006137">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-04/05 preserves HTTP 409 as an error, never a default conversation" time="0.0013521">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-04/05 preserves HTTP 503 as an error, never a default conversation" time="0.0009739">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-05 propagates a network failure" time="0.0009409">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-02 does not fetch without a valid admin session" time="0.0006352">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/auth-navigation.test.ts" timestamp="2026-11-08T16:30:57.135Z" hostname="PDM" tests="19" failures="0" errors="0" skipped="0" time="0.0100294">
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; preserves /" time="0.0033148">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; preserves /search?trace_id=abc#results" time="0.0005324">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; preserves /clusters/c1?logs_limit=200" time="0.0003942">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: undefined" time="0.0003314">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: null" time="0.0002156">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: 123" time="0.0002045">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: {}" time="0.0001967">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: https://external.example" time="0.0004045">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: //external.example" time="0.0002582">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: /\external.example" time="0.0003076">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: javascript:alert(1)" time="0.0001471">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: /login" time="0.0002866">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: /login?from=/login" time="0.000142">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: /other-service" time="0.0001159">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: /search
+" time="0.0000854">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: /search	" time="0.0000671">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: /%2f%2fexternal.example" time="0.0001377">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: /clusters/../../login" time="0.000099">
+        </testcase>
+        <testcase classname="src/lib/auth-navigation.test.ts" name="safe login return destination &gt; falls back to dashboard for unsafe or unknown destinations: /clusters/a/b" time="0.0000883">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/auth.test.ts" timestamp="2026-11-08T16:30:57.141Z" hostname="PDM" tests="12" failures="0" errors="0" skipped="0" time="0.0342409">
+        <testcase classname="src/lib/auth.test.ts" name="centralized auth session &gt; persists only the token and expiration, never credentials or extra response fields" time="0.0099198">
+        </testcase>
+        <testcase classname="src/lib/auth.test.ts" name="centralized auth session &gt; restores an unexpired persisted session after a reload" time="0.0020135">
+        </testcase>
+        <testcase classname="src/lib/auth.test.ts" name="centralized auth session &gt; expires and removes a session at its exact expiry boundary" time="0.0031278">
+        </testcase>
+        <testcase classname="src/lib/auth.test.ts" name="centralized auth session &gt; checks expiry on reads even if the browser timer has not run" time="0.0015698">
+        </testcase>
+        <testcase classname="src/lib/auth.test.ts" name="centralized auth session &gt; removes expired sessions during restoration and reports expiration" time="0.0013402">
+        </testcase>
+        <testcase classname="src/lib/auth.test.ts" name="centralized auth session &gt; discards malformed storage: {broken" time="0.0011553">
+        </testcase>
+        <testcase classname="src/lib/auth.test.ts" name="centralized auth session &gt; discards malformed storage: null" time="0.0009347">
+        </testcase>
+        <testcase classname="src/lib/auth.test.ts" name="centralized auth session &gt; discards malformed storage: {}" time="0.0011126">
+        </testcase>
+        <testcase classname="src/lib/auth.test.ts" name="centralized auth session &gt; discards malformed storage: {&quot;token&quot;:&quot;&quot;,&quot;expires_at&quot;:&quot;invalid&quot;}" time="0.0011532">
+        </testcase>
+        <testcase classname="src/lib/auth.test.ts" name="centralized auth session &gt; does not accept an already expired login response" time="0.0018986">
+        </testcase>
+        <testcase classname="src/lib/auth.test.ts" name="centralized auth session &gt; can use an in-memory session when persistence is blocked" time="0.0054795">
+        </testcase>
+        <testcase classname="src/lib/auth.test.ts" name="centralized auth session &gt; handles blocked storage on startup without crashing" time="0.0015442">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/LoginPage.test.tsx" timestamp="2026-11-08T16:30:57.144Z" hostname="PDM" tests="13" failures="0" errors="0" skipped="0" time="8.82467">
+        <testcase classname="src/pages/LoginPage.test.tsx" name="admin login page &gt; renders an accessible password form and validates required fields without a request" time="0.2852288">
+        </testcase>
+        <testcase classname="src/pages/LoginPage.test.tsx" name="admin login page &gt; logs in, persists only the session, clears old query data and replaces the route with dashboard" time="0.6147542">
+        </testcase>
+        <testcase classname="src/pages/LoginPage.test.tsx" name="admin login page &gt; shows pending state, disables duplicate submissions and recovers after rejection" time="0.7666439">
+        </testcase>
+        <testcase classname="src/pages/LoginPage.test.tsx" name="admin login page &gt; returns to a safe protected page after login: /search?trace_id=abc#results" time="0.6996034">
+        </testcase>
+        <testcase classname="src/pages/LoginPage.test.tsx" name="admin login page &gt; returns to a safe protected page after login: /clusters/c1" time="0.669488">
+        </testcase>
+        <testcase classname="src/pages/LoginPage.test.tsx" name="admin login page &gt; returns to a safe protected page after login: //external.example" time="0.6797214">
+        </testcase>
+        <testcase classname="src/pages/LoginPage.test.tsx" name="admin login page &gt; returns to a safe protected page after login: https://external.example" time="0.6660757">
+        </testcase>
+        <testcase classname="src/pages/LoginPage.test.tsx" name="admin login page &gt; returns to a safe protected page after login: /login" time="0.6680153">
+        </testcase>
+        <testcase classname="src/pages/LoginPage.test.tsx" name="admin login page &gt; uses a generic error for invalid credentials and removes any previous session" time="0.7426742">
+        </testcase>
+        <testcase classname="src/pages/LoginPage.test.tsx" name="admin login page &gt; shows a clear network error and allows retry" time="0.7526276">
+        </testcase>
+        <testcase classname="src/pages/LoginPage.test.tsx" name="admin login page &gt; handles unavailable authentication without displaying backend error details" time="0.7209659">
+        </testcase>
+        <testcase classname="src/pages/LoginPage.test.tsx" name="admin login page &gt; explains an expired restored session and accepts a fresh login" time="0.7443031">
+        </testcase>
+        <testcase classname="src/pages/LoginPage.test.tsx" name="admin login page &gt; never redirects or persists an already expired response" time="0.8107721">
+        </testcase>
+    </testsuite>
+</testsuites>

@@ -1,0 +1,12 @@
+{
+  "command": [
+    "node",
+    "node_modules/typescript/bin/tsc",
+    "-b"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 0,
+  "timed_out": false,
+  "recorded_at_utc": "2026-11-08T16:30:57.205808+00:00",
+  "environment_overrides": {}
+}

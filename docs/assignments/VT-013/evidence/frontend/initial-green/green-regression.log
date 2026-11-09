@@ -1,0 +1,118 @@
+{
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--reporter=default",
+    "--reporter=junit",
+    "--outputFile=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\frontend\\green-regression.junit.xml"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 1,
+  "timed_out": false,
+  "recorded_at_utc": "2026-11-08T16:26:58.657673+00:00"
+}
+
+
+ RUN  v5.0.3 D:/SE/Log-Anomaly-Explorer/web
+
+ ✓ src/lib/auth.test.ts (12 tests) 27ms
+ ✓ src/lib/auth-navigation.test.ts (19 tests) 10ms
+ ✓ src/lib/assistant-undo.test.ts (15 tests) 26ms
+ ❯ src/lib/api.test.ts (40 tests | 1 failed) 61ms
+   ✓ query-api client (11)
+     ✓ searchLogs: goi dung endpoint /search voi cac param duoc truyen 7ms
+     ✓ searchLogs: khong gui param rong/undefined len query string 1ms
+     ✓ listClusters: loc theo status dung tham so 1ms
+     ✓ getCluster: nem ApiError voi status 404 khi khong tim thay cum 2ms
+     ✓ getCluster: gui logs_limit khi can tai them log 1ms
+     ✓ getCluster: khong gui logs_limit/logs_offset khi khong truyen 1ms
+     ✓ getClusterHistory: goi dung endpoint /clusters/{id}/history 2ms
+     ✓ nem ApiError (status 0) khi fetch that bai hoan toan (vd. backend sap/mixed content) 2ms
+     ✓ getAssistantConversation: goi dung endpoint, tra ve messages rong khi chua hoi lan nao 5ms
+     ✓ sendAssistantMessage: POST dung body JSON, tra ve toan bo hoi thoai moi 2ms
+     ✓ sendAssistantMessage: nem ApiError voi status 503 khi thieu AZURE_OPENAI_API_KEY 1ms
+   ✓ admin login and authenticated API requests (25)
+     ✓ posts JSON credentials to the configured API base URL without putting them in a URL 5ms
+     ✓ uses a generic login error for HTTP 401 and never saves its body 1ms
+     ✓ uses a generic login error for HTTP 403 and never saves its body 1ms
+     ✓ reports login network failures without exposing request details 1ms
+     ✓ rejects a malformed successful response 1ms
+     ✓ rejects a malformed successful response 1ms
+     ✓ rejects a malformed successful response 0ms
+     ✓ attaches the current token to shared query requests 1ms
+     ✓ clears a rejected session on 401 so the router can redirect 1ms
+     ✓ does not let a late 401 from an old request erase a newer login 1ms
+     ✓ sends Bearer auth only to the configured protected endpoint /search 1ms
+     ✓ sends Bearer auth only to the configured protected endpoint /clusters 0ms
+     ✓ sends Bearer auth only to the configured protected endpoint /clusters/c1 0ms
+     ✓ sends Bearer auth only to the configured protected endpoint /clusters/c1/history 0ms
+     ✓ sends Bearer auth only to the configured protected endpoint /assistant/clusters/c1/conversation 0ms
+     ✓ sends Bearer auth only to the configured protected endpoint /assistant/clusters/c1/conversation/messages 0ms
+     ✓ never attaches an existing token to the public login request 0ms
+     ✓ clears a rejected Assistant session through the shared authenticated client 1ms
+     ✓ clears a rejected Assistant session through the shared authenticated client 0ms
+     ✓ does not fetch when anonymous or expired 2ms
+     ✓ rejects cluster IDs that normalize outside the protected endpoint: .. 1ms
+     ✓ rejects cluster IDs that normalize outside the protected endpoint: . 1ms
+     ✓ keeps URL-like cluster IDs on the configured API, never the external service 1ms
+     ✓ does not return data from a request that finishes after logout 1ms
+     ✓ passes cancellation through to fetch without changing AbortError to a network error 1ms
+   ❯ getJaegerTraceUrl (4)
+     × tra ve null khi VITE_JAEGER_URL khong duoc cau hinh (mac dinh luc test) 6ms
+     ✓ tra ve null khi trace_id rong, du da cau hinh JAEGER_URL 1ms
+     ✓ ghep dung duong dan /trace/{id} khi da cau hinh JAEGER_URL 1ms
+     ✓ bo dau / cuoi cua VITE_JAEGER_URL neu co, tranh duong dan bi lap dau // 1ms
+ ✓ src/components/StatusBadge.test.tsx (4 tests) 57ms
+ ✓ src/components/dashboard/TimeRangeControl.test.ts (2 tests) 17ms
+ ✓ src/components/incident/AssistantPanel.test.tsx (22 tests) 3113ms
+   ✓ VT-013 Assistant Undo UI and React Query cache (22)
+     ✓ F-06 pending Undo blocks double-clicks, Send and Enter without discarding the draft 435ms
+     ✓ F-06 pending Send blocks Undo and duplicate Sends 325ms
+     ✓ F-08 Stop aborts only Send, restores draft, GET-reconciles and never calls Undo 509ms
+ ✓ src/pages/LoginPage.test.tsx (13 tests) 6502ms
+   ✓ admin login page (13)
+     ✓ logs in, persists only the session, clears old query data and replaces the route with dashboard 512ms
+     ✓ shows pending state, disables duplicate submissions and recovers after rejection 548ms
+     ✓ returns to a safe protected page after login: /search?trace_id=abc#results 549ms
+     ✓ returns to a safe protected page after login: /clusters/c1 496ms
+     ✓ returns to a safe protected page after login: //external.example 521ms
+     ✓ returns to a safe protected page after login: https://external.example 539ms
+     ✓ returns to a safe protected page after login: /login 505ms
+     ✓ uses a generic error for invalid credentials and removes any previous session 515ms
+     ✓ shows a clear network error and allows retry 495ms
+     ✓ handles unavailable authentication without displaying backend error details 519ms
+     ✓ explains an expired restored session and accepts a fresh login 541ms
+     ✓ never redirects or persists an already expired response 519ms
+ ✓ src/App.test.tsx (12 tests) 1343ms
+   ✓ frontend authentication integration (12)
+     ✓ allows an admin to load the dashboard and use the existing sidebar navigation 548ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/api.test.ts > getJaegerTraceUrl > tra ve null khi VITE_JAEGER_URL khong duoc cau hinh (mac dinh luc test)
+AssertionError: expected 'http://localhost:16686/trace/abc123' to be null
+
+- Expected:
+null
+
++ Received:
+"http://localhost:16686/trace/abc123"
+
+ ❯ src/lib/api.test.ts:357:41
+    355|     // Khong co .env.local/.env.test trong repo nen VITE_JAEGER_URL lu…
+    356|     // undefined - dung lai module da import san (khong can stub).
+    357|     expect(getJaegerTraceUrl("abc123")).toBeNull();
+       |                                         ^
+    358|   });
+    359|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 8 passed (9)
+      Tests  1 failed | 138 passed (139)
+   Start at  23:26:59
+   Duration  31.09s (import 43%, environment 35%, tests 15%, setup 6%, transform 2%)
+
+JUNIT report written to D:/SE/Log-Anomaly-Explorer/docs/assignments/VT-013/evidence/frontend/green-regression.junit.xml

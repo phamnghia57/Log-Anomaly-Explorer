@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Bot, Loader2, Search, Send, Square, User } from "lucide-react";
-import type { AssistantMessage } from "@/lib/api";
-import { useAssistantConversation, useSendAssistantMessage } from "@/lib/queries";
+import { useIsMutating } from "@tanstack/react-query";
+import { Bot, Loader2, Search, Send, Square, Undo2, User } from "lucide-react";
+import { ApiError, isAssistantRevision, type AssistantMessage } from "@/lib/api";
+import { useAssistantConversation, useSendAssistantMessage, useUndoAssistantSend } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -51,9 +52,18 @@ function MessageBubble({ message }: { message: AssistantMessage }) {
 // "AI Assistant"). Hoi thoai duoc luu theo cluster_id, mo lai Incident View
 // van thay lai cau hoi/tra loi cu.
 export function AssistantPanel({ clusterId }: { clusterId: string }) {
+  // Route changes must not carry a draft/controller/mutation into another cluster.
+  return <ConversationPanel key={clusterId} clusterId={clusterId} />;
+}
+
+function ConversationPanel({ clusterId }: { clusterId: string }) {
   const [draft, setDraft] = useState("");
-  const { data, isLoading, isError } = useAssistantConversation(clusterId);
+  const [hasStopped, setHasStopped] = useState(false);
+  const { data, isLoading, isError, isFetching, refetch } = useAssistantConversation(clusterId);
   const mutation = useSendAssistantMessage(clusterId);
+  const undo = useUndoAssistantSend(clusterId);
+  const isBusy = useIsMutating({ mutationKey: ["assistant-conversation", clusterId], exact: true }) > 0;
+  const actionRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   // AbortController cho nut "Dung": cho phep nguoi dung huy cau hoi dang cho
   // (vd. model dong reasoning suy luan qua lau) de hoi lai cau khac, thay vi
@@ -63,10 +73,13 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
 
   const messages = data?.messages ?? [];
   const isAbortError = mutation.error instanceof DOMException && mutation.error.name === "AbortError";
+  const canUndo = data?.undo_available === true && isAssistantRevision(data.revision) && !isError && !isBusy;
+
+  useEffect(() => () => controllerRef.current?.abort(), []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length, mutation.isPending]);
+  }, [messages.length, mutation.isPending, undo.isPending]);
 
   // Loi that (khong phai tu nguoi dung bam Dung): tra lai noi dung da go,
   // tranh nguoi dung phai go lai tu dau khi muon thu lai (vd. timeout voi
@@ -78,29 +91,59 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
     }
   }, [mutation.isError, isAbortError]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const text = draft.trim();
-    if (!text || mutation.isPending) return;
+    if (!text || isBusy || actionRef.current) return;
+    actionRef.current = true;
+    undo.reset();
+    setHasStopped(false);
     setDraft("");
     pendingTextRef.current = text;
     const controller = new AbortController();
     controllerRef.current = controller;
-    mutation.mutate({ message: text, signal: controller.signal });
+    try {
+      await mutation.mutateAsync({ message: text, signal: controller.signal });
+      pendingTextRef.current = "";
+    } catch {
+      // The mutation renders errors and reconciles; never retry here.
+    } finally {
+      actionRef.current = false;
+      controllerRef.current = null;
+    }
+  };
+
+  const handleUndo = async () => {
+    if (!canUndo || !isAssistantRevision(data?.revision) || actionRef.current) return;
+    actionRef.current = true;
+    mutation.reset();
+    try {
+      await undo.mutateAsync(data.revision);
+    } catch {
+      // Keep history visible until the mutation's GET reconciliation completes.
+    } finally {
+      actionRef.current = false;
+    }
   };
 
   const handleStop = () => {
     controllerRef.current?.abort();
+    setHasStopped(true);
     // Tra lai noi dung da go de nguoi dung khong phai nhap lai tu dau.
     setDraft(pendingTextRef.current);
   };
 
   return (
     <div className="flex h-[28rem] flex-col rounded-xl border bg-card">
-      <div className="border-b px-4 py-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-2.5">
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
           <Bot className="h-4 w-4" />
           Điều tra với AI Assistant
         </h2>
+        <Button variant="ghost" size="sm" onClick={handleUndo} disabled={!canUndo}
+          aria-label="Hoàn tác lượt gửi" aria-busy={undo.isPending}>
+          {undo.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : <Undo2 className="h-3.5 w-3.5" aria-hidden="true" />}
+          Hoàn tác lượt gửi
+        </Button>
       </div>
 
       <ScrollArea className="flex-1 px-4">
@@ -122,7 +165,7 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
         <div className="py-2">
           {messages.map((message, index) => (
             // Hoi thoai khong co id rieng tung message (xem contract) - dung
-            // index la hop ly vi danh sach chi them vao cuoi, khong sap xep lai.
+            // bubbles khong co local state; Undo thay toan bo array tu server.
             <MessageBubble key={index} message={message} />
           ))}
         </div>
@@ -133,7 +176,8 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
               <Loader2 className="h-3 w-3 animate-spin" />
               AI đang điều tra… (có thể mất đến 1–2 phút với câu hỏi cần tra cứu thêm)
             </span>
-            <Button variant="ghost" size="sm" className="h-6 gap-1 px-2 text-xs" onClick={handleStop}>
+            <Button variant="ghost" size="sm" className="h-6 gap-1 px-2 text-xs" onClick={handleStop}
+              disabled={hasStopped}>
               <Square className="h-3 w-3" />
               Dừng
             </Button>
@@ -151,6 +195,26 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
           </div>
         )}
 
+        {isAbortError && (
+          <p role="status" className="py-2 text-xs text-muted-foreground">
+            Đã dừng chờ phản hồi. Máy chủ có thể vẫn xử lý; hãy kiểm tra hội thoại trước khi gửi lại.
+          </p>
+        )}
+
+        {undo.isError && (
+          <p role="alert" className="my-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+            {undo.error instanceof ApiError && undo.error.status === 409
+              ? "Hội thoại đã thay đổi hoặc không còn lượt gửi để hoàn tác. Hãy kiểm tra trạng thái mới nhất."
+              : "Chưa xác nhận được kết quả hoàn tác. Hãy kiểm tra hội thoại đã tải lại trước khi thử tiếp."}
+          </p>
+        )}
+
+        {(isError || undo.isError) && (
+          <Button variant="ghost" size="sm" disabled={isBusy || isFetching} onClick={() => { undo.reset(); void refetch(); }}>
+            Tải lại hội thoại
+          </Button>
+        )}
+
         <div ref={bottomRef} />
       </ScrollArea>
 
@@ -165,12 +229,13 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
             }
           }}
           placeholder="Hỏi về nguyên nhân, cách sửa…"
-          disabled={mutation.isPending}
+          disabled={isBusy}
+          aria-label="Câu hỏi cho AI Assistant"
         />
         <Button
           size="sm"
           onClick={handleSend}
-          disabled={!draft.trim() || mutation.isPending}
+          disabled={!draft.trim() || isBusy}
           aria-label="Gửi câu hỏi"
         >
           <Send className="h-4 w-4" />

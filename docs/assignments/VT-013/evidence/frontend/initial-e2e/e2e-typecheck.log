@@ -1,0 +1,24 @@
+{
+  "command": [
+    "node",
+    "node_modules/typescript/bin/tsc",
+    "--ignoreConfig",
+    "--noEmit",
+    "--target",
+    "es2023",
+    "--module",
+    "nodenext",
+    "--moduleResolution",
+    "nodenext",
+    "--skipLibCheck",
+    "--types",
+    "node",
+    "playwright.vt013.config.ts",
+    "e2e/integration/assistant-undo.spec.ts"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 0,
+  "timed_out": false,
+  "recorded_at_utc": "2026-11-08T16:36:08.743977+00:00",
+  "environment_overrides": {}
+}

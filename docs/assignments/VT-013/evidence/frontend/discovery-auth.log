@@ -1,0 +1,20 @@
+{
+  "command": [
+    "node",
+    "node_modules/@playwright/test/cli.js",
+    "test",
+    "--list",
+    "--config=playwright.auth-integration.config.ts",
+    "--reporter=list"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 0,
+  "timed_out": false,
+  "recorded_at_utc": "2026-11-08T16:44:43.315722+00:00",
+  "environment_overrides": {}
+}
+
+Listing tests:
+  [chromium] › auth.spec.ts:15:1 › seeded admin logs in via web, accesses every protected API, then logs out
+  [chromium] › auth.spec.ts:61:1 › real API rejects expired/invalid JWTs and its 401 clears the browser session
+Total: 2 tests in 1 file

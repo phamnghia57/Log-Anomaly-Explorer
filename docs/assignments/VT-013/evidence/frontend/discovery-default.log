@@ -1,0 +1,28 @@
+{
+  "command": [
+    "node",
+    "node_modules/@playwright/test/cli.js",
+    "test",
+    "--list",
+    "--config=playwright.config.ts",
+    "--reporter=list"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 0,
+  "timed_out": false,
+  "recorded_at_utc": "2026-11-08T16:44:42.110584+00:00",
+  "environment_overrides": {}
+}
+
+Listing tests:
+  [chromium] › auth.spec.ts:7:1 › deep link returns after login, navigation works, and logout blocks history access
+  [chromium] › auth.spec.ts:41:1 › 401 clears auth, redirects to login, and a failed login stays on the form
+  [chromium] › auth.spec.ts:66:1 › expiration removes a protected page without waiting for an API request
+  [chromium] › auth.spec.ts:81:1 › mobile admin menu logs out and synchronizes another open tab
+  [chromium] › dashboard.spec.ts:3:1 › dashboard tai duoc va hien sidebar + tieu de
+  [chromium] › dashboard.spec.ts:9:1 › doi facet trang thai khong lam vo trang (Alerted/Anomalous/Normal)
+  [chromium] › incident-view.spec.ts:4:1 › bam vao 1 cum -> xem Incident View -> bam trace -> nhay sang Search loc dung
+  [chromium] › login.spec.ts:5:1 › login persists a session, redirects to dashboard and restores it after reload
+  [chromium] › login.spec.ts:36:1 › mobile login shows a generic failure and keeps passwords out of storage
+  [chromium] › login.spec.ts:55:1 › an expired persisted session prompts a new login
+Total: 10 tests in 4 files

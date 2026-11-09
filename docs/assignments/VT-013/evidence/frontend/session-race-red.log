@@ -1,0 +1,113 @@
+{
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/components/incident/AssistantPanel.test.tsx",
+    "-t",
+    "F-10",
+    "--reporter=default",
+    "--reporter=junit",
+    "--outputFile=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\frontend\\session-race-red.junit.xml"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 1,
+  "timed_out": false,
+  "recorded_at_utc": "2026-11-08T16:30:05.409045+00:00",
+  "environment_overrides": {
+    "VITE_JAEGER_URL": ""
+  }
+}
+
+
+ RUN  v5.0.3 D:/SE/Log-Anomaly-Explorer/web
+
+ ❯ src/components/incident/AssistantPanel.test.tsx (23 tests | 1 failed | 22 skipped) 348ms
+   ❯ VT-013 Assistant Undo UI and React Query cache (23)
+     ↓ F-01 Undo availability flag=true revision="1:0"
+     ↓ F-01 Undo availability flag=true revision="9223372036854775807:9223372036854775807"
+     ↓ F-01 Undo availability flag=false revision="1:7"
+     ↓ F-01 Undo availability flag=true revision=null
+     ↓ F-01 Undo availability flag=true revision=""
+     ↓ F-01 Undo availability flag=true revision="01:0"
+     ↓ F-01 Undo availability flag=true revision="1:0\n"
+     ↓ F-01 Undo availability flag=true revision="1:9223372036854775808"
+     ↓ F-01 Undo availability flag=true revision=7
+     ↓ F-01 Undo availability flag="true" revision="1:7"
+     ↓ F-01 Undo availability flag=undefined revision=undefined
+     ↓ F-02/03 keyboard Undo uses current authenticated revision and exact server history, without optimistic deletion
+     ↓ F-03 first-Send Undo accepts the server's persisted empty history
+     ↓ F-04 HTTP 409 GET-reconciles newer messages, never guesses or retries Undo
+     ↓ F-05 503 preserves history until GET confirms the uncertain outcome
+     ↓ F-05 network preserves history until GET confirms the uncertain outcome
+     ↓ F-05 failed reconciliation retains messages and disables stale Undo until a manual GET succeeds
+     ↓ F-06 pending Undo blocks double-clicks, Send and Enter without discarding the draft
+     ↓ F-06 pending Send blocks Undo and duplicate Sends
+     ↓ F-07 a new QueryClient remount loads the restored history using GET
+     ↓ F-08 Stop aborts only Send, restores draft, GET-reconciles and never calls Undo
+     ↓ F-09 a late GET started before Undo cannot overwrite its confirmed response
+     × F-10 logout during a confirmed Undo cache update cannot repopulate cleared private state 343ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/incident/AssistantPanel.test.tsx > VT-013 Assistant Undo UI and React Query cache > F-10 logout during a confirmed Undo cache update cannot repopulate cleared private state
+AssertionError: expected { cluster_id: 'c1', …(3) } to be undefined
+
+- Expected:
+undefined
+
++ Received:
+{
+  "cluster_id": "c1",
+  "messages": [
+    {
+      "content": "Original question 🔎",
+      "created_at": "2026-11-08T00:00:00+00:00",
+      "role": "user",
+    },
+    {
+      "content": null,
+      "created_at": "2026-11-08T00:00:00+00:00",
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "arguments": "{}",
+          "id": "call-1",
+          "name": "get_cluster_history",
+        },
+      ],
+    },
+    {
+      "content": "[]",
+      "created_at": "2026-11-08T00:00:00+00:00",
+      "name": "get_cluster_history",
+      "role": "tool",
+      "tool_call_id": "call-1",
+    },
+    {
+      "content": "Original answer",
+      "created_at": "2026-11-08T00:00:00+00:00",
+      "role": "assistant",
+    },
+  ],
+  "revision": "1:8",
+  "undo_available": false,
+}
+
+ ❯ src/components/incident/AssistantPanel.test.tsx:273:38
+    271|     await act(async () => pendingUndo.resolve(json(restored)));
+    272|     await waitFor(() => expect(client.isMutating()).toBe(0));
+    273|     expect(client.getQueryData(KEY)).toBeUndefined();
+       |                                      ^
+    274|     expect(posts("undo")).toHaveLength(1);
+    275|     await act(async () => background.resolve(json(completed)));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 22 skipped (23)
+   Start at  23:30:06
+   Duration  3.46s (environment 44%, import 31%, tests 11%, setup 8%, transform 6%)
+
+JUNIT report written to D:/SE/Log-Anomaly-Explorer/docs/assignments/VT-013/evidence/frontend/session-race-red.junit.xml

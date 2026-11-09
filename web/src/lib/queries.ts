@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  ApiError,
   type SearchParams,
   getAssistantConversation,
   getCluster,
@@ -7,7 +8,9 @@ import {
   listClusters,
   searchLogs,
   sendAssistantMessage,
+  undoAssistantSend,
 } from "./api";
+import { getSession } from "./auth";
 
 export function useClusters(since?: string, refetchIntervalMs: number | false = 30_000) {
   // Khong loc `status` o day: Dashboard can danh sach DAY DU trong khoang
@@ -56,13 +59,59 @@ export function useAssistantConversation(clusterId: string | undefined) {
 
 export function useSendAssistantMessage(clusterId: string) {
   const queryClient = useQueryClient();
+  const queryKey = ["assistant-conversation", clusterId];
   return useMutation({
+    mutationKey: queryKey,
+    retry: false,
     mutationFn: ({ message, signal }: { message: string; signal?: AbortSignal }) =>
       sendAssistantMessage(clusterId, message, signal),
+    onMutate: async () => {
+      const token = getSession()?.token;
+      await queryClient.cancelQueries({ queryKey, exact: true });
+      return { token };
+    },
     // Ghi thang vao cache thay vi invalidate+refetch: response da la TOAN BO
     // hoi thoai moi nhat (xem api-contract.md), khong can goi lai GET.
-    onSuccess: (conversation) => {
-      queryClient.setQueryData(["assistant-conversation", clusterId], conversation);
+    onSuccess: async (conversation, _variables, context) => {
+      await queryClient.cancelQueries({ queryKey, exact: true });
+      if (context?.token && getSession()?.token === context.token) {
+        queryClient.setQueryData(queryKey, conversation);
+      }
+    },
+    onError: async (error) => {
+      if (error instanceof ApiError && error.status === 401) return;
+      // Stop cancels browser waiting, not a potentially committed server Send.
+      await queryClient.cancelQueries({ queryKey, exact: true });
+      await queryClient.invalidateQueries({ queryKey, exact: true });
+    },
+  });
+}
+
+export function useUndoAssistantSend(clusterId: string) {
+  const queryClient = useQueryClient();
+  const queryKey = ["assistant-conversation", clusterId];
+  return useMutation({
+    mutationKey: queryKey,
+    // Even a global retry policy must not repeat an uncertain mutation.
+    retry: false,
+    mutationFn: (expectedRevision: string) => undoAssistantSend(clusterId, expectedRevision),
+    onMutate: async () => {
+      const token = getSession()?.token;
+      await queryClient.cancelQueries({ queryKey, exact: true });
+      return { token };
+    },
+    onSuccess: async (conversation, _variables, context) => {
+      await queryClient.cancelQueries({ queryKey, exact: true });
+      if (context?.token && getSession()?.token === context.token) {
+        queryClient.setQueryData(queryKey, conversation);
+      }
+    },
+    onError: async (error) => {
+      if (error instanceof ApiError && error.status === 401) return;
+      // 409 may mean newer history; 503/network failure may have committed.
+      // Retain current messages until an authenticated GET confirms the state.
+      await queryClient.cancelQueries({ queryKey, exact: true });
+      await queryClient.invalidateQueries({ queryKey, exact: true });
     },
   });
 }

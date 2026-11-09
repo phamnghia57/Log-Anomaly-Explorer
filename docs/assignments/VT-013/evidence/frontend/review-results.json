@@ -1,0 +1,632 @@
+{
+  "recorded_at_utc": "2026-11-08T16:40:55.641075+00:00",
+  "head": "17ae52feae4e3f799f2249478ac2434ab869ceba",
+  "branch": "feat/vt013-undo-manhpd",
+  "executed_counts": {
+    "red-targeted": {
+      "cases": 37,
+      "passed": 0,
+      "failed": 37,
+      "errors": 0,
+      "skipped": 0
+    },
+    "session-race-red": {
+      "cases": 23,
+      "passed": 0,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 22
+    },
+    "green-targeted": {
+      "cases": 38,
+      "passed": 38,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "green-regression": {
+      "cases": 140,
+      "passed": 140,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "e2e": {
+      "cases": 1,
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "commands": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--stat"
+      ],
+      "exit_code": 0,
+      "stdout": " web/src/components/incident/AssistantPanel.tsx | 91 ++++++++++++++++++++++----\n web/src/lib/api.ts                             | 24 ++++++-\n web/src/lib/queries.ts                         | 53 ++++++++++++++-\n 3 files changed, 152 insertions(+), 16 deletions(-)\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--name-only"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "stdout": "17ae52feae4e3f799f2249478ac2434ab869ceba\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "branch",
+        "--show-current"
+      ],
+      "exit_code": 0,
+      "stdout": "feat/vt013-undo-manhpd\n",
+      "stderr": ""
+    }
+  ],
+  "production_sha256": {
+    "web/src/lib/api.ts": "6fa4b292c78763dcc7e33da1fabecef7a0842cbb61cdd34b5b04ef3ee3787442",
+    "web/src/lib/queries.ts": "fd97c6d54d136e823581e3a032f70ffe6582242e9b14e76263b93413a6793abc",
+    "web/src/components/incident/AssistantPanel.tsx": "3a9acb4cc16fee95150aedaf0a719d6e761cae05a37385c1bc79141e9a3dd67c"
+  },
+  "new_source_sha256": {
+    "web/src/lib/assistant-undo.test.ts": "dd0ebeaefefa2fb76daf56c3737d0d1d497cfc41b3ab695d62a772165fa5134d",
+    "web/src/components/incident/AssistantPanel.test.tsx": "f73e63e28d4b52546da512b25e036c2c008554b6030e3e3a444bca48483d1769",
+    "web/playwright.vt013.config.ts": "7b8f87bfc6c509db15c37a40b7acb9a186120879951309c67adfaa24a90b2012",
+    "docs/assignments/VT-013/evidence/frontend/run_frontend.py": "e7d669912c15af21dffc2574f2cbed4d1bd643edc62d8cc0d89fc419956e460f",
+    "docs/assignments/VT-013/evidence/frontend/run_e2e.py": "9795a3423ca37ee0aacc63ff49d2eef2a74a112e96aae5d8c4b0b6f7f6d144b3",
+    "web/e2e/integration/assistant-undo.pw.ts": "3866912350951237a69620b73d4d4a2a4124fc6791911f520b092c95a33488d1"
+  },
+  "app_checks": [
+    {
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/lib/assistant-undo.test.ts",
+        "src/components/incident/AssistantPanel.test.tsx",
+        "--reporter=default",
+        "--reporter=junit",
+        "--outputFile=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\frontend\\green-targeted.junit.xml"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0,
+      "timed_out": false,
+      "recorded_at_utc": "2026-11-08T16:30:35.578862+00:00",
+      "environment_overrides": {
+        "VITE_JAEGER_URL": ""
+      }
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--reporter=default",
+        "--reporter=junit",
+        "--outputFile=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\frontend\\green-regression.junit.xml"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0,
+      "timed_out": false,
+      "recorded_at_utc": "2026-11-08T16:30:43.053498+00:00",
+      "environment_overrides": {
+        "VITE_JAEGER_URL": ""
+      }
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-b"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0,
+      "timed_out": false,
+      "recorded_at_utc": "2026-11-08T16:30:57.205808+00:00",
+      "environment_overrides": {}
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/oxlint/bin/oxlint"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0,
+      "timed_out": false,
+      "recorded_at_utc": "2026-11-08T16:31:01.459649+00:00",
+      "environment_overrides": {}
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/vite/bin/vite.js",
+        "build"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0,
+      "timed_out": false,
+      "recorded_at_utc": "2026-11-08T16:31:01.618374+00:00",
+      "environment_overrides": {}
+    }
+  ],
+  "extra_checks": [
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--list",
+        "--config=playwright.config.ts",
+        "--reporter=list"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0,
+      "timed_out": false,
+      "recorded_at_utc": "2026-11-08T16:44:42.110584+00:00",
+      "environment_overrides": {}
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--list",
+        "--config=playwright.auth-integration.config.ts",
+        "--reporter=list"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0,
+      "timed_out": false,
+      "recorded_at_utc": "2026-11-08T16:44:43.315722+00:00",
+      "environment_overrides": {}
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--list",
+        "--config=playwright.vt013.config.ts",
+        "--reporter=list"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0,
+      "timed_out": false,
+      "recorded_at_utc": "2026-11-08T16:44:44.358381+00:00",
+      "environment_overrides": {}
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--ignoreConfig",
+        "--noEmit",
+        "--target",
+        "es2023",
+        "--module",
+        "nodenext",
+        "--moduleResolution",
+        "nodenext",
+        "--skipLibCheck",
+        "--types",
+        "node",
+        "playwright.vt013.config.ts",
+        "e2e/integration/assistant-undo.pw.ts"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0,
+      "timed_out": false,
+      "recorded_at_utc": "2026-11-08T16:44:45.309513+00:00",
+      "environment_overrides": {}
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/oxlint/bin/oxlint"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0,
+      "timed_out": false,
+      "recorded_at_utc": "2026-11-08T16:44:46.674660+00:00",
+      "environment_overrides": {}
+    }
+  ],
+  "e2e": {
+    "started_at_utc": "2026-11-08T16:44:59.706952+00:00",
+    "commands": [
+      {
+        "command": [
+          "docker",
+          "version",
+          "--format",
+          "{{json .}}"
+        ],
+        "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "docker",
+          "run",
+          "-d",
+          "--name",
+          "vt013-frontend-1aca1664f9904907",
+          "--label",
+          "vt013.frontend=1aca1664f9904907",
+          "--publish",
+          "127.0.0.1::9200",
+          "--memory",
+          "2g",
+          "--ulimit",
+          "nofile=65536:65536",
+          "--tmpfs",
+          "/usr/share/opensearch/data:rw,uid=1000,gid=1000,size=1g",
+          "--env",
+          "discovery.type=single-node",
+          "--env",
+          "cluster.name=vt013-frontend-1aca1664f9904907",
+          "--env",
+          "DISABLE_SECURITY_PLUGIN=true",
+          "--env",
+          "DISABLE_INSTALL_DEMO_CONFIG=true",
+          "--env",
+          "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m",
+          "opensearchproject/opensearch:2.17.1"
+        ],
+        "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "docker",
+          "inspect",
+          "c4ad641fc63ef1b5dcccac058f367cac80df6b27d751e8876913d3b06b5dca0c"
+        ],
+        "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "node",
+          "node_modules/@playwright/test/cli.js",
+          "test",
+          "--config=playwright.vt013.config.ts"
+        ],
+        "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "docker",
+          "inspect",
+          "c4ad641fc63ef1b5dcccac058f367cac80df6b27d751e8876913d3b06b5dca0c"
+        ],
+        "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "docker",
+          "rm",
+          "-f",
+          "c4ad641fc63ef1b5dcccac058f367cac80df6b27d751e8876913d3b06b5dca0c"
+        ],
+        "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+        "exit_code": 0
+      }
+    ],
+    "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+    "opensearch-py": "3.2.0",
+    "result": "PASS",
+    "backend_source_sha256": {
+      "query-api/src/assistant/router.py": "339e851612f52990a2d0292c71b034c9e5981f19813f19cc3d3b7e51ab241968",
+      "query-api/src/assistant/storage.py": "ddaaf6057906c6d7242b1ebcdc79ff43101606d127c31f56575504ea1b2240e2"
+    },
+    "opensearch": {
+      "name": "c4ad641fc63e",
+      "cluster_name": "vt013-frontend-1aca1664f9904907",
+      "cluster_uuid": "2jvLZuGYRlm5beVXVlYqeg",
+      "version": {
+        "distribution": "opensearch",
+        "number": "2.17.1",
+        "build_type": "tar",
+        "build_hash": "1893d20797e30110e5877170e44d42275ce5951e",
+        "build_date": "2024-09-26T21:59:32.078798875Z",
+        "build_snapshot": false,
+        "lucene_version": "9.11.1",
+        "minimum_wire_compatibility_version": "7.10.0",
+        "minimum_index_compatibility_version": "7.0.0"
+      },
+      "tagline": "The OpenSearch Project: https://opensearch.org/"
+    },
+    "vite_command": [
+      "node",
+      "node_modules/vite/bin/vite.js",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "56665",
+      "--strictPort"
+    ],
+    "isolation": {
+      "container_id": "c4ad641fc63ef1b5dcccac058f367cac80df6b27d751e8876913d3b06b5dca0c",
+      "cluster_name": "vt013-frontend-1aca1664f9904907",
+      "url": "http://127.0.0.1:53985",
+      "index_prefix": "vt013-frontend-1aca1664f9904907",
+      "api_url": "http://127.0.0.1:56648",
+      "web_url": "http://127.0.0.1:56665"
+    },
+    "raw_persistence_assertions": "exact original messages, consumed snapshot, creation time, reload revision",
+    "owned_container_removed": true,
+    "finished_at_utc": "2026-11-08T16:45:32.687048+00:00"
+  },
+  "chrome_version": "156.0.8078.80",
+  "new_frontend_lint_warnings": 0,
+  "existing_lint_warnings": 9,
+  "source_review": [
+    "Existing authenticated queryJson reused unchanged for Undo",
+    "Canonical bounded revision forwarded unchanged; no client-generated version",
+    "No optimistic message/snapshot update; server arrays replace cache",
+    "Both Assistant mutations explicitly retry false, including global retry policy override",
+    "Stale GET cancelled before mutation and before response cache update",
+    "Non-401 failures and Stop await GET reconciliation; failed GET retains data and disables Undo",
+    "Native accessible button, keyboard Enter, disabled state and aria-busy covered",
+    "Logout race corrected test-first by rechecking originating session before cache write",
+    "MessageBubble rendering/tool handling unchanged; panel remounts per cluster",
+    "No backend/dependency/test-expectation change; no mutation/performance/commit/push/PR action",
+    "Standalone .pw.ts discovery isolates the new scenario from default/auth Playwright suites; both existing discovery commands verified unchanged"
+  ],
+  "new_source_whitespace_checks": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "web/src/lib/assistant-undo.test.ts"
+      ],
+      "exit_code": 1,
+      "whitespace_diagnostics": "",
+      "note": "--no-index implies exit-code; 1 means file differs from /dev/null"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "web/src/components/incident/AssistantPanel.test.tsx"
+      ],
+      "exit_code": 1,
+      "whitespace_diagnostics": "",
+      "note": "--no-index implies exit-code; 1 means file differs from /dev/null"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "web/playwright.vt013.config.ts"
+      ],
+      "exit_code": 1,
+      "whitespace_diagnostics": "",
+      "note": "--no-index implies exit-code; 1 means file differs from /dev/null"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "web/e2e/integration/assistant-undo.pw.ts"
+      ],
+      "exit_code": 1,
+      "whitespace_diagnostics": "",
+      "note": "--no-index implies exit-code; 1 means file differs from /dev/null"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "docs/assignments/VT-013/evidence/frontend/run_frontend.py"
+      ],
+      "exit_code": 1,
+      "whitespace_diagnostics": "",
+      "note": "--no-index implies exit-code; 1 means file differs from /dev/null"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "docs/assignments/VT-013/evidence/frontend/run_e2e.py"
+      ],
+      "exit_code": 1,
+      "whitespace_diagnostics": "",
+      "note": "--no-index implies exit-code; 1 means file differs from /dev/null"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "docs\\assignments\\VT-013\\evidence\\frontend\\README.md"
+      ],
+      "exit_code": 1,
+      "whitespace_diagnostics": "",
+      "note": "--no-index implies exit-code; 1 means file differs from /dev/null"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "docs\\assignments\\VT-013\\evidence\\frontend\\test-results.md"
+      ],
+      "exit_code": 1,
+      "whitespace_diagnostics": "",
+      "note": "--no-index implies exit-code; 1 means file differs from /dev/null"
+    }
+  ],
+  "integrity": {
+    "preexisting_files": 509,
+    "unchanged_preexisting_files": 505,
+    "changed": [
+      {
+        "path": "web/src/components/incident/AssistantPanel.tsx",
+        "before_sha256": "177330576e5d99223d7e5ae4ec3c73a73e22cdc07b9659b9502e87ca6c560bf0",
+        "after_sha256": "3a9acb4cc16fee95150aedaf0a719d6e761cae05a37385c1bc79141e9a3dd67c"
+      },
+      {
+        "path": "web/src/lib/api.ts",
+        "before_sha256": "668782331ea45a9a4258c3dabdae48edcb0c7ebb85d9c1e7d434f690b304f548",
+        "after_sha256": "6fa4b292c78763dcc7e33da1fabecef7a0842cbb61cdd34b5b04ef3ee3787442"
+      },
+      {
+        "path": "web/src/lib/queries.ts",
+        "before_sha256": "332f8950f905ef601ce8b2fa6bcd53c479ca72f9e201c5ace04eebd865d73bed",
+        "after_sha256": "fd97c6d54d136e823581e3a032f70ffe6582242e9b14e76263b93413a6793abc"
+      },
+      {
+        "path": "graphify-out/cache/last_query_stamp",
+        "before_sha256": "c5a47138c4ebb4c3357c16edef6ca905323cc4b2cbdaa8a46209f3046be83ac7",
+        "after_sha256": "07c7971adca23367fdc4d8dba1b12dfd156785f7b726045db2bea4690e1f71ba"
+      }
+    ],
+    "backend_and_existing_tests_unchanged": true,
+    "incidental_untracked_tool_metadata": "Graphify CLI updates last_query_stamp when queried; no graph/index or backend change",
+    "new_files": [
+      "docs/assignments/VT-013/evidence/frontend/README.md",
+      "docs/assignments/VT-013/evidence/frontend/build.log",
+      "docs/assignments/VT-013/evidence/frontend/discovery-auth.log",
+      "docs/assignments/VT-013/evidence/frontend/discovery-default.log",
+      "docs/assignments/VT-013/evidence/frontend/discovery-vt013.log",
+      "docs/assignments/VT-013/evidence/frontend/e2e-after.persisted.json",
+      "docs/assignments/VT-013/evidence/frontend/e2e-api/processes.jsonl",
+      "docs/assignments/VT-013/evidence/frontend/e2e-api/vt013-frontend-1aca1664f9904907-normal.api.log",
+      "docs/assignments/VT-013/evidence/frontend/e2e-api/vt013-frontend-1aca1664f9904907-normal.events.jsonl",
+      "docs/assignments/VT-013/evidence/frontend/e2e-before.persisted.json",
+      "docs/assignments/VT-013/evidence/frontend/e2e-browser-proof.json",
+      "docs/assignments/VT-013/evidence/frontend/e2e-cleanup-ownership.log",
+      "docs/assignments/VT-013/evidence/frontend/e2e-docker-version.log",
+      "docs/assignments/VT-013/evidence/frontend/e2e-opensearch-cleanup.log",
+      "docs/assignments/VT-013/evidence/frontend/e2e-opensearch-inspect.log",
+      "docs/assignments/VT-013/evidence/frontend/e2e-opensearch-start.log",
+      "docs/assignments/VT-013/evidence/frontend/e2e-output/.last-run.json",
+      "docs/assignments/VT-013/evidence/frontend/e2e-playwright.log",
+      "docs/assignments/VT-013/evidence/frontend/e2e-results.json",
+      "docs/assignments/VT-013/evidence/frontend/e2e-typecheck.log",
+      "docs/assignments/VT-013/evidence/frontend/e2e-vite.log",
+      "docs/assignments/VT-013/evidence/frontend/e2e.junit.xml",
+      "docs/assignments/VT-013/evidence/frontend/extra-checks.json",
+      "docs/assignments/VT-013/evidence/frontend/frontend-production.diff",
+      "docs/assignments/VT-013/evidence/frontend/green-regression.junit.xml",
+      "docs/assignments/VT-013/evidence/frontend/green-regression.log",
+      "docs/assignments/VT-013/evidence/frontend/green-results.json",
+      "docs/assignments/VT-013/evidence/frontend/green-targeted.junit.xml",
+      "docs/assignments/VT-013/evidence/frontend/green-targeted.log",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-after.persisted.json",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-api/processes.jsonl",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-api/vt013-frontend-a99e77a241844c90-normal.api.log",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-api/vt013-frontend-a99e77a241844c90-normal.events.jsonl",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-before.persisted.json",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-browser-proof.json",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-cleanup-ownership.log",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-docker-version.log",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-opensearch-cleanup.log",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-opensearch-inspect.log",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-opensearch-start.log",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-output/.last-run.json",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-playwright.log",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-results.json",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-typecheck-initial.log",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-typecheck.log",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-vite.log",
+      "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e.junit.xml",
+      "docs/assignments/VT-013/evidence/frontend/initial-green/AssistantPanel.test.tsx.snapshot",
+      "docs/assignments/VT-013/evidence/frontend/initial-green/AssistantPanel.tsx.snapshot",
+      "docs/assignments/VT-013/evidence/frontend/initial-green/api.ts.snapshot",
+      "docs/assignments/VT-013/evidence/frontend/initial-green/build.log",
+      "docs/assignments/VT-013/evidence/frontend/initial-green/green-regression.junit.xml",
+      "docs/assignments/VT-013/evidence/frontend/initial-green/green-regression.log",
+      "docs/assignments/VT-013/evidence/frontend/initial-green/green-results.json",
+      "docs/assignments/VT-013/evidence/frontend/initial-green/green-targeted.junit.xml",
+      "docs/assignments/VT-013/evidence/frontend/initial-green/green-targeted.log",
+      "docs/assignments/VT-013/evidence/frontend/initial-green/lint.log",
+      "docs/assignments/VT-013/evidence/frontend/initial-green/queries.ts.snapshot",
+      "docs/assignments/VT-013/evidence/frontend/initial-green/typecheck.log",
+      "docs/assignments/VT-013/evidence/frontend/lint-final.log",
+      "docs/assignments/VT-013/evidence/frontend/lint.log",
+      "docs/assignments/VT-013/evidence/frontend/red-results.json",
+      "docs/assignments/VT-013/evidence/frontend/red-targeted.junit.xml",
+      "docs/assignments/VT-013/evidence/frontend/red-targeted.log",
+      "docs/assignments/VT-013/evidence/frontend/review-results.json",
+      "docs/assignments/VT-013/evidence/frontend/run_e2e.py",
+      "docs/assignments/VT-013/evidence/frontend/run_frontend.py",
+      "docs/assignments/VT-013/evidence/frontend/session-race-red.json",
+      "docs/assignments/VT-013/evidence/frontend/session-race-red.junit.xml",
+      "docs/assignments/VT-013/evidence/frontend/session-race-red.log",
+      "docs/assignments/VT-013/evidence/frontend/test-results.md",
+      "docs/assignments/VT-013/evidence/frontend/typecheck.log",
+      "web/e2e/integration/assistant-undo.pw.ts",
+      "web/playwright.vt013.config.ts",
+      "web/src/components/incident/AssistantPanel.test.tsx",
+      "web/src/lib/assistant-undo.test.ts"
+    ]
+  },
+  "artifact_credential_scan": {
+    "blocking_pattern_findings": [],
+    "note": "targeted private-key, actual-JWT and common provider-token scan; runtime credentials/tokens are not recorded; synthetic source constants are test-only"
+  }
+}

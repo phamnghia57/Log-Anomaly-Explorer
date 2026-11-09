@@ -1,0 +1,19 @@
+{
+  "command": [
+    "node",
+    "node_modules/@playwright/test/cli.js",
+    "test",
+    "--list",
+    "--config=playwright.vt013.config.ts",
+    "--reporter=list"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 0,
+  "timed_out": false,
+  "recorded_at_utc": "2026-11-08T16:44:44.358381+00:00",
+  "environment_overrides": {}
+}
+
+Listing tests:
+  [chromium] › assistant-undo.pw.ts:4:1 › F-E2E real admin login, Send, Undo and reload restore durable exact history
+Total: 1 test in 1 file

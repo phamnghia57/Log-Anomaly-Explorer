@@ -1,0 +1,82 @@
+[
+  {
+    "command": [
+      "node",
+      "node_modules/@playwright/test/cli.js",
+      "test",
+      "--list",
+      "--config=playwright.config.ts",
+      "--reporter=list"
+    ],
+    "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+    "exit_code": 0,
+    "timed_out": false,
+    "recorded_at_utc": "2026-11-08T16:44:42.110584+00:00",
+    "environment_overrides": {}
+  },
+  {
+    "command": [
+      "node",
+      "node_modules/@playwright/test/cli.js",
+      "test",
+      "--list",
+      "--config=playwright.auth-integration.config.ts",
+      "--reporter=list"
+    ],
+    "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+    "exit_code": 0,
+    "timed_out": false,
+    "recorded_at_utc": "2026-11-08T16:44:43.315722+00:00",
+    "environment_overrides": {}
+  },
+  {
+    "command": [
+      "node",
+      "node_modules/@playwright/test/cli.js",
+      "test",
+      "--list",
+      "--config=playwright.vt013.config.ts",
+      "--reporter=list"
+    ],
+    "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+    "exit_code": 0,
+    "timed_out": false,
+    "recorded_at_utc": "2026-11-08T16:44:44.358381+00:00",
+    "environment_overrides": {}
+  },
+  {
+    "command": [
+      "node",
+      "node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--target",
+      "es2023",
+      "--module",
+      "nodenext",
+      "--moduleResolution",
+      "nodenext",
+      "--skipLibCheck",
+      "--types",
+      "node",
+      "playwright.vt013.config.ts",
+      "e2e/integration/assistant-undo.pw.ts"
+    ],
+    "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+    "exit_code": 0,
+    "timed_out": false,
+    "recorded_at_utc": "2026-11-08T16:44:45.309513+00:00",
+    "environment_overrides": {}
+  },
+  {
+    "command": [
+      "node",
+      "node_modules/oxlint/bin/oxlint"
+    ],
+    "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+    "exit_code": 0,
+    "timed_out": false,
+    "recorded_at_utc": "2026-11-08T16:44:46.674660+00:00",
+    "environment_overrides": {}
+  }
+]

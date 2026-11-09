@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="23" failures="1" errors="0" time="0.348226">
+    <testsuite name="src/components/incident/AssistantPanel.test.tsx" timestamp="2026-11-08T16:30:09.706Z" hostname="PDM" tests="23" failures="1" errors="0" skipped="22" time="0.348226">
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;1:0&quot;" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;9223372036854775807:9223372036854775807&quot;" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=false revision=&quot;1:7&quot;" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=null" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;&quot;" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;01:0&quot;" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;1:0\n&quot;" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;1:9223372036854775808&quot;" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=7" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=&quot;true&quot; revision=&quot;1:7&quot;" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=undefined revision=undefined" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-02/03 keyboard Undo uses current authenticated revision and exact server history, without optimistic deletion" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-03 first-Send Undo accepts the server&apos;s persisted empty history" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-04 HTTP 409 GET-reconciles newer messages, never guesses or retries Undo" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-05 503 preserves history until GET confirms the uncertain outcome" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-05 network preserves history until GET confirms the uncertain outcome" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-05 failed reconciliation retains messages and disables stale Undo until a manual GET succeeds" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-06 pending Undo blocks double-clicks, Send and Enter without discarding the draft" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-06 pending Send blocks Undo and duplicate Sends" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-07 a new QueryClient remount loads the restored history using GET" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-08 Stop aborts only Send, restores draft, GET-reconciles and never calls Undo" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-09 a late GET started before Undo cannot overwrite its confirmed response" time="0">
+            <skipped/>
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-10 logout during a confirmed Undo cache update cannot repopulate cleared private state" time="0.3432834">
+            <failure message="expected { cluster_id: &apos;c1&apos;, …(3) } to be undefined" type="AssertionError">
+AssertionError: expected { cluster_id: &apos;c1&apos;, …(3) } to be undefined
+
+- Expected:
+undefined
+
++ Received:
+{
+  &quot;cluster_id&quot;: &quot;c1&quot;,
+  &quot;messages&quot;: [
+    {
+      &quot;content&quot;: &quot;Original question 🔎&quot;,
+      &quot;created_at&quot;: &quot;2026-11-08T00:00:00+00:00&quot;,
+      &quot;role&quot;: &quot;user&quot;,
+    },
+    {
+      &quot;content&quot;: null,
+      &quot;created_at&quot;: &quot;2026-11-08T00:00:00+00:00&quot;,
+      &quot;role&quot;: &quot;assistant&quot;,
+      &quot;tool_calls&quot;: [
+        {
+          &quot;arguments&quot;: &quot;{}&quot;,
+          &quot;id&quot;: &quot;call-1&quot;,
+          &quot;name&quot;: &quot;get_cluster_history&quot;,
+        },
+      ],
+    },
+    {
+      &quot;content&quot;: &quot;[]&quot;,
+      &quot;created_at&quot;: &quot;2026-11-08T00:00:00+00:00&quot;,
+      &quot;name&quot;: &quot;get_cluster_history&quot;,
+      &quot;role&quot;: &quot;tool&quot;,
+      &quot;tool_call_id&quot;: &quot;call-1&quot;,
+    },
+    {
+      &quot;content&quot;: &quot;Original answer&quot;,
+      &quot;created_at&quot;: &quot;2026-11-08T00:00:00+00:00&quot;,
+      &quot;role&quot;: &quot;assistant&quot;,
+    },
+  ],
+  &quot;revision&quot;: &quot;1:8&quot;,
+  &quot;undo_available&quot;: false,
+}
+
+ ❯ src/components/incident/AssistantPanel.test.tsx:273:38
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>

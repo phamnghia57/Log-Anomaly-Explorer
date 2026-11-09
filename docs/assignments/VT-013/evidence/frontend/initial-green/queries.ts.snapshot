@@ -1,0 +1,104 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ApiError,
+  type SearchParams,
+  getAssistantConversation,
+  getCluster,
+  getClusterHistory,
+  listClusters,
+  searchLogs,
+  sendAssistantMessage,
+  undoAssistantSend,
+} from "./api";
+
+export function useClusters(since?: string, refetchIntervalMs: number | false = 30_000) {
+  // Khong loc `status` o day: Dashboard can danh sach DAY DU trong khoang
+  // thoi gian de tinh dung so dem facet theo tung status (StatusFacets),
+  // loc hien thi lam o phia component goi (client-side, du lieu nho).
+  return useQuery({
+    queryKey: ["clusters", since],
+    queryFn: ({ signal }) => listClusters({ since }, signal),
+    refetchInterval: refetchIntervalMs, // du lieu "song" - cum co the doi status/score giua cac lan clustering chay
+  });
+}
+
+export function useCluster(clusterId: string | undefined, logsLimit?: number) {
+  return useQuery({
+    // logsLimit nam trong queryKey: doi so log can tai thi phai fetch lai,
+    // khong duoc dung lai cache cua trang nho hon.
+    queryKey: ["cluster", clusterId, logsLimit],
+    queryFn: ({ signal }) => getCluster(clusterId as string, { logsLimit }, signal),
+    enabled: Boolean(clusterId),
+  });
+}
+
+export function useClusterHistory(clusterId: string | undefined) {
+  return useQuery({
+    queryKey: ["cluster-history", clusterId],
+    queryFn: ({ signal }) => getClusterHistory(clusterId as string, signal),
+    enabled: Boolean(clusterId),
+  });
+}
+
+export function useSearchLogs(params: SearchParams, enabled: boolean) {
+  return useQuery({
+    queryKey: ["search", params],
+    queryFn: ({ signal }) => searchLogs(params, signal),
+    enabled,
+  });
+}
+
+export function useAssistantConversation(clusterId: string | undefined) {
+  return useQuery({
+    queryKey: ["assistant-conversation", clusterId],
+    queryFn: ({ signal }) => getAssistantConversation(clusterId as string, signal),
+    enabled: Boolean(clusterId),
+  });
+}
+
+export function useSendAssistantMessage(clusterId: string) {
+  const queryClient = useQueryClient();
+  const queryKey = ["assistant-conversation", clusterId];
+  return useMutation({
+    mutationKey: queryKey,
+    retry: false,
+    mutationFn: ({ message, signal }: { message: string; signal?: AbortSignal }) =>
+      sendAssistantMessage(clusterId, message, signal),
+    onMutate: () => queryClient.cancelQueries({ queryKey, exact: true }),
+    // Ghi thang vao cache thay vi invalidate+refetch: response da la TOAN BO
+    // hoi thoai moi nhat (xem api-contract.md), khong can goi lai GET.
+    onSuccess: async (conversation) => {
+      await queryClient.cancelQueries({ queryKey, exact: true });
+      queryClient.setQueryData(queryKey, conversation);
+    },
+    onError: async (error) => {
+      if (error instanceof ApiError && error.status === 401) return;
+      // Stop cancels browser waiting, not a potentially committed server Send.
+      await queryClient.cancelQueries({ queryKey, exact: true });
+      await queryClient.invalidateQueries({ queryKey, exact: true });
+    },
+  });
+}
+
+export function useUndoAssistantSend(clusterId: string) {
+  const queryClient = useQueryClient();
+  const queryKey = ["assistant-conversation", clusterId];
+  return useMutation({
+    mutationKey: queryKey,
+    // Even a global retry policy must not repeat an uncertain mutation.
+    retry: false,
+    mutationFn: (expectedRevision: string) => undoAssistantSend(clusterId, expectedRevision),
+    onMutate: () => queryClient.cancelQueries({ queryKey, exact: true }),
+    onSuccess: async (conversation) => {
+      await queryClient.cancelQueries({ queryKey, exact: true });
+      queryClient.setQueryData(queryKey, conversation);
+    },
+    onError: async (error) => {
+      if (error instanceof ApiError && error.status === 401) return;
+      // 409 may mean newer history; 503/network failure may have committed.
+      // Retain current messages until an authenticated GET confirms the state.
+      await queryClient.cancelQueries({ queryKey, exact: true });
+      await queryClient.invalidateQueries({ queryKey, exact: true });
+    },
+  });
+}

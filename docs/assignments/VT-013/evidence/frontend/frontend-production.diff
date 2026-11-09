@@ -1,0 +1,207 @@
+diff --git a/web/src/components/incident/AssistantPanel.tsx b/web/src/components/incident/AssistantPanel.tsx
+index c9c5eb3..043c401 100644
+--- a/web/src/components/incident/AssistantPanel.tsx
++++ b/web/src/components/incident/AssistantPanel.tsx
+@@ -2,3 +2,4 @@ import { useEffect, useRef, useState } from "react";
+-import { Bot, Loader2, Search, Send, Square, User } from "lucide-react";
+-import type { AssistantMessage } from "@/lib/api";
+-import { useAssistantConversation, useSendAssistantMessage } from "@/lib/queries";
++import { useIsMutating } from "@tanstack/react-query";
++import { Bot, Loader2, Search, Send, Square, Undo2, User } from "lucide-react";
++import { ApiError, isAssistantRevision, type AssistantMessage } from "@/lib/api";
++import { useAssistantConversation, useSendAssistantMessage, useUndoAssistantSend } from "@/lib/queries";
+@@ -53,0 +55,5 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
++  // Route changes must not carry a draft/controller/mutation into another cluster.
++  return <ConversationPanel key={clusterId} clusterId={clusterId} />;
++}
++
++function ConversationPanel({ clusterId }: { clusterId: string }) {
+@@ -55 +61,2 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
+-  const { data, isLoading, isError } = useAssistantConversation(clusterId);
++  const [hasStopped, setHasStopped] = useState(false);
++  const { data, isLoading, isError, isFetching, refetch } = useAssistantConversation(clusterId);
+@@ -56,0 +64,3 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
++  const undo = useUndoAssistantSend(clusterId);
++  const isBusy = useIsMutating({ mutationKey: ["assistant-conversation", clusterId], exact: true }) > 0;
++  const actionRef = useRef(false);
+@@ -65,0 +76,3 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
++  const canUndo = data?.undo_available === true && isAssistantRevision(data.revision) && !isError && !isBusy;
++
++  useEffect(() => () => controllerRef.current?.abort(), []);
+@@ -69 +82 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
+-  }, [messages.length, mutation.isPending]);
++  }, [messages.length, mutation.isPending, undo.isPending]);
+@@ -81 +94 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
+-  const handleSend = () => {
++  const handleSend = async () => {
+@@ -83 +96,4 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
+-    if (!text || mutation.isPending) return;
++    if (!text || isBusy || actionRef.current) return;
++    actionRef.current = true;
++    undo.reset();
++    setHasStopped(false);
+@@ -88 +104,22 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
+-    mutation.mutate({ message: text, signal: controller.signal });
++    try {
++      await mutation.mutateAsync({ message: text, signal: controller.signal });
++      pendingTextRef.current = "";
++    } catch {
++      // The mutation renders errors and reconciles; never retry here.
++    } finally {
++      actionRef.current = false;
++      controllerRef.current = null;
++    }
++  };
++
++  const handleUndo = async () => {
++    if (!canUndo || !isAssistantRevision(data?.revision) || actionRef.current) return;
++    actionRef.current = true;
++    mutation.reset();
++    try {
++      await undo.mutateAsync(data.revision);
++    } catch {
++      // Keep history visible until the mutation's GET reconciliation completes.
++    } finally {
++      actionRef.current = false;
++    }
+@@ -92,0 +130 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
++    setHasStopped(true);
+@@ -99 +137 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
+-      <div className="border-b px-4 py-2.5">
++      <div className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-2.5">
+@@ -103,0 +142,5 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
++        <Button variant="ghost" size="sm" onClick={handleUndo} disabled={!canUndo}
++          aria-label="Hoàn tác lượt gửi" aria-busy={undo.isPending}>
++          {undo.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : <Undo2 className="h-3.5 w-3.5" aria-hidden="true" />}
++          Hoàn tác lượt gửi
++        </Button>
+@@ -125 +168 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
+-            // index la hop ly vi danh sach chi them vao cuoi, khong sap xep lai.
++            // bubbles khong co local state; Undo thay toan bo array tu server.
+@@ -136 +179,2 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
+-            <Button variant="ghost" size="sm" className="h-6 gap-1 px-2 text-xs" onClick={handleStop}>
++            <Button variant="ghost" size="sm" className="h-6 gap-1 px-2 text-xs" onClick={handleStop}
++              disabled={hasStopped}>
+@@ -153,0 +198,20 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
++        {isAbortError && (
++          <p role="status" className="py-2 text-xs text-muted-foreground">
++            Đã dừng chờ phản hồi. Máy chủ có thể vẫn xử lý; hãy kiểm tra hội thoại trước khi gửi lại.
++          </p>
++        )}
++
++        {undo.isError && (
++          <p role="alert" className="my-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
++            {undo.error instanceof ApiError && undo.error.status === 409
++              ? "Hội thoại đã thay đổi hoặc không còn lượt gửi để hoàn tác. Hãy kiểm tra trạng thái mới nhất."
++              : "Chưa xác nhận được kết quả hoàn tác. Hãy kiểm tra hội thoại đã tải lại trước khi thử tiếp."}
++          </p>
++        )}
++
++        {(isError || undo.isError) && (
++          <Button variant="ghost" size="sm" disabled={isBusy || isFetching} onClick={() => { undo.reset(); void refetch(); }}>
++            Tải lại hội thoại
++          </Button>
++        )}
++
+@@ -168 +232,2 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
+-          disabled={mutation.isPending}
++          disabled={isBusy}
++          aria-label="Câu hỏi cho AI Assistant"
+@@ -173 +238 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
+-          disabled={!draft.trim() || mutation.isPending}
++          disabled={!draft.trim() || isBusy}
+diff --git a/web/src/lib/api.ts b/web/src/lib/api.ts
+index 60401e8..80abc45 100644
+--- a/web/src/lib/api.ts
++++ b/web/src/lib/api.ts
+@@ -101 +101,2 @@ type QueryPath = "/search" | "/clusters" | `/clusters/${string}`
+-  | `/assistant/clusters/${string}/conversation` | `/assistant/clusters/${string}/conversation/messages`;
++  | `/assistant/clusters/${string}/conversation` | `/assistant/clusters/${string}/conversation/messages`
++  | `/assistant/clusters/${string}/conversation/undo`;
+@@ -214,0 +216,11 @@ export interface AssistantConversation {
++  revision: string | null;
++  undo_available: boolean;
++}
++
++// Validate the wire token only. Never construct, increment or compare revisions.
++export function isAssistantRevision(value: unknown): value is string {
++  if (typeof value !== "string") return false;
++  const match = /^([1-9][0-9]{0,18}):(0|[1-9][0-9]{0,18})$/.exec(value);
++  if (!match || match[0] !== value) return false;
++  const max = 9223372036854775807n;
++  return BigInt(match[1]) <= max && BigInt(match[2]) <= max;
+@@ -231,0 +244,10 @@ export function sendAssistantMessage(
++
++export function undoAssistantSend(clusterId: string, expectedRevision: string): Promise<AssistantConversation> {
++  if (!isAssistantRevision(expectedRevision)) {
++    return Promise.reject(new ApiError("Revision hội thoại không hợp lệ. Tải lại hội thoại.", 422));
++  }
++  return queryJson<AssistantConversation>(
++    `/assistant/clusters/${encodeURIComponent(clusterId)}/conversation/undo`,
++    undefined, undefined, { expected_revision: expectedRevision },
++  );
++}
+diff --git a/web/src/lib/queries.ts b/web/src/lib/queries.ts
+index d6f50b4..6826e3f 100644
+--- a/web/src/lib/queries.ts
++++ b/web/src/lib/queries.ts
+@@ -2,0 +3 @@ import {
++  ApiError,
+@@ -9,0 +11 @@ import {
++  undoAssistantSend,
+@@ -10,0 +13 @@ import {
++import { getSession } from "./auth";
+@@ -58,0 +62 @@ export function useSendAssistantMessage(clusterId: string) {
++  const queryKey = ["assistant-conversation", clusterId];
+@@ -59,0 +64,2 @@ export function useSendAssistantMessage(clusterId: string) {
++    mutationKey: queryKey,
++    retry: false,
+@@ -61,0 +68,5 @@ export function useSendAssistantMessage(clusterId: string) {
++    onMutate: async () => {
++      const token = getSession()?.token;
++      await queryClient.cancelQueries({ queryKey, exact: true });
++      return { token };
++    },
+@@ -64,2 +75,40 @@ export function useSendAssistantMessage(clusterId: string) {
+-    onSuccess: (conversation) => {
+-      queryClient.setQueryData(["assistant-conversation", clusterId], conversation);
++    onSuccess: async (conversation, _variables, context) => {
++      await queryClient.cancelQueries({ queryKey, exact: true });
++      if (context?.token && getSession()?.token === context.token) {
++        queryClient.setQueryData(queryKey, conversation);
++      }
++    },
++    onError: async (error) => {
++      if (error instanceof ApiError && error.status === 401) return;
++      // Stop cancels browser waiting, not a potentially committed server Send.
++      await queryClient.cancelQueries({ queryKey, exact: true });
++      await queryClient.invalidateQueries({ queryKey, exact: true });
++    },
++  });
++}
++
++export function useUndoAssistantSend(clusterId: string) {
++  const queryClient = useQueryClient();
++  const queryKey = ["assistant-conversation", clusterId];
++  return useMutation({
++    mutationKey: queryKey,
++    // Even a global retry policy must not repeat an uncertain mutation.
++    retry: false,
++    mutationFn: (expectedRevision: string) => undoAssistantSend(clusterId, expectedRevision),
++    onMutate: async () => {
++      const token = getSession()?.token;
++      await queryClient.cancelQueries({ queryKey, exact: true });
++      return { token };
++    },
++    onSuccess: async (conversation, _variables, context) => {
++      await queryClient.cancelQueries({ queryKey, exact: true });
++      if (context?.token && getSession()?.token === context.token) {
++        queryClient.setQueryData(queryKey, conversation);
++      }
++    },
++    onError: async (error) => {
++      if (error instanceof ApiError && error.status === 401) return;
++      // 409 may mean newer history; 503/network failure may have committed.
++      // Retain current messages until an authenticated GET confirms the state.
++      await queryClient.cancelQueries({ queryKey, exact: true });
++      await queryClient.invalidateQueries({ queryKey, exact: true });

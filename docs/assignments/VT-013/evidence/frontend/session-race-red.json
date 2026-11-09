@@ -1,0 +1,26 @@
+{
+  "sha256": {
+    "web/src/lib/queries.ts": "4f8c802a14adb6abbfdd4ccffd964f8babf08e9869761db8f6d3c3d67ab7f189",
+    "web/src/components/incident/AssistantPanel.test.tsx": "f73e63e28d4b52546da512b25e036c2c008554b6030e3e3a444bca48483d1769"
+  },
+  "run": {
+    "command": [
+      "node",
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "src/components/incident/AssistantPanel.test.tsx",
+      "-t",
+      "F-10",
+      "--reporter=default",
+      "--reporter=junit",
+      "--outputFile=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\frontend\\session-race-red.junit.xml"
+    ],
+    "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+    "exit_code": 1,
+    "timed_out": false,
+    "recorded_at_utc": "2026-11-08T16:30:05.409045+00:00",
+    "environment_overrides": {
+      "VITE_JAEGER_URL": ""
+    }
+  }
+}

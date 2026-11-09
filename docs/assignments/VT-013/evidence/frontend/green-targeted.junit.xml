@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="38" failures="0" errors="0" time="3.7119722">
+    <testsuite name="src/components/incident/AssistantPanel.test.tsx" timestamp="2026-11-08T16:30:42.973Z" hostname="PDM" tests="23" failures="0" errors="0" skipped="0" time="3.69598">
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;1:0&quot;" time="0.2090567">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;9223372036854775807:9223372036854775807&quot;" time="0.0620814">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=false revision=&quot;1:7&quot;" time="0.0640936">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=null" time="0.0551294">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;&quot;" time="0.0554631">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;01:0&quot;" time="0.0517151">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;1:0\n&quot;" time="0.0282675">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=&quot;1:9223372036854775808&quot;" time="0.0371856">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=true revision=7" time="0.0642631">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=&quot;true&quot; revision=&quot;1:7&quot;" time="0.0518133">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-01 Undo availability flag=undefined revision=undefined" time="0.0461367">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-02/03 keyboard Undo uses current authenticated revision and exact server history, without optimistic deletion" time="0.1620712">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-03 first-Send Undo accepts the server&apos;s persisted empty history" time="0.156845">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-04 HTTP 409 GET-reconciles newer messages, never guesses or retries Undo" time="0.2023749">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-05 503 preserves history until GET confirms the uncertain outcome" time="0.1196161">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-05 network preserves history until GET confirms the uncertain outcome" time="0.1625667">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-05 failed reconciliation retains messages and disables stale Undo until a manual GET succeeds" time="0.2112116">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-06 pending Undo blocks double-clicks, Send and Enter without discarding the draft" time="0.5980282">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-06 pending Send blocks Undo and duplicate Sends" time="0.3584051">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-07 a new QueryClient remount loads the restored history using GET" time="0.1651054">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-08 Stop aborts only Send, restores draft, GET-reconciles and never calls Undo" time="0.5999999">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-09 a late GET started before Undo cannot overwrite its confirmed response" time="0.092935">
+        </testcase>
+        <testcase classname="src/components/incident/AssistantPanel.test.tsx" name="VT-013 Assistant Undo UI and React Query cache &gt; F-10 logout during a confirmed Undo cache update cannot repopulate cleared private state" time="0.136702">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/assistant-undo.test.ts" timestamp="2026-11-08T16:30:42.991Z" hostname="PDM" tests="15" failures="0" errors="0" skipped="0" time="0.0159922">
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-02 sends the current opaque revision and existing Bearer header to encoded cluster path" time="0.0070037">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 accepts valid revision boundary 1:0 unchanged" time="0.0008017">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 accepts valid revision boundary 9223372036854775807:9223372036854775807 unchanged" time="0.0005093">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;&quot; before a request" time="0.0014626">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;0:0&quot; before a request" time="0.0004154">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;01:0&quot; before a request" time="0.0003409">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;1:00&quot; before a request" time="0.0002855">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;1:-1&quot; before a request" time="0.0002918">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;1:0\n&quot; before a request" time="0.0002829">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;１:0&quot; before a request" time="0.0004315">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-01 rejects invalid revision &quot;1:9223372036854775808&quot; before a request" time="0.0002765">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-04/05 preserves HTTP 409 as an error, never a default conversation" time="0.0008285">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-04/05 preserves HTTP 503 as an error, never a default conversation" time="0.0005467">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-05 propagates a network failure" time="0.0004816">
+        </testcase>
+        <testcase classname="src/lib/assistant-undo.test.ts" name="VT-013 Undo API contract &gt; F-02 does not fetch without a valid admin session" time="0.0003106">
+        </testcase>
+    </testsuite>
+</testsuites>

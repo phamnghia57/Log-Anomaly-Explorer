@@ -98,7 +98,8 @@ export async function loginAdmin(username: string, password: string): Promise<Au
 
 // Client chi nhan cac duong dan Query API, khong nhan URL tuy y/URL Jaeger.
 type QueryPath = "/search" | "/clusters" | `/clusters/${string}`
-  | `/assistant/clusters/${string}/conversation` | `/assistant/clusters/${string}/conversation/messages`;
+  | `/assistant/clusters/${string}/conversation` | `/assistant/clusters/${string}/conversation/messages`
+  | `/assistant/clusters/${string}/conversation/undo`;
 
 async function queryJson<T>(path: QueryPath, params?: Record<string, string | undefined>, signal?: AbortSignal, payload?: Record<string, unknown>): Promise<T> {
   const url = new URL(`${API_BASE_URL}${path}`);
@@ -212,6 +213,17 @@ export interface AssistantMessage {
 export interface AssistantConversation {
   cluster_id: string;
   messages: AssistantMessage[];
+  revision: string | null;
+  undo_available: boolean;
+}
+
+// Validate the wire token only. Never construct, increment or compare revisions.
+export function isAssistantRevision(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  const match = /^([1-9][0-9]{0,18}):(0|[1-9][0-9]{0,18})$/.exec(value);
+  if (!match || match[0] !== value) return false;
+  const max = 9223372036854775807n;
+  return BigInt(match[1]) <= max && BigInt(match[2]) <= max;
 }
 
 export function getAssistantConversation(clusterId: string, signal?: AbortSignal) {
@@ -227,5 +239,15 @@ export function sendAssistantMessage(
   return queryJson<AssistantConversation>(
     `/assistant/clusters/${encodeURIComponent(clusterId)}/conversation/messages`,
     undefined, signal, { message },
+  );
+}
+
+export function undoAssistantSend(clusterId: string, expectedRevision: string): Promise<AssistantConversation> {
+  if (!isAssistantRevision(expectedRevision)) {
+    return Promise.reject(new ApiError("Revision hội thoại không hợp lệ. Tải lại hội thoại.", 422));
+  }
+  return queryJson<AssistantConversation>(
+    `/assistant/clusters/${encodeURIComponent(clusterId)}/conversation/undo`,
+    undefined, undefined, { expected_revision: expectedRevision },
   );
 }

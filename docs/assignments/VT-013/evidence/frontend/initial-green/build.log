@@ -1,0 +1,45 @@
+{
+  "command": [
+    "node",
+    "node_modules/vite/bin/vite.js",
+    "build"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 0,
+  "timed_out": false,
+  "recorded_at_utc": "2026-11-08T16:27:58.102572+00:00"
+}
+
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 3646 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                              0.63 kB │ gzip:   0.41 kB
+dist/assets/geist-cyrillic-ext-wght-normal-DjL33-gN.woff2    7.42 kB
+dist/assets/geist-vietnamese-wght-normal-6IgcOCM7.woff2      8.00 kB
+dist/assets/geist-cyrillic-wght-normal-BEAKL7Jp.woff2       15.08 kB
+dist/assets/geist-latin-ext-wght-normal-DC-KSUi6.woff2      16.51 kB
+dist/assets/geist-latin-wght-normal-BgDaEnEv.woff2          29.40 kB
+dist/assets/index-B8WWdrkb.css                              81.50 kB │ gzip:  13.83 kB
+dist/assets/ClusterCardSparkline-BZc9dzwI.js                 0.76 kB │ gzip:   0.51 kB
+dist/assets/ClusterScoreHistoryChart-CHcVNelC.js             0.98 kB │ gzip:   0.63 kB
+dist/assets/install-BO1LpEJ9.js                             21.50 kB │ gzip:   7.61 kB
+dist/assets/AssistantPanel-BFRNVwKQ.js                      21.78 kB │ gzip:   7.41 kB
+dist/assets/AnomalyScoreChart-BSHaYGK0.js                   23.10 kB │ gzip:   8.98 kB
+dist/assets/install-DPHc574A.js                             27.07 kB │ gzip:  10.42 kB
+dist/assets/core-tRi32Wc2.js                               468.15 kB │ gzip: 158.71 kB
+dist/assets/index-ooPyycKS.js                              764.24 kB │ gzip: 234.83 kB
+
+[plugin builtin:vite-reporter]
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 22.68s
+[33m[PLUGIN_TIMINGS] [0mJavaScript callbacks ran for 3.0s of this 22.6s build (13%).
+The slowest callbacks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
+  - plugin vite:css-post renderChunk (6%, 1.2s, 8 calls)
+  - plugin vite:css transform (5%, 1.2s, 1 call)
+Additional callback time came from callbacks under 1s.
+See https://rolldown.rs/reference/InputOptions.checks#bundlertimings for more details.

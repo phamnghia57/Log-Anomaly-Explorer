@@ -1,0 +1,34 @@
+{
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/lib/assistant-undo.test.ts",
+    "src/components/incident/AssistantPanel.test.tsx",
+    "--reporter=default",
+    "--reporter=junit",
+    "--outputFile=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\frontend\\green-targeted.junit.xml"
+  ],
+  "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+  "exit_code": 0,
+  "timed_out": false,
+  "recorded_at_utc": "2026-11-08T16:26:51.355940+00:00"
+}
+
+
+ RUN  v5.0.3 D:/SE/Log-Anomaly-Explorer/web
+
+ ✓ src/lib/assistant-undo.test.ts (15 tests) 20ms
+ ✓ src/components/incident/AssistantPanel.test.tsx (22 tests) 3131ms
+   ✓ VT-013 Assistant Undo UI and React Query cache (22)
+     ✓ F-01 Undo availability flag=true revision="1:0" 332ms
+     ✓ F-06 pending Undo blocks double-clicks, Send and Enter without discarding the draft 416ms
+     ✓ F-06 pending Send blocks Undo and duplicate Sends 339ms
+     ✓ F-08 Stop aborts only Send, restores draft, GET-reconciles and never calls Undo 475ms
+
+ Test Files  2 passed (2)
+      Tests  37 passed (37)
+   Start at  23:26:52
+   Duration  6.32s (tests 39%, environment 36%, import 13%, setup 8%, transform 4%)
+
+JUNIT report written to D:/SE/Log-Anomaly-Explorer/docs/assignments/VT-013/evidence/frontend/green-targeted.junit.xml

@@ -1,0 +1,242 @@
+{
+  "phase": "green",
+  "branch": "feat/vt013-undo-manhpd",
+  "head": "17ae52feae4e3f799f2249478ac2434ab869ceba",
+  "production_sha256_before": {
+    "web/src/lib/api.ts": "6fa4b292c78763dcc7e33da1fabecef7a0842cbb61cdd34b5b04ef3ee3787442",
+    "web/src/lib/queries.ts": "4f8c802a14adb6abbfdd4ccffd964f8babf08e9869761db8f6d3c3d67ab7f189",
+    "web/src/components/incident/AssistantPanel.tsx": "3989c2146276b0c90e6a90c6f0528c3a9a706039e39ff2af60144d2bce405867"
+  },
+  "test_sha256": {
+    "src/lib/assistant-undo.test.ts": "dd0ebeaefefa2fb76daf56c3737d0d1d497cfc41b3ab695d62a772165fa5134d",
+    "src/components/incident/AssistantPanel.test.tsx": "d56226df18c8285e6d4e31c7c28f41e7273d80da06380bb349f415a0c281e838"
+  },
+  "versions": {
+    "react": "19.3.0",
+    "@tanstack/react-query": "5.104.2",
+    "vitest": "5.0.3",
+    "@testing-library/react": "16.3.3",
+    "typescript": "6.0.3",
+    "vite": "8.3.4"
+  },
+  "node": "v25.8.2",
+  "runs": [
+    {
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/lib/assistant-undo.test.ts",
+        "src/components/incident/AssistantPanel.test.tsx",
+        "--reporter=default",
+        "--reporter=junit",
+        "--outputFile=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\frontend\\green-targeted.junit.xml"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0,
+      "timed_out": false,
+      "recorded_at_utc": "2026-11-08T16:26:51.355940+00:00"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--reporter=default",
+        "--reporter=junit",
+        "--outputFile=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\frontend\\green-regression.junit.xml"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 1,
+      "timed_out": false,
+      "recorded_at_utc": "2026-11-08T16:26:58.657673+00:00"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-b"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 2,
+      "timed_out": false,
+      "recorded_at_utc": "2026-11-08T16:27:30.713401+00:00"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/oxlint/bin/oxlint"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0,
+      "timed_out": false,
+      "recorded_at_utc": "2026-11-08T16:27:56.500483+00:00"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/vite/bin/vite.js",
+        "build"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\web",
+      "exit_code": 0,
+      "timed_out": false,
+      "recorded_at_utc": "2026-11-08T16:27:58.102572+00:00"
+    }
+  ],
+  "targeted_cases": [
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision=\"1:0\"",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision=\"9223372036854775807:9223372036854775807\"",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=false revision=\"1:7\"",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision=null",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision=\"\"",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision=\"01:0\"",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision=\"1:0\\n\"",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision=\"1:9223372036854775808\"",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=true revision=7",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=\"true\" revision=\"1:7\"",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-01 Undo availability flag=undefined revision=undefined",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-02/03 keyboard Undo uses current authenticated revision and exact server history, without optimistic deletion",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-03 first-Send Undo accepts the server's persisted empty history",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-04 HTTP 409 GET-reconciles newer messages, never guesses or retries Undo",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-05 503 preserves history until GET confirms the uncertain outcome",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-05 network preserves history until GET confirms the uncertain outcome",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-05 failed reconciliation retains messages and disables stale Undo until a manual GET succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-06 pending Undo blocks double-clicks, Send and Enter without discarding the draft",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-06 pending Send blocks Undo and duplicate Sends",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-07 a new QueryClient remount loads the restored history using GET",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-08 Stop aborts only Send, restores draft, GET-reconciles and never calls Undo",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Assistant Undo UI and React Query cache > F-09 a late GET started before Undo cannot overwrite its confirmed response",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Undo API contract > F-02 sends the current opaque revision and existing Bearer header to encoded cluster path",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Undo API contract > F-01 accepts valid revision boundary 1:0 unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Undo API contract > F-01 accepts valid revision boundary 9223372036854775807:9223372036854775807 unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Undo API contract > F-01 rejects invalid revision \"\" before a request",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Undo API contract > F-01 rejects invalid revision \"0:0\" before a request",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Undo API contract > F-01 rejects invalid revision \"01:0\" before a request",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Undo API contract > F-01 rejects invalid revision \"1:00\" before a request",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Undo API contract > F-01 rejects invalid revision \"1:-1\" before a request",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Undo API contract > F-01 rejects invalid revision \"1:0\\n\" before a request",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Undo API contract > F-01 rejects invalid revision \"\uff11:0\" before a request",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Undo API contract > F-01 rejects invalid revision \"1:9223372036854775808\" before a request",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Undo API contract > F-04/05 preserves HTTP 409 as an error, never a default conversation",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Undo API contract > F-04/05 preserves HTTP 503 as an error, never a default conversation",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Undo API contract > F-05 propagates a network failure",
+      "status": "passed"
+    },
+    {
+      "name": "VT-013 Undo API contract > F-02 does not fetch without a valid admin session",
+      "status": "passed"
+    }
+  ],
+  "production_sha256_after": {
+    "web/src/lib/api.ts": "6fa4b292c78763dcc7e33da1fabecef7a0842cbb61cdd34b5b04ef3ee3787442",
+    "web/src/lib/queries.ts": "4f8c802a14adb6abbfdd4ccffd964f8babf08e9869761db8f6d3c3d67ab7f189",
+    "web/src/components/incident/AssistantPanel.tsx": "3989c2146276b0c90e6a90c6f0528c3a9a706039e39ff2af60144d2bce405867"
+  }
+}
