@@ -1,0 +1,7 @@
+diff --git a/query-api/src/assistant/storage.py b/query-api/src/assistant/storage.py
+index d62937c..ef7a7fe 100644
+--- a/query-api/src/assistant/storage.py
++++ b/query-api/src/assistant/storage.py
+@@ -128 +128 @@ class ConversationRepository:
+-            raise StorageError("cannot read conversation") from None
++            return None

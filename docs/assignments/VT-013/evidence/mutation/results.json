@@ -1,0 +1,2440 @@
+{
+  "mutation_id": "M-01",
+  "started_at_utc": "2026-11-09T07:34:14.384579+00:00",
+  "interpreter": "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "packages": {
+    "pytest": "9.2.0",
+    "fastapi": "0.162.2",
+    "opensearch-py": "3.2.0",
+    "httpx": "0.28.1"
+  },
+  "git_commands": [
+    {
+      "command": [
+        "git",
+        "branch",
+        "--show-current"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "stdout": "feat/vt013-undo-manhpd\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "stdout": "a275c52300d40e92681692a0cc894a9946cb0084\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=no"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "worktree",
+        "list",
+        "--porcelain"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "stdout": "worktree D:/SE/Log-Anomaly-Explorer\nHEAD a275c52300d40e92681692a0cc894a9946cb0084\nbranch refs/heads/feat/vt013-undo-manhpd\n\nworktree D:/SE/LAE-issue-73\nHEAD 6ac9afe9c1d79fa94c10439a60417ff286658388\nbranch refs/heads/dev/manhpd\n\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "worktree",
+        "add",
+        "--detach",
+        "D:\\SE\\vt013-mutation-0daaa0f9f96d",
+        "a275c52300d40e92681692a0cc894a9946cb0084"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "stdout": "HEAD is now at a275c52 feat(vt013): add assistant undo UI and E2E verification\n",
+      "stderr": "Preparing worktree (detached HEAD a275c52)\nUpdating files:  85% (306/359)\rUpdating files:  86% (309/359)\rUpdating files:  87% (313/359)\rUpdating files:  88% (316/359)\rUpdating files:  89% (320/359)\rUpdating files:  90% (324/359)\rUpdating files:  91% (327/359)\rUpdating files:  92% (331/359)\rUpdating files:  93% (334/359)\rUpdating files:  94% (338/359)\rUpdating files:  95% (342/359)\rUpdating files:  96% (345/359)\rUpdating files:  97% (349/359)\rUpdating files:  98% (352/359)\rUpdating files:  99% (356/359)\rUpdating files: 100% (359/359)\rUpdating files: 100% (359/359), done.\n"
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "D:\\SE\\vt013-mutation-0daaa0f9f96d",
+      "exit_code": 0,
+      "stdout": "a275c52300d40e92681692a0cc894a9946cb0084\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--unified=0",
+        "--",
+        "query-api/src/assistant/storage.py"
+      ],
+      "cwd": "D:\\SE\\vt013-mutation-0daaa0f9f96d",
+      "exit_code": 0,
+      "stdout": "diff --git a/query-api/src/assistant/storage.py b/query-api/src/assistant/storage.py\nindex d62937c..ef7a7fe 100644\n--- a/query-api/src/assistant/storage.py\n+++ b/query-api/src/assistant/storage.py\n@@ -128 +128 @@ class ConversationRepository:\n-            raise StorageError(\"cannot read conversation\") from None\n+            return None\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--numstat"
+      ],
+      "cwd": "D:\\SE\\vt013-mutation-0daaa0f9f96d",
+      "exit_code": 0,
+      "stdout": "1\t1\tquery-api/src/assistant/storage.py\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--name-only"
+      ],
+      "cwd": "D:\\SE\\vt013-mutation-0daaa0f9f96d",
+      "exit_code": 0,
+      "stdout": "query-api/src/assistant/storage.py\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--name-only"
+      ],
+      "cwd": "D:\\SE\\vt013-mutation-0daaa0f9f96d",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "D:\\SE\\vt013-mutation-0daaa0f9f96d",
+      "exit_code": 0,
+      "stdout": "a275c52300d40e92681692a0cc894a9946cb0084\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "status",
+        "--porcelain=v1"
+      ],
+      "cwd": "D:\\SE\\vt013-mutation-0daaa0f9f96d",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "worktree",
+        "remove",
+        "D:\\SE\\vt013-mutation-0daaa0f9f96d"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "worktree",
+        "list",
+        "--porcelain"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "stdout": "worktree D:/SE/Log-Anomaly-Explorer\nHEAD a275c52300d40e92681692a0cc894a9946cb0084\nbranch refs/heads/feat/vt013-undo-manhpd\n\nworktree D:/SE/LAE-issue-73\nHEAD 6ac9afe9c1d79fa94c10439a60417ff286658388\nbranch refs/heads/dev/manhpd\n\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "stdout": "a275c52300d40e92681692a0cc894a9946cb0084\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=no"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--stat"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "runs": [
+    {
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "-m",
+        "pytest",
+        "-vv",
+        "--tb=short",
+        "-rA",
+        "--color=no",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "faulthandler_timeout=20",
+        "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\mutation\\baseline.junit.xml",
+        "tests/test_assistant_undo_contract.py",
+        "tests/test_assistant_undo_backend.py",
+        "tests/test_assistant.py",
+        "tests/test_assistant_storage.py"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 180,
+      "duration_seconds": 10.048,
+      "cases": [
+        {
+          "name": "test_t03_send_response_exposes_revision_contract",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t03_undo_first_send_persists_empty_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[space]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[tabs-newlines]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[nonbreaking-space]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t11_read_failure_returns_503_and_preserves_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_raises_storage_error_in_actual_repository",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_returns_503_not_empty_success[GET]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_returns_503_not_empty_success[POST]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t14_concurrent_sends_cannot_silently_overwrite[existing-document]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t14_concurrent_sends_cannot_silently_overwrite[first-creation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_copies_documents_and_does_not_protect_unconditional_writes",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_enforces_explicit_conditional_and_create_only_writes",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_preserves_missing_index_exception_and_ignore_semantics",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t02_undo_restores_exact_tool_history_and_creation_time",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t04_t05_one_level_undo_is_consumed_and_old_revision_conflicts",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload2]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload3]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload4]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload5]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload6]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload7]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload8]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[x]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[message1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[message2]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[message3]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[ hi ]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[None]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1_0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[True]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[ ]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1_1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[0:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[01:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:00]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:-1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[+1:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:+0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[ 1:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0\\n]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[\\uff11:\\uff10]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[9223372036854775808:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:9223372036854775808]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[revision18]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_undo_request_requires_only_the_revision_field[payload0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_undo_request_requires_only_the_revision_field[payload1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[1:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[9223372036854775807:9223372036854775807]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t10_stale_revision_does_not_touch_newer_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t13_rejected_undo_write_is_503_and_preserves_snapshot",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t15_t16_competing_undo_mutations_use_the_same_version[undo]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t15_t16_competing_undo_mutations_use_the_same_version[send]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t18_mapping_update_preserves_legacy_data_and_is_idempotent",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t18_mapping_failures_are_storage_errors[exception]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t18_mapping_failures_are_storage_errors[unacknowledged]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t19_undo_keeps_admin_authentication[None]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t19_undo_keeps_admin_authentication[Bearer invalid]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t22_corrupt_snapshot_is_not_an_empty_success",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_snapshot_and_saved_data_do_not_alias_caller_objects",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_invalid_version_metadata_is_not_defaulted[metadata0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_invalid_version_metadata_is_not_defaulted[metadata1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[None-GET-/assistant/clusters/c1/conversation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[None-POST-/assistant/clusters/c1/conversation/messages]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-GET-/assistant/clusters/c1/conversation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-POST-/assistant/clusters/c1/conversation/messages]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_cum_khong_ton_tai_tra_404",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_chua_hoi_lan_nao_tra_messages_rong",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tra_ve_hoi_thoai_da_luu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_cum_khong_ton_tai_tra_404",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_thieu_openai_key_tra_503",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tra_loi_thang_khong_can_goi_tool",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ai_goi_tool_truoc_khi_tra_loi",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_dat_gioi_han_vong_goi_tool",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_hoi_tiep_gui_kem_lich_su_cu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tool_khong_ton_tai_tra_error_khong_nem_exception",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_get_cluster_history_khong_co_cluster_store_tra_error",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_search_related_logs_mac_dinh_24h_va_gioi_han_limit",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_list_active_clusters_loc_theo_status",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_loi_trong_tool_duoc_boc_thanh_error_khong_lam_vo_chat",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_tao_index_voi_mapping_strict",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_get_chua_co_conversation_tra_none",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_save_roi_get_lai_dung_du_lieu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_save_lan_2_giu_nguyen_created_at_ban_dau",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_goi_lai_khong_nem_loi",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_bo_qua_loi_index_da_ton_tai_tu_worker_khac",
+          "status": "passed",
+          "message": ""
+        }
+      ]
+    },
+    {
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "-m",
+        "pytest",
+        "-vv",
+        "--tb=short",
+        "-rA",
+        "--color=no",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "faulthandler_timeout=20",
+        "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\mutation\\mutant.junit.xml",
+        "tests/test_assistant_undo_contract.py",
+        "tests/test_assistant_undo_backend.py",
+        "tests/test_assistant.py",
+        "tests/test_assistant_storage.py"
+      ],
+      "cwd": "D:\\SE\\vt013-mutation-0daaa0f9f96d\\query-api",
+      "exit_code": 1,
+      "timed_out": false,
+      "timeout_seconds": 180,
+      "duration_seconds": 9.803,
+      "cases": [
+        {
+          "name": "test_t03_send_response_exposes_revision_contract",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t03_undo_first_send_persists_empty_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[space]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[tabs-newlines]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[nonbreaking-space]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t11_read_failure_returns_503_and_preserves_history",
+          "status": "failed",
+          "message": "assert 409 == 503\n +  where 409 = <Response [409 Conflict]>.status_code"
+        },
+        {
+          "name": "test_t12_missing_index_raises_storage_error_in_actual_repository",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_returns_503_not_empty_success[GET]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_returns_503_not_empty_success[POST]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t14_concurrent_sends_cannot_silently_overwrite[existing-document]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t14_concurrent_sends_cannot_silently_overwrite[first-creation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_copies_documents_and_does_not_protect_unconditional_writes",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_enforces_explicit_conditional_and_create_only_writes",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_preserves_missing_index_exception_and_ignore_semantics",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t02_undo_restores_exact_tool_history_and_creation_time",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t04_t05_one_level_undo_is_consumed_and_old_revision_conflicts",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload2]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload3]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload4]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload5]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload6]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload7]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload8]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[x]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[message1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[message2]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[message3]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[ hi ]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[None]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1_0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[True]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[ ]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1_1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[0:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[01:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:00]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:-1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[+1:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:+0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[ 1:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0\\n]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[\\uff11:\\uff10]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[9223372036854775808:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:9223372036854775808]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[revision18]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_undo_request_requires_only_the_revision_field[payload0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_undo_request_requires_only_the_revision_field[payload1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[1:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[9223372036854775807:9223372036854775807]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t10_stale_revision_does_not_touch_newer_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t13_rejected_undo_write_is_503_and_preserves_snapshot",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t15_t16_competing_undo_mutations_use_the_same_version[undo]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t15_t16_competing_undo_mutations_use_the_same_version[send]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t18_mapping_update_preserves_legacy_data_and_is_idempotent",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t18_mapping_failures_are_storage_errors[exception]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t18_mapping_failures_are_storage_errors[unacknowledged]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t19_undo_keeps_admin_authentication[None]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t19_undo_keeps_admin_authentication[Bearer invalid]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t22_corrupt_snapshot_is_not_an_empty_success",
+          "status": "failed",
+          "message": "assert 409 == 503\n +  where 409 = <Response [409 Conflict]>.status_code"
+        },
+        {
+          "name": "test_snapshot_and_saved_data_do_not_alias_caller_objects",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_invalid_version_metadata_is_not_defaulted[metadata0]",
+          "status": "failed",
+          "message": "assert 409 == 503\n +  where 409 = <Response [409 Conflict]>.status_code"
+        },
+        {
+          "name": "test_invalid_version_metadata_is_not_defaulted[metadata1]",
+          "status": "failed",
+          "message": "assert 409 == 503\n +  where 409 = <Response [409 Conflict]>.status_code"
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[None-GET-/assistant/clusters/c1/conversation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[None-POST-/assistant/clusters/c1/conversation/messages]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-GET-/assistant/clusters/c1/conversation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-POST-/assistant/clusters/c1/conversation/messages]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_cum_khong_ton_tai_tra_404",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_chua_hoi_lan_nao_tra_messages_rong",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tra_ve_hoi_thoai_da_luu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_cum_khong_ton_tai_tra_404",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_thieu_openai_key_tra_503",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tra_loi_thang_khong_can_goi_tool",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ai_goi_tool_truoc_khi_tra_loi",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_dat_gioi_han_vong_goi_tool",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_hoi_tiep_gui_kem_lich_su_cu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tool_khong_ton_tai_tra_error_khong_nem_exception",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_get_cluster_history_khong_co_cluster_store_tra_error",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_search_related_logs_mac_dinh_24h_va_gioi_han_limit",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_list_active_clusters_loc_theo_status",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_loi_trong_tool_duoc_boc_thanh_error_khong_lam_vo_chat",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_tao_index_voi_mapping_strict",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_get_chua_co_conversation_tra_none",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_save_roi_get_lai_dung_du_lieu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_save_lan_2_giu_nguyen_created_at_ban_dau",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_goi_lai_khong_nem_loi",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_bo_qua_loi_index_da_ton_tai_tu_worker_khac",
+          "status": "passed",
+          "message": ""
+        }
+      ]
+    },
+    {
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "-m",
+        "pytest",
+        "-vv",
+        "--tb=short",
+        "-rA",
+        "--color=no",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "faulthandler_timeout=20",
+        "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\mutation\\restored.junit.xml",
+        "tests/test_assistant_undo_contract.py",
+        "tests/test_assistant_undo_backend.py",
+        "tests/test_assistant.py",
+        "tests/test_assistant_storage.py"
+      ],
+      "cwd": "D:\\SE\\vt013-mutation-0daaa0f9f96d\\query-api",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 180,
+      "duration_seconds": 9.038,
+      "cases": [
+        {
+          "name": "test_t03_send_response_exposes_revision_contract",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t03_undo_first_send_persists_empty_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[space]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[tabs-newlines]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[nonbreaking-space]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t11_read_failure_returns_503_and_preserves_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_raises_storage_error_in_actual_repository",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_returns_503_not_empty_success[GET]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_returns_503_not_empty_success[POST]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t14_concurrent_sends_cannot_silently_overwrite[existing-document]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t14_concurrent_sends_cannot_silently_overwrite[first-creation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_copies_documents_and_does_not_protect_unconditional_writes",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_enforces_explicit_conditional_and_create_only_writes",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_preserves_missing_index_exception_and_ignore_semantics",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t02_undo_restores_exact_tool_history_and_creation_time",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t04_t05_one_level_undo_is_consumed_and_old_revision_conflicts",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload2]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload3]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload4]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload5]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload6]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload7]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload8]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[x]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[message1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[message2]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[message3]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[ hi ]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[None]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1_0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[True]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[ ]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1_1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[0:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[01:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:00]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:-1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[+1:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:+0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[ 1:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0\\n]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[\\uff11:\\uff10]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[9223372036854775808:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:9223372036854775808]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[revision18]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_undo_request_requires_only_the_revision_field[payload0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_undo_request_requires_only_the_revision_field[payload1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[1:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[9223372036854775807:9223372036854775807]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t10_stale_revision_does_not_touch_newer_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t13_rejected_undo_write_is_503_and_preserves_snapshot",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t15_t16_competing_undo_mutations_use_the_same_version[undo]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t15_t16_competing_undo_mutations_use_the_same_version[send]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t18_mapping_update_preserves_legacy_data_and_is_idempotent",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t18_mapping_failures_are_storage_errors[exception]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t18_mapping_failures_are_storage_errors[unacknowledged]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t19_undo_keeps_admin_authentication[None]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t19_undo_keeps_admin_authentication[Bearer invalid]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t22_corrupt_snapshot_is_not_an_empty_success",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_snapshot_and_saved_data_do_not_alias_caller_objects",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_invalid_version_metadata_is_not_defaulted[metadata0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_invalid_version_metadata_is_not_defaulted[metadata1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[None-GET-/assistant/clusters/c1/conversation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[None-POST-/assistant/clusters/c1/conversation/messages]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-GET-/assistant/clusters/c1/conversation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-POST-/assistant/clusters/c1/conversation/messages]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_cum_khong_ton_tai_tra_404",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_chua_hoi_lan_nao_tra_messages_rong",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tra_ve_hoi_thoai_da_luu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_cum_khong_ton_tai_tra_404",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_thieu_openai_key_tra_503",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tra_loi_thang_khong_can_goi_tool",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ai_goi_tool_truoc_khi_tra_loi",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_dat_gioi_han_vong_goi_tool",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_hoi_tiep_gui_kem_lich_su_cu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tool_khong_ton_tai_tra_error_khong_nem_exception",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_get_cluster_history_khong_co_cluster_store_tra_error",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_search_related_logs_mac_dinh_24h_va_gioi_han_limit",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_list_active_clusters_loc_theo_status",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_loi_trong_tool_duoc_boc_thanh_error_khong_lam_vo_chat",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_tao_index_voi_mapping_strict",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_get_chua_co_conversation_tra_none",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_save_roi_get_lai_dung_du_lieu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_save_lan_2_giu_nguyen_created_at_ban_dau",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_goi_lai_khong_nem_loi",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_bo_qua_loi_index_da_ton_tai_tu_worker_khac",
+          "status": "passed",
+          "message": ""
+        }
+      ]
+    },
+    {
+      "command": [
+        "D:\\SE\\LAE-issue-73\\.venv\\Scripts\\python.exe",
+        "-u",
+        "-B",
+        "-m",
+        "pytest",
+        "-vv",
+        "--tb=short",
+        "-rA",
+        "--color=no",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "faulthandler_timeout=20",
+        "--junitxml=D:\\SE\\Log-Anomaly-Explorer\\docs\\assignments\\VT-013\\evidence\\mutation\\assignment-final.junit.xml",
+        "tests/test_assistant_undo_contract.py",
+        "tests/test_assistant_undo_backend.py",
+        "tests/test_assistant.py",
+        "tests/test_assistant_storage.py"
+      ],
+      "cwd": "D:\\SE\\Log-Anomaly-Explorer\\query-api",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 180,
+      "duration_seconds": 5.699,
+      "cases": [
+        {
+          "name": "test_t03_send_response_exposes_revision_contract",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t03_undo_first_send_persists_empty_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[space]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[tabs-newlines]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_whitespace_message_is_rejected_without_side_effects[nonbreaking-space]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t11_read_failure_returns_503_and_preserves_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_raises_storage_error_in_actual_repository",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_returns_503_not_empty_success[GET]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t12_missing_index_returns_503_not_empty_success[POST]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t14_concurrent_sends_cannot_silently_overwrite[existing-document]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t14_concurrent_sends_cannot_silently_overwrite[first-creation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_copies_documents_and_does_not_protect_unconditional_writes",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_enforces_explicit_conditional_and_create_only_writes",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_fake_preserves_missing_index_exception_and_ignore_semantics",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t02_undo_restores_exact_tool_history_and_creation_time",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t04_t05_one_level_undo_is_consumed_and_old_revision_conflicts",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload2]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload3]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload4]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload5]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload6]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload7]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t06_invalid_send_inputs_have_no_side_effects[payload8]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[x]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[message1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[message2]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[message3]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t07_valid_boundary_messages_preserve_accepted_text[ hi ]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[None]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1_0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[True]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[ ]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1_1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[0:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[01:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:00]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:-1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[+1:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:+0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[ 1:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0\\n]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[\\uff11:\\uff10]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:0:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[9223372036854775808:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[1:9223372036854775808]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_invalid_revisions_are_422_without_reads_or_writes[revision18]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_undo_request_requires_only_the_revision_field[payload0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t08_undo_request_requires_only_the_revision_field[payload1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[1:0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t09_valid_version_boundaries_are_accepted_but_missing_state_conflicts[9223372036854775807:9223372036854775807]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t10_stale_revision_does_not_touch_newer_history",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t13_rejected_undo_write_is_503_and_preserves_snapshot",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t15_t16_competing_undo_mutations_use_the_same_version[undo]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t15_t16_competing_undo_mutations_use_the_same_version[send]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t18_mapping_update_preserves_legacy_data_and_is_idempotent",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t18_mapping_failures_are_storage_errors[exception]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t18_mapping_failures_are_storage_errors[unacknowledged]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t19_undo_keeps_admin_authentication[None]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t19_undo_keeps_admin_authentication[Bearer invalid]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_t22_corrupt_snapshot_is_not_an_empty_success",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_snapshot_and_saved_data_do_not_alias_caller_objects",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_invalid_version_metadata_is_not_defaulted[metadata0]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_invalid_version_metadata_is_not_defaulted[metadata1]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[None-GET-/assistant/clusters/c1/conversation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[None-POST-/assistant/clusters/c1/conversation/messages]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-GET-/assistant/clusters/c1/conversation]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_assistant_requires_admin_before_storage_or_openai[Bearer invalid-POST-/assistant/clusters/c1/conversation/messages]",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_cum_khong_ton_tai_tra_404",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_chua_hoi_lan_nao_tra_messages_rong",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tra_ve_hoi_thoai_da_luu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_cum_khong_ton_tai_tra_404",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_thieu_openai_key_tra_503",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tra_loi_thang_khong_can_goi_tool",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ai_goi_tool_truoc_khi_tra_loi",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_dat_gioi_han_vong_goi_tool",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_hoi_tiep_gui_kem_lich_su_cu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_tool_khong_ton_tai_tra_error_khong_nem_exception",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_get_cluster_history_khong_co_cluster_store_tra_error",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_search_related_logs_mac_dinh_24h_va_gioi_han_limit",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_list_active_clusters_loc_theo_status",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_loi_trong_tool_duoc_boc_thanh_error_khong_lam_vo_chat",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_tao_index_voi_mapping_strict",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_get_chua_co_conversation_tra_none",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_save_roi_get_lai_dung_du_lieu",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_save_lan_2_giu_nguyen_created_at_ban_dau",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_goi_lai_khong_nem_loi",
+          "status": "passed",
+          "message": ""
+        },
+        {
+          "name": "test_ensure_ready_bo_qua_loi_index_da_ton_tai_tu_worker_khac",
+          "status": "passed",
+          "message": ""
+        }
+      ]
+    }
+  ],
+  "conclusion": "KILLED",
+  "assignment_source_original_sha256": "ddaaf6057906c6d7242b1ebcdc79ff43101606d127c31f56575504ea1b2240e2",
+  "preexisting_file_count": 586,
+  "evidence_original_hashes": {
+    "docs/assignments/VT-013/evidence/checkpoint/README.md": "134b014cf822d799b27339cbaed9e6ac5de5a5c5f15816319971ed313fef9db2",
+    "docs/assignments/VT-013/evidence/checkpoint/manifest.json": "93e5fe19808d6818d594b23f25ec9eed60ddab75987d406c3cd5786b738a370e",
+    "docs/assignments/VT-013/evidence/frontend/README.md": "79e8b681fd8ec86c50072b799f9d9778bf569774c87cb68d6260257de777b941",
+    "docs/assignments/VT-013/evidence/frontend/build.log": "abc845c026259bd1d80ae375e4763c70f5cb5944293f4015eaf8377c2c9c4645",
+    "docs/assignments/VT-013/evidence/frontend/discovery-auth.log": "9502ded2046741d943f73899d726d80c17086a7e71a86f7b6ca41cd9dcfb7c19",
+    "docs/assignments/VT-013/evidence/frontend/discovery-default.log": "07fc9a745955a3f9442c1707b1dd5b4a9215665498bf66ef3755bb88ab328d31",
+    "docs/assignments/VT-013/evidence/frontend/discovery-vt013.log": "51e7f6a9738a619e3736f8b361326c547c98abf4f91e373892d6a3ad7db61251",
+    "docs/assignments/VT-013/evidence/frontend/e2e-after.persisted.json": "f9f2527df264f89a59af9671a996ae077577d0033e379313c90ef4bd4bd9b9c4",
+    "docs/assignments/VT-013/evidence/frontend/e2e-api/processes.jsonl": "c4036b8e5f5711521a68d3ca7ddf7b312f72ef164e07ae5ec49ffc0a43e2302b",
+    "docs/assignments/VT-013/evidence/frontend/e2e-api/vt013-frontend-1aca1664f9904907-normal.events.jsonl": "72fd91014e86b9da83047bac293fb751828ce9c573d10dd64a0bd2cd3101232f",
+    "docs/assignments/VT-013/evidence/frontend/e2e-before.persisted.json": "7676176bc7a638c88e36811dd54f3ee29cb5dff720c9690f212e612907d23833",
+    "docs/assignments/VT-013/evidence/frontend/e2e-browser-proof.json": "e5cd7f4cb8b791ec267565bcbde8416f3cae6b7fd9a008256736d9bbeabf0175",
+    "docs/assignments/VT-013/evidence/frontend/e2e-cleanup-ownership.log": "7c00fff2475b6cd65aa70631f2d830d0cf0faaac1512592e55e66ee9698d7e85",
+    "docs/assignments/VT-013/evidence/frontend/e2e-docker-version.log": "5f66a9193caf3878c0c9c64e87a9c1846533b38986d5b433596452ad1ea50726",
+    "docs/assignments/VT-013/evidence/frontend/e2e-opensearch-cleanup.log": "efe2506fa441e2b466d3f02a9f3963ee51c957d85f9f5dfbb5f0d3f57ff5176b",
+    "docs/assignments/VT-013/evidence/frontend/e2e-opensearch-inspect.log": "7c00fff2475b6cd65aa70631f2d830d0cf0faaac1512592e55e66ee9698d7e85",
+    "docs/assignments/VT-013/evidence/frontend/e2e-opensearch-start.log": "e27d8ac5a5a6d2e60795497c07acf8e5a738a44341f807b6aac40aa50a6f065b",
+    "docs/assignments/VT-013/evidence/frontend/e2e-output/.last-run.json": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+    "docs/assignments/VT-013/evidence/frontend/e2e-playwright.log": "8848ef2089be93e39b66808deefc72bf0ec4ea79a7f124b23a9e6e694182dd16",
+    "docs/assignments/VT-013/evidence/frontend/e2e-results.json": "9f4d9daecada65a206f93426f170c878ec73fa20d396df2e3bdc3c15d25d559e",
+    "docs/assignments/VT-013/evidence/frontend/e2e-typecheck.log": "b7d674aefce24116eccf1aeb5998b3e443f129f0d2282bb4489a9e2a7a78e755",
+    "docs/assignments/VT-013/evidence/frontend/e2e-vite.log": "4a7512ffe86990dda9cdbf84fc4649c32eef3f9a3feb491f313facc4403a2017",
+    "docs/assignments/VT-013/evidence/frontend/e2e.junit.xml": "994126f92964cc0761577594dc0159af0386d91846c95a8d9bbc1d63f55060a8",
+    "docs/assignments/VT-013/evidence/frontend/extra-checks.json": "b12c14a7dfcd1f02f76e85820bf7b032c39068111998c0f955a8ecfb3bb368d1",
+    "docs/assignments/VT-013/evidence/frontend/frontend-production.diff": "7b8f9407bee8d7096e5ed5ac7d0e2f4a8730b1c0126ef0960fd1984d8c1169d3",
+    "docs/assignments/VT-013/evidence/frontend/green-regression.junit.xml": "3c3ac1e613610ec4ec4083333c3cdd6be9471fa322d4175415320bb6de554881",
+    "docs/assignments/VT-013/evidence/frontend/green-regression.log": "80ad88f243ef3766aa5dba70303d8834dfce265d01b848ae16f9eef74a23df97",
+    "docs/assignments/VT-013/evidence/frontend/green-results.json": "27b2e54b6d6256302ecd6e575717fdc93de29ea47d1407625b5049f3cc6d8957",
+    "docs/assignments/VT-013/evidence/frontend/green-targeted.junit.xml": "384dedd9395179a3b488866dc2791253d0c5ccc9a3d627a8ac2d2316b4cb8dde",
+    "docs/assignments/VT-013/evidence/frontend/green-targeted.log": "5278a6091d9d9e377683b906cb0cf6f2eb82b5813efa76a50c581477a90e194c",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-after.persisted.json": "223589321bc4a28809067a9160f0a215485ae6c978a7c5c07b263fbd38b3effd",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-api/processes.jsonl": "39e520798778f0924de0af4e0e85813c1a298159fec73df9016b7c9658c356e1",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-api/vt013-frontend-a99e77a241844c90-normal.events.jsonl": "72fd91014e86b9da83047bac293fb751828ce9c573d10dd64a0bd2cd3101232f",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-before.persisted.json": "142f62c12e007eb74e02c1ee898a8517a5c3d7c18f1485f1b327c3a7aa162fa0",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-browser-proof.json": "e5cd7f4cb8b791ec267565bcbde8416f3cae6b7fd9a008256736d9bbeabf0175",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-cleanup-ownership.log": "97d0ab1ada154d3ce85f7a4c0aa645fc72ab608a309d2c9ed7896ba524ae5a96",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-docker-version.log": "5f66a9193caf3878c0c9c64e87a9c1846533b38986d5b433596452ad1ea50726",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-opensearch-cleanup.log": "ff3523092a659d820d61c43d19bf8b302d19fbead8453025ed3e176eaa6704a2",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-opensearch-inspect.log": "97d0ab1ada154d3ce85f7a4c0aa645fc72ab608a309d2c9ed7896ba524ae5a96",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-opensearch-start.log": "5e872f64d669a9fe896c360922431cfb4e30cf37b54c2886cea2d4ab33c7d709",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-output/.last-run.json": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-playwright.log": "745169bf64a973b18d78525123a5d7cff0595807222c9f0b7e7d6ff13f830d66",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-results.json": "93645906e3a7b8dd4ec0a025b12abcfcf5e861aad9b837a48a21b80469fa2a0c",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-typecheck-initial.log": "de9438ad1a28059601fb8f9e7de44b025be66416328f8884cbee25f2f48660a8",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-typecheck.log": "a23d4dbfb6f2b036ddbb3e1f276f70747ef67e4b200be427f632888af197e7ac",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-vite.log": "0ed6b3e2ea82e434232c28d2e57c32f844057ad7d0cc06b679c7f6a9dc14f235",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e.junit.xml": "085228b3b5f8e988e0b2b52992665433d48c169b68c2e58fc3889c82e7307897",
+    "docs/assignments/VT-013/evidence/frontend/initial-green/AssistantPanel.test.tsx.snapshot": "d56226df18c8285e6d4e31c7c28f41e7273d80da06380bb349f415a0c281e838",
+    "docs/assignments/VT-013/evidence/frontend/initial-green/AssistantPanel.tsx.snapshot": "3989c2146276b0c90e6a90c6f0528c3a9a706039e39ff2af60144d2bce405867",
+    "docs/assignments/VT-013/evidence/frontend/initial-green/api.ts.snapshot": "6fa4b292c78763dcc7e33da1fabecef7a0842cbb61cdd34b5b04ef3ee3787442",
+    "docs/assignments/VT-013/evidence/frontend/initial-green/build.log": "e68d9179fb5a6fbe6500c38e7dae195d1d4ab9d57b169138f3e4e431362a7aa5",
+    "docs/assignments/VT-013/evidence/frontend/initial-green/green-regression.junit.xml": "cb904aeb9db86dcc4f6df53c892370d6f46c95dddc787832f94706476d38242c",
+    "docs/assignments/VT-013/evidence/frontend/initial-green/green-regression.log": "fab0a39a91ec480750c5d8c01cc56d0adb569782f2860bd92c245b4e3a71e02f",
+    "docs/assignments/VT-013/evidence/frontend/initial-green/green-results.json": "36ad103503d7b99ab916757729180117ce45073de48560caa3ed42c8f656c3a1",
+    "docs/assignments/VT-013/evidence/frontend/initial-green/green-targeted.junit.xml": "e5d6995df2c1ceae6c78e94fb98e6eb20a1dd7bcb00b12703f7eddd3a5f0b5de",
+    "docs/assignments/VT-013/evidence/frontend/initial-green/green-targeted.log": "64897c8e55f4692a467da9a669c5edb67fa1efe0fa9b1b82aa7e3dde534bf7e3",
+    "docs/assignments/VT-013/evidence/frontend/initial-green/lint.log": "d920808a60697157591dc585a65967c28a4cf05a2807def7ae4c80842ac99d42",
+    "docs/assignments/VT-013/evidence/frontend/initial-green/queries.ts.snapshot": "4f8c802a14adb6abbfdd4ccffd964f8babf08e9869761db8f6d3c3d67ab7f189",
+    "docs/assignments/VT-013/evidence/frontend/initial-green/typecheck.log": "ead83ac5005c89b5726a4df4a0a6f7a8f93a2133b7fe3fb15769571ece1489c0",
+    "docs/assignments/VT-013/evidence/frontend/integrity.json": "6c8076dc28caf29235b65e631e653535d7d0f00129c71eef68bd0ded58a34cc2",
+    "docs/assignments/VT-013/evidence/frontend/lint-final.log": "44cf23590377d5a351cbdb09fed31454f25272825b71feafd75c0d1291f42718",
+    "docs/assignments/VT-013/evidence/frontend/lint.log": "a0f196a81a831fc30a5409a3a84cbed8d1fa944486117d44f7bddfc671b66e48",
+    "docs/assignments/VT-013/evidence/frontend/red-results.json": "476ea55d2f9f850d32947910552b80c5818dfde881d02a982d938df3bb79ffef",
+    "docs/assignments/VT-013/evidence/frontend/red-targeted.junit.xml": "5dd84e3bb5c7881f95ee7a950fcf55f7047bb68b2df8be91becef9beca2ab29c",
+    "docs/assignments/VT-013/evidence/frontend/red-targeted.log": "b1564fb1a9fa65db641648d17213c4d7a41848ac963ad318478c6a9460143b01",
+    "docs/assignments/VT-013/evidence/frontend/review-results.json": "c042dac9e46c24e4d3d00283b8b7ef7fbf6edaf4254af2a3cdc22710f201232b",
+    "docs/assignments/VT-013/evidence/frontend/run_e2e.py": "9795a3423ca37ee0aacc63ff49d2eef2a74a112e96aae5d8c4b0b6f7f6d144b3",
+    "docs/assignments/VT-013/evidence/frontend/run_frontend.py": "e7d669912c15af21dffc2574f2cbed4d1bd643edc62d8cc0d89fc419956e460f",
+    "docs/assignments/VT-013/evidence/frontend/session-race-red.json": "b28914c1993b84c1f6cca49f03cd3ec11987023acc09260c969df9e81dc4c75f",
+    "docs/assignments/VT-013/evidence/frontend/session-race-red.junit.xml": "a495f6d6a463b5a614f86a00c966d79149fc6ae490edba65cca8d058ee6bbce5",
+    "docs/assignments/VT-013/evidence/frontend/session-race-red.log": "9dd7e0b5e6b1f95bf5a78f117c37a5e8da8b8e02c9c21171c58f1c6131871242",
+    "docs/assignments/VT-013/evidence/frontend/test-results.md": "a65cf186b07369a16f8e85112eae1aa017004573b2a6a248c39bd65d050a846e",
+    "docs/assignments/VT-013/evidence/frontend/typecheck.log": "f3abdeea94a1868dd98ba9cd36b2e3b00054179724edb699a74cebce459805c2",
+    "docs/assignments/VT-013/evidence/green/README.md": "2201a12e9457e2614cf09dbf6d01bbcb4e43eab164134f6f033bcb08efc3914d",
+    "docs/assignments/VT-013/evidence/green/assistant-regression.junit.xml": "9092c5ab1d859b11f4ecea661b974ede79bf9bb9432c13b59b96003e8ca83b5c",
+    "docs/assignments/VT-013/evidence/green/assistant-regression.log": "b8f614609581a128bb10aa15fb289b21a89a246c5acd09a241aeb93412f51097",
+    "docs/assignments/VT-013/evidence/green/backend-contracts-initial.junit.xml": "9d086ad94e7bef7b62babb8bca16e737ca52128e7e0f4854b6b08934a0b625c0",
+    "docs/assignments/VT-013/evidence/green/backend-contracts-initial.log": "4e6ab790c7d070d351a0811ffef6a53a113a88b02bc12d717d8c1d1188d4ee34",
+    "docs/assignments/VT-013/evidence/green/backend-contracts.junit.xml": "74b83e1135b4ce26f31751de91c61bce66741eadd7e84440e0004bcbf86a3c74",
+    "docs/assignments/VT-013/evidence/green/backend-contracts.log": "bdf56a9bd703bfb9c8d32a108ea4d35a41ca34a4a240789be5d592368ff7b89c",
+    "docs/assignments/VT-013/evidence/green/combined-backend.junit.xml": "1e4a5b0d8d8727e72f296e11fee88d4bc2aea0b1903a7c36cc059a339ed0a199",
+    "docs/assignments/VT-013/evidence/green/combined-backend.log": "a20e272701f38043a57d91ed2398db116869e4a2bf178e335e5d34715dfe4005",
+    "docs/assignments/VT-013/evidence/green/focused-green.junit.xml": "ec4ae659945d7c4e304e710dc705ad901d403ae55ac505c37b4dc9485a83388a",
+    "docs/assignments/VT-013/evidence/green/focused-green.log": "c54657d672040f6397c34087200b5fae4e11a9be645ad82e186f3b1f6475ccbc",
+    "docs/assignments/VT-013/evidence/green/initial-results.json": "5a1912855846cd14386fe5411aafad9f22ec754c308ea0ccc78a3c614079dc40",
+    "docs/assignments/VT-013/evidence/green/results.json": "50dc9b21157b7c7cd41993e2b7a0eb49783de7e2a5c12fbd3778255808874735",
+    "docs/assignments/VT-013/evidence/green/run_green.py": "9d9b54cb9dfa07742dec4290b494c39325cdde3185e279cadf0d4564e4d68e1b",
+    "docs/assignments/VT-013/evidence/green/test-results.md": "21c09174862dc53c766199943fa918e133f9acef8c7cdb8e115de82e080acddb",
+    "docs/assignments/VT-013/evidence/integration/Dockerfile.verify": "3517145c38e20dc05d2090cdc697e2cea6c1627d62419fd78b9201975c080a68",
+    "docs/assignments/VT-013/evidence/integration/README.md": "178a125fa3b13580b8a7f5dc9a1ad6518c2ea3a6c0386f8db41ee6edc7be38bd",
+    "docs/assignments/VT-013/evidence/integration/backend-regression.junit.xml": "b9cf1f6bae2a58c5944f843c320fb8dec4eb64f7cf49134110846172042d37fe",
+    "docs/assignments/VT-013/evidence/integration/backend-regression.log": "803c8ee94febf9ea4b4427f952bb30442f683ab8da53b7a0593900e3e2403ec5",
+    "docs/assignments/VT-013/evidence/integration/cleanup-ownership.log": "2a0d67427cd30eabb176011340effd52db46067552d76f03afa88d9110fdb071",
+    "docs/assignments/VT-013/evidence/integration/docker-version.log": "eabe127ccae0e311913a5661f406515fe4ba2d813470d764cc6bed8ed24a5c4d",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/mapping-upgrade.json": "03a7acd702887b841765f7ea85f3c73edce3f0e5bf5ef12c154487d0de56fbd8",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/not-found-shapes.json": "fb005962d64a1210676fba4e69e1aa028d1b2461e21b8ed923e8b09d5c10c5fd",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/processes.jsonl": "604e31761abb2940d12c43ffe9716829f881c2b5c32ca569b853bbe9fe44f411",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i01_create_send_undo_get.persisted.json": "0a445bc0781eaf1b4e476de8b2dc4641cfa8aa43eec5d068172ecb34133a2a21",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i02_restore_exact_tool_history.persisted.json": "0e58075af37f64bab99214900cba4520c478d2af5f0f49108e8f484c47a1c956",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i03_first_send_restores_persisted_empty.persisted.json": "8678b71b6e0008a5154d920f8061bcc26db4fcd6d2ecaa0a218fffce330ad701",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i04_restart_api_process_recovers_restored_history.persisted.json": "9c0a1266b474d61ae040257ccb01d8f3a6371b97268cb3241fce29bf2df472d1",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i05_concurrent_sends_have_one_commit[conditional-update].persisted.json": "09ce55f3c940b2330b8f4651d672c19c9d90013c803446366d82f504016ac1b0",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i05_concurrent_sends_have_one_commit[create-only].persisted.json": "701640d41f4580d013b13da14b087ca6af1b66ca4157b0b1b77017d257472ee0",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i06_concurrent_undos_have_one_commit.persisted.json": "4b42550c42479611cf3fa65dec548415bb3a514fe5deef1a1b42d9865c877d6a",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i07_missing_document_versus_missing_index.persisted.json": "5f813df2c53500c82da48e4559ebaddb0d54c3656cd1b8fdf2a380232b95594c",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i08_existing_strict_mapping_is_upgraded_additively.persisted.json": "0d7cd75b1051d9488592d519c456f45d3feb35b85398428960c757aea46b7ac4",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i09_legacy_document_remains_readable.persisted.json": "6f5f2596c93ae35ed32cfb1f7929c103fd88c0667efcc54182066cb9bf1efd78",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i10_real_connection_failure_propagates_without_data_loss.persisted.json": "799a417dc95b39455f33385d9d918eacd81c09d827538fede3f7bb9f492c663f",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i11_real_write_rejection_preserves_snapshot.persisted.json": "89f684c8cd6d061e17df40c2fada708807e40a3c1e2d624aa9f0aa4d20ccf5e5",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/test_i12_validation_and_admin_auth_remain_enforced.persisted.json": "db99e43c0bcdc918cf16bc8bae8e4c248cb49a26f9997e4dd256ff774dd33e03",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/backend-regression.junit.xml": "381bcbda2815189238dda5d93e0e4790d75992f31e0a779195899e3b4355af39",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/backend-regression.log": "52bde9cb684e17eecaa6db0c65187fe0a6f90603416996c9daf5ed2b8a8434b3",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/instance.json": "6a7dc1a020b1475dbf310d016ed65a34edaecf61f562ac76a5f49c61f0c60eea",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/opensearch-cleanup.log": "7f45f527fb4d8cffe719e359d289def97f82cc6cc80a9d4da4dbecd88c1437c6",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/real-opensearch.junit.xml": "97706fa3f347c00ed47e89c7aa4bb521cf27f5ff134fa33304e8a9913fdae4eb",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/real-opensearch.log": "f219a16776143d64aff45c77f2ac82d2cb7004ac6a2605f13e0cb9764bd88180",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/results.json": "d781b1108cc005c953018ba6a0f6a17cbb68dde299690a7c7de8be9c5b27cbd4",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/test_assistant_undo_integration.py.snapshot": "d16bd4304f282a3b935e35a8eeafa049770960514df70552c380b4976d64fcaf",
+    "docs/assignments/VT-013/evidence/integration/instance-python311.json": "daab3620bd9b747e21c10e4b4446cadef74ee5eb6c00c4c0d055f943027bd220",
+    "docs/assignments/VT-013/evidence/integration/instance.json": "7fa2e2f71c59be87fac616159f2a127de6b612214520115e2c2bb74e4f09a229",
+    "docs/assignments/VT-013/evidence/integration/integrity.json": "c7c9bcdf0f9af8bbd404c84451d677f0f089d764abfbcae2d60b78f8b28c354f",
+    "docs/assignments/VT-013/evidence/integration/opensearch-cleanup.log": "d72c12b7ac652ef5038ac17492cb3ab1e84950337a15a5967eb0cd5f18499f2d",
+    "docs/assignments/VT-013/evidence/integration/opensearch-image.log": "93d2f97890f24f063adaee91320a969d5e8800c6d638b9cb0a4d438c8b6d4401",
+    "docs/assignments/VT-013/evidence/integration/opensearch-inspect.log": "37ba315fa5634e64ea309be21db03c3aec4e55da5cbe7b371cb624606cd27766",
+    "docs/assignments/VT-013/evidence/integration/opensearch-start.log": "36935c58582b969325b5ad749293b4c8a49611b3902ea9633c8c3fd2273e7d33",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/mapping-upgrade.json": "03a7acd702887b841765f7ea85f3c73edce3f0e5bf5ef12c154487d0de56fbd8",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/not-found-shapes.json": "dbcb20f0270653027d8e4f29979b75455b33c5daf096bb37ba63033e36af857a",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/processes.jsonl": "59f13e1ebd56ab13c8bd240f1905a786bfd7d5e25693933e7dbf3d0a5c29fe89",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i01_create_send_undo_get.persisted.json": "20f75419c7ad4e52176623221c611ecc2e3e182612c38314ca37cd2373cb0250",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i02_restore_exact_tool_history.persisted.json": "a98a884040fe1d8cae81d239b50bcd4d49816dd2cf9215252b48015d0e759420",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i03_first_send_restores_persisted_empty.persisted.json": "f492e04477c339bb4ff6c2b8050747f807f9a5235e464a7451d599b2ec69ad56",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i04_restart_api_process_recovers_restored_history.persisted.json": "cf1956106c0466442865894b0556c77d13f1e1695cad90ba3d6a1bc8b67bfe48",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i05_concurrent_sends_have_one_commit[conditional-update].persisted.json": "79844f23eefa4d1e54fda84855d6561360000c2c6ed3bb26e01651ef821e70d6",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i05_concurrent_sends_have_one_commit[create-only].persisted.json": "3e924bd9c0d158ea1d043c8cb9f10d600cb28d4feffc58302c7ae8096dea67af",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i06_concurrent_undos_have_one_commit.persisted.json": "856c502921310c7c3d1d5c6af3d2449be97a2da44e0b3757d141eea52d43ef48",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i07_missing_document_versus_missing_index.persisted.json": "ad652f734ce002d1bc2f246c2b536b290e5a94c6d3d0c3f118e2739c679dad6e",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i08_existing_strict_mapping_is_upgraded_additively.persisted.json": "efefee67bcba5df79a4bdf4eae81e3a3413f2536aae13dd8423bd4f6fedef59a",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i09_legacy_document_remains_readable.persisted.json": "acae54815edf36c9883116e3b732ec6f3041f081aef9bcfb1e48ea8dea8490bc",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i10_real_connection_failure_propagates_without_data_loss.persisted.json": "3827acc25fa1153113c3b35a74674d43332f39b71e86de9b89e5e586cdd86815",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i11_real_write_rejection_preserves_snapshot.persisted.json": "88e010a2ed21c82f0006b866dcdea25d0f6c988a336ef563ef438a61a2853f68",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/test_i12_validation_and_admin_auth_remain_enforced.persisted.json": "d34e044ff196360fdbce627bf39aaba6d645bd3a0eefb19a1a11ac643f0d96a7",
+    "docs/assignments/VT-013/evidence/integration/python311-test-image-build.log": "f9c45d40ce553c072c4fe3382274b26fc4131c9f4de3f172e7fdf39ce930a1db",
+    "docs/assignments/VT-013/evidence/integration/python311-tests.junit.xml": "2024d264cc6f71ab31138a9526835c6127e30bb63e2fbb44ac9a84407bc48fc6",
+    "docs/assignments/VT-013/evidence/integration/python311-tests.log": "6a864dc665d6c2265e74d7a3ea622c1122d0f40164e21dc72671cecb8c7739b4",
+    "docs/assignments/VT-013/evidence/integration/query-api-build.log": "b5242be02c28c8a6b79c920ce49a45440735c03ebc6ae48d51c3c578fd8510ad",
+    "docs/assignments/VT-013/evidence/integration/query-api-image.log": "afe0cabdd03f7e6a3fa9dfacdc91795da3f5753a3dea999a590de9374a444286",
+    "docs/assignments/VT-013/evidence/integration/real-opensearch.junit.xml": "782fb7d2471cdbd8d42e0bdd2d065be1e98cd3576a58b20fa98eedabc2fd0aef",
+    "docs/assignments/VT-013/evidence/integration/real-opensearch.log": "13ac10b25df2c1458e3fe26f662356963873384b915cdd23d65c8bfc246615a3",
+    "docs/assignments/VT-013/evidence/integration/results.json": "a745ce6d6bd83001cd5cefc32e33415e699c122d913f3fded71ae5058aea7b7b",
+    "docs/assignments/VT-013/evidence/integration/review.md": "7d8dd91c60e8d5583566c736cf8f7841ff427ebce62e17249d3d74767ae88924",
+    "docs/assignments/VT-013/evidence/integration/reviewed-production.diff": "0176cff807d1292ec5118593863acd149aa391f890b49dbf1ff4da9fbdd51fa9",
+    "docs/assignments/VT-013/evidence/integration/run_integration.py": "ff9a8198771275ff7925c2c69fedbcc31a06a9546fa025a9f4e1851b03bd57af",
+    "docs/assignments/VT-013/evidence/integration/runtime-schema.log": "9f0448a33a1a063339b14cac424b22f46dc54dfa29cb52cd18e2932d98555a66",
+    "docs/assignments/VT-013/evidence/integration/test-results.md": "367ef05e5350f0bd33edabac8a8daadbe159656f0829fbf110c5c6a4c7a07ff2",
+    "docs/assignments/VT-013/evidence/integration/verification-summary.json": "60e32b22fce6528da19e3a3711ceb4f19bc9de3577d80c2c4a8d2a6f079ab0c8",
+    "docs/assignments/VT-013/evidence/red/README.md": "e04b65c9853c18054159d800ba77cb6b8275c8aaa74b8e94e1f68de0d1fcc4d8",
+    "docs/assignments/VT-013/evidence/red/combined-regression.junit.xml": "a2affc24c124d096f08d76af5c38d4953030d73cef1244b83d5f139acae89f97",
+    "docs/assignments/VT-013/evidence/red/combined-regression.log": "cc3926fb771cacb9ab04d6eb629d96133d6159cfec056077334f5a48d522d510",
+    "docs/assignments/VT-013/evidence/red/existing-tests.junit.xml": "16c6d5025408567cedce2823d87a29ae691da883981a447bb7cb47358371d178",
+    "docs/assignments/VT-013/evidence/red/existing-tests.log": "272fe950a8fdc9ec6538329a877c50040b0219dfb4de0b6c43fc88d45f3f3046",
+    "docs/assignments/VT-013/evidence/red/focused-red.junit.xml": "73f18fbd774c4c1e598c68a1ae2675a1d062858c7ec781a384d42270de9ed4e4",
+    "docs/assignments/VT-013/evidence/red/focused-red.log": "13b108ac74f047d39298022edfc988a6c3f03d2c9133be7b3fb93f738e44a36d",
+    "docs/assignments/VT-013/evidence/red/results.json": "6407da5a61841da0c3d8f346e6516155eb25ebd6c4a500f0e72be90aae4dc677",
+    "docs/assignments/VT-013/evidence/red/run_red.py": "db7e2a18330a26071202f80925b8b695589086d103d2c61ee34557bf15290a44",
+    "docs/assignments/VT-013/evidence/red/sandbox-probe.json": "69a5e2a7ca2fcc4e1a69454c8041bbbd9087bea0baa85e0ba96dc6465640b0cd",
+    "docs/assignments/VT-013/evidence/red/sandbox-probe.log": "a05b78f61456b3385e02a6f7e510a67b9b53ff89f40f4546d67449259337d4f6",
+    "docs/assignments/VT-013/evidence/frontend/e2e-api/vt013-frontend-1aca1664f9904907-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/frontend/initial-e2e/e2e-api/vt013-frontend-a99e77a241844c90-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/diff-review.log": "d232281a9e4edbbc2048eaba3ac777c4021270ed56278427422b73ee2500b751",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-1cf8179550-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-211d1f90ee-concurrent-send.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-211d1f90ee-concurrent-send.events.jsonl": "291fd4941421cf07cc2286ff8bf8b1e4b9f40c679db1a22187b0b61551feef1a",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-3bd3e6194f-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-3bd3e6194f-normal.events.jsonl": "1753c4c296d0a59f69504dad5c45d5a2206274e436f5d83f6fe1765a0e678790",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-5a754c463e-concurrent-undo.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-70f046b215-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-70f046b215-normal.events.jsonl": "62d92c8ffcac72d919ce34f7a257e9bf34efbf84d64289fa2029fe4fda08fbce",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-71d908e616-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-71d908e616-normal.events.jsonl": "1753c4c296d0a59f69504dad5c45d5a2206274e436f5d83f6fe1765a0e678790",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-7219c85908-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-7219c85908-normal.events.jsonl": "1753c4c296d0a59f69504dad5c45d5a2206274e436f5d83f6fe1765a0e678790",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-bdfd01545b-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-bdfd01545b-normal.events.jsonl": "29f8aade68ac8d29fa8d6c329720f0c071217c803ef1979624faf57028558542",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-d469fad888-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-e49c5f11f1-concurrent-send.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-e49c5f11f1-concurrent-send.events.jsonl": "eb666f2a691db3f40825600efc5188f6c94d034053d184bc9b6eb0b8f1aa8342",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-e60017867f-missing-index.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-e60017867f-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-f1f647360d-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-f1f647360d-normal.events.jsonl": "1753c4c296d0a59f69504dad5c45d5a2206274e436f5d83f6fe1765a0e678790",
+    "docs/assignments/VT-013/evidence/integration/host-artifacts/vt013-b747e02ce8644bf9-f5d7701ed5-read-failure.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/cleanup-ownership.log": "ce821756ddf142e564f3991537258f8c6ef4276e1ad603bc6816293be03abb19",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/docker-version.log": "3dec547d0c69186830d20f5eb04cf3901822445084c94cb73dedbf0717115df8",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/mapping-upgrade.json": "03a7acd702887b841765f7ea85f3c73edce3f0e5bf5ef12c154487d0de56fbd8",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/not-found-shapes.json": "a2a107a45c69bc6db4ab88ff39f19885901d6f5c200d5cd43abcca676a821a8a",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/processes.jsonl": "bd5846a9145ca2aca33bd9f2582454e8f46548fa1ce5175f23bd301a3e5b5ee3",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i01_create_send_undo_get.persisted.json": "b68287e258ed3ed11d3b01ac3b34cf76e8aff46ace552eae3066862109024ffc",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i02_restore_exact_tool_history.persisted.json": "7dc667dab22c1a7274cbe02a4eb7527b2df3748407d6c08dd38cff4725f97623",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i03_first_send_restores_persisted_empty.persisted.json": "d4b55e576ff2e43166435c4ffa72b871e9350927392119b67e694c6149524799",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i04_restart_api_process_recovers_restored_history.persisted.json": "ab0b00e5370a6b2465e435cd786a1e136d214114161dd50eba2759245e647148",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i05_concurrent_sends_have_one_commit[conditional-update].persisted.json": "d51d06c45624909940f71ab3000971f742d44eb63951409369ca6ea7a790a6d4",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i05_concurrent_sends_have_one_commit[create-only].persisted.json": "f63a6d41bc660f1addcb78557f735e9ccea0b09e960756179f8d30fee0ec5a88",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i06_concurrent_undos_have_one_commit.persisted.json": "12bbe5be5ed65446fd97baaaebd4563b3276fae58752ed7f330602aa067a8ddf",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i07_missing_document_versus_missing_index.persisted.json": "078cd655b6d9f816f2d00ce2faaff064a587ec1d03c750eee461ae0f041aa6f7",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i08_existing_strict_mapping_is_upgraded_additively.persisted.json": "28bbf459c1dc4ada70467de1c799819e104979c12128fd489e673fa3397e56fe",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i09_legacy_document_remains_readable.persisted.json": "32b994c8c03fae2754f9a852ca0a14baf209c07556aa10c37d74274e548531cc",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i10_real_connection_failure_propagates_without_data_loss.persisted.json": "7a9459485c040dfdd2e681138a8302e7a7ebacb39d90148f4e61635925a18add",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i11_real_write_rejection_preserves_snapshot.persisted.json": "53ddd9ab9e4c0bbda29f841793adff84ff6a894b6b60624493a1d27f33d2b3da",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/test_i12_validation_and_admin_auth_remain_enforced.persisted.json": "aed6bb663c58f5b7b2388ce3a6a87eb24bb46a426c0809ebc5c0d107a99256c8",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-16687ededf-read-failure.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-3c25d84547-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-3c25d84547-normal.events.jsonl": "1753c4c296d0a59f69504dad5c45d5a2206274e436f5d83f6fe1765a0e678790",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-43b3a803f7-concurrent-send.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-43b3a803f7-concurrent-send.events.jsonl": "291fd4941421cf07cc2286ff8bf8b1e4b9f40c679db1a22187b0b61551feef1a",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-4b79fa2e60-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-696ea8fb30-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-6ec32d481a-concurrent-undo.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-827309b27f-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-827309b27f-normal.events.jsonl": "1753c4c296d0a59f69504dad5c45d5a2206274e436f5d83f6fe1765a0e678790",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-832faf9cda-concurrent-send.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-832faf9cda-concurrent-send.events.jsonl": "eb666f2a691db3f40825600efc5188f6c94d034053d184bc9b6eb0b8f1aa8342",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-ac4b6ac944-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-ac4b6ac944-normal.events.jsonl": "29f8aade68ac8d29fa8d6c329720f0c071217c803ef1979624faf57028558542",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-bcdfbe4817-missing-index.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-bcdfbe4817-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-c7fcb61279-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-c7fcb61279-normal.events.jsonl": "1753c4c296d0a59f69504dad5c45d5a2206274e436f5d83f6fe1765a0e678790",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-cfec8721c1-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-cfec8721c1-normal.events.jsonl": "1753c4c296d0a59f69504dad5c45d5a2206274e436f5d83f6fe1765a0e678790",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/host-artifacts/vt013-198275400aa54c94-f2cefc94b3-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/opensearch-image.log": "6e8a011758f9db9a7e314858672198842307cae3760608ddde49f7c4902e9fb0",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/opensearch-inspect.log": "3d1ac3f076a9324957d80876cfa242b85dc6af3e0e3b40d723c3ca52bea2a137",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/opensearch-server.log": "63e75b547ce286d753e1918fd7aaa71a6fb879bba753bdbff4e5b5a8736f9708",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/opensearch-start.log": "d998138254aa00effa4a651afbeec39b45b91293d6ba1161d8660bd321cd619a",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/run_integration.py.snapshot": "9d3686941877603a96be5230e020ddce7106dcb3cc72bbc6dfd4541ee97da3c9",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/test_assistant_undo_integration.py": "d16bd4304f282a3b935e35a8eeafa049770960514df70552c380b4976d64fcaf",
+    "docs/assignments/VT-013/evidence/integration/initial-attempt/vt013_integration_server.py": "f9b9c4ff33392b7c033668eb4f57d4619d170c6e2c0eba6204ba299e44487b44",
+    "docs/assignments/VT-013/evidence/integration/opensearch-server.log": "db8cbdb870ccff5ad90afd6df7460005220b75e327fb84d263cd69ebec91920b",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-17b7e8e9b7-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-17b7e8e9b7-normal.events.jsonl": "afdd2e3192521ac1a9c18bd3170521ca30902f23c293d204c7c4b52c8a99695d",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-2a920237ea-concurrent-send.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-2a920237ea-concurrent-send.events.jsonl": "bb0908922b2a0fb3735453eb3da0fdeb33927cd6800859fe5b283749a44e4ca4",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-450471ae5c-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-450471ae5c-normal.events.jsonl": "afdd2e3192521ac1a9c18bd3170521ca30902f23c293d204c7c4b52c8a99695d",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-4e55947ad3-read-failure.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-7c5a3685f9-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-7c5a3685f9-normal.events.jsonl": "afdd2e3192521ac1a9c18bd3170521ca30902f23c293d204c7c4b52c8a99695d",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-7da3838268-concurrent-undo.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-8ac4270ffd-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-8ac4270ffd-normal.events.jsonl": "afdd2e3192521ac1a9c18bd3170521ca30902f23c293d204c7c4b52c8a99695d",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-8c8b812cbd-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-8c8b812cbd-normal.events.jsonl": "edd9f581838226fbdc64388fd68683aa9ac1afcbae2e4d46c2c13e49ea3e13f7",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-8ecc10a816-missing-index.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-8ecc10a816-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-b0148f2c16-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-d41474a85e-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-d41474a85e-normal.events.jsonl": "1c9e75313e002ee74a442fa4bcf42cc4336489d727e1ca7e39e861b75ffa65c4",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-df8b9a67bb-concurrent-send.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-df8b9a67bb-concurrent-send.events.jsonl": "208d8176df07c738a99f23010bf7bca437bcecfa5ebc1e223a11fb437e529b62",
+    "docs/assignments/VT-013/evidence/integration/python311-artifacts/vt013-b747e02ce8644bf9-fc8d0753ad-normal.api.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/assignments/VT-013/evidence/integration/working-tree-review.json": "66c4fed5e60c377c7e8fa29fd715fe3b81bfe177f8dfde0bebae2ed2018f611d"
+  },
+  "branch": "feat/vt013-undo-manhpd",
+  "head": "a275c52300d40e92681692a0cc894a9946cb0084",
+  "worktrees_before": "worktree D:/SE/Log-Anomaly-Explorer\nHEAD a275c52300d40e92681692a0cc894a9946cb0084\nbranch refs/heads/feat/vt013-undo-manhpd\n\nworktree D:/SE/LAE-issue-73\nHEAD 6ac9afe9c1d79fa94c10439a60417ff286658388\nbranch refs/heads/dev/manhpd\n\n",
+  "temporary_worktree": "D:\\SE\\vt013-mutation-0daaa0f9f96d",
+  "isolated_source_original_sha256": "ddaaf6057906c6d7242b1ebcdc79ff43101606d127c31f56575504ea1b2240e2",
+  "isolated_source_mutant_sha256": "16b59aacdfbe6aff612c49bf751ad4e39e9e4bbe4d0d2df14463fd586425eec2",
+  "detecting_assertions": [
+    {
+      "name": "test_t11_read_failure_returns_503_and_preserves_history",
+      "status": "failed",
+      "message": "assert 409 == 503\n +  where 409 = <Response [409 Conflict]>.status_code"
+    },
+    {
+      "name": "test_t22_corrupt_snapshot_is_not_an_empty_success",
+      "status": "failed",
+      "message": "assert 409 == 503\n +  where 409 = <Response [409 Conflict]>.status_code"
+    },
+    {
+      "name": "test_invalid_version_metadata_is_not_defaulted[metadata0]",
+      "status": "failed",
+      "message": "assert 409 == 503\n +  where 409 = <Response [409 Conflict]>.status_code"
+    },
+    {
+      "name": "test_invalid_version_metadata_is_not_defaulted[metadata1]",
+      "status": "failed",
+      "message": "assert 409 == 503\n +  where 409 = <Response [409 Conflict]>.status_code"
+    }
+  ],
+  "isolated_source_restored_sha256": "ddaaf6057906c6d7242b1ebcdc79ff43101606d127c31f56575504ea1b2240e2",
+  "temporary_worktree_removed": true,
+  "worktrees_after": "worktree D:/SE/Log-Anomaly-Explorer\nHEAD a275c52300d40e92681692a0cc894a9946cb0084\nbranch refs/heads/feat/vt013-undo-manhpd\n\nworktree D:/SE/LAE-issue-73\nHEAD 6ac9afe9c1d79fa94c10439a60417ff286658388\nbranch refs/heads/dev/manhpd\n\n",
+  "assignment_source_final_sha256": "ddaaf6057906c6d7242b1ebcdc79ff43101606d127c31f56575504ea1b2240e2",
+  "changed_preexisting_files": [],
+  "finished_at_utc": "2026-11-09T07:36:48.253746+00:00"
+}

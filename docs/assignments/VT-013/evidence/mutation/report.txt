@@ -1,0 +1,2 @@
+Mutation ID | Target | Changed behavior | Detecting test | Result | Evidence
+M-01 | query-api/src/assistant/storage.py:128 ConversationRepository.get generic except | Swallow read exception and return None instead of StorageError | T-11; T-22; invalid-version-metadata[metadata0,metadata1] | KILLED: 4 assertion failures, no setup errors; restored and final 90/90 PASS | mutation.diff; baseline.log/.junit.xml; mutant.log/.junit.xml; restored.log/.junit.xml; assignment-final.log/.junit.xml; results.json
