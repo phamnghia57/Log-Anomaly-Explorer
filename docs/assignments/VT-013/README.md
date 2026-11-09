@@ -2,7 +2,11 @@
 
 **AI-06 — Log Anomaly Explorer · SE2026-T04 · MSSV 23001904**
 
+HEAD trước checkpoint cuối: `687953784957242ed47390f0fb8652680fa726b8`. Sáu tài liệu đã được người dùng duyệt; phiên bản được xác định bằng commit chứa [PR staging manifest](pr-staging-manifest.md). Các commit evidence nằm trong [traceability](traceability.md). Checkpoint tài liệu không bao gồm PDF xuất sau đó; không có test execution mới hoặc tuyên bố checkpoint này đã push.
+
 Undo một lượt Assistant Send đã hoàn tất, lưu một snapshot trong cùng document OpenSearch. **Kết quả chức năng có bằng chứng trong phạm vi kiểm thử; NFR 60 concurrent tasks / p95 ≤ 2.0s: NOT MET.** Người dùng đã chọn giữ nguyên production (Option A), không tối ưu hoặc A/B. Các lệnh dưới đây là hướng dẫn, **không được chạy lại trong bước viết tài liệu này**.
+
+Send được chọn vì append ở mức nghiệp vụ được lưu bằng replacement toàn bộ document ở baseline, không có concurrency precondition. Hai request cùng đọc H rồi ghi H+A và H+B có thể cùng trả thành công nhưng mất A. Undo snapshot phục hồi lượt hoàn tất; CAS/create-only ngăn mất cập nhật mới hơn. Đây là rủi ro lost update đã được T-14 RED tái hiện, không phải một Delete API được giả định. [Baseline/spec](plan.md), [RED](evidence/red/README.md).
 
 ## Tài liệu và kiến trúc
 
@@ -23,13 +27,35 @@ Response: `{cluster_id, messages, revision, undo_available}`; revision null ch�
 
 Lỗi: 401 auth; 404 cluster; 422 invalid body/token; 409 `revision_conflict` hoặc `nothing_to_undo`; 503 storage unavailable/corrupt; 502 generation. Missing document khác missing index. Timeout có thể xảy ra sau commit: GET reconcile, không tự retry Undo. Browser Stop chỉ hủy request phía client.
 
-## Môi trường và tính portable
+## Điều kiện chung và môi trường đã ghi
 
 Chạy lệnh từ repository root trừ nơi có `Push-Location`. Cần Git, Python với `query-api/requirements-dev.txt`, Node/npm với `web/package-lock.json`, Docker đang chạy, image `opensearchproject/opensearch:2.17.1`, Chrome cho E2E. Fresh dependency setup là việc riêng; bước tài liệu này không cài gì. Không dùng `.env` chứa endpoint/data chung để chạy bài test.
 
 Runtime đã ghi: host Windows, Python **3.14.6**, pytest 9.2.0, httpx 0.28.1, opensearch-py 3.2.0; Docker Python **3.11.18** cũng đã chạy 103 cases. Frontend dùng Node **25.8.2**, Vitest/V8 provider **5.0.3**, Chrome **156.0.8078.80**. Node 25 nằm ngoài engine range đã khai báo của Vitest; chưa có run Node LTS được ghi. Requirements Python có khoảng version mở nên fresh install không bảo đảm lặp đúng mọi version. Xem versions trong JSON từng phase.
 
-Đường dẫn interpreter đã thực thi là `D:\SE\LAE-issue-73\.venv\Scripts\python.exe`: đây là môi trường có sẵn ở sibling worktree, **không phải prerequisite portable**. Ví dụ PowerShell chọn interpreter đã chuẩn bị tại máy chạy:
+### A. Core commands không khóa historical HEAD
+
+Các command Python/Node sau không hardcode `D:\SE`, không khóa commit và dùng cùng CLI trên các hệ điều hành có dependencies phù hợp. Đây là **recipe tái lập**, không phải bằng chứng đã kiểm chứng cross-platform. Từ repository root, chọn `python` đúng virtualenv; cần environment `STORAGE_BACKEND=memory`, `OTEL_EXPORTER_OTLP_ENDPOINT=` (rỗng), `LANGFUSE_TRACING_ENABLED=false`, `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, `VITE_JAEGER_URL=` (rỗng), và bỏ inherited `PYTEST_ADDOPTS`/Langfuse credentials. Thiết lập biến môi trường theo shell của máy chạy; PowerShell recipe riêng ở phần B.
+
+```text
+cd query-api
+python -u -B -m pytest -vv --tb=short -rA --color=no -p no:cacheprovider tests/test_assistant_undo_contract.py tests/test_assistant_undo_backend.py tests/test_assistant.py tests/test_assistant_storage.py
+cd ../web
+node node_modules/vitest/vitest.mjs run src/lib/assistant-undo.test.ts src/components/incident/AssistantPanel.test.tsx
+node node_modules/vitest/vitest.mjs run
+node node_modules/typescript/bin/tsc -b
+node node_modules/oxlint/bin/oxlint
+node node_modules/vite/bin/vite.js build
+cd ..
+```
+
+Kỳ vọng theo evidence lịch sử là backend 90 PASS, frontend targeted 38/full 140 PASS, typecheck/lint/build exit 0. Dependencies, local `.env` và version vẫn ảnh hưởng kết quả; lưu exit code từng command. Core suite dùng fake OpenSearch/mock HTTP. Không áp dụng kết quả này cho integration thật hoặc NFR.
+
+### B. Recipe PowerShell và runners lịch sử
+
+Từ đây các block PowerShell là hướng dẫn môi trường Windows đã ghi, **không phải lệnh portable shell-neutral**. Các runners còn có output cố định/HEAD guards được liệt kê riêng ở phần C. Không chạy vào evidence gốc.
+
+Đường dẫn interpreter lịch sử `D:\SE\LAE-issue-73\.venv\Scripts\python.exe` thuộc sibling worktree, không phải prerequisite của máy khác. PowerShell chọn interpreter đã chuẩn bị tại máy chạy:
 
 ```powershell
 $VT013Python = (Get-Command python).Source
@@ -49,7 +75,7 @@ New-Item -ItemType Directory -Path $VT013Output | Out-Null
 
 `Get-Command python` phải trỏ tới môi trường có dependencies; trên máy ghi evidence, Python mặc định thiếu chúng. Windows sandbox từng chặn TestClient socketpair: timeout trước assertion là **setup blocker**, không phải RED. Không khắc phục bằng sửa oracle.
 
-## Core backend và frontend
+### B1. Core commands dưới PowerShell
 
 ```powershell
 Push-Location query-api
@@ -69,7 +95,7 @@ Lưu `$LASTEXITCODE` ngay sau mỗi lệnh khi ghi evidence mới. Kết quả l
 
 RED backend nằm ở `4487c1d93c77c117b1c18c0f611cd76152e3a011` (production còn baseline); chạy focused trên snapshot đó mới kỳ vọng 10 FAIL/4 PASS. Chạy code cuối không tái tạo RED. [RED runner/logs](evidence/red/) và [GREEN runner/logs](evidence/green/) có exact argv, cwd, exit codes. Runners có thể ghi đè logs theo tên: chỉ replay trong **bản sao dùng một lần**, giữ evidence submission nguyên vẹn.
 
-## Real OpenSearch integration và browser E2E
+### B2. Runners integration và E2E cần môi trường dùng một lần
 
 Trong bản sao repository dùng để replay, với Docker/image/Chrome sẵn sàng:
 
@@ -83,7 +109,15 @@ Integration runner tạo container có label và port loopback ngẫu nhiên, ki
 
 `pytest tests/test_assistant_undo_integration.py` trực tiếp thiếu `VT013_INTEGRATION_CONTEXT` hợp lệ sẽ skip; archived manifest trỏ tới container đã xóa, không được tái sử dụng. Chỉ PASS khi 13 cases thật đã thực thi. E2E runner tạo API/Vite/OpenSearch riêng, seed admin thực, browser login → Send → Undo → reload, kiểm raw `_source`/version ngoài browser. Không chỉ chạy Playwright với response intercept. Kỳ vọng lịch sử: 1 scenario PASS; config `web/playwright.vt013.config.ts`, spec `web/e2e/integration/assistant-undo.pw.ts`, retries 0. Không chạy default/auth E2E vào dữ liệu chung.
 
-## Mutation và quality replay
+## C. Runners khóa HEAD và tooling lịch sử
+
+| Runner | HEAD thực thi bị guard | Commit chứa tooling | Giới hạn |
+|---|---|---|---|
+| `evidence/mutation/run_mutation.py` | chính xác `a275c52300d40e92681692a0cc894a9946cb0084` | `bc735253920db6bc51d19f12b0fb3d92f210a8c2` | Detached mutation worktree; phải copy tooling vào scratch snapshot đúng HEAD |
+| `evidence/quality/run_quality.py` | prefix `bc73525` | `d899b960ea898d841a54a3d091019603e3768337` | Windows/external coverage provider; orchestration lịch sử có corrections riêng |
+| `load-tests/vt013_undo.py` | prefix `d899b96`, đúng assignment branch | `e7aa0b969c756d2c3d12dfa7116fbd4936498eaf` | PowerShell host probe, Docker, fixed output; không chạy ở HEAD cuối |
+
+Integration/E2E ở B2 không có các HEAD guards trên, nhưng vẫn phụ thuộc Docker, Chrome, môi trường Python/Node và output layout. Các runner không phải bằng chứng một lệnh fresh-clone portable. Archived manifests trỏ tới container đã xóa không phải runtime context tái sử dụng.
 
 Các lệnh lịch sử (chỉ chạy trong scratch copy ở đúng HEAD được guard):
 
@@ -134,7 +168,7 @@ $env:VT013_PERF_SIZES = '2,100'
 & $VT013Python -u -B load-tests/vt013_undo.py
 ```
 
-Harness guard: đúng branch `feat/vt013-undo-manhpd`, HEAD prefix `d899b96`, tracked diff sạch, refuses overwrite samples. Sau commit mới guard sẽ chặn. Replay phải dùng scratch snapshot đúng HEAD, mang theo harness chưa commit đã kiểm hash; không tự bỏ guard hoặc sửa raw evidence. `summarize.py` cũng **ghi lại** summary/comparison, nên không chạy vào dữ liệu submission nguyên gốc. Chỉ đọc summary hiện có nếu cần xem kết quả.
+Harness guard: đúng branch `feat/vt013-undo-manhpd`, HEAD prefix `d899b96`, tracked diff sạch, refuses overwrite samples. Replay lịch sử cần scratch snapshot đúng HEAD và trích harness/tooling từ commit `e7aa0b969c756d2c3d12dfa7116fbd4936498eaf`; không tự bỏ guard hoặc sửa raw evidence. `summarize.py` cũng **ghi lại** summary/comparison, nên không chạy vào dữ liệu submission nguyên gốc. Chỉ đọc summary hiện có nếu cần xem kết quả.
 
 Protocol: 60 workers + coordinator barrier; client connection/keepalive 60; 5 warm-up + 50 measured rounds, histories 0/2/100, nội dung 1 KiB/non-null. Timing POST → response + JSON decode sau barrier; seed/login/Send rearm/raw verification ngoài timing. p95 nearest rank trên successful measured requests, lỗi và warm-up lưu riêng; 409 contention tách khỏi distribution. Mỗi lớp phải p95 ≤ 2000 ms **và** không unexpected error, state đúng.
 
@@ -142,22 +176,22 @@ Kết quả thực: H0 1139/1140, p95 2097.897 ms, 1 ReadError và dừng sớm;
 
 Môi trường benchmark: shared Windows host, 1 API worker/Python 3.14.6, OpenSearch single-node 512 MiB heap/2 GiB limit/tmpfs, refresh 1s, resource snapshots ngoài load; không profile. Không suy rộng thành capacity production hoặc kết luận bottleneck đã chứng minh.
 
-**Encoding caveat đã kiểm tra:** phần contention Unicode trong derived `summary.json` bị mojibake; `continuation/results.json` đọc UTF-8 có đúng U+0111 và nội dung 1024 byte. `summarize.py` dùng default encoding khi đọc results; locale hiện tại cp1252. Dùng results UTF-8 gốc để đọc payload/state; số p95/count và raw SHA-256 đã được recompute độc lập bằng cách chỉ đọc, vẫn khớp. Không sửa raw hoặc derived evidence ở bước tài liệu này. Nếu sau này sửa reporter phải review riêng và giữ bản lịch sử, không chạy ghi đè để che khác biệt.
+**Encoding caveat đã kiểm tra:** phần contention Unicode trong derived `summary.json` bị mojibake; `continuation/results.json` đọc UTF-8 có đúng U+0111 và nội dung 1024 byte. `summarize.py` dùng default encoding khi đọc results; locale đã kiểm là cp1252. Dùng results UTF-8 gốc để đọc payload/state; số p95/count và raw SHA-256 đã được tính lại chỉ bằng đọc raw samples, vẫn khớp. Đây không phải benchmark hoặc execution do người khác thực hiện độc lập. Không sửa raw hoặc derived evidence ở bước tài liệu này. Nếu sau này sửa reporter phải review riêng và giữ bản lịch sử, không chạy ghi đè để che khác biệt.
 
 ## Evidence index và phạm vi PR
 
 [RED](evidence/red/) · [GREEN](evidence/green/) · [integration](evidence/integration/) · [frontend](evidence/frontend/) · [mutation](evidence/mutation/) · [quality](evidence/quality/) · [performance](evidence/performance/).
 
-Lần review tài liệu ban đầu: HEAD `d899b960ea898d841a54a3d091019603e3768337`, sáu commit sau baseline; 480 tracked files thay đổi (phần lớn evidence), 19 file ngoài assignment docs. Sau review người dùng cho phép commit/push; performance/harness nằm trong commit `e7aa0b969c756d2c3d12dfa7116fbd4936498eaf`, bộ tài liệu được checkpoint riêng (xem `git log -1 -- docs/assignments/VT-013/README.md`). PR dự kiến phục vụ bài tập cá nhân, **không yêu cầu merge**, base `main`, compare `feat/vt013-undo-manhpd`, title đã yêu cầu: `[BT3][VT-013] Undo Assistant Send - Contract Testing`. Chưa fetch main nên chưa xác minh diff với remote main hiện tại; phạm vi baseline không phải PR diff cuối.
+Trước checkpoint cuối, local `git log` xác nhận tám commit sau baseline, gồm performance `e7aa0b969c756d2c3d12dfa7116fbd4936498eaf` và tài liệu `687953784957242ed47390f0fb8652680fa726b8`. Reflog ghi `update by push` tới checkpoint cũ; không chứng minh checkpoint cuối đã push. [Giới hạn bằng chứng push](ai-usage-log.md#kiểm-tra-commit-và-giới-hạn-của-phát-biểu-push). Kiểm tra GitHub read-only trước checkpoint xác nhận main `33515bd50959155c579dcad26559f0aef69ff650`, cùng merge base baseline; assignment ahead 8/behind 18. Text probe ghi conflict `web/src/lib/api.ts`; chưa kiểm thử kết hợp với main và không thực hiện merge.
+
+PR dự kiến bài tập cá nhân, **không yêu cầu merge**; base `main`, compare `feat/vt013-undo-manhpd`, title `[BT3][VT-013] Undo Assistant Send - Contract Testing`. Trước checkpoint cuối, diff ba chấm có 521 files; thêm manifest làm phạm vi checkpoint thành 522 files theo cùng base. [Curated PR staging manifest](pr-staging-manifest.md) phân biệt file thiết yếu, archive bổ sung và file phải loại; chỉ allowlist sáu tài liệu được stage, chưa thực hiện cleanup evidence hoặc tạo PR.
 
 Checkpoint performance giữ nguyên byte các artifact đã chọn. [Scoped Git attributes](evidence/performance/.gitattributes) ngăn EOL normalization làm sai recorded hashes; `.log` là raw capture, có thể chứa CRCRLF nên được lưu opaque. Raw latency samples, số đo và kết luận NOT MET không đổi. Log API rỗng, generation event dumps và verbose server logs vẫn để local, không đưa vào checkpoint.
 
 Loại khỏi PR: `graphify-out/`, `docs/chatgpt-context-vi.md`, `upgrade_assignment*.md`, local env/node_modules/dist/cache, verbose OpenSearch server logs/empty API logs/event dumps/diff audits và duplicate initial-attempt diagnostics đã chủ động để untracked. Không xóa chúng. Các initial failures đã được chọn commit vẫn là audit evidence, không xóa chỉ để đẹp kết quả. Giữ raw benchmark/JUnit/summary cần thiết, review secrets và staging allowlist trước commit.
 
-Giới hạn còn lại: uncovered P0 paths, supported-Node portability, failover/TLS, lost response sau commit, shared-admin/mixed old-new writers và live AI chưa đủ bằng chứng. Bản báo cáo chưa được render A4/PDF; tám trang là mục tiêu bố cục, cần kiểm tra khi export sau khi người dùng duyệt.
+Giới hạn còn lại: uncovered P0 paths, supported-Node portability, failover/TLS, lost response sau commit, shared-admin/mixed old-new writers và live AI chưa đủ bằng chứng. Tại lần rà soát trước checkpoint, báo cáo giảm từ 2626 xuống 2462 từ tách khoảng trắng, gồm reflection 328 từ; thay đổi trạng thái checkpoint không đổi nội dung kỹ thuật. Ước lượng khoảng 6–8 trang A4 ở chữ 11pt, giãn dòng 1.15, lề 18–20 mm; các bảng/URL/chuỗi monospace dài và bảng bị ngắt trang có thể làm vượt giới hạn. Số trang cuối phải kiểm từ PDF thực sau export. Phụ lục chi tiết nằm ở repository, không chép toàn bộ vào report chính.
 
-### Review thực hiện khi chuẩn bị tài liệu
+### Trạng thái tài liệu và giới hạn kiểm tra
 
-Đã đọc inventory bảy thư mục evidence (595 files), kiểm JSON/JUnit, đối chiếu các README với commit chứa artifact và đọc production diff từ baseline. Không chạy lại test suites. Recompute chỉ đọc 8040 raw samples (7140 measured) xác nhận p95 và hai SHA-256 trong summary; storage source hash vẫn đúng hash đã restored sau mutation. Liên kết relative trong năm docs được kiểm tồn tại, reflection 328 từ và bản nhúng trong report giống hệt.
-
-Pattern scan 528 files thuộc committed assignment diff + performance/harness + năm docs không phát hiện mẫu private key, AWS/GitHub/OpenAI token hoặc JWT hoàn chỉnh; đây là kiểm tra có giới hạn, không chứng nhận mọi loại secret đã được loại trừ. Có 222 files chứa machine paths (chủ yếu command/log lịch sử); giữ chúng làm provenance, không mô tả là portable. Không thấy production/test/contract/dependency mới bị thay đổi ở bước này. `git diff` thường rỗng vì năm docs là untracked; phải kiểm thêm `git diff --no-index` từng file, không stage để làm xuất hiện diff. Chưa fetch remote, không khẳng định PR hiện tại conflict-free.
+Checkpoint cuối chỉ gồm sáu tài liệu được duyệt; SHA tra bằng `git log -1 -- docs/assignments/VT-013/README.md`. PDF được xuất sau checkpoint và cần kiểm riêng số trang, font, bảng và URL trước khi commit artifact. Kiểm tra link/SHA/hash không phải suite rerun hoặc human verification độc lập. Không khẳng định PR conflict-free, checkpoint đã push hoặc mọi loại secret được loại trừ từ pattern scan. Số trang PDF phải lấy từ artifact thực, không suy ra từ độ dài Markdown.

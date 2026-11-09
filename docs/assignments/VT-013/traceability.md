@@ -2,7 +2,9 @@
 
 MSSV **23001904** · AI-06 / SE2026-T04 · cập nhật 2026-11-09 (Asia/Saigon).
 
-Đặc tả được giữ nguyên tại [plan.md](plan.md). Đây là tổng hợp **kết quả đã ghi**, không phải lần chạy kiểm thử mới. HEAD khi tổng hợp: `d899b960ea898d841a54a3d091019603e3768337`; baseline: `a2e0c070d694054001767979fe3f247e7ebff6be`. Kết quả chức năng và tuân thủ hiệu năng được đánh giá riêng: **NFR hiệu năng NOT MET**.
+Đặc tả được giữ nguyên tại [plan.md](plan.md). Đây là tổng hợp **kết quả đã ghi**, không phải lần chạy kiểm thử mới. Baseline: `a2e0c070d694054001767979fe3f247e7ebff6be`; HEAD trước checkpoint cuối: `687953784957242ed47390f0fb8652680fa726b8` (bản tổng hợp đầu thực hiện ở `d899b960ea898d841a54a3d091019603e3768337`). Sáu tài liệu và [PR manifest](pr-staging-manifest.md) được định danh bằng commit chứa phiên bản này; tra bằng `git log -1 -- docs/assignments/VT-013/traceability.md`, không gán SHA tự tham chiếu trước khi commit. Kết quả chức năng và tuân thủ hiệu năng được đánh giá riêng: **NFR hiệu năng NOT MET**.
+
+Assistant Send là hành động rủi ro vì baseline thay toàn bộ conversation document mà không kiểm phiên bản: hai request đọc H rồi ghi H+A/H+B có thể cùng thành công và mất A. Snapshot giải quyết recovery của lượt hoàn tất; CAS/create-only giải quyết lost updates, không dùng Undo để che concurrency bug. [Plan/baseline](plan.md#verified-repository-facts), [T-14 RED](evidence/red/README.md), [I-05](evidence/integration/test-results.md).
 
 ## Cách đọc
 
@@ -50,4 +52,4 @@ Performance tổng cộng 7140 measured attempts: 7139 thành công khôi phục
 
 Review tài liệu phát hiện chuỗi Unicode trong phần contention của `summary.json` dẫn xuất bị mojibake: ký tự đầu là U+00C4/U+2018, trong khi `continuation/results.json` UTF-8 gốc là U+0111, đúng 1024 byte/non-null message đã chuẩn bị. `summarize.py` đọc results bằng encoding mặc định; môi trường hiện tại là cp1252. Vì vậy dùng [continuation results gốc](evidence/performance/continuation/results.json) làm authority cho nội dung Unicode/persisted state. Recompute chỉ đọc raw samples xác nhận p95 và hashes khớp; không sửa summary/raw data trong bước này. Đây là gap trình bày dẫn xuất cần review, không phải kết quả performance mới hoặc persistence corruption.
 
-**Quyết định của người dùng:** Option A, giữ production hiện tại, giữ kết luận **NOT MET**, không tối ưu hoặc A/B. Sau review người dùng cho phép commit/push các file bài tập còn lại. SHA của chính bộ tài liệu lấy từ `git log -1 -- docs/assignments/VT-013/traceability.md`, tránh tự tham chiếu một SHA chưa tồn tại. Không relabel kết quả lịch sử thành execution của lần viết tài liệu.
+**Quyết định kỹ thuật được ghi nhận:** Option A, giữ production và kết luận **NOT MET**, không tối ưu/A-B. Checkpoint trước của năm tài liệu là `687953784957242ed47390f0fb8652680fa726b8`; commit chứa phiên bản hiện tại là checkpoint cuối của sáu tài liệu, không bao gồm PDF xuất sau đó. Commit SHAs trong ma trận chứng minh artifact local, không tự chứng minh đã push. [AI log](ai-usage-log.md#kiểm-tra-commit-và-giới-hạn-của-phát-biểu-push) ghi rõ giới hạn của remote-tracking ref/reflog. Không đổi kết quả lịch sử thành execution của lần chỉnh tài liệu.

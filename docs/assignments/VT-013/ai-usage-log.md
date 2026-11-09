@@ -2,7 +2,17 @@
 
 MSSV **23001904** · AI-06 / SE2026-T04 · 2026-11-09 (Asia/Saigon).
 
-Đây là nhật ký **tổng hợp lại** từ yêu cầu trong chat, [đặc tả đã lưu](plan.md), mã nguồn và evidence. Không phải transcript đầy đủ; các mô tả prompt/output được diễn giải, không gán thời điểm, số token hoặc phiên bản model không có bằng chứng. Công cụ: **Codex** (phân tích, đề xuất, sửa code/test theo từng lần cho phép, chạy lệnh và tổng hợp); **Graphify** (đồ thị quan hệ để định hướng đọc source).
+Nhật ký tổng hợp từ yêu cầu trong chat, [đặc tả](plan.md), source và evidence; không phải transcript đầy đủ. Không gán phiên bản model, số token hoặc người thực thi độc lập khi không có hồ sơ.
+
+## Phân biệt công cụ và vai trò
+
+| Công cụ | Vai trò | Căn cứ / giới hạn |
+|---|---|---|
+| **ChatGPT** | Hỗ trợ thiết kế prompt theo pha, đặt câu hỏi về contract/invariant và review định hướng kế hoạch, kết quả, nội dung nộp bài | Vai trò được sinh viên bổ sung trong yêu cầu chỉnh tài liệu. Chưa có transcript/export ChatGPT riêng; không xác nhận từng prompt hay correction cụ thể do ChatGPT tạo. Không gán lệnh Git, sửa file hoặc test execution cho ChatGPT |
+| **Codex** | Đọc source, đề xuất spec/test/code, sửa repository theo phạm vi cho phép, thực thi lệnh và thu evidence | Source, diffs, runners, logs/JUnit và lịch sử Git. Kết quả execution lịch sử không phải một lần chạy do sinh viên hoặc reviewer khác thực hiện độc lập |
+| **Graphify** | Định hướng quan hệ, symbol và call path trong repository | Plan/frontend evidence ghi việc dùng graph. Kết luận cần đối chiếu source; index cũ và truncated query không chứng minh hành vi runtime |
+
+Các yêu cầu theo pha trong bảng dưới đây có trong chat với Codex. Không suy ra rằng mọi output của Codex đã được ChatGPT hoặc con người xác minh độc lập. Những quyết định được ghi là chỉ dẫn thực sự có trong hồ sơ, không phải xác nhận sinh viên đã tự chạy toàn bộ kiểm thử.
 
 ## Các yêu cầu chính, output và quyết định
 
@@ -17,7 +27,8 @@ MSSV **23001904** · AI-06 / SE2026-T04 · 2026-11-09 (Asia/Saigon).
 | Đo coverage, risk coverage, repeated races/order/E2E | [Quality](evidence/quality/README.md): coverage có giới hạn, 400 fake race PASS, 10 actual browser PASS; setup failures giữ riêng | Người dùng yêu cầu commit quality evidence đã review: `d899b960ea898d841a54a3d091019603e3768337` |
 | Đo real 60-task performance; sau đó chỉ chẩn đoán, không optimize | [Performance](evidence/performance/README.md): cả 3 lớp NOT MET, một ReadError; AI khuyến nghị giữ kết quả, phân biệt hypothesis với causal evidence | Người dùng xác nhận **Option A: giữ nguyên production, NOT MET; không A/B**. Artifact sau review: `e7aa0b969c756d2c3d12dfa7116fbd4936498eaf` |
 | Chuẩn bị submission, không chạy thêm test/commit/PDF | Năm tài liệu tổng hợp, truy vết SHA, lệnh tái lập và giới hạn | Dừng chờ review ở bước tạo tài liệu; không tự gán PASS cho lần tổng hợp này |
-| Sau review: commit các file bài tập còn lại và push | Tách checkpoint performance và tài liệu; scoped Git attributes giữ byte raw evidence, không sửa số đo | Người dùng cho phép commit/push trong chat; không cho phép tối ưu, A/B hoặc mở PR |
+| Commit các file bài tập còn lại và push | Git local có performance `e7aa0b969c756d2c3d12dfa7116fbd4936498eaf` và tài liệu `687953784957242ed47390f0fb8652680fa726b8`; scoped attributes giữ raw bytes | Có chỉ dẫn commit/push và local reflog `update by push` tới checkpoint tài liệu; giới hạn xác nhận nêu bên dưới |
+| Chỉnh tài liệu cuối | Bổ sung vai trò ChatGPT, phạm vi bằng chứng, khả năng tái lập và curated PR manifest | Sáu tài liệu đã được người dùng duyệt; checkpoint cuối xác định bằng commit chứa phiên bản này. Không có test execution mới; PDF là artifact xuất sau checkpoint, không thuộc commit sáu tài liệu |
 
 ## Những khuyến nghị AI đã được sửa hoặc thu hẹp
 
@@ -45,8 +56,12 @@ Fake cũ không enforce conditional arguments và có alias dữ liệu; thêm a
 
 AI đã nêu các lựa chọn giữ nguyên, đổi deployment benchmark hoặc tối ưu nhỏ **nếu** có bằng chứng bottleneck; A/B limiter chỉ là đề xuất chưa thực hiện. Người dùng hiện **không phê duyệt** tối ưu/A/B và chọn giữ NOT MET. `refresh="wait_for"`, refresh interval 1s, endpoint sync, default limiter/pool là quan sát code/cấu hình hoặc giả thuyết; chưa có stage profile chứng minh nguyên nhân. Không bịa một lần human rejection cho một patch chưa tồn tại.
 
-## Graphify và tính độc lập của verification
+## Graphify và giới hạn bằng chứng execution
 
 [Plan](plan.md#actual-executed-evidence-and-limitations) ghi graph 172 indexed files khớp baseline, 1458 nodes/2885 edges, warning và query truncation. [Frontend README](evidence/frontend/README.md) ghi rõ index đã cũ so với implementation, chỉ dùng như bản đồ, mỗi kết luận kiểm lại source; CLI từng cập nhật untracked cache timestamp. Không rebuild graph ở bước tổng hợp này, không dùng stale graph làm bằng chứng execution, không đưa `graphify-out/` vào PR. Token accounting không có giá trị đáng tin; số 0 placeholder không phải đo usage.
 
-Human approval được ghi ở đây chỉ là những chỉ dẫn có trong chat; không xác nhận người dùng đã đọc từng dòng, tự chạy test, được team đồng ý merge hoặc được giảng viên duyệt. Evidence thực thi là log/JUnit/raw data của các phase trước. Lần này chỉ đọc, kiểm tra tài liệu và Git; không rerun để thay thế lịch sử.
+Các chỉ dẫn phê duyệt trong chat không chứng minh sinh viên đã đọc từng dòng, tự chạy test, được team đồng ý merge hoặc được giảng viên duyệt. Evidence thực thi là log/JUnit/raw data của các phase trước; bước chỉnh tài liệu không chạy lại suites.
+
+## Kiểm tra commit và giới hạn của phát biểu push
+
+Kiểm tra trước checkpoint cuối tại HEAD `687953784957242ed47390f0fb8652680fa726b8`: `git log` xác nhận tám commit sau baseline; `git for-each-ref refs/remotes/origin/feat/vt013-undo-manhpd` trỏ tới cùng SHA. Local reflog ghi `update by push` tới `17ae52f`, `a275c52` và `6879537`. Đây là bằng chứng local, không chứng minh checkpoint cuối đã push, CI xanh hoặc branch protection. Kiểm tra GitHub read-only trước checkpoint xác nhận main `33515bd50959155c579dcad26559f0aef69ff650`, merge base bằng baseline, assignment ahead 8/behind 18; text probe phát hiện conflict `web/src/lib/api.ts`. Không merge/rebase hoặc sửa production; không suy luận push từ commit tồn tại hay lệnh người dùng yêu cầu.

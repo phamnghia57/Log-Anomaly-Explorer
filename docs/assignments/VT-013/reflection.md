@@ -1,6 +1,6 @@
 # VT-013 — Reflection
 
-MSSV: **23001904**. Bản nháp do AI hỗ trợ, cần sinh viên đọc và xác nhận trước khi nộp. **328 từ**, tính bằng tách khoảng trắng trên sáu đoạn nội dung dưới đây, không tính tiêu đề hoặc ghi chú.
+MSSV: **23001904**. Reflection có AI hỗ trợ diễn đạt; không phải hồ sơ về một lần kiểm thử do sinh viên thực hiện độc lập. **328 từ**, tính bằng tách khoảng trắng trên sáu đoạn nội dung dưới đây, không tính tiêu đề hoặc ghi chú. Phiên bản tài liệu được xác định bằng commit chứa file này.
 
 Niềm tin vào Undo tăng khi kiểm thử đối chiếu cả phản hồi API lẫn tài liệu OpenSearch đã lưu. Khôi phục chính xác lịch sử có Unicode, null và tool messages thuyết phục hơn việc chỉ nhìn nút Undo hoạt động. Kiểm thử khởi động lại API giúp phân biệt persistence thật với cache trình duyệt.
 
