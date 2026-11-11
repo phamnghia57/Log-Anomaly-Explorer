@@ -1,0 +1,16 @@
+$ git checkout -b mutation/vt014-m1-logid-mapping
+mutation commit: 0935a05
+0935a05 MUTATION M1 (tam thoi): response.log_id map sang payload.trace_id
+
+ ingestion/src/ingest_core.py        |   2 +-
+-    return Result(202, {"accepted": True, "log_id": log_id})
++    return Result(202, {"accepted": True, "log_id": payload["trace_id"]})
+$ cd ingestion && python -m pytest tests/test_ingest_core.py tests/test_idempotency.py -q
+FAILED tests/test_ingest_core.py::test_single_valid_is_202_and_stored
+FAILED tests/test_ingest_core.py::test_baseline_resubmit_creates_duplicate
+FAILED tests/test_idempotency.py::test_tc01_no_key_keeps_legacy_behavior
+FAILED tests/test_idempotency.py::test_tc02_new_valid_key_writes_once_and_maps_log_id
+4 failed, 27 passed in 0.15s
+Deleted branch mutation/vt014-m1-logid-mapping (was 0935a05).
+$ grep -c 'payload\["trace_id"\]' ingestion/src/ingest_core.py (nhanh nop bai)
+0
