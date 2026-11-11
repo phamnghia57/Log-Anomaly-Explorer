@@ -6,6 +6,7 @@ import { StatCards } from "@/components/dashboard/StatCards";
 import { ClusterGrid } from "@/components/dashboard/ClusterGrid";
 import { StatusFacets } from "@/components/dashboard/StatusFacets";
 import { ServiceFacets } from "@/components/dashboard/ServiceFacets";
+import { crossFilterClusters } from "@/components/dashboard/facet-filters";
 import {
   TimeRangeControl, sinceFromRange, type TimeRangeKey,
 } from "@/components/dashboard/TimeRangeControl";
@@ -32,15 +33,14 @@ export function DashboardPage() {
   const { data, isLoading, isFetching, isError, error, refetch } = useClusters(since, autoRefreshMs);
 
   // Loc hien thi theo status + service o client (data da tai day du trong
-  // khoang thoi gian). StatusFacets/ServiceFacets van nhan `data.clusters`
-  // CHUA LOC de dem dung tong so luong cho moi facet (khong doi theo facet
-  // kia dang chon - giu don gian, khong cross-filter giua 2 facet).
-  const filtered = useMemo(() => {
+  // khoang thoi gian). Cross-filter: moi facet dem tren tap DA LOC BOI FACET
+  // KIA (vd. chon status=alerted thi so dem cua tung service chi tinh trong
+  // cac cum alerted), giong cach Datadog/Kibana hien facet.
+  const facets = useMemo(() => {
     if (!data) return undefined;
-    return data.clusters.filter((c) =>
-      (status === "all" || c.status === status) &&
-      (service === "all" || (c.service || "unknown") === service));
+    return crossFilterClusters(data.clusters, status, service);
   }, [data, status, service]);
+  const filtered = facets?.grid;
 
   return (
     <AppShell title="Dashboard">
@@ -89,8 +89,8 @@ export function DashboardPage() {
 
           <div className="grid gap-4 lg:grid-cols-[180px_1fr]">
             <aside className="lg:sticky lg:top-6 lg:self-start space-y-4">
-              {data && <StatusFacets clusters={data.clusters} value={status} onChange={setStatus} />}
-              {data && <ServiceFacets clusters={data.clusters} value={service} onChange={setService} />}
+              {facets && <StatusFacets clusters={facets.forStatusFacets} value={status} onChange={setStatus} />}
+              {facets && <ServiceFacets clusters={facets.forServiceFacets} value={service} onChange={setService} />}
             </aside>
 
             {isLoading ? (

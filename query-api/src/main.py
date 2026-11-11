@@ -35,7 +35,8 @@ from ingestion.src import config
 from ingestion.src.storage import LogStore, OpenSearchLogStore, StorageError, build_store
 
 from .auth import require_admin, router as auth_router
-from .assistant.router import router as assistant_router
+from .assistant.retention import start_scheduler as start_assistant_retention
+from .assistant.router import public_router as assistant_public_router, router as assistant_router
 from .assistant.storage import ConversationRepository
 from .telemetry import setup_telemetry
 from .users import UserRepository
@@ -117,6 +118,15 @@ app.state.store = store
 app.state.cluster_store = cluster_store
 app.state.assistant_conversations = _build_conversation_repository()
 app.include_router(assistant_router, dependencies=[Depends(require_admin)])
+# /assistant/health KHONG gan require_admin: trang "Trang thai he thong" doc
+# health cua moi service bang fetch thuong (khong kem token), giong
+# /health, /ingestion/health, /demo/health - xem web/src/lib/api.ts.
+app.include_router(assistant_public_router)
+
+if app.state.assistant_conversations is not None:
+    # Hoi thoai khong co retention nhu `logs` thi se phinh vo han theo so cum
+    # da tung duoc hoi. Interval = 0 (env) -> tat, dung cron ben ngoai.
+    start_assistant_retention(app.state.assistant_conversations)
 
 # api-contract.md: "from"/"to" mac dinh 24h gan nhat.
 DEFAULT_WINDOW_HOURS = 24

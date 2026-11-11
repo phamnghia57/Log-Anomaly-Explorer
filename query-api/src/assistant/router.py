@@ -14,11 +14,15 @@ from pydantic import BaseModel, Field
 from ingestion.src.storage import StorageError
 
 from . import config
-from .service import run_chat_turn
+from .service import last_call_status, run_chat_turn
 
 logger = logging.getLogger("query-api.assistant")
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
+# Router rieng KHONG gan require_admin (xem main.py): chi chua /assistant/health
+# de trang "Trang thai he thong" doc duoc bang fetch thuong, giong cac
+# /health khac. Khong dat endpoint co du lieu log/hoi thoai vao day.
+public_router = APIRouter(prefix="/assistant", tags=["assistant"])
 
 
 class ChatRequest(BaseModel):
@@ -47,6 +51,33 @@ def _get_cluster_or_404(cluster_store, cluster_id: str) -> dict:
     if cluster is None:
         raise HTTPException(status_code=404, detail="cluster not found")
     return cluster
+
+
+@public_router.get("/health")
+def assistant_health(request: Request):
+    """Tinh trang AI Assistant cho trang "Trang thai he thong".
+
+    LUON tra HTTP 200 (khong 503 nhu /health cua service): day khong phai
+    healthcheck cua container, ma la 1 dong thong tin tren UI - tra 503 se
+    khien UI chi hien "HTTP 503" thay vi ly do that trong `status`.
+
+    KHONG goi Azure OpenAI o day (poll 15s/lan se ton phi) - chi doc cau hinh
+    + ket qua lan goi that gan nhat (xem service.last_call_status).
+    """
+    if request.app.state.assistant_conversations is None:
+        return {"status": "kho hội thoại chưa sẵn sàng", "service": "ai-assistant"}
+
+    try:
+        config.require_azure_openai_api_key()
+    except ValueError as exc:
+        return {"status": "chưa cấu hình", "service": "ai-assistant", "detail": str(exc)}
+
+    last = last_call_status()
+    if last["ok"] is False:
+        return {"status": f"lỗi gọi gần nhất: {last['error']}", "service": "ai-assistant",
+                "last_call_at": last["at"]}
+    return {"status": "ok", "service": "ai-assistant",
+            "model": config.AZURE_OPENAI_DEPLOYMENT, "last_call_at": last["at"]}
 
 
 @router.get("/clusters/{cluster_id}/conversation")
