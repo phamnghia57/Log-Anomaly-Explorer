@@ -177,6 +177,10 @@ export const HEALTH_ENDPOINTS = [
   { name: "Query API", url: `${API_BASE_URL}/health` },
   { name: "Ingestion", url: import.meta.env.VITE_INGESTION_HEALTH_URL || `${API_BASE_URL}/ingestion/health` },
   { name: "Demo App", url: import.meta.env.VITE_DEMO_HEALTH_URL || `${API_BASE_URL}/demo/health` },
+  // AI Assistant: khong phai service rieng ma la tinh nang trong query-api -
+  // bao trang thai cau hinh + ket qua goi Azure OpenAI gan nhat (het quota,
+  // bi chan vung...), thu ma /health cua query-api khong thay duoc.
+  { name: "AI Assistant", url: `${API_BASE_URL}/assistant/health` },
 ];
 
 export async function getSystemHealth(signal?: AbortSignal): Promise<ServiceHealth[]> {

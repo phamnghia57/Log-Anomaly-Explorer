@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { ClusterRecord } from "@/lib/api";
+import { serviceOf } from "@/components/dashboard/facet-filters";
 import { cn } from "@/lib/utils";
 
 // Facet tinh client-side tu danh sach cum DA TAI, cung pattern voi
@@ -16,12 +17,17 @@ export function ServiceFacets({
   const { services, counts } = useMemo(() => {
     const byService: Record<string, number> = { all: clusters.length };
     for (const c of clusters) {
-      const service = c.service || "unknown";
+      const service = serviceOf(c);
       byService[service] = (byService[service] ?? 0) + 1;
     }
-    const names = Object.keys(byService).filter((s) => s !== "all").sort();
+    const names = Object.keys(byService).filter((s) => s !== "all");
+    // Giu lai service DANG CHON du so dem ve 0 sau khi cross-filter theo
+    // status: neu khong no bien mat khoi danh sach va nguoi dung bi ket,
+    // khong con nut nao de bo chon.
+    if (value !== "all" && !names.includes(value)) names.push(value);
+    names.sort();
     return { services: names, counts: byService };
-  }, [clusters]);
+  }, [clusters, value]);
 
   if (services.length === 0) return null;
 

@@ -22,6 +22,22 @@ from .tools import TOOL_SCHEMAS, ToolExecutor
 
 logger = logging.getLogger("query-api.assistant")
 
+# Ket qua lan goi Azure OpenAI GAN NHAT, giu trong bo nho process. Dung cho
+# GET /assistant/health: trang "Trang thai he thong" poll 15s/lan nen KHONG
+# duoc goi that moi lan kiem tra (ton tien + cham) - thay vao do bao lai ket
+# qua that gan nhat, du de phat hien het quota / bi chan vung / sai cau hinh.
+# Restart process thi ve lai None (chua goi lan nao) - chap nhan duoc.
+_last_call: dict[str, object | None] = {"ok": None, "error": None, "at": None}
+
+
+def _record_call(ok: bool, error: str | None = None) -> None:
+    _last_call.update(ok=ok, error=error, at=datetime.now(timezone.utc).isoformat())
+
+
+def last_call_status() -> dict:
+    """Ban sao trang thai lan goi gan nhat; `ok=None` = chua goi lan nao."""
+    return dict(_last_call)
+
 SYSTEM_PROMPT_TEMPLATE = """Bạn là AI Assistant điều tra lỗi hệ thống cho dự án "Log Anomaly \
 Explorer", đóng vai trò giống Elastic Observability AI Assistant: giải thích lỗi và đề xuất \
 cách sửa DỰA TRÊN DỮ LIỆU THẬT, không bịa đặt thông tin không có trong dữ liệu/công cụ.
@@ -69,6 +85,27 @@ def _build_system_prompt(cluster: dict, logs: list[dict]) -> str:
     )
 
 
+def _trim_history(history: list[dict], limit: int) -> list[dict]:
+    """Chi giu toi da `limit` message cu gan nhat de GUI len model.
+
+    Hoi thoai van duoc LUU day du (router.py luu `history + new_messages`) -
+    gioi han nay chi cho phan ngu canh gui di, vi moi luot deu gui lai toan bo
+    lich su nen chi phi token tang dan theo do dai hoi thoai.
+
+    Sau khi cat, BO tiep cac message dau cho den khi gap mot message `user`:
+    message `tool` chi hop le khi di ngay sau assistant message co `tool_calls`
+    sinh ra no, cat ngang chuoi do se lam API tra 400. Bat dau tu mot luot hoi
+    cua nguoi dung thi luon an toan.
+    """
+    if len(history) <= limit:
+        return history
+    trimmed = history[-limit:]
+    for index, entry in enumerate(trimmed):
+        if entry.get("role") == "user":
+            return trimmed[index:]
+    return []
+
+
 def _to_openai_message(entry: dict) -> dict:
     """Chuyen 1 message da luu (dinh dang cua assistant-conversation-schema.json)
     ve dung dinh dang OpenAI chat API mong doi."""
@@ -105,21 +142,26 @@ def run_chat_turn(
     ]
 
     openai_messages: list[dict] = [{"role": "system", "content": _build_system_prompt(cluster, logs)}]
-    for entry in history + new_messages:
+    for entry in _trim_history(history, config.MAX_HISTORY_MESSAGES) + new_messages:
         openai_messages.append(_to_openai_message(entry))
 
     for round_index in range(config.MAX_TOOL_ROUNDS):
-        response = client.chat.completions.create(
-            model=config.AZURE_OPENAI_DEPLOYMENT,
-            messages=openai_messages,
-            tools=TOOL_SCHEMAS,
-            max_completion_tokens=config.MAX_OUTPUT_TOKENS,
-            reasoning_effort=config.ASSISTANT_REASONING_EFFORT,
-            metadata={
-                "langfuse_tags": ["log-anomaly-explorer", "incident-assistant"],
-                "langfuse_session_id": cluster_id,
-            },
-        )
+        try:
+            response = client.chat.completions.create(
+                model=config.AZURE_OPENAI_DEPLOYMENT,
+                messages=openai_messages,
+                tools=TOOL_SCHEMAS,
+                max_completion_tokens=config.MAX_OUTPUT_TOKENS,
+                reasoning_effort=config.ASSISTANT_REASONING_EFFORT,
+                metadata={
+                    "langfuse_tags": ["log-anomaly-explorer", "incident-assistant"],
+                    "langfuse_session_id": cluster_id,
+                },
+            )
+        except Exception as exc:  # noqa: BLE001 - ghi nhan roi nem tiep cho router xu ly
+            _record_call(False, type(exc).__name__)
+            raise
+        _record_call(True)
         message = response.choices[0].message
 
         assistant_entry: dict = {

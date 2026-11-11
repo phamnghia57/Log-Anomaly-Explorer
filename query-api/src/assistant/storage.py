@@ -74,5 +74,24 @@ class ConversationRepository:
             raise StorageError(f"save conversation failed: {exc}") from exc
         return document
 
+    def delete_older_than(self, cutoff_iso: str) -> int:
+        """Xoa hoi thoai co `updated_at` < cutoff. Tra ve so hoi thoai da xoa.
+
+        Dung delete_by_query (KHONG tach index theo ngay nhu `logs`): index nay
+        chi co toi da 1 document/cum da tung duoc hoi, khoi luong nho hon log
+        thuong nhieu bac nen khong can co che drop-index cua ingestion.
+        """
+        try:
+            response = self.client.delete_by_query(
+                index=self.index,
+                body={"query": {"range": {"updated_at": {"lt": cutoff_iso}}}},
+                conflicts="proceed",
+                refresh=True,
+                wait_for_completion=True,
+            )
+        except Exception as exc:  # noqa: BLE001
+            raise StorageError(f"delete_older_than failed: {exc}") from exc
+        return int(response.get("deleted", 0))
+
     def close(self) -> None:
         self.client.close()

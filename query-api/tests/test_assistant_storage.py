@@ -110,3 +110,71 @@ def test_ensure_ready_bo_qua_loi_index_da_ton_tai_tu_worker_khac(repo):
     client.indices.create = boom
 
     repository.ensure_ready()  # khong duoc nem loi
+
+
+# --------------------------------------------------------------------------- retention
+
+assistant_retention = importlib.import_module("query-api.src.assistant.retention")
+assistant_config = importlib.import_module("query-api.src.assistant.config")
+
+
+def test_delete_older_than_xoa_theo_updated_at(repo):
+    repository, client = repo
+    client.delete_by_query = lambda **kw: client.calls.append(("dbq", kw)) or {"deleted": 3}
+
+    assert repository.delete_older_than("2026-10-01T00:00:00+00:00") == 3
+
+    _name, call = client.calls[-1]
+    assert call["index"] == "assistant-conversations"
+    # Moc la `updated_at` (lan hoi gan nhat), KHONG phai created_at: hoi thoai
+    # van dang duoc dung tiep thi khong bi xoa du tao tu lau.
+    assert call["body"]["query"]["range"]["updated_at"]["lt"] == "2026-10-01T00:00:00+00:00"
+    assert call["conflicts"] == "proceed"
+
+
+def test_delete_older_than_boc_loi_client_thanh_storage_error(repo):
+    repository, client = repo
+
+    def boom(**_kw):
+        raise RuntimeError("opensearch offline")
+
+    client.delete_by_query = boom
+    with pytest.raises(ingestion_storage.StorageError, match="delete_older_than failed"):
+        repository.delete_older_than("2026-10-01T00:00:00+00:00")
+
+
+def test_run_retention_tinh_cutoff_tu_so_ngay_cau_hinh(monkeypatch):
+    captured = {}
+
+    class FakeRepo:
+        def delete_older_than(self, cutoff_iso):
+            captured["cutoff"] = cutoff_iso
+            return 2
+
+    monkeypatch.setattr(assistant_config, "CONVERSATIONS_RETENTION_DAYS", 7)
+    assert assistant_retention.run_retention(FakeRepo()) == 2
+
+    from datetime import datetime, timedelta, timezone
+    expected = datetime.now(timezone.utc) - timedelta(days=7)
+    actual = datetime.fromisoformat(captured["cutoff"])
+    assert abs((actual - expected).total_seconds()) < 60
+
+
+def test_start_scheduler_interval_0_thi_khong_chay(monkeypatch):
+    """0 = tat vong lap nen (dung cron ben ngoai), giong RETENTION_INTERVAL_SECONDS."""
+    monkeypatch.setattr(assistant_config, "CONVERSATIONS_RETENTION_INTERVAL_SECONDS", 0)
+    assert assistant_retention.start_scheduler(object()) is None
+
+
+def test_start_scheduler_tra_ve_event_de_dung_duoc(monkeypatch):
+    monkeypatch.setattr(assistant_config, "CONVERSATIONS_RETENTION_INTERVAL_SECONDS", 3600)
+
+    class FakeRepo:
+        def delete_older_than(self, _cutoff):
+            return 0
+
+    stop = assistant_retention.start_scheduler(FakeRepo())
+    try:
+        assert stop is not None
+    finally:
+        stop.set()  # khong de thread nen song sot qua test

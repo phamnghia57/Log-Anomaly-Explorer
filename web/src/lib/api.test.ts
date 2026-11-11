@@ -6,6 +6,7 @@ import {
   getCluster,
   getClusterHistory,
   getJaegerTraceUrl,
+  HEALTH_ENDPOINTS,
   listClusters,
   loginAdmin,
   searchLogs,
@@ -66,8 +67,28 @@ describe("query-api client", () => {
     fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ status: "ok" })));
     fetchMock.mockRejectedValueOnce(new Error("connection failed"));
     fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ status: "degraded" }), { status: 503 }));
+    // Cac endpoint con lai (danh sach co the dai them khi bo sung service moi)
+    // deu tra ok - test nay chi kiem "1 service chet khong lam mat ket qua cua
+    // cac service khac", khong phu thuoc vao SO LUONG endpoint.
+    for (let i = 3; i < HEALTH_ENDPOINTS.length; i += 1) {
+      fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ status: "ok" })));
+    }
+
     const health = await getSystemHealth();
-    expect(health.map((entry) => entry.ok)).toEqual([true, false, false]);
+
+    expect(health).toHaveLength(HEALTH_ENDPOINTS.length);
+    expect(health.slice(0, 3).map((entry) => entry.ok)).toEqual([true, false, false]);
+    expect(health[1].status).toBe("unreachable");
+    expect(health[2].status).toBe("HTTP 503");
+    expect(health.slice(3).every((entry) => entry.ok)).toBe(true);
+  });
+
+  it("getSystemHealth: co kiem tra ca AI Assistant", async () => {
+    // /assistant/health luon tra HTTP 200 kem `status` co y nghia (vd. het
+    // quota Azure OpenAI) - khac cac /health khac co the tra 503.
+    expect(HEALTH_ENDPOINTS.map((entry) => entry.name)).toContain("AI Assistant");
+    const assistant = HEALTH_ENDPOINTS.find((entry) => entry.name === "AI Assistant");
+    expect(assistant?.url).toBe(`${API_BASE_URL}/assistant/health`);
   });
 
   it("listClusters: loc theo status dung tham so", async () => {

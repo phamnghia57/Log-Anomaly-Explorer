@@ -346,3 +346,122 @@ class TestToolExecutor:
         executor = assistant_tools.ToolExecutor(store=BoomStore(), cluster_store=None, cluster_id="c1")
         result = executor.run("search_related_logs", {})
         assert result["error"] == "RuntimeError: storage that bai"
+
+
+# --------------------------------------------------------------------------- gioi han lich su hoi thoai
+
+class TestTrimHistory:
+    """_trim_history chi cat phan GUI len model; hoi thoai van luu day du."""
+
+    def user(self, text):
+        return {"role": "user", "content": text, "created_at": "x"}
+
+    def assistant(self, text):
+        return {"role": "assistant", "content": text, "created_at": "x"}
+
+    def test_ngan_hon_gioi_han_thi_giu_nguyen(self):
+        history = [self.user("1"), self.assistant("2")]
+        assert assistant_service._trim_history(history, 20) == history
+
+    def test_cat_bot_phan_cu_khi_vuot_gioi_han(self):
+        history = [self.user(str(i)) for i in range(10)]
+        trimmed = assistant_service._trim_history(history, 4)
+        assert [m["content"] for m in trimmed] == ["6", "7", "8", "9"]
+
+    def test_bo_tool_message_mo_coi_o_dau_sau_khi_cat(self):
+        """Cat ngang chuoi tool_calls -> OpenAI tra 400 vi message `tool`
+        khong con assistant/tool_calls sinh ra no dung truoc."""
+        history = [
+            self.user("cu"),
+            {"role": "assistant", "content": None, "created_at": "x",
+             "tool_calls": [{"id": "call_1", "name": "get_cluster_history", "arguments": "{}"}]},
+            {"role": "tool", "tool_call_id": "call_1", "name": "get_cluster_history",
+             "content": "{}", "created_at": "x"},
+            self.assistant("tra loi cu"),
+            self.user("moi"),
+        ]
+        # limit=3 cat ra [tool, assistant, user] - tool dau tien la mo coi.
+        trimmed = assistant_service._trim_history(history, 3)
+        assert [m["role"] for m in trimmed] == ["user"]
+        assert trimmed[0]["content"] == "moi"
+
+    def test_khong_con_message_user_nao_thi_bo_het_ngu_canh(self):
+        history = [self.assistant("a"), self.assistant("b"), self.assistant("c")]
+        assert assistant_service._trim_history(history, 2) == []
+
+    def test_run_chat_turn_chi_gui_phan_lich_su_da_cat(self, clusters, conversations,
+                                                       azure_openai_env, monkeypatch):
+        clusters.records = [record("c1")]
+        monkeypatch.setattr(assistant_config, "MAX_HISTORY_MESSAGES", 2)
+        conversations.docs["c1"] = {
+            "cluster_id": "c1", "created_at": "x", "updated_at": "x",
+            "messages": [self.user(f"cu {i}") for i in range(6)],
+        }
+        holder = patch_openai(monkeypatch, [fake_response(fake_message(content="xong"))])
+
+        resp = client.post("/assistant/clusters/c1/conversation/messages", json={"message": "moi"})
+
+        assert resp.status_code == 200
+        # FakeOpenAI giu THAM CHIEU toi chinh list openai_messages, ma list do
+        # con duoc append cau tra loi sau khi goi -> chi kiem phan dau (4 phan
+        # tu da gui luc goi), khong so sanh ca list.
+        sent = holder["instance"].calls[0]["messages"]
+        # system + 2 message cu gan nhat + user moi (khong phai ca 6 cai cu)
+        assert [m["role"] for m in sent[:4]] == ["system", "user", "user", "user"]
+        assert [m["content"] for m in sent[1:4]] == ["cu 4", "cu 5", "moi"]
+        assert all(m.get("content") != "cu 0" for m in sent)
+        # Nhung LUU thi van day du: 6 cu + user moi + tra loi cua assistant.
+        assert len(conversations.docs["c1"]["messages"]) == 8
+
+
+# --------------------------------------------------------------------------- GET /assistant/health
+
+class TestAssistantHealth:
+    """Endpoint cong khai cho trang "Trang thai he thong" - luon HTTP 200,
+    khong goi Azure OpenAI that (poll 15s/lan)."""
+
+    def test_khong_can_token_va_luon_tra_200(self, clusters, conversations, azure_openai_env):
+        original = client.headers.copy()
+        client.headers.pop("Authorization", None)
+        try:
+            response = client.get("/assistant/health")
+        finally:
+            client.headers = original
+        assert response.status_code == 200
+        assert response.json()["status"] == "ok"
+
+    def test_thieu_cau_hinh_bao_chua_cau_hinh(self, clusters, conversations, monkeypatch):
+        monkeypatch.delenv("AZURE_OPENAI_API_KEY", raising=False)
+        body = client.get("/assistant/health").json()
+        assert body["status"] == "chưa cấu hình"
+
+    def test_kho_hoi_thoai_chua_san_sang(self, clusters, azure_openai_env):
+        original = main.app.state.assistant_conversations
+        main.app.state.assistant_conversations = None
+        try:
+            body = client.get("/assistant/health").json()
+        finally:
+            main.app.state.assistant_conversations = original
+        assert body["status"] == "kho hội thoại chưa sẵn sàng"
+
+    def test_bao_loi_cua_lan_goi_azure_gan_nhat(self, clusters, conversations, azure_openai_env,
+                                                monkeypatch):
+        clusters.records = [record("c1")]
+
+        def boom(*, api_key=None, base_url=None, timeout=None):
+            class Boom:
+                def __init__(self):
+                    self.chat = SimpleNamespace(completions=SimpleNamespace(create=self._create))
+
+                def _create(self, **_kw):
+                    raise PermissionError("unsupported_country_region_territory")
+
+            return Boom()
+
+        monkeypatch.setattr(assistant_service, "OpenAI", boom)
+        assert client.post("/assistant/clusters/c1/conversation/messages",
+                           json={"message": "hi"}).status_code == 502
+
+        body = client.get("/assistant/health").json()
+        assert body["status"] == "lỗi gọi gần nhất: PermissionError"
+        assert body["last_call_at"] is not None
