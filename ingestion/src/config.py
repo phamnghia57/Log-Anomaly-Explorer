@@ -35,3 +35,9 @@ INGEST_RATE_LIMIT_RPS = int(os.environ.get("INGEST_RATE_LIMIT_RPS", "100"))
 INGEST_MAX_BATCH_SIZE = int(os.environ.get("INGEST_MAX_BATCH_SIZE", "500"))
 if INGEST_RATE_LIMIT_RPS < 1 or INGEST_MAX_BATCH_SIZE < 1:
     raise ValueError("INGEST_RATE_LIMIT_RPS and INGEST_MAX_BATCH_SIZE must be positive")
+
+# VT-014: thoi gian nho response theo Idempotency-Key (giay). Het han -> key duoc xu ly lai,
+# nhung log_id tat dinh nen van khong tao document trung.
+IDEMPOTENCY_TTL_SECONDS = int(os.environ.get("IDEMPOTENCY_TTL_SECONDS", "86400"))
+if IDEMPOTENCY_TTL_SECONDS < 1:
+    raise ValueError("IDEMPOTENCY_TTL_SECONDS must be positive")

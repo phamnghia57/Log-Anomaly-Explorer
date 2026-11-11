@@ -75,6 +75,10 @@ $batch = @(
 Invoke-RestMethod -Method Post -Uri 'http://localhost:8000/ingest/batch' -ContentType 'application/json' -Body (ConvertTo-Json -InputObject $batch -Depth 6)
 ```
 
+### Idempotency-Key (VT-014)
+
+Gửi kèm header `Idempotency-Key` (1..128 ký tự `[A-Za-z0-9._:-]`) cho `/ingest` hoặc `/ingest/batch` để **retry an toàn**: cùng key + cùng payload → trả lại đúng response lần đầu (header `Idempotent-Replayed: true`), không ghi thêm; cùng key + payload khác → `409`. Không gửi header → hành vi cũ. Retry sau `503`/ghi một phần không còn tạo log trùng vì `log_id` được suy ra tất định từ key + payload. Chi tiết, giới hạn và cách chạy test: [`README_VT014.md`](README_VT014.md). Biến môi trường: `IDEMPOTENCY_TTL_SECONDS` (mặc định `86400`).
+
 ### Daily indices + retention và compatibility
 
 - Từ bản cập nhật này, ghi theo **ngày UTC của `timestamp` trong log**, ví dụ `logs-2026.11.02`. Không ghi mới vào index đơn `logs`.
