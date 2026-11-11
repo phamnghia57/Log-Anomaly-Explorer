@@ -1,0 +1,19 @@
+M1 [KILLED] response.log_id map nham sang payload.trace_id
+    4 failed, 27 passed, 1 skipped in 0.22s
+    killed by: tests/test_ingest_core.py::test_single_valid_is_202_and_stored
+    killed by: tests/test_ingest_core.py::test_baseline_resubmit_creates_duplicate
+    killed by: tests/test_idempotency.py::test_tc01_no_key_keeps_legacy_behavior
+    killed by: tests/test_idempotency.py::test_tc02_new_valid_key_writes_once_and_maps_log_id
+M2 [KILLED] response.log_ids map sai thu tu (log_ids[i] khong ung voi payload[i])
+    1 failed, 30 passed, 1 skipped in 0.19s
+    killed by: tests/test_idempotency.py::test_tc10b_batch_log_ids_map_to_payload_positions
+M3 [KILLED] replay map status co dinh 202 thay vi status da luu
+    1 failed, 30 passed, 1 skipped in 0.19s
+    killed by: tests/test_idempotency.py::test_tc09_invalid_payload_replay_does_not_duplicate_quarantine
+M4 [KILLED] response.reason cua 409 map sang ma loi khac
+    1 failed, 30 passed, 1 skipped in 0.18s
+    killed by: tests/test_idempotency.py::test_tc05_same_key_different_payload_is_409_without_write
+M5 [SURVIVED] accepted_count map tu len(payload) (mutant tuong duong ky vong)
+    31 passed, 1 skipped in 0.18s
+
+Tong: 5 mutant, 4 killed, 1 survived

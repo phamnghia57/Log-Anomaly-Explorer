@@ -1,0 +1,45 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.18, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python3
+rootdir: /home/claude/src/Log-Anomaly-Explorer/ingestion
+plugins: platformdirs-4.13.5, anyio-4.15.1
+collecting ... collected 35 items / 1 skipped
+
+tests/test_ingest_core.py::test_single_valid_is_202_and_stored PASSED    [  2%]
+tests/test_ingest_core.py::test_single_invalid_is_400_and_quarantined_only PASSED [  5%]
+tests/test_ingest_core.py::test_batch_all_or_nothing_and_size_limit PASSED [  8%]
+tests/test_ingest_core.py::test_baseline_resubmit_creates_duplicate PASSED [ 11%]
+tests/test_idempotency.py::test_tc01_no_key_keeps_legacy_behavior PASSED [ 14%]
+tests/test_idempotency.py::test_tc02_new_valid_key_writes_once_and_maps_log_id PASSED [ 17%]
+tests/test_idempotency.py::test_tc03_replay_same_payload_returns_identical_response PASSED [ 20%]
+tests/test_idempotency.py::test_tc04_same_payload_different_key_order_is_same_request PASSED [ 22%]
+tests/test_idempotency.py::test_tc05_same_key_different_payload_is_409_without_write PASSED [ 25%]
+tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[empty] PASSED [ 28%]
+tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[blank] PASSED [ 31%]
+tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[len129] PASSED [ 34%]
+tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[space] PASSED [ 37%]
+tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[non-ascii] PASSED [ 40%]
+tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[html] PASSED [ 42%]
+tests/test_idempotency.py::test_tc07_boundary_valid_keys_accepted[len1] PASSED [ 45%]
+tests/test_idempotency.py::test_tc07_boundary_valid_keys_accepted[len128] PASSED [ 48%]
+tests/test_idempotency.py::test_tc07_boundary_valid_keys_accepted[charset] PASSED [ 51%]
+tests/test_idempotency.py::test_tc08_storage_failure_is_not_remembered_and_retry_writes_once PASSED [ 54%]
+tests/test_idempotency.py::test_tc09_invalid_payload_replay_does_not_duplicate_quarantine PASSED [ 57%]
+tests/test_idempotency.py::test_tc10_batch_replay_writes_batch_once PASSED [ 60%]
+tests/test_idempotency.py::test_tc10b_batch_log_ids_map_to_payload_positions PASSED [ 62%]
+tests/test_idempotency.py::test_tc08b_batch_partial_write_then_retry_has_no_duplicates PASSED [ 65%]
+tests/test_idempotency.py::test_tc11_same_key_on_other_endpoint_is_409 PASSED [ 68%]
+tests/test_idempotency.py::test_tc12_expired_key_is_processed_again_but_still_no_duplicate PASSED [ 71%]
+tests/test_idempotency.py::test_tc12b_key_still_valid_just_before_ttl PASSED [ 74%]
+tests/test_idempotency.py::test_tc13_150_concurrent_identical_requests_write_once PASSED [ 77%]
+tests/test_idempotency.py::test_tc13b_first_concurrent_request_fails_waiters_are_not_stuck PASSED [ 80%]
+tests/test_idempotency.py::test_tc14_restart_loses_cache_but_log_id_is_deterministic PASSED [ 82%]
+tests/test_idempotency.py::test_tc15_opensearch_receives_same_document_id_on_retry PASSED [ 85%]
+tests/test_idempotency.py::test_expired_records_are_purged_to_bound_memory PASSED [ 88%]
+tests/test_idempotency.py::test_timestamp_is_not_now_dependent PASSED    [ 91%]
+tests/test_idempotency.py::test_tc01b_batch_without_key_keeps_legacy_behavior PASSED [ 94%]
+tests/test_idempotency.py::test_ttl_must_be_positive PASSED              [ 97%]
+tests/test_idempotency.py::test_get_treats_expired_record_as_absent PASSED [100%]
+
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_idempotency_api.py:9: could not import 'fastapi': No module named 'fastapi'
+======================== 35 passed, 1 skipped in 0.17s =========================

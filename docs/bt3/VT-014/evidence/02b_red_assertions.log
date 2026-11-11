@@ -1,0 +1,346 @@
+..FFFFFFFFF....FFFFFFFFF.                                                [100%]
+=================================== FAILURES ===================================
+___________ test_tc03_replay_same_payload_returns_identical_response ___________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3fbda850>
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f9ae210>
+
+    def test_tc03_replay_same_payload_returns_identical_response(store, idem):
+        """K1+H2+P1: gui lai 3 lan -> 1 ban ghi, cung status/body, header replay."""
+        first = handle_ingest(store, idem, make_log(), "order-7f3a-0002")
+        replays = [handle_ingest(store, idem, make_log(), "order-7f3a-0002") for _ in range(3)]
+>       assert len(store._logs) == 1
+E       AssertionError: assert 4 == 1
+E        +  where 4 = len({'f3197202-1c5a-44b6-89a7-fa6ad2609a39': {'timestamp': '2026-11-10T08:00:00Z', 'level': 'ERROR', 'service': 'demo-web'...b-8ec009719346': {'timestamp': '2026-11-10T08:00:00Z', 'level': 'ERROR', 'service': 'demo-web', 'trace_id': 't1', ...}})
+E        +    where {'f3197202-1c5a-44b6-89a7-fa6ad2609a39': {'timestamp': '2026-11-10T08:00:00Z', 'level': 'ERROR', 'service': 'demo-web'...b-8ec009719346': {'timestamp': '2026-11-10T08:00:00Z', 'level': 'ERROR', 'service': 'demo-web', 'trace_id': 't1', ...}} = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3fbda850>._logs
+
+tests/test_idempotency.py:92: AssertionError
+__________ test_tc04_same_payload_different_key_order_is_same_request __________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3f93e520>
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f7c43e0>
+
+    def test_tc04_same_payload_different_key_order_is_same_request(store, idem):
+        """H2: thu tu field JSON khac nhung noi dung giong -> cung lop 'cung payload'."""
+        p1 = make_log()
+        p2 = dict(reversed(list(p1.items())))
+        a = handle_ingest(store, idem, p1, "k-order")
+        b = handle_ingest(store, idem, p2, "k-order")
+>       assert b.status == 202 and b.body == a.body and b.headers.get(REPLAY) == "true"
+E       AssertionError: assert (202 == 202 and {'accepted': ...0a59932ffeff'} == {'accepted': ...b876bd7da777'}
+E        +  where 202 = Result(status=202, body={'accepted': True, 'log_id': '0b3cb2a0-db7e-46cb-ab99-0a59932ffeff'}, headers={}).status
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'log_id': '0b3cb2a0-db7e-46cb-ab99-0a59932ffeff'} != {'log_id': '66d12f4c-6699-4a3d-a56a-b876bd7da777'}
+E         Use -v to get more diff)
+
+tests/test_idempotency.py:105: AssertionError
+__________ test_tc05_same_key_different_payload_is_409_without_write ___________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3f7c48a0>
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f7c4b00>
+
+    def test_tc05_same_key_different_payload_is_409_without_write(store, idem):
+        """NEGATIVE K1+H3: tai su dung key cho payload khac -> 409, khong ghi, khong quarantine."""
+        handle_ingest(store, idem, make_log(), "k-reuse")
+        r = handle_ingest(store, idem, make_log(message="another failure"), "k-reuse")
+>       assert r.status == 409
+E       AssertionError: assert 202 == 409
+E        +  where 202 = Result(status=202, body={'accepted': True, 'log_id': '9a4459f6-641e-4824-b616-3af156ecd0c1'}, headers={}).status
+
+tests/test_idempotency.py:114: AssertionError
+____________ test_tc06_invalid_key_rejected_before_any_write[empty] ____________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3f9e5c70>
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f9e56d0>
+bad_key = ''
+
+    @pytest.mark.parametrize("bad_key", ["", "   ", "a" * 129, "abc def", "khóa-1", "<script>"],
+                             ids=["empty", "blank", "len129", "space", "non-ascii", "html"])
+    def test_tc06_invalid_key_rejected_before_any_write(store, idem, bad_key):
+        """NEGATIVE K2: key sai dinh dang -> 400 invalid_idempotency_key, kho khong doi."""
+        r = handle_ingest(store, idem, make_log(), bad_key)
+>       assert r.status == 400 and r.body["reason"] == "invalid_idempotency_key"
+E       AssertionError: assert (202 == 400)
+E        +  where 202 = Result(status=202, body={'accepted': True, 'log_id': '16521430-ce16-4b93-bd6f-faebfa0d229a'}, headers={}).status
+
+tests/test_idempotency.py:125: AssertionError
+____________ test_tc06_invalid_key_rejected_before_any_write[blank] ____________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3f9aacf0>
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f9aaf10>
+bad_key = '   '
+
+    @pytest.mark.parametrize("bad_key", ["", "   ", "a" * 129, "abc def", "khóa-1", "<script>"],
+                             ids=["empty", "blank", "len129", "space", "non-ascii", "html"])
+    def test_tc06_invalid_key_rejected_before_any_write(store, idem, bad_key):
+        """NEGATIVE K2: key sai dinh dang -> 400 invalid_idempotency_key, kho khong doi."""
+        r = handle_ingest(store, idem, make_log(), bad_key)
+>       assert r.status == 400 and r.body["reason"] == "invalid_idempotency_key"
+E       AssertionError: assert (202 == 400)
+E        +  where 202 = Result(status=202, body={'accepted': True, 'log_id': 'c74ee031-b998-48f0-9730-82b0b27825d6'}, headers={}).status
+
+tests/test_idempotency.py:125: AssertionError
+___________ test_tc06_invalid_key_rejected_before_any_write[len129] ____________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3f9ab130>
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f9ab350>
+bad_key = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+
+    @pytest.mark.parametrize("bad_key", ["", "   ", "a" * 129, "abc def", "khóa-1", "<script>"],
+                             ids=["empty", "blank", "len129", "space", "non-ascii", "html"])
+    def test_tc06_invalid_key_rejected_before_any_write(store, idem, bad_key):
+        """NEGATIVE K2: key sai dinh dang -> 400 invalid_idempotency_key, kho khong doi."""
+        r = handle_ingest(store, idem, make_log(), bad_key)
+>       assert r.status == 400 and r.body["reason"] == "invalid_idempotency_key"
+E       AssertionError: assert (202 == 400)
+E        +  where 202 = Result(status=202, body={'accepted': True, 'log_id': '833ceeef-6f5d-4fb4-bc54-828eeabe7fc3'}, headers={}).status
+
+tests/test_idempotency.py:125: AssertionError
+____________ test_tc06_invalid_key_rejected_before_any_write[space] ____________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3f7bd450>
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f7bd650>
+bad_key = 'abc def'
+
+    @pytest.mark.parametrize("bad_key", ["", "   ", "a" * 129, "abc def", "khóa-1", "<script>"],
+                             ids=["empty", "blank", "len129", "space", "non-ascii", "html"])
+    def test_tc06_invalid_key_rejected_before_any_write(store, idem, bad_key):
+        """NEGATIVE K2: key sai dinh dang -> 400 invalid_idempotency_key, kho khong doi."""
+        r = handle_ingest(store, idem, make_log(), bad_key)
+>       assert r.status == 400 and r.body["reason"] == "invalid_idempotency_key"
+E       AssertionError: assert (202 == 400)
+E        +  where 202 = Result(status=202, body={'accepted': True, 'log_id': '3d3c6d82-8470-4c82-9be6-28925df0bdb8'}, headers={}).status
+
+tests/test_idempotency.py:125: AssertionError
+__________ test_tc06_invalid_key_rejected_before_any_write[non-ascii] __________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3f7bd950>
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f7bdb50>
+bad_key = 'khóa-1'
+
+    @pytest.mark.parametrize("bad_key", ["", "   ", "a" * 129, "abc def", "khóa-1", "<script>"],
+                             ids=["empty", "blank", "len129", "space", "non-ascii", "html"])
+    def test_tc06_invalid_key_rejected_before_any_write(store, idem, bad_key):
+        """NEGATIVE K2: key sai dinh dang -> 400 invalid_idempotency_key, kho khong doi."""
+        r = handle_ingest(store, idem, make_log(), bad_key)
+>       assert r.status == 400 and r.body["reason"] == "invalid_idempotency_key"
+E       AssertionError: assert (202 == 400)
+E        +  where 202 = Result(status=202, body={'accepted': True, 'log_id': 'd679964c-80d0-47bc-802d-e433f0c4d4b0'}, headers={}).status
+
+tests/test_idempotency.py:125: AssertionError
+____________ test_tc06_invalid_key_rejected_before_any_write[html] _____________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3f80c9b0>
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f80cb90>
+bad_key = '<script>'
+
+    @pytest.mark.parametrize("bad_key", ["", "   ", "a" * 129, "abc def", "khóa-1", "<script>"],
+                             ids=["empty", "blank", "len129", "space", "non-ascii", "html"])
+    def test_tc06_invalid_key_rejected_before_any_write(store, idem, bad_key):
+        """NEGATIVE K2: key sai dinh dang -> 400 invalid_idempotency_key, kho khong doi."""
+        r = handle_ingest(store, idem, make_log(), bad_key)
+>       assert r.status == 400 and r.body["reason"] == "invalid_idempotency_key"
+E       AssertionError: assert (202 == 400)
+E        +  where 202 = Result(status=202, body={'accepted': True, 'log_id': 'a6e8f093-fc67-400d-8046-de5c08d5fe00'}, headers={}).status
+
+tests/test_idempotency.py:125: AssertionError
+________ test_tc09_invalid_payload_replay_does_not_duplicate_quarantine ________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3faaf590>
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3faafad0>
+
+    def test_tc09_invalid_payload_replay_does_not_duplicate_quarantine(store, idem):
+        """K1+P2: payload sai schema -> 400 lan dau; gui lai cung key -> 400 replay,
+        quarantine chi co 1 ban ghi (quarantine cung la du lieu, khong duoc trung)."""
+        bad = {"level": "ERROR"}
+        a = handle_ingest(store, idem, bad, "k-bad")
+        b = handle_ingest(store, idem, bad, "k-bad")
+        assert a.status == b.status == 400 and b.body == a.body
+>       assert b.headers.get(REPLAY) == "true"
+E       assert None == 'true'
+E        +  where None = <built-in method get of dict object at 0x7f4c3f65f180>('Idempotent-Replayed')
+E        +    where <built-in method get of dict object at 0x7f4c3f65f180> = {}.get
+E        +      where {} = Result(status=400, body={'accepted': False, 'reason': 'schema_validation_failed', 'details': ["<root>: 'timestamp' is ...quired property", "<root>: 'span_id' is a required property", "<root>: 'message' is a required property"]}, headers={}).headers
+
+tests/test_idempotency.py:163: AssertionError
+___________________ test_tc10_batch_replay_writes_batch_once ___________________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3faafb90>
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3faaf7d0>
+
+    def test_tc10_batch_replay_writes_batch_once(store, idem):
+        """E=/ingest/batch, K1+H2: gui lai batch -> khong ghi them, cung response."""
+        batch = [make_log(trace_id="a"), make_log(trace_id="b")]
+        first = handle_ingest_batch(store, idem, batch, "batch-0001", 500)
+        again = handle_ingest_batch(store, idem, batch, "batch-0001", 500)
+        assert first.status == again.status == 202
+>       assert again.body == first.body and again.headers.get(REPLAY) == "true"
+E       AssertionError: assert ({'accepted': ...f98f4414284']} == {'accepted': ...707b1e7e6f2']}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'log_ids': ['bd73da89-ee9d-4e4d-902d-41ffbabb2f3f', 'd1c8c777-79c6-437f-b1ff-bf98f4414284']} != {'log_ids': ['a282371c-d7a9-41b9-8605-998a49950a7a', '7e87a47e-29b2-4e76-b73f-4707b1e7e6f2']}
+E         Use -v to get more diff)
+
+tests/test_idempotency.py:174: AssertionError
+_________________ test_tc11_same_key_on_other_endpoint_is_409 __________________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3f7a3280>
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f7a33e0>
+
+    def test_tc11_same_key_on_other_endpoint_is_409(store, idem):
+        """NEGATIVE: cung key dung cho /ingest roi /ingest/batch -> xem la khac yeu cau -> 409."""
+        handle_ingest(store, idem, make_log(), "k-cross")
+        r = handle_ingest_batch(store, idem, [make_log()], "k-cross", 500)
+>       assert r.status == 409 and len(store._logs) == 1
+E       AssertionError: assert (202 == 409)
+E        +  where 202 = Result(status=202, body={'accepted': True, 'accepted_count': 1, 'log_ids': ['3ec4fbd5-4f8f-4a12-95f1-8cdf4880d250']}, headers={}).status
+
+tests/test_idempotency.py:182: AssertionError
+_______ test_tc12_expired_key_is_processed_again_but_still_no_duplicate ________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3f7a36a0>
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f7a3800>
+clock = <test_idempotency.FakeClock object at 0x7f4c3f7a3750>
+
+    def test_tc12_expired_key_is_processed_again_but_still_no_duplicate(store, idem, clock):
+        """H4: qua TTL -> key duoc xu ly lai (khong co header replay), NHUNG log_id tat dinh
+        theo (endpoint, key, payload) nen kho van chi co 1 ban ghi."""
+        a = handle_ingest(store, idem, make_log(), "k-ttl")
+        clock.now += 61  # > ttl 60s, khong sleep
+        b = handle_ingest(store, idem, make_log(), "k-ttl")
+        assert REPLAY not in b.headers
+>       assert b.body["log_id"] == a.body["log_id"]
+E       AssertionError: assert '390832d7-567...-ffecfc01514a' == 'd395f232-044...-1fd6956aed9f'
+E         
+E         - d395f232-0447-44fd-a043-1fd6956aed9f
+E         + 390832d7-567c-4afe-9adf-ffecfc01514a
+
+tests/test_idempotency.py:193: AssertionError
+__________________ test_tc12b_key_still_valid_just_before_ttl __________________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3f7ab4d0>
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f7aa030>
+clock = <test_idempotency.FakeClock object at 0x7f4c3f7a9810>
+
+    def test_tc12b_key_still_valid_just_before_ttl(store, idem, clock):
+        """H2 bien TTL: con 1 giay truoc khi het han -> van replay."""
+        handle_ingest(store, idem, make_log(), "k-ttl2")
+        clock.now += 59
+>       assert handle_ingest(store, idem, make_log(), "k-ttl2").headers.get(REPLAY) == "true"
+E       AssertionError: assert None == 'true'
+E        +  where None = <built-in method get of dict object at 0x7f4c3fa4c5c0>('Idempotent-Replayed')
+E        +    where <built-in method get of dict object at 0x7f4c3fa4c5c0> = {}.get
+E        +      where {} = Result(status=202, body={'accepted': True, 'log_id': 'bcd8aafa-6db0-44ed-8c46-29b8223f0559'}, headers={}).headers
+E        +        where Result(status=202, body={'accepted': True, 'log_id': 'bcd8aafa-6db0-44ed-8c46-29b8223f0559'}, headers={}) = handle_ingest(<ingestion.src.storage.InMemoryLogStore object at 0x7f4c3f7ab4d0>, <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f7aa030>, {'timestamp': '2026-11-10T08:00:00Z', 'level': 'ERROR', 'service': 'demo-web', 'trace_id': 't1', ...}, 'k-ttl2')
+E        +          where {'timestamp': '2026-11-10T08:00:00Z', 'level': 'ERROR', 'service': 'demo-web', 'trace_id': 't1', ...} = make_log()
+
+tests/test_idempotency.py:201: AssertionError
+____________ test_tc13_150_concurrent_identical_requests_write_once ____________
+
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f7a8eb0>
+
+    def test_tc13_150_concurrent_identical_requests_write_once(idem):
+        """H6: 150 request dong thoi cung key + payload -> dung 1 lan ghi, moi response 202
+        va cung log_id (muc tai VT-014)."""
+        store = CountingStore()
+        barrier = threading.Barrier(150)
+    
+        def send(_):
+            barrier.wait()
+            return handle_ingest(store, idem, make_log(), "k-concurrent")
+    
+        with ThreadPoolExecutor(max_workers=150) as pool:
+            results = list(pool.map(send, range(150)))
+>       assert store.writes == 1
+E       assert 150 == 1
+E        +  where 150 = <test_idempotency.CountingStore object at 0x7f4c3fa702f0>.writes
+
+tests/test_idempotency.py:232: AssertionError
+__________ test_tc14_restart_loses_cache_but_log_id_is_deterministic ___________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3f792530>
+clock = <test_idempotency.FakeClock object at 0x7f4c3f7f1490>
+
+    def test_tc14_restart_loses_cache_but_log_id_is_deterministic(store, clock):
+        """Mo phong restart process (cache idempotency mat): cung key + payload -> cung log_id
+        -> InMemory/OpenSearch ghi de cung _id, khong sinh ban ghi thu 2."""
+        a = handle_ingest(store, IdempotencyStore(ttl_seconds=60, clock=clock), make_log(), "k-restart")
+        b = handle_ingest(store, IdempotencyStore(ttl_seconds=60, clock=clock), make_log(), "k-restart")
+>       assert a.body["log_id"] == b.body["log_id"]
+E       AssertionError: assert 'a44cb3fe-c50...-4a096ce9f3ac' == '1a615152-a3a...-bb22d2870319'
+E         
+E         - 1a615152-a3ad-4de3-b181-bb22d2870319
+E         + a44cb3fe-c509-404c-9057-4a096ce9f3ac
+
+tests/test_idempotency.py:244: AssertionError
+___________ test_tc15_opensearch_receives_same_document_id_on_retry ____________
+
+clock = <test_idempotency.FakeClock object at 0x7f4c3f6c3950>
+
+    def test_tc15_opensearch_receives_same_document_id_on_retry(clock):
+        """Lop storage that (OpenSearch, client gia - khong mang): 2 lan gui sau restart
+        dung cung _id -> OpenSearch index() la upsert, khong tao document trung."""
+    
+        class FakeIndices:
+            def exists(self, index):
+                return True
+    
+        class FakeClient:
+            def __init__(self):
+                self.indices = FakeIndices()
+                self.ids = []
+    
+            def index(self, index, id, body, **kw):
+                self.ids.append((index, id))
+    
+        client = FakeClient()
+        os_store = OpenSearchLogStore(client, log_index="logs")
+        for _ in range(2):
+            handle_ingest(os_store, IdempotencyStore(ttl_seconds=60, clock=clock), make_log(), "k-os")
+>       assert len(client.ids) == 2 and client.ids[0] == client.ids[1]
+E       AssertionError: assert (2 == 2 and ('logs-2026.1...0d292a690dec') == ('logs-2026.1...4cc5ad936c1e')
+E        +  where 2 = len([('logs-2026.11.10', 'e2915682-ce4d-4e6e-b25d-0d292a690dec'), ('logs-2026.11.10', '46e7a347-84ee-43d4-b0c7-4cc5ad936c1e')])
+E        +    where [('logs-2026.11.10', 'e2915682-ce4d-4e6e-b25d-0d292a690dec'), ('logs-2026.11.10', '46e7a347-84ee-43d4-b0c7-4cc5ad936c1e')] = <test_idempotency.test_tc15_opensearch_receives_same_document_id_on_retry.<locals>.FakeClient object at 0x7f4c3f7852b0>.ids
+E         
+E         At index 1 diff: 'e2915682-ce4d-4e6e-b25d-0d292a690dec' != '46e7a347-84ee-43d4-b0c7-4cc5ad936c1e'
+E         Use -v to get more diff)
+
+tests/test_idempotency.py:268: AssertionError
+_______________ test_expired_records_are_purged_to_bound_memory ________________
+
+store = <ingestion.src.storage.InMemoryLogStore object at 0x7f4c3f7f1760>
+idem = <ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f7c0fa0>
+clock = <test_idempotency.FakeClock object at 0x7f4c3f6c3f50>
+
+    def test_expired_records_are_purged_to_bound_memory(store, idem, clock):
+        """NFR bo nho: ban ghi het han bi don, khong tang vo han."""
+        for i in range(20):
+            handle_ingest(store, idem, make_log(trace_id=f"t{i}"), f"k-{i}")
+>       assert len(idem) == 20
+E       assert 0 == 20
+E        +  where 0 = len(<ingestion.src.idempotency.IdempotencyStore object at 0x7f4c3f7c0fa0>)
+
+tests/test_idempotency.py:276: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_idempotency.py::test_tc03_replay_same_payload_returns_identical_response
+FAILED tests/test_idempotency.py::test_tc04_same_payload_different_key_order_is_same_request
+FAILED tests/test_idempotency.py::test_tc05_same_key_different_payload_is_409_without_write
+FAILED tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[empty]
+FAILED tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[blank]
+FAILED tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[len129]
+FAILED tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[space]
+FAILED tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[non-ascii]
+FAILED tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[html]
+FAILED tests/test_idempotency.py::test_tc09_invalid_payload_replay_does_not_duplicate_quarantine
+FAILED tests/test_idempotency.py::test_tc10_batch_replay_writes_batch_once - ...
+FAILED tests/test_idempotency.py::test_tc11_same_key_on_other_endpoint_is_409
+FAILED tests/test_idempotency.py::test_tc12_expired_key_is_processed_again_but_still_no_duplicate
+FAILED tests/test_idempotency.py::test_tc12b_key_still_valid_just_before_ttl
+FAILED tests/test_idempotency.py::test_tc13_150_concurrent_identical_requests_write_once
+FAILED tests/test_idempotency.py::test_tc14_restart_loses_cache_but_log_id_is_deterministic
+FAILED tests/test_idempotency.py::test_tc15_opensearch_receives_same_document_id_on_retry
+FAILED tests/test_idempotency.py::test_expired_records_are_purged_to_bound_memory
+18 failed, 7 passed in 0.21s
