@@ -1,0 +1,122 @@
+{
+  "backend": "SIMULATED SQLite unique-key inserts; production ApprovalRepository",
+  "api_processes": 1,
+  "http_transport": "loopback TCP HTTP; separate uvicorn process",
+  "load_generator": "same machine, up to 80 threads and 100 pooled connections",
+  "clock": "time.perf_counter_ns; includes HTTP/pool/server queueing; excludes barrier wait",
+  "percentile_method": "nearest rank",
+  "python": "3.13.7",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "logical_cpus": 4,
+  "sqlite_version": "3.50.4",
+  "isolated_index": "vt015-sim-aaddb2e601a5409d81caaf494b636986",
+  "total_requests": 162,
+  "successes": 82,
+  "conflicts": 80,
+  "errors": 0,
+  "persisted_count": 82,
+  "scenarios": [
+    {
+      "scenario": "same_cluster_2",
+      "concurrency": 2,
+      "requests": 2,
+      "successes": 1,
+      "conflicts": 1,
+      "errors": 0,
+      "persisted": 1,
+      "valid": true
+    },
+    {
+      "scenario": "same_cluster_80",
+      "concurrency": 80,
+      "requests": 80,
+      "successes": 1,
+      "conflicts": 79,
+      "errors": 0,
+      "persisted": 1,
+      "valid": true
+    },
+    {
+      "scenario": "independent_clusters_80",
+      "concurrency": 80,
+      "requests": 80,
+      "successes": 80,
+      "conflicts": 0,
+      "errors": 0,
+      "persisted": 80,
+      "valid": true
+    }
+  ],
+  "metrics": [
+    {
+      "scenario": "same_cluster_2",
+      "response": "success",
+      "count": 1,
+      "p50_ms": 22.3396,
+      "p95_ms": 22.3396,
+      "p99_ms": 22.3396,
+      "max_ms": 22.3396,
+      "p95_below_2500_ms": true
+    },
+    {
+      "scenario": "same_cluster_2",
+      "response": "conflict",
+      "count": 1,
+      "p50_ms": 33.6268,
+      "p95_ms": 33.6268,
+      "p99_ms": 33.6268,
+      "max_ms": 33.6268,
+      "p95_below_2500_ms": true
+    },
+    {
+      "scenario": "same_cluster_80",
+      "response": "success",
+      "count": 1,
+      "p50_ms": 143.7143,
+      "p95_ms": 143.7143,
+      "p99_ms": 143.7143,
+      "max_ms": 143.7143,
+      "p95_below_2500_ms": true
+    },
+    {
+      "scenario": "same_cluster_80",
+      "response": "conflict",
+      "count": 79,
+      "p50_ms": 583.0913,
+      "p95_ms": 827.5892,
+      "p99_ms": 861.3402,
+      "max_ms": 861.3402,
+      "p95_below_2500_ms": true
+    },
+    {
+      "scenario": "independent_clusters_80",
+      "response": "success",
+      "count": 80,
+      "p50_ms": 872.1038,
+      "p95_ms": 1470.7435,
+      "p99_ms": 1672.585,
+      "max_ms": 1672.585,
+      "p95_below_2500_ms": true
+    },
+    {
+      "scenario": "all",
+      "response": "success",
+      "count": 82,
+      "p50_ms": 870.3065,
+      "p95_ms": 1470.7435,
+      "p99_ms": 1672.585,
+      "max_ms": 1672.585,
+      "p95_below_2500_ms": true
+    },
+    {
+      "scenario": "all",
+      "response": "conflict",
+      "count": 80,
+      "p50_ms": 549.8038,
+      "p95_ms": 821.1998,
+      "p99_ms": 861.3402,
+      "max_ms": 861.3402,
+      "p95_below_2500_ms": true
+    }
+  ]
+}

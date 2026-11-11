@@ -1,0 +1,53 @@
+Command: git branch --show-current
+bt3/23001907-vt015
+Exit code: 0
+
+Command: git diff b627243c1f71a9417b581b2bc9e09a3f3a935a85 -- query-api/src
+Exit code: 0
+
+Command: git diff a4f13a37942606572f98c70fe5df05bedd7d0868 -- query-api/tests/test_vt015_approval.py
+Exit code: 0
+
+Command: git diff --check
+Exit code: 0
+
+Command: git status --short
+ M docs/architect/contracts/api-contract.md
+?? docs/task/VT-015/evidence/COVERAGE-concurrency-performance.md
+?? docs/task/VT-015/evidence/coverage-after-nine-tests.json
+?? docs/task/VT-015/evidence/coverage-after-nine-tests.txt
+?? docs/task/VT-015/evidence/coverage-final.json
+?? docs/task/VT-015/evidence/coverage-final.txt
+?? docs/task/VT-015/evidence/coverage-initial.json
+?? docs/task/VT-015/evidence/coverage-initial.txt
+?? docs/task/VT-015/evidence/coverage-install-approved.txt
+?? docs/task/VT-015/evidence/coverage-install.txt
+?? docs/task/VT-015/evidence/coverage-workload-audit.txt
+?? docs/task/VT-015/evidence/coverage-workload-packages.txt
+?? docs/task/VT-015/evidence/coverage.data
+?? docs/task/VT-015/evidence/docker-containers-approved.txt
+?? docs/task/VT-015/evidence/docker-containers.txt
+?? docs/task/VT-015/evidence/docker-info-approved.txt
+?? docs/task/VT-015/evidence/docker-info.txt
+?? docs/task/VT-015/evidence/hardware.txt
+?? docs/task/VT-015/evidence/opensearch-probe.json
+?? docs/task/VT-015/evidence/workload-command.txt
+?? docs/task/VT-015/evidence/workload-initial/
+?? docs/task/VT-015/evidence/workload-persisted.json
+?? docs/task/VT-015/evidence/workload-raw.csv
+?? docs/task/VT-015/evidence/workload-results.json
+?? docs/task/VT-015/evidence/workload-server.txt
+?? docs/task/VT-015/evidence/workload-summary.md
+?? docs/task/VT-015/evidence/workload-validation.txt
+?? query-api/tests/test_vt015_coverage.py
+?? query-api/tests/vt015_sqlite_simulator.py
+?? query-api/tests/vt015_workload.py
+Exit code: 0
+
+Unchanged contract SHA256: 6991aa03dfc314305a94f862e139772a81c12e2cb754d33492984250c0cd7018
+
+Evidence formatting review: normalized only new UTF-8 evidence line endings to LF; stripped empty pip metadata field padding. No measurements or prior evidence changed.
+Command: git diff --cached --name-only -- docs/architect/contracts/api-contract.md
+Exit code: 0
+Command: git diff --cached --name-only -- query-api/src
+Exit code: 0

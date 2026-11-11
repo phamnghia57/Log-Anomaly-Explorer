@@ -79,6 +79,28 @@ class UserRepository:
             # Khong de response/body/connection credentials lot vao log hay traceback.
             raise StorageError("cannot create admin user") from None
 
+    def create_reviewer(self, username: str, password: str) -> bool:
+        """Explicit provisioning only; never replace an existing account or role."""
+        if not username or not username.strip():
+            raise ValueError("Username must not be empty")
+        document = {
+            "username": username,
+            "password_hash": hash_password(password),
+            "role": "reviewer",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        try:
+            result = self.client.create(
+                index=self.index, id=username, body=document, refresh="wait_for",
+            )
+            if result.get("result") != "created":
+                raise StorageError("reviewer creation was not confirmed")
+            return True
+        except ConflictError:
+            return False
+        except Exception:
+            raise StorageError("cannot create reviewer") from None
+
     def close(self) -> None:
         try:
             self.client.close()

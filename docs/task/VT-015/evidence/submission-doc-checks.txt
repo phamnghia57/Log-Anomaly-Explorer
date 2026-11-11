@@ -1,0 +1,3 @@
+PASS: 129 local Markdown links resolve across 6 new submission documents.
+PASS: Vietnamese reflection body is 317 whitespace-delimited words (required 250-350); title/disclosure excluded.
+No external link, academic marking rubric or live endpoint was verified by this check.

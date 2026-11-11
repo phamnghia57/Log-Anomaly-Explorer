@@ -36,7 +36,7 @@ _DUMMY_HASH = hash_password(secrets.token_urlsafe(32))
 _bearer = HTTPBearer(auto_error=False)
 
 
-def require_admin(
+def require_reviewer(
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
 ) -> dict:
     """Verify JWT truoc khi query storage; missing/malformed token deu tra 401."""
@@ -52,6 +52,12 @@ def require_admin(
         raise unauthorized from None
     except JWTConfigurationError:
         raise HTTPException(status_code=503, detail="Authentication unavailable") from None
+
+
+def require_admin(claims: dict = Depends(require_reviewer)) -> dict:
+    if claims["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return claims
 
 
 class LoginRequest(BaseModel):
@@ -87,12 +93,12 @@ def login(
         credentials.password.get_secret_value(),
         stored_hash if isinstance(stored_hash, str) else _DUMMY_HASH,
     )
-    if (not valid_password or not user or user.get("role") != "admin"
+    if (not valid_password or not user or user.get("role") not in ("admin", "reviewer")
             or user.get("username") != credentials.username):
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
     try:
-        result = create_access_token(user["username"])
+        result = create_access_token(user["username"], role=user["role"])
     except JWTConfigurationError:
         raise HTTPException(status_code=503, detail="Authentication unavailable") from None
     response.headers["Cache-Control"] = "no-store"
