@@ -43,21 +43,23 @@ from .assistant.storage import ConversationRepository
 from .telemetry import setup_telemetry
 from .users import UserRepository
 from .sessions import SessionRepository
+from .login_limits import LoginLimiter
 
 logger = logging.getLogger("query-api")
 
 @asynccontextmanager
 async def lifespan(app):
-    async def cleanup_sessions():
+    async def cleanup_auth():
         while True:
             await asyncio.sleep(3600)
-            repository = getattr(app.state, "session_repository", None)
-            if repository is not None:
-                try:
-                    await asyncio.to_thread(repository.cleanup)
-                except StorageError:
-                    logger.warning("Expired auth sessions cleanup unavailable")
-    task = asyncio.create_task(cleanup_sessions())
+            for name in ("session_repository", "login_limiter"):
+                repository = getattr(app.state, name, None)
+                if repository is not None:
+                    try:
+                        await asyncio.to_thread(repository.cleanup)
+                    except StorageError:
+                        logger.warning("Expired records cleanup unavailable for %s", name)
+    task = asyncio.create_task(cleanup_auth())
     try:
         yield
     finally:
@@ -97,6 +99,7 @@ store: LogStore = build_store()
 # Dung lai client hien co; memory backend chi ho tro cac route doc/dev, khong login.
 app.state.user_repository = UserRepository(store) if isinstance(store, OpenSearchLogStore) else None
 app.state.session_repository = SessionRepository(store) if isinstance(store, OpenSearchLogStore) else None
+app.state.login_limiter = LoginLimiter(store) if isinstance(store, OpenSearchLogStore) else None
 app.include_router(auth_router)
 
 

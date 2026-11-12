@@ -20,6 +20,7 @@ config = importlib.import_module("query-api.src.config")
 tokens = importlib.import_module("query-api.src.tokens")
 users = importlib.import_module("query-api.src.users")
 sessions = importlib.import_module("query-api.src.sessions")
+limits = importlib.import_module("query-api.src.login_limits")
 fake = importlib.import_module("query-api.tests.fake_opensearch")
 passwords = importlib.import_module("query-api.src.passwords")
 
@@ -72,8 +73,12 @@ def login_app(monkeypatch, jwt_config, admin_credentials):
     repository = users.UserRepository(OpenSearchLogStore(client))
     session_repository = sessions.SessionRepository(repository.log_store)
     session_repository.ensure_ready()
+    limit_client, _ = fake.fake_client()
+    limiter = limits.LoginLimiter(OpenSearchLogStore(limit_client))
+    limiter.ensure_ready()
     client.reset_mock()
-    monkeypatch.setattr(main.app, "state", State({"user_repository": repository, "session_repository": session_repository}))
+    monkeypatch.setattr(main.app, "state", State({"user_repository": repository,
+                        "session_repository": session_repository, "login_limiter": limiter}))
     with TestClient(main.app, headers={"X-CSRF-Protection": "1"}) as app:
         yield app, client, {"username": username, "password": password}, document
 
@@ -124,6 +129,26 @@ def test_wrong_username_and_password_have_identical_generic_response(login_app, 
     assert missing.json() == wrong.json() == {"detail": "Invalid username or password"}
     assert verify.call_count == 2
     assert verify.call_args_list[0].args[1] == auth._DUMMY_HASH
+
+
+def test_login_budget_blocks_before_hashing_and_recovers(login_app, monkeypatch):
+    app, _, credentials, _ = login_app
+    monkeypatch.setattr(config, "AUTH_LOGIN_MAX_ATTEMPTS", 2)
+    now = [1_000_000_000_000]
+    monkeypatch.setattr(limits.time, "time_ns", lambda: now[0])
+    verify = Mock(wraps=auth.verify_password)
+    monkeypatch.setattr(auth, "verify_password", verify)
+    wrong = {**credentials, "password": "incorrect"}
+    assert app.post("/auth/login", json=wrong).status_code == 401
+    assert app.post("/auth/login", json=wrong).status_code == 401
+    blocked = app.post("/auth/login", json=credentials)
+    assert blocked.status_code == 429
+    assert blocked.headers["retry-after"] == str(config.AUTH_LOGIN_LOCK_SECONDS)
+    assert verify.call_count == 2
+    now[0] += config.AUTH_LOGIN_LOCK_SECONDS * 1_000_000_000
+    assert app.post("/auth/login", json=credentials).status_code == 200
+    assert app.post("/auth/login", json=wrong).status_code == 401
+    assert app.post("/auth/login", json=credentials).status_code == 200
 
 
 @pytest.mark.parametrize("username", ["", " \t"])
@@ -245,7 +270,7 @@ def test_browser_preflight_allows_json_login(login_app):
     app, _, _, _ = login_app
 
     response = app.options("/auth/login", headers={
-        "Origin": "https://frontend.example",
+        "Origin": config.AUTH_ALLOWED_ORIGINS[0],
         "Access-Control-Request-Method": "POST",
         "Access-Control-Request-Headers": "content-type",
     })

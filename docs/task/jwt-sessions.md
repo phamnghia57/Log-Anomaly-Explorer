@@ -68,6 +68,10 @@ Keep the PR draft with Refs #73 until review, CI and staging verification are co
 - USERS_INDEX: users; AUTH_SESSIONS_INDEX: auth-sessions. Use the existing cluster/client.
 - AUTH_COOKIE_SECURE: true. Set false explicitly only for local HTTP development/tests.
 - AUTH_ALLOWED_ORIGINS: comma-separated exact web origins (scheme/host/port, no path).
+- AUTH_LOGIN_LIMIT_INDEX, AUTH_LOGIN_MAX_ATTEMPTS, AUTH_LOGIN_WINDOW_SECONDS and
+  AUTH_LOGIN_LOCK_SECONDS configure the shared login limit. The defaults allow
+  five attempts within five minutes, then a five-minute lockout. A successful
+  login resets the budget. Run `manage_auth init` before deploying the new API.
   Defaults to localhost:5173 and 127.0.0.1:5173 over HTTP. Configure production and each
   trusted preview explicitly; no wildcard or null origin. Missing Origin is supported
   for non-browser clients but the CSRF header remains mandatory.

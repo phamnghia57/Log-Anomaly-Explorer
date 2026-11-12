@@ -62,6 +62,11 @@ async function authPost(action: "login" | "refresh" | "logout", payload?: Record
   } catch {
     throw new ApiError("Không kết nối được máy chủ. Vui lòng thử lại.", 0);
   }
+  if (action === "login" && response.status === 429) {
+    const seconds = Number(response.headers.get("Retry-After"));
+    const wait = Number.isSafeInteger(seconds) && seconds > 0 ? ` sau ${seconds} giây` : " sau ít phút";
+    throw new ApiError(`Đã thử đăng nhập quá nhiều lần. Vui lòng thử lại${wait}.`, 429);
+  }
   if (!response.ok) throw new ApiError(response.status >= 500
     ? "Dịch vụ đăng nhập tạm thời không khả dụng. Vui lòng thử lại."
     : action === "login" ? "Đăng nhập không thành công. Vui lòng kiểm tra tên đăng nhập và mật khẩu."

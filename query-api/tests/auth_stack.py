@@ -78,10 +78,14 @@ def auth_stack(*, username="integration-admin", password=None, secret=None):
         repository = importlib.import_module("query-api.src.users").UserRepository(log_store)
         sessions = importlib.import_module("query-api.src.sessions").SessionRepository(log_store)
         sessions.ensure_ready()
+        limiter = importlib.import_module("query-api.src.login_limits").LoginLimiter(log_store)
+        limiter.ensure_ready()
         clusters = OpenSearchStore(log_store)
         clusters.clusters, clusters.history = "auth-test-clusters", "auth-test-history"
         stack.enter_context(patch.multiple(main, store=log_store, cluster_store=clusters))
-        stack.enter_context(patch.object(main.app, "state", State({"user_repository": repository, "session_repository": sessions})))
+        stack.enter_context(patch.object(main.app, "state", State({
+            "user_repository": repository, "session_repository": sessions, "login_limiter": limiter,
+        })))
         yield SimpleNamespace(app=main.app, repository=repository, client=client, documents=documents,
                               credentials={"username": username, "password": password}, secret=secret,
                               cluster=cluster, log=log, point=point)

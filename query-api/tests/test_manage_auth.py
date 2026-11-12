@@ -6,13 +6,15 @@ from ingestion.src.storage import StorageError
 manage = importlib.import_module("query-api.src.manage_auth")
 
 
-def test_cli_init_migrates_both_indexes(monkeypatch):
-    users, sessions = Mock(), Mock()
+def test_cli_init_migrates_auth_indexes(monkeypatch):
+    users, sessions, limits = Mock(), Mock(), Mock()
     monkeypatch.setattr(manage, "UserRepository", lambda: users)
     monkeypatch.setattr(manage, "SessionRepository", lambda store: sessions)
+    monkeypatch.setattr(manage, "LoginLimiter", lambda store: limits)
     assert manage.main(["init"]) == 0
     users.ensure_ready.assert_called_once()
     sessions.ensure_ready.assert_called_once()
+    limits.ensure_ready.assert_called_once()
     users.close.assert_called_once()
 
 

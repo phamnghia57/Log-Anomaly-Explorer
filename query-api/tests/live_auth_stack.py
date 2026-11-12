@@ -16,7 +16,9 @@ from clustering.src.storage import OpenSearchStore
 @contextmanager
 def live_auth_stack(url, username, password, secret):
     prefix = "issue73-browser-" + secrets.token_hex(8)
-    names = {kind: prefix + "-" + kind for kind in ("users", "sessions", "logs", "clusters", "history", "quarantine")}
+    names = {kind: prefix + "-" + kind for kind in (
+        "users", "sessions", "limits", "logs", "clusters", "history", "quarantine",
+    )}
     client = OpenSearch(url, timeout=10, max_retries=0)
     store = OpenSearchLogStore(client, log_index=names["logs"], quarantine_index=names["quarantine"], shards=1, replicas=0)
     now = datetime.now(timezone.utc).isoformat()
@@ -30,6 +32,7 @@ def live_auth_stack(url, username, password, secret):
             config = importlib.import_module("query-api.src.config")
             patches.enter_context(patch.multiple(config, JWT_SECRET=secret,
                 USERS_INDEX=names["users"], AUTH_SESSIONS_INDEX=names["sessions"],
+                AUTH_LOGIN_LIMIT_INDEX=names["limits"],
                 ADMIN_SEED_USERNAME=username, ADMIN_SEED_PASSWORD=password,
                 AUTH_COOKIE_SECURE=False, AUTH_ALLOWED_ORIGINS=("http://127.0.0.1:5174",)))
             main = importlib.import_module("query-api.src.main")
@@ -37,6 +40,8 @@ def live_auth_stack(url, username, password, secret):
             sessions = importlib.import_module("query-api.src.sessions").SessionRepository(store)
             users.ensure_ready()
             sessions.ensure_ready()
+            limiter = importlib.import_module("query-api.src.login_limits").LoginLimiter(store)
+            limiter.ensure_ready()
             users.create_admin(username, password)
             clusters = OpenSearchStore(store)
             clusters.clusters, clusters.history = names["clusters"], names["history"]
@@ -48,7 +53,7 @@ def live_auth_stack(url, username, password, secret):
             patches.enter_context(patch.multiple(main, store=store, cluster_store=clusters))
             patches.enter_context(patch.object(main.app, "state", State({
                 "store": store, "cluster_store": clusters, "user_repository": users,
-                "session_repository": sessions, "assistant_conversations": None,
+                "session_repository": sessions, "login_limiter": limiter, "assistant_conversations": None,
             })))
             yield SimpleNamespace(app=main.app)
     finally:

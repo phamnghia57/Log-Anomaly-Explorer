@@ -5,6 +5,7 @@ import getpass
 import sys
 from argon2.exceptions import HashingError
 from ingestion.src.storage import StorageError
+from .login_limits import LoginLimiter
 from .sessions import SessionRepository
 from .users import UserRepository
 
@@ -12,7 +13,7 @@ from .users import UserRepository
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Initialize auth storage or administer accounts")
     sub = parser.add_subparsers(dest="action", required=True)
-    sub.add_parser("init", help="Migrate users mapping and create session index idempotently")
+    sub.add_parser("init", help="Prepare user, session, and login rate limit indexes")
     for action in ("disable", "enable", "set-password", "set-role", "revoke-all"):
         command = sub.add_parser(action)
         command.add_argument("username")
@@ -25,6 +26,7 @@ def main(argv=None) -> int:
         if args.action == "init":
             repository.ensure_ready()
             SessionRepository(repository.log_store).ensure_ready()
+            LoginLimiter(repository.log_store).ensure_ready()
         else:
             value = getattr(args, "role", None)
             if args.action == "set-password":

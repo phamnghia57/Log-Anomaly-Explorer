@@ -134,6 +134,7 @@ index explicitly; there is no public registration or password-reset endpoint.
 - `POST /auth/login`: JSON `{username, password}`. Success 200 `{token, expires_at}`
   with a rotating refresh cookie; invalid credentials/account 401, invalid JSON/fields
   422 with sanitized `detail="Invalid login request"`, unavailable auth/storage 503.
+  A depleted per-account login budget returns 429 with `Retry-After` in seconds.
 - `POST /auth/refresh`: refresh cookie only, no token in query/body. Success 200 has the
   same access response shape and replaces the cookie. Invalid/expired/reused refresh 401;
   storage/config failure 503. Replay of a previously issued refresh token revokes its session.

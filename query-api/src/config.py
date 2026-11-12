@@ -21,6 +21,12 @@ JWT_SECRET = os.environ.get("JWT_SECRET")
 JWT_EXPIRY_SECONDS = _positive_int("JWT_EXPIRY_SECONDS", 900)
 AUTH_REFRESH_TTL_SECONDS = _positive_int("AUTH_REFRESH_TTL_SECONDS", 604800)
 AUTH_SESSIONS_INDEX = os.environ.get("AUTH_SESSIONS_INDEX", "auth-sessions")
+AUTH_LOGIN_LIMIT_INDEX = os.environ.get("AUTH_LOGIN_LIMIT_INDEX", "auth-login-limits")
+AUTH_LOGIN_MAX_ATTEMPTS = _positive_int("AUTH_LOGIN_MAX_ATTEMPTS", 5)
+AUTH_LOGIN_WINDOW_SECONDS = _positive_int("AUTH_LOGIN_WINDOW_SECONDS", 300)
+AUTH_LOGIN_LOCK_SECONDS = _positive_int("AUTH_LOGIN_LOCK_SECONDS", 300)
+if not AUTH_LOGIN_LIMIT_INDEX.strip():
+    raise ValueError("AUTH_LOGIN_LIMIT_INDEX must not be empty")
 if not AUTH_SESSIONS_INDEX.strip():
     raise ValueError("AUTH_SESSIONS_INDEX must not be empty")
 _cookie_secure = os.environ.get("AUTH_COOKIE_SECURE", "true").lower()

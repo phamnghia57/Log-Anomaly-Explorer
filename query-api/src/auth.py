@@ -10,6 +10,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, SecretStr, StrictStr
 from ingestion.src.storage import StorageError
 from . import config
+from .login_limits import LoginLimited, LoginLimiter
 from .passwords import hash_password, verify_password
 from .sessions import SessionRepository, active_admin
 from .tokens import JWTConfigurationError, decode_access_token, decode_refresh_token, jwt_settings
@@ -64,6 +65,13 @@ def get_session_repository(request: Request) -> SessionRepository:
     return repository
 
 
+def get_login_limiter(request: Request) -> LoginLimiter:
+    limiter = getattr(request.app.state, "login_limiter", None)
+    if limiter is None:
+        raise HTTPException(503, "Authentication unavailable")
+    return limiter
+
+
 def unauthorized(*, expired=False) -> HTTPException:
     headers = {"WWW-Authenticate": "Bearer"}
     if expired:
@@ -101,11 +109,19 @@ def set_refresh_cookie(response: Response, token: str, expires: datetime) -> Non
 @router.post("/login")
 def login(credentials: LoginRequest, response: Response,
           repository: UserRepository = Depends(get_user_repository),
-          sessions: SessionRepository = Depends(get_session_repository)) -> dict:
+          sessions: SessionRepository = Depends(get_session_repository),
+          limiter: LoginLimiter = Depends(get_login_limiter)) -> dict:
     try:
         jwt_settings()
     except JWTConfigurationError:
         raise HTTPException(503, "Authentication unavailable") from None
+    try:
+        reservation = limiter.reserve(credentials.username)
+    except LoginLimited as exc:
+        raise HTTPException(429, "Too many login attempts",
+                            headers={"Retry-After": str(exc.retry_after)}) from None
+    except StorageError:
+        raise HTTPException(503, "Authentication storage unavailable") from None
     try:
         user = repository.get(credentials.username) if credentials.username.strip() else None
     except StorageError:
@@ -116,6 +132,7 @@ def login(credentials: LoginRequest, response: Response,
     if not valid_password or not active_admin(user, credentials.username):
         raise HTTPException(401, "Invalid username or password")
     try:
+        limiter.reset(reservation)
         access, refresh, expires = sessions.start(user)
     except (JWTConfigurationError, StorageError, jwt.InvalidTokenError):
         raise HTTPException(503, "Authentication unavailable") from None
