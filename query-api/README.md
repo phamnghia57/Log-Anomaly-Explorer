@@ -49,6 +49,7 @@ Các route `/search` và `/clusters*` bên dưới yêu cầu JWT admin trong he
 | `POST /auth/login` | JSON `username`, `password` | Đăng nhập admin, trả JWT và `expires_at` |
 | `GET /assistant/clusters/{id}/conversation` | — | Hội thoại điều tra với AI Assistant (xem mục riêng bên dưới) |
 | `POST /assistant/clusters/{id}/conversation/messages` | body `{"message": "..."}` | Gửi câu hỏi cho AI Assistant |
+| `GET /assistant/health` | — | Tình trạng AI Assistant cho trang "Trạng thái hệ thống" (không cần token) |
 
 ```bash
 # TOKEN la JWT nhan tu POST /auth/login (xem vi du PowerShell ben duoi).
@@ -123,16 +124,24 @@ bịa đặt dựa trên 1 đoạn text tĩnh.
   Resource Azure OpenAI tạo ở vùng khác (không phải East Asia) là đủ để né lỗi, không liên quan
   vùng của VM gọi đến nó.
 - **Theo dõi chi phí/độ trễ/token**: qua [Langfuse](https://jp.cloud.langfuse.com) — tự động,
-  không cần đổi code gọi Azure OpenAI (dùng `langfuse.openai.AzureOpenAI`, drop-in thay
-  `openai.AzureOpenAI`). Để trống `LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY` thì assistant vẫn
+  không cần đổi code gọi Azure OpenAI (dùng `langfuse.openai.OpenAI` trỏ `base_url` vào
+  `<endpoint>/openai/v1/`). Để trống `LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY` thì assistant vẫn
   chạy bình thường, chỉ không gửi trace đi.
 - **Lưu hội thoại**: 1 conversation/cụm, index `assistant-conversations` (xem
   [`assistant-conversation-schema.json`](../docs/architect/contracts/assistant-conversation-schema.json)).
   Mở lại Incident View vẫn thấy lại câu hỏi/trả lời cũ.
-- **Bảo vệ chi phí**: `ASSISTANT_MAX_TOOL_ROUNDS` (mặc định 5) giới hạn số vòng AI tự gọi tool
-  trong 1 lượt chat, tránh vòng lặp không điểm dừng.
-- Hai route `/assistant/*` được gắn `Depends(require_admin)` khi include router trong `main.py`,
-  giống các query routes, vì đây là dữ liệu log/stack trace nội bộ và gọi API có phí.
+- **Bảo vệ chi phí**: `ASSISTANT_MAX_TOOL_ROUNDS` (mặc định 2) giới hạn số vòng AI tự gọi tool
+  trong 1 lượt chat, tránh vòng lặp không điểm dừng. `ASSISTANT_MAX_HISTORY_MESSAGES` (mặc định
+  20) chặn số message cũ gửi lại làm ngữ cảnh mỗi lượt — hội thoại vẫn lưu đầy đủ, chỉ phần gửi
+  lên model bị cắt (nếu không, chi phí token tăng dần theo độ dài hội thoại).
+- **Retention**: `ASSISTANT_RETENTION_DAYS` (mặc định 30) xoá hội thoại không được hỏi tiếp quá
+  số ngày đó (theo `updated_at`). Job nền chạy mỗi `ASSISTANT_RETENTION_INTERVAL_SECONDS` giây;
+  đặt `0` để tắt và chạy bằng cron ngoài: `python -m query-api.src.assistant.retention`.
+- Hai route hội thoại `/assistant/clusters/*` được gắn `Depends(require_admin)` khi include router
+  trong `main.py`, giống các query routes, vì đây là dữ liệu log/stack trace nội bộ và gọi API có
+  phí. Riêng `GET /assistant/health` nằm ở router công khai (không token) để trang "Trạng thái hệ
+  thống" đọc được — nó chỉ trả tình trạng cấu hình + kết quả lần gọi Azure OpenAI gần nhất, không
+  chứa dữ liệu log/hội thoại và không gọi Azure OpenAI thật.
 
 ```bash
 curl -X POST "http://localhost:8002/assistant/clusters/<cluster_id>/conversation/messages" \

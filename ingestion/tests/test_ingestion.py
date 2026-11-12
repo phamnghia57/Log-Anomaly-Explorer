@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -108,13 +109,39 @@ def test_validator_ok():
 
 
 # ---- OpenSearchLogStore voi client gia (kiem tra request gui di)
+
+def resolve_indices(target: str, existing) -> list[str]:
+    """Mo phong cach OpenSearch khop chuoi multi-index (vd. "a,b-*,-b-x").
+
+    QUAN TRONG: chi `*` la wildcard. `?` la KY TU THUONG, khong phai wildcard
+    khi khop ten index - fake cu bo qua tham so `index` nen khong phat hien
+    duoc pattern sai `logs-????.??.??` (khop 0 index that), de lot bug lam
+    /search + Incident View + clustering khong thay log nao.
+    Tien to `-` la loai tru.
+    """
+    included: list[str] = []
+    excluded: set[str] = set()
+    for part in (p.strip() for p in target.split(",")):
+        if not part:
+            continue
+        negate = part.startswith("-")
+        expr = part[1:] if negate else part
+        regex = re.compile("^" + "".join(
+            ".*" if ch == "*" else re.escape(ch) for ch in expr) + "$")
+        matched = [name for name in existing if regex.match(name)]
+        if negate:
+            excluded.update(matched)
+        else:
+            included.extend(name for name in matched if name not in included)
+    return [name for name in included if name not in excluded]
+
+
 class FakeIndices:
     def __init__(self): self.created = {}
     def exists(self, index): return index in self.created
     def create(self, index, body): self.created[index] = body
     def get(self, index, **kw):
-        return {name: body for name, body in self.created.items()
-                if name.startswith("logs-") and name != "logs-quarantine"}
+        return {name: self.created[name] for name in resolve_indices(index, self.created)}
     def delete(self, index): self.created.pop(index); return {"acknowledged": True}
 
 
@@ -234,11 +261,29 @@ def test_opensearch_filter_and_histogram_request():
     store.search_with_total(level="ERROR")
     sent = client.calls[-1][1]
     assert {"term": {"level": "ERROR"}} in sent["body"]["query"]["bool"]["filter"]
-    assert sent["index"] == "logs,logs-????.??.??"
-    assert "logs-quarantine" not in sent["index"]
+    assert sent["index"] == "logs,logs-*,-logs-quarantine"
     aggs = store.aggregate_logs(level="ERROR", interval="day")
     assert aggs["levels"] == [{"key": "ERROR", "count": 2}]
     assert client.calls[-1][1]["body"]["aggs"]["histogram"]["date_histogram"]["fixed_interval"] == "1d"
+
+
+def test_read_indices_khop_dung_index_ngay_va_loai_tru_quarantine():
+    """Hoi quy cho bug that: pattern cu `logs-????.??.??` khop 0 index tren
+    OpenSearch (chi `*` la wildcard khi khop ten index, `?` khong phai), nen
+    /search, Incident View va clustering deu khong thay log nao - ma khong he
+    bao loi, vi cac lenh search deu dat ignore_unavailable=True.
+    """
+    store = OpenSearchLogStore(FakeClient())
+    existing = ["logs", "logs-2026.11.10", "logs-2026.11.11", "logs-quarantine"]
+
+    resolved = resolve_indices(store.read_indices, existing)
+
+    assert "logs-2026.11.11" in resolved  # index ngay hom nay PHAI duoc doc
+    assert "logs-2026.11.10" in resolved
+    assert "logs" in resolved             # giu lich su truoc khi tach theo ngay
+    assert "logs-quarantine" not in resolved  # log sai schema khong duoc lot vao
+    # Pattern cu phai that bai o chinh bai test nay neu ai do dua `?` tro lai.
+    assert resolve_indices("logs,logs-????.??.??", existing) == ["logs"]
 
 
 def test_daily_index_cutoff_does_not_drop_partial_day():

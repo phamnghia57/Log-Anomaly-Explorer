@@ -20,6 +20,21 @@ def _positive_int(name: str, default: int) -> int:
     return value
 
 
+def _nonnegative_int(name: str, default: int) -> int:
+    """Nhu _positive_int nhung CHO PHEP 0 - dung cho chu ky job nen, 0 = tat
+    (chay bang cron ben ngoai), giong RETENTION_INTERVAL_SECONDS cua ingestion."""
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        raise ValueError(f"{name} must be a nonnegative integer") from None
+    if value < 0:
+        raise ValueError(f"{name} must be a nonnegative integer")
+    return value
+
+
 # Khong co default: nguoi dung tu dien vao .env (xem .env.example), khong
 # commit key/endpoint that. Doc lai moi lan goi (khong cache o module-load-
 # time) de test monkeypatch bang os.environ duoc thoai mai.
@@ -70,6 +85,17 @@ CONVERSATIONS_INDEX = os.environ.get("ASSISTANT_CONVERSATIONS_INDEX", "assistant
 # nhu gpt-5-mini).
 MAX_TOOL_ROUNDS = _positive_int("ASSISTANT_MAX_TOOL_ROUNDS", 2)
 MAX_OUTPUT_TOKENS = _positive_int("ASSISTANT_MAX_OUTPUT_TOKENS", 1200)
+# So message CU nhieu nhat duoc gui lai lam ngu canh moi luot hoi. Hoi thoai
+# van LUU day du trong OpenSearch - gioi han nay chi ap cho phan gui len model,
+# vi moi luot deu gui lai toan bo lich su nen chi phi token tang dan theo do
+# dai hoi thoai neu khong chan.
+MAX_HISTORY_MESSAGES = _positive_int("ASSISTANT_MAX_HISTORY_MESSAGES", 20)
+# Retention cho index hoi thoai: khac `logs` (RETENTION_DAYS cua ingestion),
+# hoi thoai it va nho hon nhieu nen dung delete_by_query theo `updated_at`,
+# khong can tach index theo ngay. Interval = 0 -> tat job nen (dung cron).
+CONVERSATIONS_RETENTION_DAYS = _positive_int("ASSISTANT_RETENTION_DAYS", 30)
+CONVERSATIONS_RETENTION_INTERVAL_SECONDS = _nonnegative_int(
+    "ASSISTANT_RETENTION_INTERVAL_SECONDS", 86_400)
 # Chi dung de HIEN THI trong system prompt cho AI biet nguong dang ap dung,
 # khong doc truc tiep tu clustering (khac process, khac bien moi truong).
 ANOMALY_THRESHOLD_HINT = os.environ.get("ANOMALY_THRESHOLD", "2.0")

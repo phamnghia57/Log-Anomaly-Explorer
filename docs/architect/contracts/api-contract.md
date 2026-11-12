@@ -166,8 +166,9 @@ index explicitly; there is no public registration or password-reset endpoint.
 
 Hỗ trợ điều tra & đề xuất cách sửa cho một cụm lỗi — dùng **Azure OpenAI** (model `gpt-5-mini`)
 với function calling để AI tự tra cứu dữ liệu thật thay vì chỉ trả lời dựa trên 1 đoạn text tĩnh.
-Hai endpoint dưới đây yêu cầu JWT admin giống các Query API routes; thiếu/sai/hết hạn token
-trả 401 trước khi đọc dữ liệu hoặc gọi Azure OpenAI.
+Hai endpoint hội thoại bên dưới yêu cầu JWT admin giống các Query API routes; thiếu/sai/hết hạn
+token trả 401 trước khi đọc dữ liệu hoặc gọi Azure OpenAI. Riêng `GET /assistant/health`
+**không** yêu cầu token (xem bên dưới).
 
 **Vì sao Azure OpenAI, không dùng OpenAI trực tiếp**: VM chạy ở vùng Azure "East Asia" (Hong
 Kong). OpenAI chặn request theo IP của vùng này (`unsupported_country_region_territory`) — Hong
@@ -196,16 +197,44 @@ thoại đã lưu sau lượt này (không chỉ tin nhắn mới).
   sẵn sàng (`STORAGE_BACKEND=memory`).
 - Response 502: lỗi gọi Azure OpenAI (timeout, quota, …) — không làm sập service.
 
+### `GET /assistant/health`
+Tình trạng AI Assistant cho trang "Trạng thái hệ thống" — **không yêu cầu token** (giống
+`/health`, `/ingestion/health`, `/demo/health`: trang status đọc bằng `fetch` thường, không kèm
+`Authorization`). Chỉ đọc cấu hình + **kết quả lần gọi Azure OpenAI gần nhất** đã lưu trong bộ
+nhớ process — **không** gọi Azure OpenAI thật, vì trang status poll 15s/lần (gọi thật sẽ tốn phí).
+
+**Luôn trả HTTP 200** (khác `/health` của service, có thể trả 503): đây không phải healthcheck
+của container mà là một dòng thông tin trên UI — trả 503 sẽ khiến UI chỉ hiện "HTTP 503" thay vì
+lý do thật trong `status`.
+
+```json
+{ "status": "ok", "service": "ai-assistant", "model": "gpt-5-mini", "last_call_at": "..." }
+```
+
+Các giá trị `status` khác: `"kho hội thoại chưa sẵn sàng"` (`STORAGE_BACKEND=memory`/OpenSearch
+chưa lên), `"chưa cấu hình"` (thiếu `AZURE_OPENAI_API_KEY`/`AZURE_OPENAI_ENDPOINT`), và
+`"lỗi gọi gần nhất: <TênLỗi>"` (vd. hết quota, bị chặn vùng) — chỉ `"ok"` được UI coi là bình thường.
+
 Dữ liệu lưu theo [`assistant-conversation-schema.json`](./assistant-conversation-schema.json),
 index `assistant-conversations` (env `ASSISTANT_CONVERSATIONS_INDEX`).
 
 **Tool AI có thể tự gọi** (chỉ đọc, xem `query-api/src/assistant/tools.py`): `get_cluster_history`
 (xu hướng score của cụm đang hỏi), `search_related_logs` (log khác liên quan, mặc định 24h gần
 nhất), `list_active_clusters` (cụm khác đang bất thường cùng lúc — kiểm tra lan sang service
-khác). Giới hạn `ASSISTANT_MAX_TOOL_ROUNDS` vòng gọi tool/lượt chat (mặc định 5) để bảo vệ chi
+khác). Giới hạn `ASSISTANT_MAX_TOOL_ROUNDS` vòng gọi tool/lượt chat (mặc định 2) để bảo vệ chi
 phí Azure OpenAI và độ trễ.
+
+**Giới hạn ngữ cảnh gửi đi**: mỗi lượt hỏi tiếp gửi lại lịch sử hội thoại làm ngữ cảnh, nên chi
+phí token tăng dần theo độ dài hội thoại. `ASSISTANT_MAX_HISTORY_MESSAGES` (mặc định 20) chặn số
+message cũ được gửi lại — hội thoại vẫn **lưu đầy đủ**, chỉ phần gửi lên model bị cắt (và luôn
+cắt về đầu một lượt `user` để không để lại message `tool` mồ côi làm API trả 400).
+
+**Retention**: `ASSISTANT_RETENTION_DAYS` (mặc định 30) xoá hội thoại không được hỏi tiếp quá số
+ngày này, theo `updated_at`. Job nền chạy mỗi `ASSISTANT_RETENTION_INTERVAL_SECONDS` giây (mặc
+định 86400); đặt `0` để tắt và chạy bằng cron ngoài:
+`python -m query-api.src.assistant.retention`.
 
 **Theo dõi chi phí/độ trễ**: qua Langfuse (`LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY`, miền
 `https://jp.cloud.langfuse.com`) — tự động, không cần đổi code gọi Azure OpenAI (dùng wrapper
-`langfuse.openai.AzureOpenAI`). Để trống 2 key thì assistant vẫn chạy bình thường, chỉ không gửi
-trace.
+`langfuse.openai.OpenAI` trỏ `base_url` vào `<endpoint>/openai/v1/`). Để trống 2 key thì assistant
+vẫn chạy bình thường, chỉ không gửi trace.
