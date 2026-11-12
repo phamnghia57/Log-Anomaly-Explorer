@@ -4,10 +4,34 @@ Dùng chung giữa Minh (load test tầng ingestion) và Nghĩa (load test end-t
 
 Hai nhóm người dùng trong [`locustfile.py`](locustfile.py):
 
-| Nhóm | Mô phỏng | Request |
+| Nhóm | Mô phỏng | Request (kèm weight) |
 |---|---|---|
-| `IngestionUser` | demo-app liên tục gửi log | `POST /ingest` — INFO (70%), ERROR kèm stack trace (30%), và log sai schema (kiểm tra đường quarantine, 400 được tính là **đúng**) |
-| `QueryUser` | người dùng tra cứu + Incident View | `POST /auth/login` một lần/user, rồi `GET /search`, `GET /search` có filter, `GET /clusters`, `GET /clusters/{id}` (lấy `cluster_id` thật từ lần liệt kê trước, không bịa id) |
+| `IngestionUser` | demo-app liên tục gửi log | `POST /ingest` — INFO (7), ERROR kèm stack trace (3), log sai schema (1 — kiểm tra đường quarantine, 400 được tính là **đúng**); `POST /ingest/batch` (2 — mỗi request `LOAD_TEST_BATCH_SIZE` log, body là JSON **array**) |
+| `QueryUser` | người dùng tra cứu + Dashboard + Incident View | `POST /auth/login` một lần/user, rồi `GET /search` (5), `GET /search` có filter (3), `GET /clusters` (3), `GET /clusters/{id}` (2 — lấy `cluster_id` thật từ lần liệt kê trước, không bịa id), `GET /search/aggregations` (2), `GET /clusters/{id}/history` (2), `PATCH /clusters/{id}` (1 — **mặc định tắt**) |
+
+Hai điểm cần biết khi đọc kết quả của `QueryUser`:
+
+- **`GET /clusters/{id}/history` là N request mỗi lần, không phải 1.** Mỗi card trên Dashboard tự
+  gọi endpoint này cho riêng nó (xem `web/src/components/dashboard/ClusterCard.tsx`), nên một lần
+  mở Dashboard bắn N request liên tiếp. Task `dashboard_sparklines` mô phỏng đúng hành vi đó với
+  `LOAD_TEST_DASHBOARD_CARDS` cụm. Lưu ý `GET /clusters` mặc định trả tới **100** cụm, nên
+  Dashboard thật có thể bắn tới 100 request — đây là đường nóng nhất của UI.
+- **`PATCH /clusters/{id}` đổi trạng thái incident thật** nên mặc định không chạy. Bật bằng
+  `LOAD_TEST_INCIDENT_WRITE=true` và chỉ bật trên môi trường được phép làm nhiễu dữ liệu demo:
+  nó chuyển các đợt đang `open` thành `acknowledged`. Trong phép đo này **409 được tính là đúng**
+  (nhiều user ảo cùng ack một cụm, hoặc đợt đã đổi trạng thái giữa lúc đọc và lúc ghi → CAS từ
+  chối theo đúng thiết kế).
+
+## Biến môi trường của load test
+
+| Biến | Mặc định | Tác dụng |
+|---|---|---|
+| `INGESTION_HOST` | `http://localhost:8000` | Host của Ingestion |
+| `QUERY_API_HOST` | `http://localhost:8002` | Host của Query API |
+| `QUERY_API_USERNAME` / `QUERY_API_PASSWORD` | — | Bắt buộc với `QueryUser` (xem mục JWT) |
+| `LOAD_TEST_BATCH_SIZE` | `50` | Số log mỗi `POST /ingest/batch` (server chặn ở `INGEST_MAX_BATCH_SIZE`, mặc định 500) |
+| `LOAD_TEST_DASHBOARD_CARDS` | `12` | Số card Dashboard mô phỏng = số request `/clusters/{id}/history` mỗi lần |
+| `LOAD_TEST_INCIDENT_WRITE` | tắt | `true` để bật `PATCH /clusters/{id}` (**ghi dữ liệu thật**) |
 
 Log được sinh với **timestamp hiện tại** và nhiều loại lỗi khác nhau — nếu gắn mốc thời gian cố định thì log sẽ nằm ngoài cửa sổ 24h của `/search` lẫn cửa sổ đang xét của clustering, đo xong không quan sát được gì.
 
@@ -123,9 +147,45 @@ tải với API/OpenSearch thật; chỉ ghi live load-test evidence khi thực 
 - `POST /ingest (sai schema)` trả **400 là đúng** — đã được đánh dấu `success` trong locustfile, không tính vào tỷ lệ lỗi.
 - `GET /clusters/{id}` chỉ bắt đầu chạy sau khi `GET /clusters` trả về cụm đầu tiên. Lúc mới khởi động, clustering chưa chạy xong chu kỳ nào nên endpoint này tạm thời không có request — đó là bình thường, không phải lỗi.
 
-## Kết quả đo được (2026-10-23)
+## Cần đo lại (evidence hiện tại đã lỗi thời)
 
-Evidence lịch sử trước khi bật JWT; không phải kết quả đo lại sau thay đổi authentication.
+Số liệu ở mục dưới đo ngày **2026-10-23**, **trước khi bật JWT**, và chỉ ở **một mức tải**
+(20 user). Từ đó tới nay hệ thống đã thêm: JWT + refresh/revocation, rate-limit đăng nhập,
+`POST /ingest/batch`, `GET /search/aggregations`, `PATCH /clusters/{cluster_id}` (vòng đời
+incident), daily indices `logs-YYYY.MM.DD`, và AI Assistant. Mỗi request đọc giờ phải qua
+verify JWT, nên **không được dùng lại số cũ** làm evidence cho bản hiện tại.
+
+Cần chạy lại trên **đúng máy chủ deploy** (số cũ đo trên 2 vCPU/4GB chạy chung OpenSearch +
+Jaeger + clustering — đo ở máy khác thì không so sánh được), qua cổng nội bộ, ở **nhiều mức tải**
+để thấy điểm bắt đầu xuống cấp:
+
+```bash
+cd load-tests
+pip install locust
+
+read -r -p "Seeded admin username: " QUERY_API_USERNAME
+read -r -s -p "Seeded admin password: " QUERY_API_PASSWORD; printf '\n'
+export QUERY_API_USERNAME QUERY_API_PASSWORD
+export INGESTION_HOST=http://localhost:9000 QUERY_API_HOST=http://localhost:9002
+
+for u in 10 20 50; do
+  locust -f locustfile.py --headless --users "$u" --spawn-rate 5 --run-time 3m \
+         --csv "ket-qua-load-test-${u}u"
+done
+
+unset QUERY_API_USERNAME QUERY_API_PASSWORD
+```
+
+Đổi `9000`/`9002` theo `INGESTION_PORT`/`QUERY_API_PORT` trong `.env` của máy chủ. Mỗi mức tải
+sinh ra `ket-qua-load-test-<N>u_stats.csv` — commit cả 3 file vào thư mục này rồi cập nhật bảng
+tóm tắt bên dưới (ghi rõ ngày đo và mức tải). Lưu ý `GET /clusters/{id}` và
+`GET /clusters/{id}/history` chỉ có request sau khi clustering đã chạy xong ít nhất một chu kỳ,
+nên để hệ thống chạy vài phút trước khi đo.
+
+## Kết quả đo được (2026-10-23) — evidence lịch sử, đã lỗi thời
+
+Đo **trước khi bật JWT** và trước các endpoint mới; giữ lại để so sánh xu hướng, không dùng làm
+evidence cho bản hiện tại (xem mục trên).
 
 Chạy thật trên máy chủ deploy (2 vCPU / 4GB, chạy chung với OpenSearch + Jaeger +
 `clustering`), qua cổng nội bộ (`localhost:8000`/`:8002`, không qua gateway):

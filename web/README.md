@@ -157,6 +157,32 @@ Nếu preview trỏ vào staging, cấu hình origin HTTPS cụ thể của prev
 Local mặc định cho phép Vite qua localhost hoặc 127.0.0.1 trong Query API, còn health
 gọi trực tiếp qua Caddy dùng `CORS_WEB_ORIGIN`. Vercel root directory vẫn là `web`.
 
+### Biến môi trường phải đặt cho CẢ scope Preview, không chỉ Production
+
+Biến môi trường trên Vercel được phân theo scope (**Production** / **Preview** / **Development**),
+và `vercel.ts` **throw** khi thiếu `API_PROXY_TARGET` (xem dòng 4–7 của file đó). Vercel bundle
+`vercel.ts` bằng esbuild rồi **thực thi** nó để lấy config, nên thiếu biến là deployment **fail
+ngay**, không phải fail lúc chạy. Hệ quả đã gặp thật: `API_PROXY_TARGET` chỉ đặt cho Production →
+mọi deployment Production xanh, nhưng **mọi Preview deployment của mọi PR đều đỏ**, làm mỗi PR
+mang một dấu X trong khi test thật đều pass.
+
+Kiểm tra lại đúng cơ chế Vercel dùng, không cần deploy thử:
+
+```bash
+cd web && npm test -- proxy.test.ts
+```
+
+Sửa: Vercel → **Settings → Environment Variables**, đặt `VITE_API_BASE_URL`, `API_PROXY_TARGET`
+và `VITE_JAEGER_URL` cho **cả Preview** (dự án này không có backend staging riêng nên trỏ cùng
+Caddy gateway như Production), rồi redeploy lại PR để check chuyển xanh. Nếu không muốn dùng
+Preview deployment thì tắt hẳn trong **Settings → Git** — đừng nới lỏng guard trong `vercel.ts`,
+vì khi đó preview sẽ build thành công nhưng không có rewrite `/api`, tức là lỗi âm thầm lúc chạy
+thay vì lỗi rõ ràng lúc build.
+
+Lưu ý thêm: URL preview đổi theo từng deployment, nên đăng nhập **từ** trang preview chỉ hoạt động
+khi origin preview nằm trong `AUTH_ALLOWED_ORIGINS` của backend. Chỉ cần check CI xanh thì không
+bắt buộc bước này — build thành công là đủ.
+
 `vercel.ts` xuất cấu hình qua `default` và tạo rewrite bằng helper `routes.rewrite()`.
 Chạy `npm test -- proxy.test.ts` để kiểm tra cấu hình sau khi bundle bằng esbuild,
 thực thi trong Node và serialize thành JSON; test dùng bộ kiểm tra routing của Vercel
