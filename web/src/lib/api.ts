@@ -87,8 +87,12 @@ export const loginAdmin = loginSession;
 type QueryPath = "/search" | "/search/aggregations" | "/clusters" | `/clusters/${string}`
   | `/assistant/clusters/${string}/conversation` | `/assistant/clusters/${string}/conversation/messages`;
 
+// `consume` thay cho res.json() khi response khong phai JSON (vd. SSE cua
+// POST .../messages) - dung chung toan bo phan xu ly auth/401/loi mang o duoi
+// thay vi viet lai mot client thu hai.
 async function queryJson<T>(path: QueryPath, params?: Record<string, string | undefined>, signal?: AbortSignal,
-  payload?: Record<string, unknown>, method: "POST" | "PATCH" = "POST"): Promise<T> {
+  payload?: Record<string, unknown>, method: "POST" | "PATCH" = "POST",
+  consume?: (response: Response) => Promise<T>): Promise<T> {
   const url = new URL(`${API_BASE_URL}${path}`);
   const base = new URL(API_BASE_URL);
   // Khong cho dot-segment trong ID thoat ra endpoint/base path da cau hinh.
@@ -120,7 +124,11 @@ async function queryJson<T>(path: QueryPath, params?: Record<string, string | un
     checkSession(session.session_id);
     try {
       res = await fetch(url.toString(), {
-        headers: { Authorization: `Bearer ${session.token}`, ...(payload ? { "Content-Type": "application/json" } : {}) },
+        headers: {
+          Authorization: `Bearer ${session.token}`,
+          ...(payload ? { "Content-Type": "application/json" } : {}),
+          ...(consume ? { Accept: "text/event-stream" } : {}),
+        },
         ...(payload ? { method, body: JSON.stringify(payload) } : {}),
         signal, cache: "no-store", credentials: "omit", redirect: "error",
       });
@@ -142,7 +150,7 @@ async function queryJson<T>(path: QueryPath, params?: Record<string, string | un
     const body = await res.text().catch(() => "");
     throw new ApiError(body || `API tra ve loi ${res.status}`, res.status);
   }
-  const body = await res.json() as T;
+  const body = consume ? await consume(res) : await res.json() as T;
   // Request cu co the hoan tat sau logout/doi tai khoan; khong dua data do vao cache moi.
   checkSession(session.session_id);
   return body;
@@ -280,5 +288,59 @@ export function sendAssistantMessage(
   return queryJson<AssistantConversation>(
     `/assistant/clusters/${encodeURIComponent(clusterId)}/conversation/messages`,
     undefined, signal, { message },
+  );
+}
+
+// Event tra ve dan trong luc AI con dang tra loi: `delta` la doan chu vua sinh
+// ra, `tool` la ten tool AI dang tu tra cuu (xem query-api/src/assistant/tools.py).
+export interface AssistantStreamEvent {
+  delta?: string;
+  tool?: string;
+}
+
+async function readConversationStream(
+  response: Response, onEvent: (event: AssistantStreamEvent) => void,
+): Promise<AssistantConversation> {
+  const reader = response.body?.getReader();
+  if (!reader) throw new ApiError("Không đọc được luồng trả lời của AI Assistant.", 502);
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let conversation: AssistantConversation | null = null;
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    // 1 event SSE ket thuc bang dong trong; phan con lai co the la event bi cat
+    // giua chung nen giu lai cho lan doc sau.
+    const chunks = buffer.split("\n\n");
+    buffer = chunks.pop() ?? "";
+    for (const chunk of chunks) {
+      const line = chunk.split("\n").find((part) => part.startsWith("data: "));
+      if (!line) continue;
+      const event = JSON.parse(line.slice("data: ".length)) as
+        AssistantStreamEvent & { error?: string; conversation?: AssistantConversation };
+      if (event.error) throw new ApiError(event.error, 502);
+      if (event.conversation) conversation = event.conversation;
+      else onEvent(event);
+    }
+  }
+  // Stream da het ma khong co event `conversation`: luot chat bi ngat giua
+  // duong, khong the coi la thanh cong (se ghi hoi thoai thieu vao cache).
+  if (!conversation) throw new ApiError("Luồng trả lời của AI Assistant bị ngắt giữa chừng.", 502);
+  return conversation;
+}
+
+// Cung endpoint voi sendAssistantMessage, chi khac header Accept (xem
+// api-contract.md muc "AI Assistant"): tra ve chu dan tung doan thay vi doi het
+// luot moi thay gi. Ket qua cuoi cung giong het ban JSON.
+export function streamAssistantMessage(
+  clusterId: string, message: string,
+  onEvent: (event: AssistantStreamEvent) => void, signal?: AbortSignal,
+): Promise<AssistantConversation> {
+  return queryJson<AssistantConversation>(
+    `/assistant/clusters/${encodeURIComponent(clusterId)}/conversation/messages`,
+    undefined, signal, { message }, "POST",
+    (response) => readConversationStream(response, onEvent),
   );
 }

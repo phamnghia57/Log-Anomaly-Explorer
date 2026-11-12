@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  type AssistantStreamEvent,
   type SearchParams,
   type ClusterRecord,
   type IncidentAction,
@@ -11,6 +12,7 @@ import {
   searchAggregations,
   getSystemHealth,
   sendAssistantMessage,
+  streamAssistantMessage,
   updateIncident,
 } from "./api";
 import { ApiError } from "./api-base";
@@ -98,11 +100,17 @@ export function useAssistantConversation(clusterId: string | undefined) {
   });
 }
 
-export function useSendAssistantMessage(clusterId: string) {
+// `onEvent` co thi dung ban streaming (chu hien dan tung doan); khong co thi
+// giu nguyen ban JSON cu - cung mot endpoint, xem api.ts.
+export function useSendAssistantMessage(
+  clusterId: string, onEvent?: (event: AssistantStreamEvent) => void,
+) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ message, signal }: { message: string; signal?: AbortSignal }) =>
-      sendAssistantMessage(clusterId, message, signal),
+      onEvent
+        ? streamAssistantMessage(clusterId, message, onEvent, signal)
+        : sendAssistantMessage(clusterId, message, signal),
     // Ghi thang vao cache thay vi invalidate+refetch: response da la TOAN BO
     // hoi thoai moi nhat (xem api-contract.md), khong can goi lai GET.
     onSuccess: (conversation) => {

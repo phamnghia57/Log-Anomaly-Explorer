@@ -13,14 +13,34 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Iterator
 from datetime import datetime, timezone
+from types import SimpleNamespace
 
 from langfuse.openai import OpenAI
 
 from . import config
-from .tools import TOOL_SCHEMAS, ToolExecutor
+from .tools import MAX_STACK_TRACE_CHARS, TOOL_SCHEMAS, ToolExecutor
 
 logger = logging.getLogger("query-api.assistant")
+
+# Client OpenAI dung lai giua cac request: moi lan khoi tao moi la 1 connection
+# pool httpx moi + 1 bat tay TLS moi + init lai wrapper Langfuse, cong vao do
+# tre cua MOI tin nhan chat. Key co ca `OpenAI` (callable duoc tra cuu luc goi)
+# chu khong chi config: test monkeypatch `service.OpenAI` thanh factory rieng o
+# tung test, cache chi theo config se tra ve client cua test truoc.
+_clients: dict[tuple, object] = {}
+
+
+def _get_client():
+    api_key = config.require_azure_openai_api_key()
+    base_url = config.azure_openai_v1_base_url()
+    timeout = config.AZURE_OPENAI_TIMEOUT_SECONDS
+    key = (OpenAI, api_key, base_url, timeout)
+    client = _clients.get(key)
+    if client is None:
+        client = _clients[key] = OpenAI(api_key=api_key, base_url=base_url, timeout=timeout)
+    return client
 
 # Ket qua lan goi Azure OpenAI GAN NHAT, giu trong bo nho process. Dung cho
 # GET /assistant/health: trang "Trang thai he thong" poll 15s/lan nen KHONG
@@ -69,7 +89,8 @@ def _build_system_prompt(cluster: dict, logs: list[dict]) -> str:
     sample = logs[:5]
     sample_text = "\n".join(
         f"  [{item.get('timestamp')}] {item.get('service')}: {item.get('message')}"
-        + (f"\n    stack_trace: {item['stack_trace']}" if item.get("stack_trace") else "")
+        + (f"\n    stack_trace: {item['stack_trace'][:MAX_STACK_TRACE_CHARS]}"
+           if item.get("stack_trace") else "")
         for item in sample
     ) or "  (không có log mẫu)"
     service = next((log.get("service") for log in logs if log.get("service")), "unknown")
@@ -121,6 +142,44 @@ def _to_openai_message(entry: dict) -> dict:
     return message
 
 
+def _collect_stream(response) -> Iterator[dict]:
+    """Gom cac chunk cua mot lan goi stream=True thanh MOT message co cung hinh
+    dang voi ban non-stream (`.content`, `.tool_calls`), dong thoi yield tung
+    doan chu ngay khi model sinh ra de router day ra SSE.
+
+    Dung SimpleNamespace thay vi dinh nghia class rieng: chi can du thuoc tinh
+    cho doan code xu ly message o duoi dung chung cho ca 2 che do, khong them
+    mot tang kieu du lieu chi de sao chep lai dang cua SDK.
+    """
+    content: list[str] = []
+    calls: dict[int, dict] = {}
+    for chunk in response:
+        if not chunk.choices:
+            continue  # chunk cuoi chi chua usage/content filter, khong co delta
+        delta = chunk.choices[0].delta
+        if delta.content:
+            content.append(delta.content)
+            yield {"delta": delta.content}
+        for part in delta.tool_calls or []:
+            # tool_calls ve rai rac theo `index`: id/name o chunk dau, arguments
+            # noi dan tung manh JSON o cac chunk sau.
+            call = calls.setdefault(part.index, {"id": "", "name": "", "arguments": ""})
+            if part.id:
+                call["id"] = part.id
+            if part.function and part.function.name:
+                call["name"] = part.function.name
+            if part.function and part.function.arguments:
+                call["arguments"] += part.function.arguments
+    return SimpleNamespace(
+        content="".join(content) or None,
+        tool_calls=[
+            SimpleNamespace(id=call["id"],
+                            function=SimpleNamespace(name=call["name"], arguments=call["arguments"]))
+            for _index, call in sorted(calls.items())
+        ] or None,
+    )
+
+
 def run_chat_turn(
     *, cluster: dict, logs: list[dict], history: list[dict], user_message: str,
     store, cluster_store, cluster_id: str,
@@ -129,12 +188,27 @@ def run_chat_turn(
     vong), tra ve DANH SACH message MOI can luu them (bao gom ca user_message
     dau tien) - khong bao gom `history` (goi lai da truyen vao).
     """
-    api_key = config.require_azure_openai_api_key()
-    client = OpenAI(
-        api_key=api_key,
-        base_url=config.azure_openai_v1_base_url(),
-        timeout=config.AZURE_OPENAI_TIMEOUT_SECONDS,
-    )
+    for event in stream_chat_turn(
+        cluster=cluster, logs=logs, history=history, user_message=user_message,
+        store=store, cluster_store=cluster_store, cluster_id=cluster_id, stream=False,
+    ):
+        if "messages" in event:
+            return event["messages"]
+    return []  # khong bao gio xay ra: stream_chat_turn luon ket thuc bang event messages
+
+
+def stream_chat_turn(
+    *, cluster: dict, logs: list[dict], history: list[dict], user_message: str,
+    store, cluster_store, cluster_id: str, stream: bool = True,
+) -> Iterator[dict]:
+    """Nhu run_chat_turn nhung tra ve lan luot cac event de day ra SSE:
+    `{"delta": "<doan chu>"}`, `{"tool": "<ten tool>"}`, va cuoi cung
+    `{"messages": [...]}` (danh sach message moi can luu, giong run_chat_turn).
+
+    `stream=False` goi Azure OpenAI y nhu truoc (KHONG truyen stream=True) va
+    chi yield event `messages` cuoi cung - do la duong di cua nhanh JSON cu.
+    """
+    client = _get_client()
     executor = ToolExecutor(store=store, cluster_store=cluster_store, cluster_id=cluster_id)
 
     new_messages: list[dict] = [
@@ -146,11 +220,19 @@ def run_chat_turn(
         openai_messages.append(_to_openai_message(entry))
 
     for round_index in range(config.MAX_TOOL_ROUNDS):
+        # Vong CUOI khong gui `tools`: neu con tool thi model co the lai doi tra
+        # cuu them va het luot ma chua tra loi - mat them 1 lan goi model chi de
+        # nhan ve cau "da dat gioi han". Vong cuoi buoc phai tra loi bang chu.
+        tools = {"tools": TOOL_SCHEMAS} if round_index < config.MAX_TOOL_ROUNDS - 1 else {}
         try:
             response = client.chat.completions.create(
                 model=config.AZURE_OPENAI_DEPLOYMENT,
                 messages=openai_messages,
-                tools=TOOL_SCHEMAS,
+                **tools,
+                # include_usage: chunk cuoi cua stream moi mang so token - thieu
+                # no thi Langfuse khong tinh duoc token/chi phi cho cac luot
+                # stream (xem README.md muc "AI Assistant").
+                **({"stream": True, "stream_options": {"include_usage": True}} if stream else {}),
                 max_completion_tokens=config.MAX_OUTPUT_TOKENS,
                 reasoning_effort=config.ASSISTANT_REASONING_EFFORT,
                 metadata={
@@ -158,11 +240,13 @@ def run_chat_turn(
                     "langfuse_session_id": cluster_id,
                 },
             )
+            # Khi stream, loi mang/quota chi noi len luc doc chunk nen phan gom
+            # chunk phai nam trong cung try de _record_call(False) khong bi bo sot.
+            message = (yield from _collect_stream(response)) if stream else response.choices[0].message
         except Exception as exc:  # noqa: BLE001 - ghi nhan roi nem tiep cho router xu ly
             _record_call(False, type(exc).__name__)
             raise
         _record_call(True)
-        message = response.choices[0].message
 
         assistant_entry: dict = {
             "role": "assistant",
@@ -181,6 +265,7 @@ def run_chat_turn(
             break
 
         for tool_call in message.tool_calls:
+            yield {"tool": tool_call.function.name}
             try:
                 arguments = json.loads(tool_call.function.arguments or "{}")
             except json.JSONDecodeError:
@@ -207,11 +292,8 @@ def run_chat_turn(
             "created_at": datetime.now(timezone.utc).isoformat(),
         })
 
-    try:
-        from langfuse import get_client
-
-        get_client().flush()
-    except Exception:  # noqa: BLE001 - khong de loi flush trace lam hong response that da co
-        logger.exception("Khong flush duoc Langfuse trace")
-
-    return new_messages
+    # KHONG flush Langfuse dong bo o day: flush() la 1 round trip HTTPS sang
+    # Langfuse cloud (khac vung voi VM) cong vao do tre cua MOI tin nhan chat,
+    # trong khi SDK da tu gui nen theo batch + flush luc atexit. Danh doi: neu
+    # process bi kill ngay sau khi tra loi thi trace cua luot do co the mat.
+    yield {"messages": new_messages}

@@ -52,8 +52,18 @@ function MessageBubble({ message }: { message: AssistantMessage }) {
 // van thay lai cau hoi/tra loi cu.
 export function AssistantPanel({ clusterId }: { clusterId: string }) {
   const [draft, setDraft] = useState("");
+  // Cau tra loi dang chay ve tung doan (SSE) - chi ton tai trong luc cho, xong
+  // thi hoi thoai day du tu response ghi vao cache va phan nay khong render nua.
+  const [streaming, setStreaming] = useState<{ text: string; tool: string | null }>({
+    text: "", tool: null,
+  });
   const { data, isLoading, isError } = useAssistantConversation(clusterId);
-  const mutation = useSendAssistantMessage(clusterId);
+  const mutation = useSendAssistantMessage(clusterId, (event) => {
+    setStreaming((current) => ({
+      text: event.delta ? current.text + event.delta : current.text,
+      tool: event.tool ?? current.tool,
+    }));
+  });
   const bottomRef = useRef<HTMLDivElement>(null);
   // AbortController cho nut "Dung": cho phep nguoi dung huy cau hoi dang cho
   // (vd. model dong reasoning suy luan qua lau) de hoi lai cau khac, thay vi
@@ -66,7 +76,7 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length, mutation.isPending]);
+  }, [messages.length, mutation.isPending, streaming.text]);
 
   // Loi that (khong phai tu nguoi dung bam Dung): tra lai noi dung da go,
   // tranh nguoi dung phai go lai tu dau khi muon thu lai (vd. timeout voi
@@ -82,6 +92,7 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
     const text = draft.trim();
     if (!text || mutation.isPending) return;
     setDraft("");
+    setStreaming({ text: "", tool: null });
     pendingTextRef.current = text;
     const controller = new AbortController();
     controllerRef.current = controller;
@@ -128,16 +139,30 @@ export function AssistantPanel({ clusterId }: { clusterId: string }) {
         </div>
 
         {mutation.isPending && (
-          <div className="flex items-center justify-between gap-2 py-2 text-xs text-muted-foreground">
-            <span className="flex items-center gap-2">
-              <Loader2 className="h-3 w-3 animate-spin" />
-              AI đang điều tra… (có thể mất đến 1–2 phút với câu hỏi cần tra cứu thêm)
-            </span>
-            <Button variant="ghost" size="sm" className="h-6 gap-1 px-2 text-xs" onClick={handleStop}>
-              <Square className="h-3 w-3" />
-              Dừng
-            </Button>
-          </div>
+          <>
+            {streaming.tool && (
+              <MessageBubble
+                message={{ role: "tool", content: null, created_at: "", name: streaming.tool }}
+              />
+            )}
+            {streaming.text && (
+              <MessageBubble
+                message={{ role: "assistant", content: streaming.text, created_at: "" }}
+              />
+            )}
+            <div className="flex items-center justify-between gap-2 py-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                {streaming.text
+                  ? "AI đang trả lời…"
+                  : "AI đang điều tra… (có thể mất đến 1–2 phút với câu hỏi cần tra cứu thêm)"}
+              </span>
+              <Button variant="ghost" size="sm" className="h-6 gap-1 px-2 text-xs" onClick={handleStop}>
+                <Square className="h-3 w-3" />
+                Dừng
+              </Button>
+            </div>
+          </>
         )}
 
         {mutation.isError && !isAbortError && (

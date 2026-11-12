@@ -10,6 +10,7 @@ cluster_store/assistant_conversations trong app.state duoc thay bang fake.
 from __future__ import annotations
 
 import importlib
+import json
 from datetime import datetime, timezone
 from types import SimpleNamespace
 
@@ -338,6 +339,17 @@ class TestToolExecutor:
         result = executor.run("list_active_clusters", {"status": "alerted"})
         assert [c["cluster_id"] for c in result["clusters"]] == ["c1"]
 
+    def test_search_related_logs_chi_tra_field_can_thiet_va_cat_stack_trace(self):
+        """Khong nhoi nguyen log document vao message role=tool: phinh token
+        lam cham vong goi model tiep theo (xem tools._log_summary)."""
+        write("log-1", stack_trace="X" * 2000, metadata={"user_id": "u1"})
+        executor = assistant_tools.ToolExecutor(store=main.store, cluster_store=None, cluster_id="c1")
+
+        row = executor.run("search_related_logs", {})["results"][0]
+
+        assert set(row) <= {"timestamp", "service", "level", "message", "trace_id", "stack_trace"}
+        assert len(row["stack_trace"]) == assistant_tools.MAX_STACK_TRACE_CHARS
+
     def test_loi_trong_tool_duoc_boc_thanh_error_khong_lam_vo_chat(self):
         class BoomStore:
             def search_with_total(self, **_kw):
@@ -414,6 +426,88 @@ class TestTrimHistory:
         assert len(conversations.docs["c1"]["messages"]) == 8
 
 
+# --------------------------------------------------------------------------- hieu nang 1 luot chat
+
+class TestHieuNang:
+    """Chong hoi quy cac toi uu do tre cua 1 luot chat - moi test o day gan
+    voi MOT chi phi thua da do duoc tren duong di cua POST .../messages."""
+
+    def post(self, message="hi"):
+        return client.post("/assistant/clusters/c1/conversation/messages", json={"message": message})
+
+    def test_dung_lai_client_openai_giua_cac_request(self, clusters, conversations,
+                                                     azure_openai_env, monkeypatch):
+        """Moi lan khoi tao OpenAI(...) la 1 connection pool + bat tay TLS moi."""
+        clusters.records = [record("c1")]
+        created = []
+
+        def factory(*, api_key=None, base_url=None, timeout=None):
+            fake = FakeOpenAI(
+                [fake_response(fake_message(content="A")), fake_response(fake_message(content="B"))],
+                api_key=api_key, base_url=base_url, timeout=timeout,
+            )
+            created.append(fake)
+            return fake
+
+        monkeypatch.setattr(assistant_service, "OpenAI", factory)
+
+        assert self.post("cau 1").status_code == 200
+        assert self.post("cau 2").status_code == 200
+
+        assert len(created) == 1  # 2 request, chi 1 lan khoi tao client
+        assert len(created[0].calls) == 2
+
+    def test_chi_doc_5_log_mau_cho_system_prompt(self, clusters, conversations,
+                                                 azure_openai_env, monkeypatch):
+        """system prompt chi nhung 5 log mau - doc 20 doc day du la doc thua."""
+        clusters.records = [record("c1", log_ids=[f"log-{i}" for i in range(20)])]
+        for index in range(20):
+            write(f"log-{index}")
+        seen = {}
+        original = main.store.get_logs
+
+        def spy(log_ids):
+            seen["ids"] = list(log_ids)
+            return original(log_ids)
+
+        monkeypatch.setattr(main.store, "get_logs", spy)
+        patch_openai(monkeypatch, [fake_response(fake_message(content="xong"))])
+
+        assert self.post().status_code == 200
+        assert len(seen["ids"]) == 5
+
+    def test_vong_cuoi_khong_gui_tools(self, clusters, conversations, azure_openai_env, monkeypatch):
+        """Con tools o vong cuoi thi model co the lai doi tra cuu va het luot ma
+        chua tra loi - mat 1 lan goi model chi de nhan cau "da dat gioi han"."""
+        clusters.records = [record("c1")]
+        clusters.history = [{"cluster_id": "c1", "score": 1.0, "status": "normal",
+                             "recorded_at": "2026-10-29T00:00:00+00:00"}]
+        holder = patch_openai(monkeypatch, [
+            fake_response(fake_message(
+                content=None, tool_calls=[_FakeToolCall("call_1", "get_cluster_history", "{}")])),
+            fake_response(fake_message(content="Score dang tang dan.")),
+        ])
+
+        assert self.post("Xu huong the nao?").status_code == 200
+
+        calls = holder["instance"].calls
+        assert "tools" in calls[0]
+        assert "tools" not in calls[-1]
+
+    def test_system_prompt_cat_stack_trace(self, clusters, conversations,
+                                           azure_openai_env, monkeypatch):
+        clusters.records = [record("c1")]
+        write("log-1", stack_trace="Y" * 2000)
+        holder = patch_openai(monkeypatch, [fake_response(fake_message(content="xong"))])
+
+        assert self.post().status_code == 200
+
+        system_prompt = holder["instance"].calls[0]["messages"][0]["content"]
+        cut = assistant_tools.MAX_STACK_TRACE_CHARS
+        assert "Y" * cut in system_prompt
+        assert "Y" * (cut + 1) not in system_prompt
+
+
 # --------------------------------------------------------------------------- GET /assistant/health
 
 class TestAssistantHealth:
@@ -465,3 +559,123 @@ class TestAssistantHealth:
         body = client.get("/assistant/health").json()
         assert body["status"] == "lỗi gọi gần nhất: PermissionError"
         assert body["last_call_at"] is not None
+
+
+# --------------------------------------------------------------------------- SSE tren chinh endpoint cu
+# DAT O CUOI FILE co y: test loi o day ghi _last_call = that bai, ma
+# TestAssistantHealth phia tren doc dung gia tri do (xem service._record_call).
+
+def fake_chunk(content=None, tool_calls=None):
+    return SimpleNamespace(choices=[
+        SimpleNamespace(delta=SimpleNamespace(content=content, tool_calls=tool_calls)),
+    ])
+
+
+def fake_tool_call_delta(index, id_=None, name=None, arguments=None):
+    """1 manh tool_call trong stream - id/name o chunk dau, arguments noi dan."""
+    return SimpleNamespace(index=index, id=id_,
+                           function=SimpleNamespace(name=name, arguments=arguments))
+
+
+def patch_openai_stream(monkeypatch, chunk_batches):
+    """Fake client cho che do stream=True: moi lan goi tra ve 1 list chunk."""
+    batches = list(chunk_batches)
+    calls: list[dict] = []
+
+    def factory(*, api_key=None, base_url=None, timeout=None):
+        def create(**kwargs):
+            calls.append(kwargs)
+            return iter(batches.pop(0))
+
+        return SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+
+    monkeypatch.setattr(assistant_service, "OpenAI", factory)
+    return calls
+
+
+class TestStreamingSSE:
+    """CUNG endpoint POST .../messages, chon dang tra ve theo header Accept."""
+
+    def post_stream(self, message="hi"):
+        return client.post("/assistant/clusters/c1/conversation/messages",
+                           json={"message": message},
+                           headers={"Accept": "text/event-stream"})
+
+    def events(self, response):
+        return [json.loads(line[len("data: "):])
+                for line in response.text.splitlines() if line.startswith("data: ")]
+
+    def test_day_tung_doan_chu_roi_gui_ca_hoi_thoai_o_cuoi(self, clusters, conversations,
+                                                           azure_openai_env, monkeypatch):
+        clusters.records = [record("c1")]
+        patch_openai_stream(monkeypatch, [[fake_chunk("Nguyen "), fake_chunk("nhan: X"), fake_chunk()]])
+
+        resp = self.post_stream("Loi nay la gi?")
+
+        assert resp.status_code == 200
+        assert resp.headers["content-type"].startswith("text/event-stream")
+        events = self.events(resp)
+        assert [e["delta"] for e in events if "delta" in e] == ["Nguyen ", "nhan: X"]
+        conversation = events[-1]["conversation"]
+        assert [m["role"] for m in conversation["messages"]] == ["user", "assistant"]
+        assert conversation["messages"][1]["content"] == "Nguyen nhan: X"
+        # Hoi thoai phai duoc LUU truoc khi gui event cuoi - F5 lai van thay.
+        assert conversations.docs["c1"]["messages"] == conversation["messages"]
+
+    def test_bao_ten_tool_dang_tra_cuu_truoc_khi_tra_loi(self, clusters, conversations,
+                                                         azure_openai_env, monkeypatch):
+        clusters.records = [record("c1")]
+        clusters.history = [{"cluster_id": "c1", "score": 1.0, "status": "normal",
+                             "recorded_at": "2026-10-29T00:00:00+00:00"}]
+        calls = patch_openai_stream(monkeypatch, [
+            [fake_chunk(tool_calls=[fake_tool_call_delta(0, id_="call_1",
+                                                         name="get_cluster_history")]),
+             fake_chunk(tool_calls=[fake_tool_call_delta(0, arguments="{}")])],
+            [fake_chunk("Score dang tang dan.")],
+        ])
+
+        resp = self.post_stream("Xu huong the nao?")
+
+        events = self.events(resp)
+        assert [e["tool"] for e in events if "tool" in e] == ["get_cluster_history"]
+        messages = events[-1]["conversation"]["messages"]
+        assert [m["role"] for m in messages] == ["user", "assistant", "tool", "assistant"]
+        assert "recorded_at" in messages[2]["content"]
+        assert all(call.get("stream") is True for call in calls)
+
+    def test_khong_gui_accept_thi_van_tra_json_nhu_cu(self, clusters, conversations,
+                                                      azure_openai_env, monkeypatch):
+        clusters.records = [record("c1")]
+        calls = patch_openai_stream(monkeypatch, [[fake_chunk("khong dung den")]])
+        patch_openai(monkeypatch, [fake_response(fake_message(content="tra loi JSON"))])
+
+        resp = client.post("/assistant/clusters/c1/conversation/messages", json={"message": "hi"})
+
+        assert resp.headers["content-type"].startswith("application/json")
+        assert resp.json()["messages"][1]["content"] == "tra loi JSON"
+        assert calls == []  # nhanh JSON KHONG truyen stream=True
+
+    def test_loi_giua_stream_bao_bang_event_error(self, clusters, conversations,
+                                                  azure_openai_env, monkeypatch):
+        """Header 200 da gui roi nen khong the doi thanh 502 - bao bang event."""
+        clusters.records = [record("c1")]
+
+        def factory(*, api_key=None, base_url=None, timeout=None):
+            def create(**_kwargs):
+                raise PermissionError("unsupported_country_region_territory")
+
+            return SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+
+        monkeypatch.setattr(assistant_service, "OpenAI", factory)
+
+        resp = self.post_stream()
+
+        assert resp.status_code == 200
+        assert self.events(resp)[-1]["error"] == "AI Assistant loi: PermissionError"
+        assert conversations.docs == {}  # khong luu hoi thoai nua voi
+
+    def test_cum_khong_ton_tai_van_la_404_that(self, clusters, conversations, azure_openai_env):
+        """Loi TRUOC khi stream bat dau van la HTTP status that, khong phai event."""
+        resp = client.post("/assistant/clusters/khong-co/conversation/messages",
+                           json={"message": "hi"}, headers={"Accept": "text/event-stream"})
+        assert resp.status_code == 404
