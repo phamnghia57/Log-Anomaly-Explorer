@@ -78,7 +78,8 @@ Invoke-RestMethod -Method Post -Uri 'http://localhost:8000/ingest/batch' -Conten
 ### Daily indices + retention và compatibility
 
 - Từ bản cập nhật này, ghi theo **ngày UTC của `timestamp` trong log**, ví dụ `logs-2026.11.02`. Không ghi mới vào index đơn `logs`.
-- Query API và clustering đọc đồng thời **legacy index `logs`** và các `logs-????.??.??`, loại trừ `logs-quarantine`. `get_logs` dùng truy vấn `_id` xuyên index thay cho `mget` một index.
+- Query API và clustering đọc đồng thời **legacy index `logs`** và các daily index qua pattern `logs,logs-*,-logs-quarantine` (xem `LogStore.read_indices`), loại trừ `logs-quarantine` bằng cú pháp loại trừ `-` của multi-index. `get_logs` dùng truy vấn `_id` xuyên index thay cho `mget` một index.
+  - ⚠️ **Phải dùng `*`, không dùng `?`**: OpenSearch chỉ hỗ trợ wildcard `*` khi khớp *tên index* (`?` chỉ là wildcard trong query string, không phải khi resolve index). Pattern `logs-????.??.??` khớp đúng 0 index, và vì mọi lệnh search đều đặt `ignore_unavailable=True` nên nó trả về rỗng **trong im lặng** — đã từng làm `/search`, Incident View và clustering không thấy log nào suốt nhiều ngày mà không báo lỗi gì.
 - Retention chỉ **drop toàn bộ daily index có ngày nhỏ hơn ngày cutoff**; làm tròn theo ngày nên dữ liệu có thể được giữ lâu hơn cấu hình tối đa khoảng 1 ngày. Không dùng `delete_by_query` cho daily indices. Kết quả retention của OpenSearch là **số index đã drop**, không phải số document.
 - **Không tự xoá legacy `logs`** để tránh mất dữ liệu. Dữ liệu cũ không được daily retention dọn dẹp; vận hành phải lên kế hoạch migrate/backup và dọn legacy index thủ công sau khi được trưởng nhóm phê duyệt.
 - Tránh client phụ thuộc trực tiếp vào tên index `logs` mà không dùng `LogStore.read_indices`; xem thay đổi `clustering/src/storage.py`.
