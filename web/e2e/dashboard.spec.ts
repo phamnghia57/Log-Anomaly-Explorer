@@ -9,7 +9,7 @@ test("dashboard tai duoc va hien sidebar + tieu de", async ({ page }) => {
 test("doi facet trang thai khong lam vo trang (Alerted/Anomalous/Normal)", async ({ page }) => {
   await page.goto("/");
   for (const label of ["Alerted", "Anomalous", "Normal", "Tất cả"]) {
-    await page.getByRole("button", { name: label }).click();
+    await page.getByRole("navigation", { name: "Lọc theo trạng thái" }).getByRole("button", { name: label }).click();
     await expect(page.getByText("Cụm bất thường")).toBeVisible();
   }
 });

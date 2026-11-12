@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { useSystemHealth } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
+import { formatDateTime } from "@/lib/format";
 
 export function SystemStatusPage() {
   const { data, isPending, refetch } = useSystemHealth();
@@ -23,6 +24,11 @@ export function SystemStatusPage() {
                 </span>
               </div>
               <p className="mt-3 text-xs text-muted-foreground">{service.status}</p>
+              {service.lastProcessedAt && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Xử lý lần cuối {formatDateTime(service.lastProcessedAt)}
+                </p>
+              )}
             </div>
           ))}
         </div>

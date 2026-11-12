@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   type SearchParams,
+  type ClusterRecord,
+  type IncidentAction,
   getAssistantConversation,
   getCluster,
   getClusterHistory,
@@ -9,7 +11,9 @@ import {
   searchAggregations,
   getSystemHealth,
   sendAssistantMessage,
+  updateIncident,
 } from "./api";
+import { ApiError } from "./api-base";
 
 export function useClusters(since?: string, refetchIntervalMs: number | false = 30_000) {
   // Khong loc `status` o day: Dashboard can danh sach DAY DU trong khoang
@@ -40,6 +44,25 @@ export function useClusterHistory(clusterId: string | undefined) {
   });
 }
 
+export function useUpdateIncident(clusterId: string) {
+  const queryClient = useQueryClient();
+  const queryKey = ["cluster", clusterId];
+  return useMutation({
+    mutationFn: (change: IncidentAction) => updateIncident(clusterId, change),
+    onSuccess: async (incident) => {
+      await queryClient.cancelQueries({ queryKey });
+      queryClient.setQueriesData<ClusterRecord>({ queryKey }, (cluster) =>
+        cluster ? { ...cluster, incident } : cluster,
+      );
+    },
+    onError: (error) => {
+      if (error instanceof ApiError && error.status === 409) {
+        void queryClient.invalidateQueries({ queryKey });
+      }
+    },
+  });
+}
+
 export function useSearchLogs(params: SearchParams, enabled: boolean) {
   return useQuery({
     queryKey: ["search", params],
@@ -56,9 +79,11 @@ export function useSearchAggregations(params: SearchParams, enabled: boolean) {
   });
 }
 
+export const SYSTEM_HEALTH_QUERY_KEY = ["system-health"] as const;
+
 export function useSystemHealth() {
   return useQuery({
-    queryKey: ["system-health"],
+    queryKey: SYSTEM_HEALTH_QUERY_KEY,
     queryFn: ({ signal }) => getSystemHealth(signal),
     refetchInterval: 15_000,
     retry: false,

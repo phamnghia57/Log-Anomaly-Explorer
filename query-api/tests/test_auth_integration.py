@@ -27,10 +27,10 @@ def test_seed_login_query_and_expiration_preserve_contracts(caplog):
         assert stack.credentials["password"] not in json.dumps(list(stack.documents.values()))
         assert stack.client.create.call_count == 1
 
-        with TestClient(stack.app) as client:
+        with TestClient(stack.app, headers={"X-CSRF-Protection": "1"}) as client:
             login = client.post("/auth/login", json=stack.credentials)
             assert login.status_code == 200
-            assert set(login.json()) == {"token", "expires_at"}
+            assert set(login.json()) == {"token", "expires_at", "session_id"}
             token = login.json()["token"]
             claims = jwt.decode(token, stack.secret, algorithms=["HS256"], options={"require": ["sub", "role", "exp"]})
             assert claims["sub"] == stack.credentials["username"]
@@ -53,7 +53,7 @@ def test_seed_login_query_and_expiration_preserve_contracts(caplog):
             validate(stack.cluster, json.loads((contracts / "cluster-record.schema.json").read_text()), format_checker=FormatChecker())
             assert client.get("/clusters", headers=valid).json() == {"total": 1, "clusters": [stack.cluster]}
             assert client.get("/clusters/auth-test-cluster", headers=valid).json() == {
-                **stack.cluster, "logs": search["results"], "logs_total": 1,
+                **stack.cluster, "logs": search["results"], "logs_total": 1, "incident": None,
             }
             assert client.get("/clusters/auth-test-cluster/history", headers=valid).json() == {
                 "cluster_id": "auth-test-cluster", "points": [stack.point],

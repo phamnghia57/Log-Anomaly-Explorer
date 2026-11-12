@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { ApiError, loginAdmin } from "@/lib/api";
 import {
-  clearSession, saveSession, SessionExpiredError, SESSION_EXPIRED_MESSAGE, useAuthStore,
+  SessionExpiredError, SESSION_EXPIRED_MESSAGE, useAuthStore,
 } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
@@ -36,11 +36,9 @@ export function LoginPage() {
 
   async function onSubmit(values: LoginValues) {
     setError("");
-    clearSession();
     queryClient.clear();
     try {
-      const session = await loginAdmin(values.username, values.password);
-      saveSession(session);
+      await loginAdmin(values.username, values.password);
       navigate(returnTo, { replace: true });
     } catch (cause) {
       if (cause instanceof SessionExpiredError) setError(SESSION_EXPIRED_MESSAGE);

@@ -49,57 +49,17 @@ Types trong [`src/lib/api.ts`](src/lib/api.ts) khớp với
 
 ## Đăng nhập và lưu phiên
 
-Mở `/login`, nhập tài khoản admin đã seed trong OpenSearch (xem
-[`query-api/README.md`](../query-api/README.md)). Form gửi JSON tới
-`${VITE_API_BASE_URL}/auth/login`, dùng cùng cấu hình API base URL với dashboard.
-Backend cần `JWT_SECRET` riêng và admin đã seed; không có signup hoặc credentials mặc định.
-Gateway Caddy proxy `POST /auth/login` và OPTIONS cùng với query routes tới query-api.
-Dev có thể gọi trực tiếp cổng query-api. Xem quy trình đầy đủ tại
-[`docs/task/auth-deployment.md`](../docs/task/auth-deployment.md).
+Web gọi `/api` cùng origin qua Vite/Vercel proxy. Access token chỉ ở RAM, mặc định 15 phút;
+refresh token nằm trong cookie HttpOnly và phiên hết hạn tuyệt đối sau 7 ngày. Reload chờ
+refresh trước khi định tuyến. Web Locks tuần tự hóa login/refresh/logout giữa các tab;
+BroadcastChannel đồng bộ thay tài khoản/đăng xuất và xóa cache cũ.
 
-Thành công: đọc `token`/`expires_at`, lưu qua `src/lib/auth.ts` (Zustand), xóa query cache cũ
-và quay lại trang được yêu cầu bằng React Router với `replace` (mặc định `/`). Guard bảo vệ
-`/`, `/search`, `/clusters/:id`: chưa đăng nhập thì chuyển tới `/login` trước khi render/tải
-dữ liệu. Return destination chỉ chấp nhận các route nội bộ đã biết, giữ query/hash; không
-chấp nhận URL bên ngoài hoặc `/login` để tránh open redirect và vòng lặp. Admin còn phiên
-hợp lệ mở `/login` sẽ được chuyển về trang được yêu cầu hoặc Dashboard.
+Access hết hạn được refresh; chỉ một lần gửi lại business request sau phản hồi xác nhận
+`access_expired`. Lỗi mạng/5xx không tự gửi lại POST. Logout chỉ chuyển về login sau khi backend
+xác nhận thu hồi; lỗi có thông báo để thử lại. Các JWT sao chép từ phiên đã logout bị backend từ chối.
+Trình duyệt phải hỗ trợ Web Locks/BroadcastChannel. Token localStorage của bản cũ bị xóa.
 
-Client chung trong `src/lib/api.ts` gắn `Authorization: Bearer <token>` cho bốn Query API
-endpoints và hai Assistant endpoints được bảo vệ dưới `VITE_API_BASE_URL`. Login không gắn token; link Jaeger mở riêng,
-không đi qua client này. Query requests không dùng HTTP cache/cookie và không theo redirect
-HTTP để tránh gửi token sang route/service ngoài phạm vi. AbortSignal từ TanStack Query được
-truyền tới fetch. Lỗi mạng/5xx hiển thị như trước; không xóa phiên chỉ vì mất kết nối.
-
-Module auth chỉ lưu `{ token, expires_at }` dưới key `log-anomaly-explorer.auth` trong
-localStorage; không lưu username/password. Mật khẩu chỉ ở form/request trong bộ nhớ và được
-xóa khỏi form sau mỗi lần gửi. Response lỗi không được lưu; lỗi credentials hiển thị chung,
-không đưa chi tiết backend vào UI. Form có thông báo riêng cho lỗi mạng/dịch vụ không sẵn sàng.
-
-Phiên còn hạn được restore khi reload/mở lại trình duyệt. Hết `expires_at`, timer xóa phiên;
-guard/client kiểm tra hạn lại trước khi render/request và khi tab được focus lại. Hết hạn
-hoặc Query API trả 401: xóa phiên bị từ chối, hủy request, xóa query/mutation cache rồi
-chuyển tới `/login` với thông báo đăng nhập lại. Không retry 401; lỗi 401 tại form login
-chỉ hiển thị lỗi. Response của request cũ không xóa phiên mới hoặc trả dữ liệu vào cache mới.
-Thay đổi storage giữa các tab được đồng bộ và xóa cache khi thay phiên/đăng xuất. Nếu browser
-chặn storage/hết quota, phiên chỉ tồn tại trong memory đến khi reload. Dữ liệu persisted
-hỏng/hết hạn được loại bỏ.
-
-Menu **Quản trị viên** ở góc phải header có **Đăng xuất**: xóa session trong memory/storage,
-hủy request, xóa cả query và mutation cache, rồi chuyển tới `/login`. Nút Back không mở lại
-trang được bảo vệ khi đã đăng xuất. JWT đã phát vẫn có thể hợp lệ ở backend tới `exp`; đây
-là đăng xuất phía client, chưa có endpoint thu hồi token/refresh token.
-
-**Tradeoff bảo mật:** localStorage tiện restore phiên nhưng JavaScript cùng origin có thể
-đọc token; XSS có thể đánh cắp nó, và dữ liệu storage không phải nguồn đáng tin cậy. Đây là
-tradeoff của client Bearer JWT hiện tại. [OWASP khuyến cáo tránh lưu session identifier
-trong localStorage](https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html#local-storage);
-cookie HttpOnly giảm khả năng script đọc token nhưng cần thiết kế lại cơ chế cookie/BFF
-và CSRF ở backend. Chưa chuyển sang cơ chế đó trong bước này. Dùng HTTPS khi deploy,
-không log token/password, không đưa `JWT_SECRET` vào biến `VITE_*`. Expiry ở client chỉ hỗ trợ
-UX; backend vẫn phải kiểm tra signature/role/expiration cho mọi query được bảo vệ.
-
-Route guard chỉ hỗ trợ UX. Query API vẫn là nơi xác thực chữ ký, thuật toán, role admin và
-expiration cho mọi request được bảo vệ; sửa storage hoặc bỏ qua guard không cấp quyền dữ liệu.
+Xem [runbook phiên JWT](../docs/task/jwt-sessions.md) cho cấu hình và migration.
 
 ## Tracing / Jaeger
 
@@ -120,9 +80,8 @@ thời gian xử lý thật của từng request và liên kết đúng 1-1 vớ
 ## Chạy thử (dev local)
 
 Cần `query-api` đang chạy thật (xem `docker-compose.yml` ở gốc repo hoặc
-`query-api/README.md`), vì CORS trên `query-api` đã mở sẵn cho frontend gọi trực tiếp
-(`allow_origins=["*"]`, cho `GET`, `POST` và preflight với header Authorization — xem
-`query-api/src/main.py`).
+`query-api/README.md`), web gọi cùng origin qua `/api` và Vite chuyển tiếp tới `API_PROXY_TARGET`.
+Backend local phải cho phép origin Vite và đặt AUTH_COOKIE_SECURE=false khi dùng HTTP.
 
 ```bash
 # Từ thư mục gốc repo, dựng backend thật (gồm cả Jaeger):
@@ -131,7 +90,7 @@ docker compose up -d --build
 cd web
 npm install
 cp .env.example .env.local
-# Sua VITE_API_BASE_URL khop cong backend: Compose mac dinh http://localhost:8002.
+# VITE_API_BASE_URL=/api; API_PROXY_TARGET tro toi backend local (mac dinh :8002).
 npm run dev                      # http://localhost:5173
 ```
 
@@ -158,16 +117,15 @@ cả mobile, reload và đăng xuất giữa hai tab. Build đã bao gồm typec
 `test:auth-integration` cần Python của venv Query API trên PATH (dependencies từ
 `query-api/requirements-dev.txt`) và Chrome theo cấu hình hiện có. Hai process riêng được
 Playwright quản lý tại `127.0.0.1:8023` (FastAPI) và `127.0.0.1:5174` (web), không dùng lại
-server đang chạy. Test tự sinh secret/credentials tạm, gọi seed CLI hai lần, đăng nhập qua
-UI thật, verify JWT, gọi cả bốn query endpoints, kiểm tra CORS, 401, expiry và logout. Không
-mock fetch/login ở browser; chỉ client OpenSearch trong API được mock. Trace/video tắt để
-không ghi request credentials. Test không tạo database/container hay dùng dữ liệu triển khai.
-Đây chưa phải evidence cho OpenSearch hoặc gateway HTTPS thật.
+server đang chạy. Test tự sinh secret/credentials tạm và kiểm tra login, refresh, nhiều tab,
+CSRF và logout qua proxy. Đặt AUTH_E2E_OPENSEARCH_URL để dùng OpenSearch thật; nếu không đặt,
+client storage được mock. Trace/video tắt để không ghi credentials. Chỉ dùng cluster test riêng.
+`npm run test:system-integration` chạy thêm các luồng Dashboard/Incident hiện có bằng tài khoản tạm.
 
 Ví dụ PowerShell từ repo root sau khi đã cài dependencies:
 
 ```powershell
-$env:PATH = "$PWD/query-api/.venv/Scripts;$env:PATH"
+$env:PATH = "$PWD/.venv/Scripts;$env:PATH"
 Set-Location web
 npm run test:auth-integration -- --reporter=line
 ```
@@ -190,13 +148,20 @@ Hoặc qua dashboard: Vercel → **Add New Project** → import repo GitHub này
 đặt thành `web` (bắt buộc, vì đây là monorepo nhiều thư mục) → Vercel tự nhận diện Vite, không
 cần cấu hình build command/output (mặc định `npm run build` → thư mục `dist/`).
 
-**Bắt buộc**: trong Vercel → Project Settings → Environment Variables, thêm
-`VITE_API_BASE_URL` trỏ tới URL **public, HTTPS** của `query-api` đã deploy. Hai lưu ý quan trọng:
+**Bắt buộc** trên Vercel: `VITE_API_BASE_URL=/api`, `API_PROXY_TARGET=https://<backend-origin>`.
+Proxy target phải là HTTPS origin không có path/credentials; cấu hình được đọc lúc build,
+đổi phải redeploy. Backend đặt `AUTH_ALLOWED_ORIGINS` đúng origin của web production/preview
+và `AUTH_COOKIE_SECURE=true`. Dùng đúng origin HTTPS của frontend production cho
+`AUTH_ALLOWED_ORIGINS` và `CORS_WEB_ORIGIN` (không kèm path hay dấu gạch chéo cuối).
+Nếu preview trỏ vào staging, cấu hình origin HTTPS cụ thể của preview ở staging.
+Local mặc định cho phép Vite qua localhost hoặc 127.0.0.1 trong Query API, còn health
+gọi trực tiếp qua Caddy dùng `CORS_WEB_ORIGIN`. Vercel root directory vẫn là `web`.
 
-- Biến này được nhúng vào bundle **lúc build**, không phải lúc chạy — đổi giá trị trên Vercel
-  xong phải **Redeploy** mới có hiệu lực, chỉ sửa biến không tự áp dụng cho bản đã build.
-- Backend phải là **HTTPS**, không phải HTTP thuần — Vercel phục vụ trang qua HTTPS nên trình
-  duyệt sẽ chặn (Mixed Content) nếu gọi sang một API HTTP thuần.
+`vercel.ts` xuất cấu hình qua `default` và tạo rewrite bằng helper `routes.rewrite()`.
+Chạy `npm test -- proxy.test.ts` để kiểm tra cấu hình sau khi bundle bằng esbuild,
+thực thi trong Node và serialize thành JSON; test dùng bộ kiểm tra routing của Vercel
+để xác minh `/api/auth/refresh` được chuyển đúng tới backend trước SPA fallback.
+
 - `VITE_JAEGER_URL` cũng phải HTTPS nếu muốn nút "Xem trace trên Jaeger" hoạt động từ trang
   Vercel — hoặc để trống nếu Jaeger chỉ chạy nội bộ (nút sẽ tự ẩn).
 
@@ -217,7 +182,7 @@ docker compose up -d --build gateway
 docker compose logs gateway --tail 20              # doi thay "certificate obtained successfully"
 curl https://20-1-2-3.sslip.io/health               # phai tra ve {"status":"ok",...}
 ```
-`https://20-1-2-3.sslip.io` chính là giá trị đặt cho `VITE_API_BASE_URL` trên Vercel.
+`https://20-1-2-3.sslip.io` chính là giá trị đặt cho `API_PROXY_TARGET` trên Vercel.
 
 Jaeger UI cũng được route qua cùng domain tại `/jaeger` (xem `@jaeger` trong `deploy/Caddyfile`
 và `QUERY_BASE_PATH=/jaeger` trong `docker-compose.yml`):
@@ -235,5 +200,11 @@ thay cho việc chỉ test qua Swagger UI/`curl`.
 
 - Trang `/search` có filter level, histogram theo giờ và facet theo level/service; gọi `GET /search/aggregations` tại Query API. Đòi hỏi JWT admin giống `/search`.
 - Sidebar thêm `/system-status`, gọi `/health` của Query API, Ingestion và Demo App mỗi 15 giây; hiển thị xanh (ok) / đỏ (degraded hoặc unreachable).
-- Khi frontend truy cập bằng HTTPS (Vercel), các URL health **phải** qua Caddy gateway HTTPS, không gọi trực tiếp cổng Docker HTTP. Đặt `VITE_API_BASE_URL=https://<backend-domain>` và (tùy chọn) `VITE_INGESTION_HEALTH_URL=https://<backend-domain>/ingestion/health`, `VITE_DEMO_HEALTH_URL=https://<backend-domain>/demo/health`. Caddy chỉ mở health ingestion, không mở ingest public.
+- Khi frontend truy cập bằng HTTPS (Vercel), các URL health **phải** qua Caddy gateway HTTPS, không gọi trực tiếp cổng Docker HTTP. Đặt `VITE_API_BASE_URL=/api`, `API_PROXY_TARGET=https://<backend-domain>` và (tùy chọn) `VITE_INGESTION_HEALTH_URL=https://<backend-domain>/ingestion/health`, `VITE_DEMO_HEALTH_URL=https://<backend-domain>/demo/health`. Caddy chỉ mở health ingestion, không mở ingest public.
 - Khi dùng local query-api tại `:8002` nhưng gateway tại `:80`, cấu hình health URLs trong `web/.env.local` theo ví dụ `.env.example`.
+
+### Auth browser tests với OpenSearch thật
+
+Đặt `AUTH_E2E_OPENSEARCH_URL` tới cluster test riêng rồi chạy `npm run test:auth-integration`.
+Suite tự tạo index/credentials tạm và kiểm tra cookie, proxy, refresh, nhiều tab, CSRF và logout.
+Không đặt biến này tới production. Xem runbook JWT sessions; CI có job riêng dùng OpenSearch 2.17.1.

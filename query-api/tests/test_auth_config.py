@@ -12,6 +12,7 @@ def clean_auth_env(monkeypatch):
     for name in (
         "JWT_SECRET", "JWT_EXPIRY_SECONDS", "ADMIN_SEED_USERNAME",
         "ADMIN_SEED_PASSWORD", "USERS_INDEX",
+        "AUTH_REFRESH_TTL_SECONDS", "AUTH_SESSIONS_INDEX", "AUTH_COOKIE_SECURE", "AUTH_ALLOWED_ORIGINS",
     ):
         monkeypatch.delenv(name, raising=False)
 
@@ -25,8 +26,10 @@ def test_defaults_do_not_invent_credentials():
     config = load_config()
 
     assert config["JWT_SECRET"] is None
-    assert config["JWT_EXPIRY_SECONDS"] == 3600
+    assert config["JWT_EXPIRY_SECONDS"] == 900
     assert config["USERS_INDEX"] == "users"
+    assert config["AUTH_REFRESH_TTL_SECONDS"] == 604800
+    assert config["AUTH_COOKIE_SECURE"] is True
     assert config["ADMIN_SEED_USERNAME"] is None
     assert config["ADMIN_SEED_PASSWORD"] is None
     with pytest.raises(ValueError, match="^JWT_SECRET must be set for authentication$"):

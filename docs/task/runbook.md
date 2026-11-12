@@ -37,9 +37,16 @@
    Nếu cùng 1 cụm có **nhiều service** (`demo-web` *và* `demo-mobile-api`) bị cùng 1 lỗi — đây là
    2 `ClusterRecord` riêng biệt (nhóm theo `(service, signature)`, không gộp chung), kiểm tra lần
    lượt từng cái qua `GET /clusters` lọc `status=alerted`.
-6. **Đóng sự cố**: cập nhật trạng thái, ghi lại nguyên nhân gốc (root cause) — đây chính là dữ liệu
-   cho `clustering/evaluation/labeled_incidents.json` (Nam dùng để đo precision/recall), nên ghi
-   kèm đúng `window_from`/`window_to`/`service`/`expected_cluster_signature` ngay lúc còn nhớ rõ.
+6. **Tiếp nhận và đóng sự cố**. Bấm **Tiếp nhận** khi bắt đầu điều tra. Khi có kết luận,
+   bấm **Đóng sự cố**, chọn **Sự cố thật** hoặc **Báo động giả**, ghi nguyên nhân hoặc
+   lý do và kiểm tra lại khoảng thời gian. Nếu cùng cụm phát sinh log bất thường sau
+   lúc đóng, Incident View hiển thị đợt mới khi tải lại. Đợt cũ vẫn được lưu.
+
+Nam có thể xuất nhãn dương từ cùng OpenSearch bằng
+`python -m clustering.evaluation.export_incidents --from <ISO-8601> --to <ISO-8601> --output <file.json>`.
+Dùng `precision_recall.py --labels <file.json> --predictions <predictions.json>`
+cho cùng khoảng đánh giá. Để đo recall, bổ sung cả sự cố được xác nhận độc lập
+trong khoảng này mà detector đã bỏ sót.
 
 ## Khi hệ thống báo động giả (false positive) nhiều
 

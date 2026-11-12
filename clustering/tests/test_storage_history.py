@@ -18,6 +18,9 @@ class FakeIndices:
     def create(self, index, body):
         self.created[index] = body
 
+    def put_mapping(self, index, body):
+        self.created[index]["mappings"]["properties"].update(body["properties"])
+
 
 class FakeClient:
     def __init__(self):

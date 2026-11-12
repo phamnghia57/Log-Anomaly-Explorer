@@ -14,34 +14,53 @@ class OpenSearchStore:
         self.clusters = os.getenv("CLUSTER_INDEX", "clusters")
         self.history = os.getenv("HISTORY_INDEX", "cluster-history")
 
-    def ensure_ready(self):
-        self.log_store.ensure_ready()
-        fields = {name: {"type": "keyword"} for name in
-                  ("cluster_id", "service", "signature", "log_ids", "trace_ids", "status")}
-        fields.update(score={"type": "double"}, first_seen={"type": "date"}, last_seen={"type": "date"})
+    @property
+    def heartbeat(self):
+        return f"{self.clusters}-heartbeat"
+
+    def _ensure_index(self, index, fields):
         try:
-            if not self.client.indices.exists(index=self.clusters):
-                self.client.indices.create(index=self.clusters, body={
+            if not self.client.indices.exists(index=index):
+                self.client.indices.create(index=index, body={
                     "settings": self.log_store._settings(),
                     "mappings": {"dynamic": "strict", "properties": fields},
                 })
         except Exception as exc:
             if "resource_already_exists_exception" not in str(exc):
-                raise StorageError(f"cannot prepare clusters: {exc}") from exc
+                raise StorageError(f"cannot prepare {index}") from exc
+
+    def ensure_ready(self):
+        self.log_store.ensure_ready()
+        fields = {name: {"type": "keyword"} for name in
+                  ("cluster_id", "service", "signature", "log_ids", "trace_ids", "status")}
+        fields.update(score={"type": "double"}, first_seen={"type": "date"}, last_seen={"type": "date"})
+        self._ensure_index(self.clusters, fields)
 
         # cluster-history-schema.json: 1 diem/chu ky/cum, KHONG upsert (khac
         # `clusters` o tren) - dung ve xu huong score theo thoi gian.
+        evidence_fields = {key: {"type": "date"} for key in ("first_seen", "last_seen")}
         history_fields = {"cluster_id": {"type": "keyword"}, "status": {"type": "keyword"},
-                           "score": {"type": "double"}, "recorded_at": {"type": "date"}}
+                           "score": {"type": "double"}, "recorded_at": {"type": "date"},
+                           **evidence_fields}
+        self._ensure_index(self.history, history_fields)
         try:
-            if not self.client.indices.exists(index=self.history):
-                self.client.indices.create(index=self.history, body={
-                    "settings": self.log_store._settings(),
-                    "mappings": {"dynamic": "strict", "properties": history_fields},
-                })
+            self.client.indices.put_mapping(index=self.history, body={"properties": evidence_fields})
         except Exception as exc:
-            if "resource_already_exists_exception" not in str(exc):
-                raise StorageError(f"cannot prepare cluster-history: {exc}") from exc
+            raise StorageError("cannot migrate cluster history timestamps") from exc
+        self._ensure_index(self.heartbeat, {"last_processed_at": {"type": "date"}})
+
+    def write_heartbeat(self, processed_at):
+        try:
+            self.client.index(index=self.heartbeat, id="worker", body={"last_processed_at": processed_at})
+        except Exception as exc:
+            raise StorageError("cannot write clustering heartbeat") from exc
+
+    def get_heartbeat(self):
+        try:
+            response = self.client.get(index=self.heartbeat, id="worker", ignore=[404])
+            return response["_source"]["last_processed_at"] if response.get("found") else None
+        except Exception as exc:
+            raise StorageError("cannot read clustering heartbeat") from exc
 
     def read_logs(self, start, end):
         scroll_id = None
@@ -80,6 +99,7 @@ class OpenSearchStore:
     def write_history(self, record, recorded_at):
         """Append one score point for a cluster at the cycle's window_to."""
         point = {name: record[name] for name in ("cluster_id", "score", "status")}
+        point.update({name: record[name] for name in ("first_seen", "last_seen") if name in record})
         point["recorded_at"] = recorded_at
         try:
             self.client.index(index=self.history, body=point, refresh="wait_for")
@@ -128,7 +148,24 @@ class OpenSearchStore:
             response = self.client.search(index=self.history, body=body)
         except Exception as exc:
             raise StorageError(f"list_history failed: {exc}") from exc
-        return [hit["_source"] for hit in response["hits"]["hits"]]
+        return [{field: hit["_source"][field] for field in ("cluster_id", "score", "status", "recorded_at")}
+                for hit in response["hits"]["hits"]]
+
+    def first_anomaly_after(self, cluster_id, resolved_at):
+        body = {
+            "size": 1,
+            "query": {"bool": {"filter": [
+                {"term": {"cluster_id": cluster_id}},
+                {"terms": {"status": ["anomalous", "alerted"]}},
+                {"range": {"last_seen": {"gt": resolved_at}}},
+            ]}},
+            "sort": [{"last_seen": {"order": "asc", "unmapped_type": "date"}}, {"recorded_at": "asc"}],
+        }
+        try:
+            hits = self.client.search(index=self.history, body=body, ignore_unavailable=True)["hits"]["hits"]
+            return hits[0]["_source"] if hits else None
+        except Exception as exc:
+            raise StorageError("cannot read incident recurrence") from exc
 
     def close(self):
         self.client.close()

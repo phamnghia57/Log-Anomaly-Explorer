@@ -48,6 +48,8 @@ def main():
             for _, record in records:
                 store.write_cluster(record)
                 store.write_history(record, end.isoformat())
+            if args.window_to is None:
+                store.write_heartbeat(datetime.now(timezone.utc).isoformat())
             logging.info("Processed %s: %d clusters", end.isoformat(), len(records))
             if args.once or args.window_to:
                 break

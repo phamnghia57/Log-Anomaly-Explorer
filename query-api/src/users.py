@@ -1,6 +1,7 @@
 """Admin repository dung client OpenSearch da cau hinh cua ingestion."""
 
 from datetime import datetime, timezone
+import secrets
 
 from opensearchpy.exceptions import ConflictError, NotFoundError, RequestError
 
@@ -17,6 +18,8 @@ USER_MAPPING = {
         "role": {"type": "keyword"},
         "created_at": {"type": "date"},
         "last_login_at": {"type": "date"},
+        "enabled": {"type": "boolean"},
+        "auth_version": {"type": "keyword"},
     },
 }
 
@@ -41,6 +44,8 @@ class UserRepository:
                 })
                 if not result.get("acknowledged"):
                     raise StorageError("users index creation was not acknowledged")
+            else:
+                self.client.indices.put_mapping(index=self.index, body=USER_MAPPING)
         except RequestError as exc:
             # Hai seed process cung tao index: chi bo qua loi index da ton tai.
             if exc.error != "resource_already_exists_exception":
@@ -50,7 +55,7 @@ class UserRepository:
 
     def get(self, username: str) -> dict | None:
         try:
-            result = self.client.get(index=self.index, id=username)
+            result = self.client.get(index=self.index, id=username, realtime=True)
             return result["_source"] if result.get("found") else None
         except NotFoundError as exc:
             if exc.error == "index_not_found_exception":
@@ -67,6 +72,8 @@ class UserRepository:
             "username": username,
             "password_hash": hash_password(password),
             "role": "admin",
+            "enabled": True,
+            "auth_version": secrets.token_urlsafe(32),
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
         try:
@@ -78,6 +85,26 @@ class UserRepository:
         except Exception:
             # Khong de response/body/connection credentials lot vao log hay traceback.
             raise StorageError("cannot create admin user") from None
+
+    def administer(self, username: str, action: str, *, value=None) -> None:
+        """Change account data and epoch atomically; enabling cannot restore old tokens."""
+        changes = {"auth_version": secrets.token_urlsafe(32)}
+        if action in {"enable", "disable"}:
+            changes["enabled"] = action == "enable"
+        elif action == "set-role":
+            if value not in {"admin", "viewer"}:
+                raise ValueError("Role must be admin or viewer")
+            changes["role"] = value
+        elif action == "set-password":
+            if not isinstance(value, str) or not value:
+                raise ValueError("Password must not be empty")
+            changes["password_hash"] = hash_password(value)
+        elif action != "revoke-all":
+            raise ValueError("Unknown account action")
+        try:
+            self.client.update(index=self.index, id=username, body={"doc": changes}, refresh="wait_for")
+        except Exception:
+            raise StorageError("cannot update admin user") from None
 
     def close(self) -> None:
         try:
