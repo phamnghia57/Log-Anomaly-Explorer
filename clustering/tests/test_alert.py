@@ -103,3 +103,63 @@ def test_missing_webhook_does_not_start_cooldown(monkeypatch, sent):
     assert records[0][1]["status"] == "anomalous"
     monkeypatch.setenv("ALERT_WEBHOOK_URL", "http://webhook.test/hook")
     assert alert.check_and_alert_batch(records) == 1
+
+
+class CooldownStore:
+    def __init__(self, data):
+        self.data = data
+
+    def get_alert_times(self, ids):
+        return {key: self.data[key] for key in ids if key in self.data}
+
+    def write_alert_times(self, ids, sent_at):
+        self.data.update(dict.fromkeys(ids, sent_at))
+
+
+def test_persistent_cooldown_survives_restart_and_expires(monkeypatch, sent):
+    data = {}
+    monkeypatch.setenv("ALERT_COOLDOWN_SECONDS", "600")
+    monkeypatch.setattr(alert.time, "time", lambda: 1000)
+    assert alert.check_and_alert(record(), store=CooldownStore(data))
+    assert data == {"c1": 1000}
+    alert.reset_alert_state()
+    monkeypatch.setattr(alert.time, "time", lambda: 1599)
+    assert not alert.check_and_alert(record(), store=CooldownStore(data))
+    monkeypatch.setattr(alert.time, "time", lambda: 1600)
+    assert alert.check_and_alert(record(), store=CooldownStore(data))
+    assert len(sent) == 2
+
+
+def test_persistent_failed_delivery_does_not_start_cooldown(monkeypatch, sent):
+    data = {}
+    post = alert.httpx.post
+    monkeypatch.setattr(alert.httpx, "post", lambda *a, **kw: httpx.Response(
+        500, request=httpx.Request("POST", "http://webhook.test")))
+    assert not alert.check_and_alert(record(), store=CooldownStore(data))
+    assert data == {}
+    monkeypatch.setattr(alert.httpx, "post", post)
+    assert alert.check_and_alert(record(), store=CooldownStore(data))
+
+
+def test_cooldown_read_failure_prevents_delivery(sent):
+    class Broken(CooldownStore):
+        def get_alert_times(self, ids):
+            raise RuntimeError("offline")
+    with pytest.raises(RuntimeError, match="offline"):
+        alert.check_and_alert(record(), store=Broken({}))
+    assert sent == []
+
+
+def test_persistence_failure_is_reported(sent):
+    class Broken(CooldownStore):
+        def write_alert_times(self, ids, sent_at):
+            raise RuntimeError("write failed")
+    with pytest.raises(RuntimeError, match="write failed"):
+        alert.check_and_alert(record(), store=Broken({}))
+    assert len(sent) == 1
+
+
+@pytest.mark.parametrize("value", ["", "oops", "-1", "nan", "inf"])
+def test_invalid_cooldown_environment_uses_default(monkeypatch, value):
+    monkeypatch.setenv("ALERT_COOLDOWN_SECONDS", value)
+    assert alert._float_env("ALERT_COOLDOWN_SECONDS", 600) == 600

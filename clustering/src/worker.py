@@ -44,7 +44,7 @@ def main():
                               history_windows=history, threshold=get_threshold(), augmenter=augmenter)
             for _, record in records:
                 store.write_cluster(record)
-            check_and_alert_batch(records, window_to=end.isoformat())
+            check_and_alert_batch(records, window_to=end.isoformat(), store=store)
             for _, record in records:
                 store.write_cluster(record)
                 store.write_history(record, end.isoformat())
