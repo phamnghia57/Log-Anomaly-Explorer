@@ -42,6 +42,25 @@ export interface StructuredLog {
 }
 
 export type ClusterStatus = "normal" | "anomalous" | "alerted";
+export type IncidentDisposition = "confirmed_incident" | "false_positive";
+
+export interface IncidentEpisode {
+  episode_id: string;
+  status: "open" | "acknowledged" | "resolved";
+  window_from: string;
+  window_to: string;
+  acknowledged_at?: string;
+  acknowledged_by?: string;
+  resolved_at?: string;
+  resolved_by?: string;
+  disposition?: IncidentDisposition;
+  note?: string;
+}
+
+export type IncidentAction =
+  | { episode_id: string; action: "acknowledge" }
+  | { episode_id: string; action: "resolve"; disposition: IncidentDisposition; note: string;
+      window_from: string; window_to: string };
 
 // ClusterRecord - docs/architect/contracts/cluster-record.schema.json
 // (+ "logs" duoc query-api dien them o GET /clusters/{id}, xem api-contract.md)
@@ -59,6 +78,7 @@ export interface ClusterRecord {
   // Tong so log_ids cua cum, khong bi cat boi logs_limit - de biet con bao
   // nhieu log chua tai (GET /clusters/{id} phan trang `logs`).
   logs_total?: number;
+  incident?: IncidentEpisode | null;
 }
 
 export const loginAdmin = loginSession;
@@ -67,7 +87,8 @@ export const loginAdmin = loginSession;
 type QueryPath = "/search" | "/search/aggregations" | "/clusters" | `/clusters/${string}`
   | `/assistant/clusters/${string}/conversation` | `/assistant/clusters/${string}/conversation/messages`;
 
-async function queryJson<T>(path: QueryPath, params?: Record<string, string | undefined>, signal?: AbortSignal, payload?: Record<string, unknown>): Promise<T> {
+async function queryJson<T>(path: QueryPath, params?: Record<string, string | undefined>, signal?: AbortSignal,
+  payload?: Record<string, unknown>, method: "POST" | "PATCH" = "POST"): Promise<T> {
   const url = new URL(`${API_BASE_URL}${path}`);
   const base = new URL(API_BASE_URL);
   // Khong cho dot-segment trong ID thoat ra endpoint/base path da cau hinh.
@@ -90,7 +111,7 @@ async function queryJson<T>(path: QueryPath, params?: Record<string, string | un
     try {
       res = await fetch(url.toString(), {
         headers: { Authorization: `Bearer ${session.token}`, ...(payload ? { "Content-Type": "application/json" } : {}) },
-        ...(payload ? { method: "POST", body: JSON.stringify(payload) } : {}),
+        ...(payload ? { method, body: JSON.stringify(payload) } : {}),
         signal, cache: "no-store", credentials: "omit", redirect: "error",
       });
     } catch (cause) {
@@ -180,6 +201,10 @@ export function listClusters(params: { status?: ClusterStatus | ""; since?: stri
     status: params.status || undefined,
     since: params.since,
   }, signal);
+}
+
+export function updateIncident(clusterId: string, change: IncidentAction) {
+  return queryJson<IncidentEpisode>(`/clusters/${encodeURIComponent(clusterId)}`, undefined, undefined, change, "PATCH");
 }
 
 export function getCluster(clusterId: string, params?: { logsLimit?: number; logsOffset?: number }, signal?: AbortSignal) {

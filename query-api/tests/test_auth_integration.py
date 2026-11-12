@@ -53,7 +53,7 @@ def test_seed_login_query_and_expiration_preserve_contracts(caplog):
             validate(stack.cluster, json.loads((contracts / "cluster-record.schema.json").read_text()), format_checker=FormatChecker())
             assert client.get("/clusters", headers=valid).json() == {"total": 1, "clusters": [stack.cluster]}
             assert client.get("/clusters/auth-test-cluster", headers=valid).json() == {
-                **stack.cluster, "logs": search["results"], "logs_total": 1,
+                **stack.cluster, "logs": search["results"], "logs_total": 1, "incident": None,
             }
             assert client.get("/clusters/auth-test-cluster/history", headers=valid).json() == {
                 "cluster_id": "auth-test-cluster", "points": [stack.point],

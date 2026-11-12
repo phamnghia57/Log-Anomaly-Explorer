@@ -25,7 +25,7 @@ def test_worker_health(monkeypatch, age, code, reason):
         processed_at = (datetime.now(timezone.utc) - timedelta(seconds=age)).isoformat()
     store.get_heartbeat.return_value = processed_at
     monkeypatch.setattr(main, "cluster_store", store)
-    monkeypatch.setattr(main.config, "CLUSTER_HEARTBEAT_STALE_SECONDS", 180)
+    monkeypatch.setattr(main.query_config, "CLUSTER_HEARTBEAT_STALE_SECONDS", 180)
     response = TestClient(main.app).get("/clustering/health")
     assert response.status_code == code
     assert response.json() == {"status": "ok" if code == 200 else "degraded",

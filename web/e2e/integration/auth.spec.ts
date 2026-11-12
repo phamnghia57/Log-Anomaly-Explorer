@@ -87,3 +87,19 @@ test("logout failure is visible and can be retried without false success", async
   await page.getByRole("menuitem", { name: "Đăng xuất", exact: true }).click();
   await expect(page).toHaveURL("/login");
 });
+
+test("Incident View acknowledges and closes a persisted episode", async ({ page }) => {
+  test.skip(!process.env.AUTH_E2E_OPENSEARCH_URL, "Requires the disposable OpenSearch test cluster");
+  await login(page, "/clusters/auth-test-cluster");
+  await page.getByRole("button", { name: "Tiếp nhận", exact: true }).click();
+  await expect(page.getByText("Đã tiếp nhận", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Đóng sự cố", exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Kết luận").selectOption("confirmed_incident");
+  await dialog.getByLabel("Nguyên nhân gốc hoặc lý do báo động giả").fill("Lỗi mạng trong môi trường kiểm thử");
+  await dialog.getByRole("button", { name: "Lưu kết luận", exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await page.reload();
+  await expect(page.getByText("Đã đóng", { exact: true })).toBeVisible();
+  await expect(page.getByText("Lỗi mạng trong môi trường kiểm thử", { exact: true })).toBeVisible();
+});

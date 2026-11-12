@@ -86,6 +86,19 @@ endpoint này chậm nhất hệ thống (đo thật: median 530ms, p99 1.7s —
 nhiêu log chưa tải. Lưu ý `len(logs)` có thể **nhỏ hơn** số lượng yêu cầu nếu log trong trang đó
 đã bị retention xoá.
 
+Chi tiết cũng trả `incident` với `episode_id`, `status` (`open`, `acknowledged`,
+`resolved`), `window_from`, `window_to` và thông tin người thao tác sau khi lưu.
+`incident: null` cho biết kho xử lý sự cố không khả dụng.
+
+### `PATCH /clusters/{cluster_id}`
+
+Yêu cầu Bearer JWT admin. Gửi `episode_id` và `action` là `acknowledge` hoặc
+`resolve`. Resolve cần `disposition` (`confirmed_incident` hoặc `false_positive`),
+`note` và khoảng `[window_from, window_to)` có múi giờ. Trả 200 với bản ghi
+incident, 404 khi thiếu cluster, 409 khi đợt hoặc trạng thái đã thay đổi, 422
+khi body sai và 503 khi kho không khả dụng. Có thể đóng trực tiếp từ trạng thái
+open. Detector vẫn cung cấp `status` của cluster và biểu đồ score.
+
 ### `GET /clusters/{cluster_id}/history`
 Lịch sử anomaly score theo thời gian của **một cụm** — dùng vẽ biểu đồ xu hướng trong Incident
 View (khác `GET /clusters/{cluster_id}`: endpoint đó chỉ trả 1 điểm số hiện tại). Đọc từ index

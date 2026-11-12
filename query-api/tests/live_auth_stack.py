@@ -11,6 +11,7 @@ from opensearchpy import OpenSearch
 from starlette.datastructures import State
 from ingestion.src.storage import OpenSearchLogStore
 from clustering.src.storage import OpenSearchStore
+from clustering.src.incidents import IncidentRepository
 
 
 @contextmanager
@@ -45,6 +46,13 @@ def live_auth_stack(url, username, password, secret):
             users.create_admin(username, password)
             clusters = OpenSearchStore(store)
             clusters.clusters, clusters.history = names["clusters"], names["history"]
+            client.indices.create(index=names["history"], body={
+                "settings": {"number_of_shards": 1, "number_of_replicas": 0},
+                "mappings": {"dynamic": "strict", "properties": {
+                    "cluster_id": {"type": "keyword"}, "score": {"type": "double"},
+                    "status": {"type": "keyword"}, "recorded_at": {"type": "date"},
+                }},
+            })
             clusters.ensure_ready()
             client.index(index=names["logs"], id="auth-test-log", body=log, refresh=True)
             client.index(index=names["clusters"], id=cluster["cluster_id"], body=cluster, refresh=True)
@@ -53,10 +61,11 @@ def live_auth_stack(url, username, password, secret):
             patches.enter_context(patch.multiple(main, store=store, cluster_store=clusters))
             patches.enter_context(patch.object(main.app, "state", State({
                 "store": store, "cluster_store": clusters, "user_repository": users,
+                "incident_repository": IncidentRepository(clusters),
                 "session_repository": sessions, "login_limiter": limiter, "assistant_conversations": None,
             })))
             yield SimpleNamespace(app=main.app)
     finally:
-        for name in (*names.values(), names["clusters"] + "-heartbeat"):
+        for name in (*names.values(), names["clusters"] + "-heartbeat", names["clusters"] + "-incidents"):
             client.indices.delete(index=name, ignore=[404])
         client.close()

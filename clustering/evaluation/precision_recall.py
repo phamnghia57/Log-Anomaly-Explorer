@@ -27,8 +27,9 @@ def _cluster_overlaps_incident(cluster, incident):
     first, last = timestamp(cluster["first_seen"]), timestamp(cluster["last_seen"])
     if start >= end or first > last:
         raise ValueError("Invalid incident or cluster interval")
-    signature = normalize_message(incident["expected_cluster_signature"])
-    return (cluster.get("signature") == signature
+    expected = incident["expected_cluster_signature"]
+    signature = cluster.get("signature")
+    return (signature in (expected, normalize_message(expected))
             and cluster["cluster_id"] == make_cluster_id(incident["service"], signature)
             and first < end and last >= start)
 

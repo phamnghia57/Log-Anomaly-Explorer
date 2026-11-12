@@ -139,7 +139,7 @@ jobs:
         run: pip install -r query-api/requirements-dev.txt
       - name: Verify real storage, persistence and CAS
         working-directory: query-api
-        run: python -m pytest tests/test_live_auth_sessions.py -v
+        run: python -m pytest tests/test_live_auth_sessions.py tests/test_live_incidents.py -v
       - name: Install browser dependencies
         working-directory: web
         run: |
