@@ -94,6 +94,26 @@ describe("query-api client", () => {
     expect(assistant?.url).toBe(`${API_BASE_URL}/assistant/health`);
   });
 
+  it("getSystemHealth: AI Assistant loi Azure OpenAI hien do kem thoi diem goi gan nhat", async () => {
+    const assistantIndex = HEALTH_ENDPOINTS.findIndex((entry) => entry.name === "AI Assistant");
+    HEALTH_ENDPOINTS.forEach((_, index) => {
+      fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(index === assistantIndex
+        ? { status: "lỗi gọi gần nhất: RateLimitError", service: "ai-assistant", last_call_at: "2026-11-12T08:00:00+00:00" }
+        : { status: "ok" })));
+    });
+
+    const assistant = (await getSystemHealth())[assistantIndex];
+
+    // /assistant/health luon HTTP 200, nen `ok` phai dua vao `status` chu khong
+    // phai response.ok - neu khong, het quota van hien xanh "Hoat dong".
+    expect(assistant).toEqual({
+      name: "AI Assistant",
+      ok: false,
+      status: "lỗi gọi gần nhất: RateLimitError",
+      lastCallAt: "2026-11-12T08:00:00+00:00",
+    });
+  });
+
   it("listClusters: loc theo status dung tham so", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ total: 0, clusters: [] }), { status: 200 }),
