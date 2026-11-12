@@ -15,7 +15,8 @@ def test_cycle_batches_alerts_then_appends_final_status(monkeypatch):
         def write_history(self, record, end):
             calls.append(("history", record["cluster_id"], record["status"], end))
         def close(self): calls.append(("close",))
-    def send(batch, *, window_to):
+    def send(batch, *, window_to, store):
+        assert isinstance(store, Store)
         assert batch is records
         calls.append(("digest", window_to))
         batch[0][1]["status"] = "alerted"

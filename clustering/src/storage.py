@@ -15,6 +15,10 @@ class OpenSearchStore:
         self.history = os.getenv("HISTORY_INDEX", "cluster-history")
 
     @property
+    def alert_state(self):
+        return f"{self.clusters}-alert-state"
+
+    @property
     def heartbeat(self):
         return f"{self.clusters}-heartbeat"
 
@@ -48,6 +52,34 @@ class OpenSearchStore:
         except Exception as exc:
             raise StorageError("cannot migrate cluster history timestamps") from exc
         self._ensure_index(self.heartbeat, {"last_processed_at": {"type": "date"}})
+        self._ensure_index(self.alert_state, {"sent_at": {"type": "double"}})
+
+    def get_alert_times(self, cluster_ids):
+        """Realtime multi-get avoids waiting for a search refresh after delivery."""
+        if not cluster_ids:
+            return {}
+        try:
+            response = self.client.mget(index=self.alert_state, body={"ids": cluster_ids})
+            if any("error" in doc for doc in response["docs"]):
+                raise RuntimeError("Incomplete cooldown read")
+            return {doc["_id"]: doc["_source"]["sent_at"]
+                    for doc in response["docs"] if doc.get("found")}
+        except Exception as exc:
+            raise StorageError("cannot read alert cooldowns") from exc
+
+    def write_alert_times(self, cluster_ids, sent_at):
+        if not cluster_ids:
+            return
+        body = []
+        for cluster_id in cluster_ids:
+            body.extend([{"index": {"_index": self.alert_state, "_id": cluster_id}},
+                         {"sent_at": sent_at}])
+        try:
+            response = self.client.bulk(body=body)
+            if response.get("errors"):
+                raise RuntimeError("Incomplete cooldown write")
+        except Exception as exc:
+            raise StorageError("cannot persist alert cooldowns") from exc
 
     def write_heartbeat(self, processed_at):
         try:
