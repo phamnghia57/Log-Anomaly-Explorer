@@ -1,6 +1,7 @@
 """Loopback browser-test fixture using real, uniquely named OpenSearch indexes."""
 
 import importlib
+import re
 import secrets
 from contextlib import ExitStack, contextmanager
 from datetime import datetime, timezone
@@ -15,8 +16,10 @@ from clustering.src.incidents import IncidentRepository
 
 
 @contextmanager
-def live_auth_stack(url, username, password, secret):
-    prefix = "issue73-browser-" + secrets.token_hex(8)
+def live_auth_stack(url, username, password, secret, *, index_prefix=None):
+    prefix = index_prefix or "issue73-browser-" + secrets.token_hex(8)
+    if not re.fullmatch(r"issue73-browser-[0-9a-f]{16}", prefix):
+        raise ValueError("Invalid isolated test index prefix")
     names = {kind: prefix + "-" + kind for kind in (
         "users", "sessions", "limits", "logs", "clusters", "history", "quarantine",
     )}

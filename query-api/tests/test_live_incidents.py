@@ -1,6 +1,7 @@
 import json
 import os
 import secrets
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from importlib import import_module
@@ -8,10 +9,14 @@ from threading import Barrier
 
 import pytest
 from fastapi.testclient import TestClient
+from opensearchpy import OpenSearch
 
+from clustering.evaluation import export_incidents
 from clustering.evaluation.precision_recall import evaluate
 from clustering.src import incidents
 from clustering.src.clustering import make_cluster_id
+from clustering.src.storage import OpenSearchStore
+from ingestion.src.storage import OpenSearchLogStore
 
 live_auth_stack = import_module("query-api.tests.live_auth_stack").live_auth_stack
 limits = import_module("query-api.src.login_limits")
@@ -103,10 +108,18 @@ def test_incident_lifecycle_with_legacy_history_and_export(stack, monkeypatch, t
     chart = client.get(f"{path}/history", headers=auth).json()
     assert len(chart["points"]) == 2
     assert set(chart["points"][0]) == {"cluster_id", "status", "recorded_at", "score"}
-    labels = state.incident_repository.export_confirmed(base - timedelta(days=1), base + timedelta(days=1))
-    assert [label["incident_id"] for label in labels] == [first["episode_id"], third["episode_id"]]
     output = tmp_path / "labels.json"
-    output.write_text(json.dumps({"incidents": labels}), encoding="utf-8")
+    monkeypatch.setenv("CLUSTER_INDEX", store.clusters)
+    monkeypatch.setattr(export_incidents, "OpenSearchStore", lambda: OpenSearchStore(
+        OpenSearchLogStore(OpenSearch(os.environ["AUTH_TEST_OPENSEARCH_URL"], timeout=10, max_retries=0)),
+    ))
+    monkeypatch.setattr(sys, "argv", [
+        "export_incidents", "--from", (base - timedelta(days=1)).isoformat(),
+        "--to", (base + timedelta(days=1)).isoformat(), "--output", str(output),
+    ])
+    export_incidents.main()
+    labels = json.loads(output.read_text(encoding="utf-8"))["incidents"]
+    assert [label["incident_id"] for label in labels] == [first["episode_id"], third["episode_id"]]
     assert evaluate([original], output)["true_positive"] == 1
 
 

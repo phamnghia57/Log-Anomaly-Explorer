@@ -138,7 +138,7 @@ with OpenSearch 2.17.1 and a browser.
 
 ### Release checklist
 
-- [ ] Nghĩa reviews auth contract and schema changes in PR #74.
+- [ ] Nghĩa reviews auth contract and schema changes in PR #80.
 - [ ] Required CI jobs pass on the final commit.
 - [ ] Initialize the target users/session storage and configure web origins/proxy target.
 - [ ] On an actual HTTPS Vercel preview, verify Secure/HttpOnly cookie creation, refresh,

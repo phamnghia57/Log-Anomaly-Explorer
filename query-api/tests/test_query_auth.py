@@ -38,7 +38,7 @@ def query_app(monkeypatch, admin_auth):
     expected = {
         "/search": {"total": 1, "results": [log]},
         "/clusters": {"total": 1, "clusters": [cluster]},
-        "/clusters/c1": {**cluster, "logs": [log], "logs_total": 1},
+        "/clusters/c1": {**cluster, "logs": [log], "logs_total": 1, "incident": None},
         "/clusters/c1/history": {"cluster_id": "c1", "points": [point]},
     }
     with TestClient(main.app) as client:
@@ -122,13 +122,13 @@ def test_options_preflight_needs_no_jwt(query_app, path):
     client, logs, clusters, _ = query_app
 
     response = client.options(path, headers={
-        "Origin": "https://frontend.example",
+        "Origin": config.AUTH_ALLOWED_ORIGINS[0],
         "Access-Control-Request-Method": "GET",
         "Access-Control-Request-Headers": "authorization,content-type",
     })
 
     assert response.status_code == 200
-    assert response.headers["access-control-allow-origin"] == "*"
+    assert response.headers["access-control-allow-origin"] == config.AUTH_ALLOWED_ORIGINS[0]
     assert "GET" in response.headers["access-control-allow-methods"]
     assert "authorization" in response.headers["access-control-allow-headers"].lower()
     assert not logs.mock_calls
@@ -139,10 +139,10 @@ def test_options_preflight_needs_no_jwt(query_app, path):
 def test_401_response_has_cors_headers_for_frontend(query_app, path):
     client, logs, clusters, _ = query_app
 
-    response = client.get(path, headers={"Origin": "https://frontend.example"})
+    response = client.get(path, headers={"Origin": config.AUTH_ALLOWED_ORIGINS[0]})
 
     assert_unauthorized(response, logs, clusters)
-    assert response.headers["access-control-allow-origin"] == "*"
+    assert response.headers["access-control-allow-origin"] == config.AUTH_ALLOWED_ORIGINS[0]
 
 
 def test_invalid_server_config_does_not_disable_auth(query_app, admin_auth, monkeypatch):

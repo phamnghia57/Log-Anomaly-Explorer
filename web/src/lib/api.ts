@@ -187,7 +187,7 @@ export async function getSystemHealth(signal?: AbortSignal): Promise<ServiceHeal
       return {
         name,
         ok: response.ok && body?.status === "ok",
-        status: body?.reason ?? body?.status ?? (response.ok ? "unknown" : `HTTP ${response.status}`),
+        status: body?.reason ?? (response.ok ? body?.status ?? "unknown" : `HTTP ${response.status}`),
         ...(body?.last_processed_at ? { lastProcessedAt: body.last_processed_at } : {}),
       };
     } catch {

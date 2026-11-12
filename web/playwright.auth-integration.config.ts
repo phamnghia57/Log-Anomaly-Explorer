@@ -6,6 +6,7 @@ import base from "./playwright.config";
 process.env.AUTH_E2E_USERNAME = "integration-admin";
 process.env.AUTH_E2E_PASSWORD ??= randomBytes(32).toString("base64url");
 process.env.AUTH_E2E_SECRET ??= randomBytes(48).toString("base64url");
+process.env.AUTH_E2E_INDEX_PREFIX ??= "issue73-browser-" + randomBytes(8).toString("hex");
 
 export default defineConfig({
   testDir: "./e2e/integration",

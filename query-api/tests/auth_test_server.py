@@ -18,7 +18,8 @@ def main():
     if os.environ.get("AUTH_E2E_OPENSEARCH_URL"):
         from .live_auth_stack import live_auth_stack
         with live_auth_stack(os.environ["AUTH_E2E_OPENSEARCH_URL"], os.environ[required[0]],
-                             os.environ[required[1]], os.environ[required[2]]) as stack:
+                             os.environ[required[1]], os.environ[required[2]],
+                             index_prefix=os.environ.get("AUTH_E2E_INDEX_PREFIX")) as stack:
             uvicorn.run(stack.app, host="127.0.0.1", port=8023, access_log=False, log_level="warning")
         return
     with auth_stack(username=os.environ[required[0]], password=os.environ[required[1]],

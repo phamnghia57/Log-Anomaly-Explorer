@@ -16,11 +16,11 @@ test("facet Status va Service dem cheo nhau, khong tu loc chinh no", async ({ pa
     make("w3", "demo-web", "normal"), make("m1", "demo-mobile-api", "alerted"),
     make("b1", "billing", "normal"),
   ];
-  await page.addInitScript(() => {
-    localStorage.setItem("log-anomaly-explorer.auth", JSON.stringify({
+  await page.route("**/api/auth/refresh", (route) => route.fulfill({
+    json: {
       token: "local-browser-test", expires_at: new Date(Date.now() + 3_600_000).toISOString(),
-    }));
-  });
+    },
+  }));
   await page.route(/\/clusters(?:[/?].*)?$/, async (route) => {
     const path = new URL(route.request().url()).pathname;
     const json = path.endsWith("/history")
