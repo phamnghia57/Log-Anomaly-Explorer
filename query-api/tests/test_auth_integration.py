@@ -30,7 +30,7 @@ def test_seed_login_query_and_expiration_preserve_contracts(caplog):
         with TestClient(stack.app, headers={"X-CSRF-Protection": "1"}) as client:
             login = client.post("/auth/login", json=stack.credentials)
             assert login.status_code == 200
-            assert set(login.json()) == {"token", "expires_at"}
+            assert set(login.json()) == {"token", "expires_at", "session_id"}
             token = login.json()["token"]
             claims = jwt.decode(token, stack.secret, algorithms=["HS256"], options={"require": ["sub", "role", "exp"]})
             assert claims["sub"] == stack.credentials["username"]

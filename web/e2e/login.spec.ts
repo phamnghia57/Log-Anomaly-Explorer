@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("login persists a session, redirects to dashboard and restores it after reload", async ({ page }, testInfo) => {
-  const session = { token: "browser-test-token", expires_at: new Date(Date.now() + 3_600_000).toISOString() };
+  const session = { token: "browser-test-token", session_id: "test-session", expires_at: new Date(Date.now() + 3_600_000).toISOString() };
   let authenticatedQueries = 0;
   await page.route("**/auth/login", async (route) => {
     expect(route.request().postDataJSON()).toEqual({ username: "test-admin", password: "test-password" });

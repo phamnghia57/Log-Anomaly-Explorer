@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.routing import APIRoute
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from pydantic import BaseModel, SecretStr, StrictStr
+from pydantic import BaseModel, Field, SecretStr, StrictStr
 from ingestion.src.storage import StorageError
 from . import config
 from .login_limits import LoginLimited, LoginLimiter
@@ -100,6 +100,10 @@ class LoginRequest(BaseModel):
     password: SecretStr
 
 
+class SessionTarget(BaseModel):
+    expected_session_id: StrictStr | None = Field(default=None, min_length=1, max_length=128)
+
+
 def set_refresh_cookie(response: Response, token: str, expires: datetime) -> None:
     response.set_cookie(COOKIE_NAME, token, httponly=True, secure=config.AUTH_COOKIE_SECURE,
                         samesite="lax", path=COOKIE_PATH, expires=expires,
@@ -143,10 +147,13 @@ def login(credentials: LoginRequest, response: Response,
 @router.post("/refresh")
 def refresh(request: Request, response: Response,
             repository: UserRepository = Depends(get_user_repository),
-            sessions: SessionRepository = Depends(get_session_repository)) -> dict:
+            sessions: SessionRepository = Depends(get_session_repository),
+            target: SessionTarget | None = None) -> dict:
     try:
         token = request.cookies.get(COOKIE_NAME, "")
         claims = decode_refresh_token(token)
+        if target is not None and target.expected_session_id not in (None, claims["sid"]):
+            raise unauthorized()
         access, replacement, expires = sessions.refresh(token, claims, repository)
     except jwt.InvalidTokenError:
         # A delayed error must not delete a newer login cookie.
@@ -158,19 +165,31 @@ def refresh(request: Request, response: Response,
 
 
 @router.post("/logout", status_code=204)
-def logout(request: Request, sessions: SessionRepository = Depends(get_session_repository)) -> Response:
+def logout(request: Request, sessions: SessionRepository = Depends(get_session_repository),
+           credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
+           target: SessionTarget | None = None) -> Response:
+    cookie_sid = access_sid = None
     try:
         token = request.cookies.get(COOKIE_NAME)
         if token:
             try:
-                claims = decode_refresh_token(token)
+                cookie_sid = decode_refresh_token(token)["sid"]
             except jwt.InvalidTokenError:
-                claims = None
-            if claims is not None:
-                sessions.revoke(claims["sid"])
+                pass
+        if credentials is not None:
+            try:
+                access_sid = decode_access_token(credentials.credentials)["sid"]
+            except jwt.InvalidTokenError:
+                pass
+        expected_sid = target.expected_session_id if target else None
+        session_id = expected_sid or access_sid or cookie_sid
+        if session_id is None or session_id not in (cookie_sid, access_sid):
+            raise unauthorized()
+        sessions.revoke(session_id)
     except (JWTConfigurationError, StorageError):
         raise HTTPException(503, "Authentication unavailable") from None
     response = Response(status_code=204, headers=NO_STORE)
-    response.delete_cookie(COOKIE_NAME, path=COOKIE_PATH, httponly=True,
-                           secure=config.AUTH_COOKIE_SECURE, samesite="lax")
+    if cookie_sid in (None, session_id):
+        response.delete_cookie(COOKIE_NAME, path=COOKIE_PATH, httponly=True,
+                               secure=config.AUTH_COOKIE_SECURE, samesite="lax")
     return response

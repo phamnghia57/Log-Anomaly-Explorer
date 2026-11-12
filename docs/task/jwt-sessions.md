@@ -31,9 +31,12 @@ account cannot restore old grants. Only admin can log in; viewer reserves no API
 
 ## HTTP and browser contract
 
-- POST /auth/login: unchanged JSON {token, expires_at}; sets refresh cookie.
-- POST /auth/refresh: rotates cookie and returns the same access response shape.
-- POST /auth/logout: revokes the current session and clears cookie; idempotent 204.
+- POST /auth/login returns JSON `{token, expires_at, session_id}` and sets the refresh cookie.
+- POST /auth/refresh rotates the cookie and returns the same response shape. A tab with an
+  established session sends `expected_session_id` to confirm that the cookie still belongs to it.
+- POST /auth/logout revokes the verified target session and returns 204. The browser supplies
+  the access token and expected session ID so logout can revoke a session whose cookie is missing.
+  The API preserves a cookie for a different session and returns 401 if it cannot verify the target.
 - Every auth POST requires X-CSRF-Protection: 1; a supplied Origin must match the explicit
   allowlist, and Origin: null is rejected. Auth responses, including errors, are no-store.
 - Cookie lae_refresh: HttpOnly, host-only, SameSite=Lax, Path=/api/auth, Secure by default.

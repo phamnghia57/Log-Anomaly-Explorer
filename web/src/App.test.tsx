@@ -5,10 +5,10 @@ import { MemoryRouter, useLocation } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AdminMenu } from "@/components/auth/AdminMenu";
-import { AUTH_STORAGE_KEY, clearSession, getSession, saveSession, SESSION_EXPIRED_MESSAGE } from "@/lib/auth";
+import { AUTH_STORAGE_KEY, clearSession, getSession, restoreSession, saveSession, SESSION_EXPIRED_MESSAGE } from "@/lib/auth";
 import App from "./App";
 
-const session = () => ({ token: "test-admin-token", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
+const session = () => ({ token: "test-admin-token", session_id: "test-session", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
 
 function LocationProbe() {
   const location = useLocation();
@@ -97,6 +97,32 @@ describe("frontend authentication integration", () => {
     expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeVisible();
   });
 
+  it("keeps polling public system health when startup refresh returns 503", async () => {
+    vi.useFakeTimers();
+    fetchMock.mockImplementation((url) => Promise.resolve(url.endsWith("/auth/refresh")
+      ? new Response(null, { status: 503 })
+      : new Response(JSON.stringify({ status: "ok" }))));
+    const startup = restoreSession().catch(() => {});
+    renderApp("/system-status");
+    await act(async () => { await startup; await vi.advanceTimersByTimeAsync(1); });
+    expect(screen.getByRole("heading", { name: "Trạng thái hệ thống" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Clustering Worker" })).toBeVisible();
+    const polls = () => fetchMock.mock.calls.filter(([url]) => url.endsWith("/clustering/health"));
+    expect(polls()).toHaveLength(1);
+    expect(polls()[0][1].headers).toBeUndefined();
+    await act(async () => { await vi.advanceTimersByTimeAsync(15_000); });
+    expect(polls()).toHaveLength(2);
+  });
+
+  it("shows the auth outage on a private route without fetching protected data", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 503 }));
+    await restoreSession().catch(() => {});
+    renderApp("/clusters/c1");
+    expect(screen.getByRole("alert")).toHaveTextContent("Chưa xác minh được phiên đăng nhập");
+    expect(screen.getByRole("link", { name: "Trạng thái hệ thống" })).toHaveAttribute("href", "/system-status");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it("clears the rejected session and all cached data on 401, redirects once, and does not retry", async () => {
     saveSession(session());
     cachePrivateState();
@@ -114,7 +140,7 @@ describe("frontend authentication integration", () => {
 
   it("returns to login when automatic refresh is rejected at access expiry", async () => {
     vi.useFakeTimers();
-    saveSession({ token: "short-test-token", expires_at: new Date(Date.now() + 2_000).toISOString() });
+    saveSession({ ...session(), token: "short-test-token", expires_at: new Date(Date.now() + 2_000).toISOString() });
     renderApp("/search");
     cachePrivateState();
     expect(screen.getByRole("heading", { name: "Search log" })).toBeVisible();
@@ -171,9 +197,9 @@ describe("frontend authentication integration", () => {
   });
 
   it("handles a logout broadcast from another tab and clears private cache", async () => {
-    const connections: { onmessage?: (event: { data: string }) => void }[] = [];
+    const connections: { onmessage?: (event: { data: unknown }) => void }[] = [];
     vi.stubGlobal("BroadcastChannel", class {
-      onmessage?: (event: { data: string }) => void;
+      onmessage?: (event: { data: unknown }) => void;
       constructor() { connections.push(this); }
       close() {}
       postMessage() {}
@@ -183,7 +209,11 @@ describe("frontend authentication integration", () => {
     cachePrivateState();
 
     act(() => {
-      connections[0].onmessage?.({ data: "logout" });
+      connections[0].onmessage?.({ data: { type: "logout", session_id: "other-session" } });
+    });
+    expect(getSession()?.session_id).toBe("test-session");
+    act(() => {
+      connections[0].onmessage?.({ data: { type: "logout", session_id: "test-session" } });
     });
 
     expect(await screen.findByRole("heading", { name: "Đăng nhập quản trị" })).toBeVisible();

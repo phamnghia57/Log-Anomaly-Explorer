@@ -18,7 +18,7 @@ test("facet Status va Service dem cheo nhau, khong tu loc chinh no", async ({ pa
   ];
   await page.route("**/api/auth/refresh", (route) => route.fulfill({
     json: {
-      token: "local-browser-test", expires_at: new Date(Date.now() + 3_600_000).toISOString(),
+      token: "local-browser-test", session_id: "test-session", expires_at: new Date(Date.now() + 3_600_000).toISOString(),
     },
   }));
   await page.route(/\/clusters(?:[/?].*)?$/, async (route) => {

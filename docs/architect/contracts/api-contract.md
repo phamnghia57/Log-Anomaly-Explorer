@@ -152,15 +152,20 @@ Design/rollout proposed for review through Draft PR #74. Existing query/ingestio
 contracts remain unchanged. Operators initialize the users mapping and `auth-sessions`
 index explicitly; there is no public registration or password-reset endpoint.
 
-- `POST /auth/login`: JSON `{username, password}`. Success 200 `{token, expires_at}`
+- `POST /auth/login` accepts JSON `{username, password}`. Success 200 returns `{token, expires_at, session_id}`
   with a rotating refresh cookie; invalid credentials/account 401, invalid JSON/fields
   422 with sanitized `detail="Invalid login request"`, unavailable auth/storage 503.
   A depleted per-account login budget returns 429 with `Retry-After` in seconds.
-- `POST /auth/refresh`: refresh cookie only, no token in query/body. Success 200 has the
-  same access response shape and replaces the cookie. Invalid/expired/reused refresh 401;
-  storage/config failure 503. Replay of a previously issued refresh token revokes its session.
-- `POST /auth/logout`: revokes the cookie's session and clears the cookie, idempotent 204.
-  An expired access token does not prevent logout. Storage failure is 503 and is not success.
+- `POST /auth/refresh` authenticates with the refresh cookie. A tab with an established
+  session sends `{expected_session_id}`. If it differs from the verified cookie, the API
+  returns 401 before rotation. On success, 200 returns the login response shape and rotates
+  the cookie. Invalid, expired, or reused refresh credentials return 401. Reuse revokes the
+  associated session. Storage or configuration failure returns 503.
+- `POST /auth/logout` revokes the session identified by a verified cookie or valid Bearer
+  access token. The browser sends `{expected_session_id}` to identify the intended session.
+  The API returns 204 after revocation or when that verified session is already revoked.
+  It clears the cookie if it belongs to the target session. It returns 401 when credentials
+  cannot confirm the target and 503 when the session store is unavailable.
 - Every auth POST requires `X-CSRF-Protection: 1`. If `Origin` is supplied it must match
   `AUTH_ALLOWED_ORIGINS`; `null` is rejected. Origin/CSRF failure is 403. Every auth response
   (including errors) has `Cache-Control: no-store` and `Pragma: no-cache`.

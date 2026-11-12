@@ -39,7 +39,7 @@ def create_access_token(username: str, *, sid: str, auth_version: str,
         "sub": username, "role": "admin", "sid": sid, "ver": auth_version,
         "token_use": "access", "iat": int(now.timestamp()), "exp": int(expires_at.timestamp()),
     }, secret, algorithm=JWT_ALGORITHM)
-    return {"token": token, "expires_at": expires_at.isoformat()}
+    return {"token": token, "expires_at": expires_at.isoformat(), "session_id": sid}
 
 
 def create_refresh_token(username: str, *, sid: str, auth_version: str,

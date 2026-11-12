@@ -96,6 +96,42 @@ def test_logout_revokes_copied_access_but_preserves_other_browser(stack):
     assert stack.http.post("/auth/refresh", headers=cookie(refresh)).status_code == 401
 
 
+def test_logout_without_cookie_uses_verified_access_and_is_idempotent(stack):
+    access, refresh = login(stack)
+    stack.http.cookies.clear()
+    target = {"expected_session_id": access["session_id"]}
+    assert stack.http.post("/auth/logout", json=target).status_code == 401
+    assert stack.http.get("/search", headers=bearer(access)).status_code == 200
+    for _ in range(2):
+        assert stack.http.post("/auth/logout", json=target, headers=bearer(access)).status_code == 204
+    assert stack.http.get("/search", headers=bearer(access)).status_code == 401
+    assert stack.http.post("/auth/refresh", headers=cookie(refresh)).status_code == 401
+
+
+def test_stale_tab_cannot_rotate_or_delete_another_admins_cookie(stack):
+    first, _ = login(stack)
+    other_credentials = {**stack.credentials, "username": "other-admin"}
+    stack.repository.create_admin(**other_credentials)
+    response = stack.http.post("/auth/login", json=other_credentials)
+    assert response.status_code == 200
+    second = response.json()
+    other_cookie = cookie(response.cookies["lae_refresh"])
+    target = {"expected_session_id": first["session_id"]}
+
+    rejected = stack.http.post("/auth/refresh", headers=other_cookie, json=target)
+    assert rejected.status_code == 401
+    assert "set-cookie" not in rejected.headers
+    assert stack.http.post("/auth/logout", headers=other_cookie, json=target).status_code == 401
+    logged_out = stack.http.post("/auth/logout", headers={**other_cookie, **bearer(first)}, json=target)
+    assert logged_out.status_code == 204
+    assert "set-cookie" not in logged_out.headers
+    assert stack.http.get("/search", headers=bearer(first)).status_code == 401
+    refreshed = stack.http.post("/auth/refresh", headers=other_cookie,
+                                json={"expected_session_id": second["session_id"]})
+    assert refreshed.status_code == 200
+    assert refreshed.json()["session_id"] == second["session_id"]
+
+
 @pytest.mark.parametrize("action,value", [("disable", None), ("set-role", "viewer"),
     ("set-password", "new-test-password"), ("revoke-all", None), ("enable", None)])
 def test_operator_change_revokes_every_session(stack, action, value):
@@ -128,7 +164,9 @@ def test_storage_failure_cannot_allow_access_refresh_or_report_logout(stack):
     stack.client.get.side_effect = RuntimeError("private storage diagnostic")
     for response in (stack.http.get("/search", headers=bearer(access)),
                      stack.http.post("/auth/refresh", headers=cookie(refresh)),
-                     stack.http.post("/auth/logout", headers=cookie(refresh))):
+                     stack.http.post("/auth/logout", headers=cookie(refresh)),
+                     stack.http.post("/auth/logout", headers=bearer(access),
+                                     json={"expected_session_id": access["session_id"]})):
         assert response.status_code == 503
         assert "private storage diagnostic" not in response.text
 

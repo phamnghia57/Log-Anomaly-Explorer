@@ -148,6 +148,11 @@ jobs:
       - name: Verify browser and proxy against real OpenSearch
         working-directory: web
         run: npm run test:auth-integration -- --reporter=line
+      - name: Verify browser and proxy with mock storage
+        working-directory: web
+        env:
+          AUTH_E2E_OPENSEARCH_URL: ""
+        run: npm run test:auth-integration -- --reporter=line
       - name: Verify existing dashboard, incident and navigation flows
         working-directory: web
         run: npm run test:system-integration -- --reporter=line

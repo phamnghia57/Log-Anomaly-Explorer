@@ -16,10 +16,23 @@ function localDateInput(timestamp: string) {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, -1);
 }
 
+function incidentBound(original: string) {
+  const initial = localDateInput(original);
+  return { original, initial, value: initial };
+}
+
+function resolveBound(bound: ReturnType<typeof incidentBound>) {
+  // Compare wall times in UTC so DST does not influence whether the field changed.
+  if (Date.parse(`${bound.value}Z`) === Date.parse(`${bound.initial}Z`)) return bound.original;
+  const edited = new Date(bound.value);
+  return Number.isFinite(edited.getTime()) ? edited.toISOString() : null;
+}
+
 export function IncidentActions({ clusterId, incident }: { clusterId: string; incident: IncidentEpisode | null }) {
   const mutation = useUpdateIncident(clusterId);
   const [draft, setDraft] = useState<{
-    episodeId: string; from: string; to: string; note: string; disposition: IncidentDisposition | "";
+    episodeId: string; from: ReturnType<typeof incidentBound>; to: ReturnType<typeof incidentBound>;
+    note: string; disposition: IncidentDisposition | "";
   } | null>(null);
   const [invalidWindow, setInvalidWindow] = useState(false);
 
@@ -32,16 +45,16 @@ export function IncidentActions({ clusterId, incident }: { clusterId: string; in
   function resolve(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!draft?.disposition || staleDraft || mutation.isPending) return;
-    const from = new Date(draft.from);
-    const to = new Date(draft.to);
-    if (!Number.isFinite(from.getTime()) || !Number.isFinite(to.getTime()) || from >= to) {
+    const from = resolveBound(draft.from);
+    const to = resolveBound(draft.to);
+    if (!from || !to || Date.parse(from) >= Date.parse(to)) {
       setInvalidWindow(true);
       return;
     }
     setInvalidWindow(false);
     mutation.mutate({
       action: "resolve", episode_id: draft.episodeId, disposition: draft.disposition,
-      note: draft.note.trim(), window_from: from.toISOString(), window_to: to.toISOString(),
+      note: draft.note.trim(), window_from: from, window_to: to,
     }, { onSuccess: () => setDraft(null) });
   }
 
@@ -60,8 +73,8 @@ export function IncidentActions({ clusterId, incident }: { clusterId: string; in
             mutation.reset();
             setInvalidWindow(false);
             setDraft({
-              episodeId: incident.episode_id, from: localDateInput(incident.window_from),
-              to: localDateInput(incident.window_to), note: "", disposition: "",
+              episodeId: incident.episode_id, from: incidentBound(incident.window_from),
+              to: incidentBound(incident.window_to), note: "", disposition: "",
             });
           }}>
             Đóng sự cố
@@ -99,13 +112,13 @@ export function IncidentActions({ clusterId, incident }: { clusterId: string; in
             </div>
             <div className="space-y-1">
               <Label htmlFor="incident-from">Bắt đầu</Label>
-              <Input id="incident-from" type="datetime-local" step="0.001" required value={draft.from}
-                onChange={(e) => setDraft({ ...draft, from: e.target.value })} />
+              <Input id="incident-from" type="datetime-local" step="0.001" required value={draft.from.value}
+                onChange={(e) => setDraft({ ...draft, from: { ...draft.from, value: e.target.value } })} />
             </div>
             <div className="space-y-1">
               <Label htmlFor="incident-to">Kết thúc</Label>
-              <Input id="incident-to" type="datetime-local" step="0.001" required value={draft.to}
-                onChange={(e) => setDraft({ ...draft, to: e.target.value })} />
+              <Input id="incident-to" type="datetime-local" step="0.001" required value={draft.to.value}
+                onChange={(e) => setDraft({ ...draft, to: { ...draft.to, value: e.target.value } })} />
             </div>
             <div className="space-y-1">
               <Label htmlFor="incident-note">Nguyên nhân gốc hoặc lý do báo động giả</Label>

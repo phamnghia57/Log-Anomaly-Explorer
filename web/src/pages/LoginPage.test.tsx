@@ -12,7 +12,7 @@ import { LoginPage } from "./LoginPage";
 
 describe("admin login page", () => {
   const fetchMock = vi.fn();
-  const session = () => ({ token: "test-token", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
+  const session = () => ({ token: "test-token", session_id: "test-session", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
 
   function renderLogin(from?: unknown) {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });

@@ -13,7 +13,7 @@ async function login(page: Page, destination = "/search") {
   const result = await response;
   expect(result.status()).toBe(200);
   await expect(page).toHaveURL(destination);
-  return result.json() as Promise<{ token: string; expires_at: string }>;
+  return result.json() as Promise<{ token: string; expires_at: string; session_id: string }>;
 }
 
 test("login uses HttpOnly cookie through proxy; logout revokes copied access", async ({ page, context }) => {
@@ -49,12 +49,26 @@ test("reload and simultaneous tabs rotate safely; logout synchronizes all tabs",
   await expect(other).toHaveURL("/login");
 });
 
+test("logout revokes the current token when the refresh cookie is missing", async ({ page, context }) => {
+  const access = await login(page);
+  await context.clearCookies({ name: "lae_refresh" });
+  const logout = page.waitForResponse((response) => response.url().endsWith("/api/auth/logout"));
+  await page.getByRole("button", { name: "Menu quản trị" }).click();
+  await page.getByRole("menuitem", { name: "Đăng xuất", exact: true }).click();
+  expect((await logout).status()).toBe(204);
+  await expect(page).toHaveURL("/login");
+  expect((await context.request.get("/api/search", {
+    headers: { Authorization: `Bearer ${access.token}` },
+  })).status()).toBe(401);
+});
+
 test("access expiry automatically refreshes without sending the user to login", async ({ page, context }) => {
   const before = await login(page);
   const response = await page.waitForResponse((res) => res.url().endsWith("/api/auth/refresh")
     && res.status() === 200, { timeout: 12_000 });
   const after = await response.json();
   expect(after.token).not.toBe(before.token);
+  expect(after.session_id).toBe(before.session_id);
   await expect(page).toHaveURL("/search");
   expect((await context.request.get("/api/search", { headers: { Authorization: `Bearer ${after.token}` } })).status()).toBe(200);
 });

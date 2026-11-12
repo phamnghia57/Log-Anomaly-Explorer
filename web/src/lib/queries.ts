@@ -79,9 +79,11 @@ export function useSearchAggregations(params: SearchParams, enabled: boolean) {
   });
 }
 
+export const SYSTEM_HEALTH_QUERY_KEY = ["system-health"] as const;
+
 export function useSystemHealth() {
   return useQuery({
-    queryKey: ["system-health"],
+    queryKey: SYSTEM_HEALTH_QUERY_KEY,
     queryFn: ({ signal }) => getSystemHealth(signal),
     refetchInterval: 15_000,
     retry: false,

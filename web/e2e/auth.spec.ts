@@ -9,7 +9,7 @@ test.beforeEach(async ({ context }) => {
   await context.route("**/auth/logout", (route) => route.fulfill({ status: 204 }));
 });
 const cors = { "Access-Control-Allow-Origin": "*" };
-const session = () => ({ token: "browser-test-token", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
+const session = () => ({ token: "browser-test-token", session_id: "test-session", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
 
 test("deep link returns after login, navigation works, and logout blocks history access", async ({ page }, testInfo) => {
   const current = session();
@@ -73,7 +73,7 @@ test("401 clears auth, redirects to login, and a failed login stays on the form"
 test("expiration removes a protected page without waiting for an API request", async ({ page }) => {
   const now = Date.now();
   await page.clock.install({ time: now });
-  const current = { token: "expiring-browser-test-token", expires_at: new Date(now + 3_600_000).toISOString() };
+  const current = { ...session(), token: "expiring-browser-test-token", expires_at: new Date(now + 3_600_000).toISOString() };
   let refreshes = 0;
   await page.route("**/auth/refresh", (route) => ++refreshes === 1
     ? route.fulfill({ json: current }) : route.fulfill({ status: 401, json: { detail: "Unauthorized" } }));

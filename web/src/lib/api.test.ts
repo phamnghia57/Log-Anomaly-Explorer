@@ -13,14 +13,15 @@ import {
   searchAggregations,
   getSystemHealth,
   sendAssistantMessage,
+  updateIncident,
 } from "./api";
-import { AUTH_STORAGE_KEY, clearSession, getSession, saveSession, useAuthStore } from "./auth";
+import { AUTH_STORAGE_KEY, clearSession, getSession, saveSession, SessionExpiredError, useAuthStore } from "./auth";
 
 describe("query-api client", () => {
   const fetchMock = vi.fn();
 
   beforeEach(() => {
-    saveSession({ token: "test-token", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
+    saveSession({ token: "test-token", session_id: "test-session", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
     vi.stubGlobal("fetch", fetchMock);
   });
 
@@ -197,7 +198,7 @@ describe("query-api client", () => {
 
 describe("admin login and authenticated API requests", () => {
   const fetchMock = vi.fn();
-  const session = () => ({ token: "test-token", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
+  const session = () => ({ token: "test-token", session_id: "test-session", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
 
   beforeEach(() => {
     clearSession();
@@ -396,6 +397,31 @@ describe("admin login and authenticated API requests", () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(fetchMock.mock.calls[1][0]).toContain("/auth/refresh");
     expect(fetchMock.mock.calls[2][1].headers.Authorization).toBe("Bearer refreshed-token");
+  });
+
+  it.each([true, false])("retries an incident update only when refresh keeps the same session (%s)", async (sameSession) => {
+    const current = session();
+    saveSession(current);
+    const refreshed = { ...current, token: "refreshed-token", session_id: sameSession ? current.session_id : "other-admin" };
+    const change = { action: "acknowledge", episode_id: "c1:1" } as const;
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 401, headers: { "X-Auth-Reason": "access_expired" } }));
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(refreshed)));
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ episode_id: change.episode_id, status: "acknowledged" })));
+
+    const request = updateIncident("c1", change);
+    if (sameSession) {
+      await expect(request).resolves.toMatchObject({ status: "acknowledged" });
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+      expect(fetchMock.mock.calls[2][1]).toMatchObject({
+        method: "PATCH", headers: { Authorization: "Bearer refreshed-token" }, body: JSON.stringify(change),
+      });
+    } else {
+      await expect(request).rejects.toBeInstanceOf(SessionExpiredError);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(getSession()).toBeNull();
+    }
+    expect(fetchMock.mock.calls[1][0]).toContain("/auth/refresh");
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ expected_session_id: current.session_id });
   });
 
   it.each([503, 500])("does not replay a business POST on HTTP %s", async (status) => {

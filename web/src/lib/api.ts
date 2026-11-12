@@ -103,11 +103,21 @@ async function queryJson<T>(path: QueryPath, params?: Record<string, string | un
   let session = getSession();
   if (!session) throw new ApiError(useAuthStore.getState().status === "expired"
     ? SESSION_EXPIRED_MESSAGE : "Vui lòng đăng nhập để xem dữ liệu.", 401);
+  const sessionId = session.session_id;
+  const checkSession = (candidateId: string) => {
+    if (generation !== authGeneration() || getSession()?.session_id !== sessionId) {
+      throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
+    }
+    if (candidateId !== sessionId) {
+      clearSession("expired");
+      throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
+    }
+  };
   if (Date.parse(session.expires_at) <= Date.now()) session = await refreshSession();
   let res!: Response;
   for (let attempt = 0; attempt < 2; attempt++) {
     if (signal?.aborted) throw signal.reason;
-    if (generation !== authGeneration()) throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
+    checkSession(session.session_id);
     try {
       res = await fetch(url.toString(), {
         headers: { Authorization: `Bearer ${session.token}`, ...(payload ? { "Content-Type": "application/json" } : {}) },
@@ -118,7 +128,7 @@ async function queryJson<T>(path: QueryPath, params?: Record<string, string | un
       if (signal?.aborted) throw cause;
       throw new ApiError("Không kết nối được tới API. Vui lòng thử lại.", 0);
     }
-    if (generation !== authGeneration()) throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
+    checkSession(session.session_id);
     if (res.status !== 401) break;
     if (attempt === 0 && res.headers.get("X-Auth-Reason") === "access_expired") {
       const latest = getSession();
@@ -134,7 +144,7 @@ async function queryJson<T>(path: QueryPath, params?: Record<string, string | un
   }
   const body = await res.json() as T;
   // Request cu co the hoan tat sau logout/doi tai khoan; khong dua data do vao cache moi.
-  if (generation !== authGeneration()) throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
+  checkSession(session.session_id);
   return body;
 }
 

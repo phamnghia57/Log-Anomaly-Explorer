@@ -94,8 +94,9 @@ def test_login_returns_signed_admin_claims_and_configured_expiry(
 
     assert response.status_code == 200
     body = response.json()
-    assert set(body) == {"token", "expires_at"}
+    assert set(body) == {"token", "expires_at", "session_id"}
     claims = jwt.decode(body["token"], jwt_config, algorithms=["HS256"])
+    assert body["session_id"] == claims["sid"]
     assert jwt.get_unverified_header(body["token"])["alg"] == "HS256"
     assert claims["sub"] == credentials["username"]
     assert claims["role"] == "admin"

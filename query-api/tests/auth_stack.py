@@ -69,7 +69,7 @@ def auth_stack(*, username="integration-admin", password=None, secret=None):
         stack.enter_context(patch("ingestion.src.storage.build_store", return_value=log_store))
         stack.enter_context(patch("clustering.src.storage.build_store", return_value=log_store))
         config = importlib.import_module("query-api.src.config")
-        stack.enter_context(patch.multiple(config, JWT_SECRET=secret, JWT_EXPIRY_SECONDS=3600,
+        stack.enter_context(patch.multiple(config, JWT_SECRET=secret,
                                            ADMIN_SEED_USERNAME=username, ADMIN_SEED_PASSWORD=password,
                                            USERS_INDEX="auth-test-users", AUTH_SESSIONS_INDEX="auth-test-sessions",
                                            AUTH_COOKIE_SECURE=False,

@@ -4,7 +4,7 @@ import { AUTH_STORAGE_KEY, clearSession, getSession, loginSession, logoutSession
 
 describe("persistent server sessions with memory-only access", () => {
   const fetchMock = vi.fn();
-  const session = () => ({ token: "test-token", expires_at: new Date(Date.now() + 900_000).toISOString() });
+  const session = () => ({ token: "test-token", session_id: "test-session", expires_at: new Date(Date.now() + 900_000).toISOString() });
   beforeEach(() => { clearSession(); localStorage.clear(); vi.stubGlobal("fetch", fetchMock); });
   afterEach(() => { clearSession(); fetchMock.mockReset(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
@@ -59,11 +59,14 @@ describe("persistent server sessions with memory-only access", () => {
     expect(getSession()).toEqual(current);
   });
   it("clears memory only after confirmed server logout", async () => {
-    saveSession(session());
+    const current = session();
+    saveSession(current);
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
     await logoutSession();
     expect(getSession()).toBeNull();
     expect(fetchMock.mock.calls[0][0]).toContain("/api/auth/logout");
+    expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe(`Bearer ${current.token}`);
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ expected_session_id: current.session_id });
   });
   it("turns rejected refresh into anonymous startup and expired active session", async () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 }));

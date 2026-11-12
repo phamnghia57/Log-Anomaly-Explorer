@@ -14,7 +14,7 @@ test("dashboard renders score history and links to the runbook", async ({ page }
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.route("**/auth/refresh", (route) => route.fulfill({ json: {
-    token: "local-browser-test", expires_at: new Date(Date.now() + 3_600_000).toISOString(),
+    token: "local-browser-test", session_id: "test-session", expires_at: new Date(Date.now() + 3_600_000).toISOString(),
   } }));
   await page.route(/\/clusters(?:[/?].*)?$/, async (route) => {
     const path = new URL(route.request().url()).pathname;
