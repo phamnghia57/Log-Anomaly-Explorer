@@ -40,7 +40,7 @@ export function ClusterHistoryChart({ points, compact = false }: { points: Clust
       series: [{ name: "Anomaly score", type: "line", smooth: false, connectNulls: false, silent: compact,
         data: sorted.map((p) => [p.recorded_at, p.score, p.status]),
         symbol: "circle", symbolSize: 5, showSymbol: compact ? sorted.length === 1 : sorted.length <= 20,
-        lineStyle: { width: 2, color: chartColors.line },
+        lineStyle: { width: compact ? 1.5 : 2, color: chartColors.line },
         itemStyle: { color: (p: { data: [string, number, ClusterHistoryPoint["status"]] }) => chartColors[p.data[2]],
           borderColor: "#18181b", borderWidth: 1 },
         areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -51,7 +51,7 @@ export function ClusterHistoryChart({ points, compact = false }: { points: Clust
   }, [points, compact]);
   if (!points.length) return null;
   return <div className="min-w-0" role="img" aria-label="Anomaly score history">
-    <ReactEChartsCore echarts={echarts} option={option} style={{ height: compact ? 64 : 360, width: "100%" }} />
+    <ReactEChartsCore echarts={echarts} option={option} style={{ height: compact ? 40 : 360, width: "100%" }} />
     {!compact && <p className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground"><span className="inline-block h-0.5 w-4 bg-[#73bf69]" />Anomaly score<span className="ml-auto">Kéo thanh để phóng to thời gian</span></p>}
   </div>;
 }
