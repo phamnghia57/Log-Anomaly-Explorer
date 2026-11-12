@@ -129,9 +129,20 @@ class OpenSearchLogStore(LogStore):
 
     @property
     def read_indices(self) -> str:
-        # Bao gom index logs cu de khong lam mat lich su khi rollout.
-        # Wildcard ngay khong khop logs-quarantine (khong duoc doc log bi cach ly).
-        return f"{self.log_index},{self.log_index}-????.??.??"
+        """Index de DOC log: index `logs` cu (giu lich su truoc khi tach theo
+        ngay) + moi index ngay `logs-YYYY.MM.DD`, TRU index quarantine.
+
+        PHAI dung `*`: OpenSearch chi ho tro wildcard `*` khi khop TEN INDEX,
+        KHONG ho tro `?` (khac voi query string, noi `?` la wildcard 1 ky tu).
+        Pattern `logs-????.??.??` khop dung 0 index, ma vi cac lenh search deu
+        dat ignore_unavailable=True nen no tra ve RONG trong im lang - tung lam
+        /search, Incident View va ca clustering khong thay log nao suot nhieu
+        ngay ma khong bao loi gi.
+
+        `-{quarantine}` la cu phap loai tru cua multi-index OpenSearch: log sai
+        schema bi cach ly khong duoc lot vao ket qua doc.
+        """
+        return f"{self.log_index},{self.log_index}-*,-{self.quarantine_index}"
 
     def _day_index(self, log: dict) -> str:
         ts = datetime.fromisoformat(log["timestamp"].replace("Z", "+00:00"))
@@ -333,7 +344,10 @@ class OpenSearchLogStore(LogStore):
         cutoff_day = datetime.fromisoformat(cutoff_iso.replace("Z", "+00:00")).date()
         pattern = re.compile(rf"{re.escape(self.log_index)}-(\d{{4}})\.(\d{{2}})\.(\d{{2}})")
         try:
-            found = self.client.indices.get(index=f"{self.log_index}-????.??.??",
+            # `*` chu khong phai `?` - xem read_indices. `logs-*` co the tra ve
+            # ca logs-quarantine, nhung pattern regex ben duoi chi khop dung
+            # dang logs-YYYY.MM.DD nen quarantine khong bao gio bi xoa.
+            found = self.client.indices.get(index=f"{self.log_index}-*",
                                             ignore_unavailable=True, allow_no_indices=True)
             dropped = 0
             for name in sorted(found):
