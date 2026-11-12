@@ -16,6 +16,7 @@
 # "Deploy len Vercel".
 
 {$PUBLIC_ADDRESS} {
+	@webHealthOrigin header Origin {$CORS_WEB_ORIGIN:http://localhost:5173}
 	# Query API, gom POST/OPTIONS /auth/login; giu nguyen Authorization khi proxy.
 	# /assistant* - AI Assistant (GET conversation, POST message), xem
 	# query-api/src/assistant/router.py.
@@ -35,7 +36,8 @@
 	@ingestion_health path /ingestion/health
 	handle @ingestion_health {
 		uri strip_prefix /ingestion
-		header Access-Control-Allow-Origin "*"
+		header +Vary Origin
+		header @webHealthOrigin Access-Control-Allow-Origin {$CORS_WEB_ORIGIN:http://localhost:5173}
 		reverse_proxy ingestion:8000
 	}
 
@@ -43,7 +45,8 @@
 	@demo_health path /demo/health
 	handle @demo_health {
 		uri strip_prefix /demo
-		header Access-Control-Allow-Origin "*"
+		header +Vary Origin
+		header @webHealthOrigin Access-Control-Allow-Origin {$CORS_WEB_ORIGIN:http://localhost:5173}
 		reverse_proxy demo-app:8001
 	}
 

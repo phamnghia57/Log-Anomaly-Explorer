@@ -151,7 +151,11 @@ cần cấu hình build command/output (mặc định `npm run build` → thư m
 **Bắt buộc** trên Vercel: `VITE_API_BASE_URL=/api`, `API_PROXY_TARGET=https://<backend-origin>`.
 Proxy target phải là HTTPS origin không có path/credentials; cấu hình được đọc lúc build,
 đổi phải redeploy. Backend đặt `AUTH_ALLOWED_ORIGINS` đúng origin của web production/preview
-và `AUTH_COOKIE_SECURE=true`. Vercel root directory vẫn là `web`.
+và `AUTH_COOKIE_SECURE=true`. Dùng đúng origin HTTPS của frontend production cho
+`AUTH_ALLOWED_ORIGINS` và `CORS_WEB_ORIGIN` (không kèm path hay dấu gạch chéo cuối).
+Nếu preview trỏ vào staging, cấu hình origin HTTPS cụ thể của preview ở staging.
+Local mặc định cho phép Vite qua localhost hoặc 127.0.0.1 trong Query API, còn health
+gọi trực tiếp qua Caddy dùng `CORS_WEB_ORIGIN`. Vercel root directory vẫn là `web`.
 
 `vercel.ts` xuất cấu hình qua `default` và tạo rewrite bằng helper `routes.rewrite()`.
 Chạy `npm test -- proxy.test.ts` để kiểm tra cấu hình sau khi bundle bằng esbuild,

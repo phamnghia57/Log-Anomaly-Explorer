@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from urllib.parse import urlsplit
 
 
 def _positive_int(name: str, default: int) -> int:
@@ -29,6 +30,13 @@ AUTH_COOKIE_SECURE = _cookie_secure == "true"
 AUTH_ALLOWED_ORIGINS = tuple(origin.strip() for origin in os.environ.get(
     "AUTH_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
 ).split(",") if origin.strip())
+for _origin in AUTH_ALLOWED_ORIGINS:
+    _url = urlsplit(_origin)
+    if (_url.scheme not in {"http", "https"} or not _url.hostname or _url.username is not None
+            or any(char in _origin for char in "*?#")
+            or _origin != f"{_url.scheme}://{_url.netloc}"):
+        raise ValueError("AUTH_ALLOWED_ORIGINS must contain exact HTTP(S) origins")
+    _url.port  # Validate an explicit port.
 ADMIN_SEED_USERNAME = os.environ.get("ADMIN_SEED_USERNAME")
 ADMIN_SEED_PASSWORD = os.environ.get("ADMIN_SEED_PASSWORD")
 USERS_INDEX = os.environ.get("USERS_INDEX", "users")

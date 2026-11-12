@@ -205,6 +205,7 @@ services:
       - caddy-data:/data
     environment:
       PUBLIC_ADDRESS: ${PUBLIC_ADDRESS:-:80}
+      CORS_WEB_ORIGIN: ${CORS_WEB_ORIGIN:-http://localhost:5173}
     ports:
       - "80:80"
       - "443:443"

@@ -73,8 +73,8 @@ app = FastAPI(title="Log Anomaly Explorer - Query & Incident API", lifespan=life
 # API doc log (GET), login va Assistant JSON (POST) - frontend khac domain backend.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["GET", "POST"],
+    allow_origins=list(config.AUTH_ALLOWED_ORIGINS),
+    allow_methods=["GET", "POST", "PATCH"],
     allow_headers=["*"],
 )
 
