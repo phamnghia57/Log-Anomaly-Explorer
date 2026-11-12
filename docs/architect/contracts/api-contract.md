@@ -125,6 +125,14 @@ Khi `score > ngưỡng`, Clustering service tự gọi webhook/email cấu hình
 mở thẳng trace đó trên Jaeger: `https://<domain>/jaeger/trace/<trace_id>`. Key **luôn có mặt**,
 giá trị `null` khi cụm không có trace nào — bên nhận không cần xử lý trường hợp thiếu key.
 
+### `GET /clustering/health`
+
+Health public cho tiến độ clustering. Trả 200 với `status="ok"` và
+`last_processed_at` (UTC) khi worker hoàn tất chu kỳ gần đây. Trả 503 với
+`status="degraded"` và `reason` là `missing`, `stale` hoặc `storage_unavailable`
+khi chưa có heartbeat, quá ba chu kỳ `WINDOW_SECONDS` hoặc không đọc được kho.
+Worker cập nhật cả khi không có cụm. Replay bằng `--window-to` không cập nhật heartbeat.
+
 ## Auth — persistent sessions (#73)
 
 Design/rollout proposed for review through Draft PR #74. Existing query/ingestion/cluster response

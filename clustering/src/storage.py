@@ -14,6 +14,21 @@ class OpenSearchStore:
         self.clusters = os.getenv("CLUSTER_INDEX", "clusters")
         self.history = os.getenv("HISTORY_INDEX", "cluster-history")
 
+    @property
+    def heartbeat(self):
+        return f"{self.clusters}-heartbeat"
+
+    def _ensure_index(self, index, fields):
+        try:
+            if not self.client.indices.exists(index=index):
+                self.client.indices.create(index=index, body={
+                    "settings": self.log_store._settings(),
+                    "mappings": {"dynamic": "strict", "properties": fields},
+                })
+        except Exception as exc:
+            if "resource_already_exists_exception" not in str(exc):
+                raise StorageError(f"cannot prepare {index}") from exc
+
     def ensure_ready(self):
         self.log_store.ensure_ready()
         fields = {name: {"type": "keyword"} for name in
@@ -42,6 +57,20 @@ class OpenSearchStore:
         except Exception as exc:
             if "resource_already_exists_exception" not in str(exc):
                 raise StorageError(f"cannot prepare cluster-history: {exc}") from exc
+        self._ensure_index(self.heartbeat, {"last_processed_at": {"type": "date"}})
+
+    def write_heartbeat(self, processed_at):
+        try:
+            self.client.index(index=self.heartbeat, id="worker", body={"last_processed_at": processed_at})
+        except Exception as exc:
+            raise StorageError("cannot write clustering heartbeat") from exc
+
+    def get_heartbeat(self):
+        try:
+            response = self.client.get(index=self.heartbeat, id="worker", ignore=[404])
+            return response["_source"]["last_processed_at"] if response.get("found") else None
+        except Exception as exc:
+            raise StorageError("cannot read clustering heartbeat") from exc
 
     def read_logs(self, start, end):
         scroll_id = None

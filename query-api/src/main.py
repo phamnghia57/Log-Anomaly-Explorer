@@ -252,6 +252,25 @@ def _require_cluster_store():
     return cluster_store
 
 
+@app.get("/clustering/health")
+def clustering_health():
+    last_processed_at = None
+    reason = "missing"
+    try:
+        last_processed_at = _require_cluster_store().get_heartbeat()
+        if last_processed_at is not None:
+            processed_at = datetime.fromisoformat(last_processed_at.replace("Z", "+00:00"))
+            age = (datetime.now(timezone.utc) - processed_at).total_seconds()
+            reason = "stale" if age > config.CLUSTER_HEARTBEAT_STALE_SECONDS else None
+    except (StorageError, HTTPException, ValueError, TypeError):
+        reason = "storage_unavailable"
+    return JSONResponse(
+        status_code=503 if reason else 200, headers={"Cache-Control": "no-store"},
+        content={"status": "degraded" if reason else "ok", "reason": reason,
+                 "last_processed_at": last_processed_at},
+    )
+
+
 @app.get("/clusters", dependencies=[Depends(require_admin)])
 def list_clusters(
     status: str | None = None,

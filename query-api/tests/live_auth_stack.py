@@ -57,6 +57,6 @@ def live_auth_stack(url, username, password, secret):
             })))
             yield SimpleNamespace(app=main.app)
     finally:
-        for name in names.values():
+        for name in (*names.values(), names["clusters"] + "-heartbeat"):
             client.indices.delete(index=name, ignore=[404])
         client.close()

@@ -147,6 +147,7 @@ services:
       CLUSTER_INDEX: ${CLUSTER_INDEX:-clusters}
       HISTORY_INDEX: ${HISTORY_INDEX:-cluster-history}
       RETENTION_DAYS: ${RETENTION_DAYS:-30}
+      WINDOW_SECONDS: ${WINDOW_SECONDS:-60}
       # Login/query routes bat JWT admin; khong co secret mac dinh. /health public.
       JWT_SECRET: ${JWT_SECRET:-}
       JWT_EXPIRY_SECONDS: ${JWT_EXPIRY_SECONDS:-900}

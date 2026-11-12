@@ -141,7 +141,7 @@ export function searchAggregations(params: SearchParams, signal?: AbortSignal) {
   return queryJson<SearchAggregations>("/search/aggregations", params, signal);
 }
 
-export type ServiceHealth = { name: string; ok: boolean; status: string };
+export type ServiceHealth = { name: string; ok: boolean; status: string; lastProcessedAt?: string };
 
 // Cac service co /health rieng. Khi deploy Vercel, health URL can tro ve
 // Caddy gateway HTTPS (xem deploy/Caddyfile), khong truy cap Docker host noi bo.
@@ -153,15 +153,22 @@ export const HEALTH_ENDPOINTS = [
   // bao trang thai cau hinh + ket qua goi Azure OpenAI gan nhat (het quota,
   // bi chan vung...), thu ma /health cua query-api khong thay duoc.
   { name: "AI Assistant", url: `${API_BASE_URL}/assistant/health` },
+  { name: "Clustering Worker", url: `${API_BASE_URL}/clustering/health` },
 ];
 
 export async function getSystemHealth(signal?: AbortSignal): Promise<ServiceHealth[]> {
   return Promise.all(HEALTH_ENDPOINTS.map(async ({ name, url }) => {
     try {
       const response = await fetch(url, { signal, cache: "no-store" });
-      if (!response.ok) return { name, ok: false, status: `HTTP ${response.status}` };
-      const body = await response.json() as { status?: string };
-      return { name, ok: body.status === "ok", status: body.status ?? "unknown" };
+      const body = await response.json().catch(() => null) as {
+        status?: string; last_processed_at?: string | null; reason?: string | null;
+      } | null;
+      return {
+        name,
+        ok: response.ok && body?.status === "ok",
+        status: body?.reason ?? body?.status ?? (response.ok ? "unknown" : `HTTP ${response.status}`),
+        ...(body?.last_processed_at ? { lastProcessedAt: body.last_processed_at } : {}),
+      };
     } catch {
       return { name, ok: false, status: "unreachable" };
     }
