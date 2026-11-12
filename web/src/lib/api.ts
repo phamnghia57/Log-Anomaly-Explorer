@@ -180,7 +180,12 @@ export function searchAggregations(params: SearchParams, signal?: AbortSignal) {
   return queryJson<SearchAggregations>("/search/aggregations", params, signal);
 }
 
-export type ServiceHealth = { name: string; ok: boolean; status: string; lastProcessedAt?: string };
+export type ServiceHealth = {
+  name: string; ok: boolean; status: string; lastProcessedAt?: string;
+  // Chi AI Assistant co: thoi diem goi Azure OpenAI that gan nhat (thanh cong
+  // hay loi) - xem GET /assistant/health trong api-contract.md.
+  lastCallAt?: string;
+};
 
 // Cac service co /health rieng. Khi deploy Vercel, health URL can tro ve
 // Caddy gateway HTTPS (xem deploy/Caddyfile), khong truy cap Docker host noi bo.
@@ -201,12 +206,14 @@ export async function getSystemHealth(signal?: AbortSignal): Promise<ServiceHeal
       const response = await fetch(url, { signal, cache: "no-store" });
       const body = await response.json().catch(() => null) as {
         status?: string; last_processed_at?: string | null; reason?: string | null;
+        last_call_at?: string | null;
       } | null;
       return {
         name,
         ok: response.ok && body?.status === "ok",
         status: body?.reason ?? (response.ok ? body?.status ?? "unknown" : `HTTP ${response.status}`),
         ...(body?.last_processed_at ? { lastProcessedAt: body.last_processed_at } : {}),
+        ...(body?.last_call_at ? { lastCallAt: body.last_call_at } : {}),
       };
     } catch {
       return { name, ok: false, status: "unreachable" };

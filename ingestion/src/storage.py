@@ -12,8 +12,11 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from threading import Lock
+import logging
 import re
 from typing import Any
+
+logger = logging.getLogger("ingestion.storage")
 
 
 class StorageError(Exception):
@@ -61,7 +64,8 @@ class LogStore:
         raise NotImplementedError
 
     def delete_older_than(self, cutoff_iso: str) -> int:
-        """Retention: memory tra so log; OpenSearch tra so index ngay da drop."""
+        """Retention: memory tra so log; OpenSearch tra so index da drop
+        (index ngay + index legacy `logs` neu no da het han hoan toan)."""
         raise NotImplementedError
 
     def ping(self) -> bool:
@@ -118,12 +122,14 @@ def _iso_utc_now() -> str:
 class OpenSearchLogStore(LogStore):
     def __init__(self, client: Any, *, log_index: str = "logs",
                  quarantine_index: str = "logs-quarantine",
-                 shards: int = 1, replicas: int = 0) -> None:
+                 shards: int = 1, replicas: int = 0,
+                 drop_legacy_index: bool = True) -> None:
         self.client = client
         self.log_index = log_index
         self.quarantine_index = quarantine_index
         self.shards = shards
         self.replicas = replicas
+        self.drop_legacy_index = drop_legacy_index
         self._prepared_days: set[str] = set()
         self._day_lock = Lock()
 
@@ -187,6 +193,7 @@ class OpenSearchLogStore(LogStore):
             quarantine_index=config.QUARANTINE_INDEX,
             shards=config.NUMBER_OF_SHARDS,
             replicas=config.NUMBER_OF_REPLICAS,
+            drop_legacy_index=config.RETENTION_DROP_LEGACY_INDEX,
         )
 
     def _settings(self) -> dict:
@@ -339,8 +346,61 @@ class OpenSearchLogStore(LogStore):
         }
 
     def delete_older_than(self, cutoff_iso: str) -> int:
-        # Xoa ca index neu TOAN BO ngay nam truoc ngay cutoff; legacy logs de
-        # nguyen, khong delete_by_query va khong xoa nham logs-quarantine.
+        # Xoa ca index neu TOAN BO ngay nam truoc ngay cutoff; khong
+        # delete_by_query va khong xoa nham logs-quarantine. Index legacy
+        # `logs` (truoc khi tach theo ngay) duoc xu ly rieng o
+        # _drop_legacy_index_if_expired - cung nguyen tac "chi drop khi toan
+        # bo du lieu da qua han".
+        dropped = self._drop_daily_indices(cutoff_iso)
+        if self.drop_legacy_index:
+            dropped += self._drop_legacy_index_if_expired(cutoff_iso)
+        return dropped
+
+    def _drop_legacy_index_if_expired(self, cutoff_iso: str) -> int:
+        """Drop index `logs` monolithic cu khi document MOI NHAT trong do da
+        cu hon cutoff. Tra 1 neu da drop, 0 neu khong.
+
+        Index nay khong con nhan ghi moi tu khi chuyen sang `logs-YYYY.MM.DD`
+        (ensure_ready khong tao lai), nen sau toi da RETENTION_DAYS ke tu luc
+        migrate no se tu het han va bi drop - khong can xoa tay, va khong bao
+        gio mat log con trong han retention. Chua het han thi giu nguyen ca
+        index (khong delete_by_query tung phan, giong daily index).
+
+        Neu `log_index` la ALIAS (vd. ai do tro alias `logs` vao index khac)
+        thi KHONG dong vao: chi drop dung index vat ly ten `log_index`.
+        """
+        try:
+            if not self.client.indices.exists(index=self.log_index):
+                return 0
+            found = self.client.indices.get(index=self.log_index,
+                                            ignore_unavailable=True, allow_no_indices=True)
+            if self.log_index not in found:
+                logger.warning("retention: %r la alias, khong phai index vat ly - bo qua",
+                               self.log_index)
+                return 0
+            resp = self.client.search(index=self.log_index, body={
+                "size": 0, "aggs": {"newest": {"max": {"field": "timestamp"}}},
+            })
+        except Exception as exc:  # noqa: BLE001
+            raise StorageError(f"legacy index inspection failed: {exc}") from exc
+
+        cutoff = datetime.fromisoformat(cutoff_iso.replace("Z", "+00:00"))
+        newest_ms = (resp.get("aggregations") or {}).get("newest", {}).get("value")
+        # newest_ms = None: index rong (khong con document) -> drop luon.
+        if newest_ms is not None and newest_ms >= cutoff.timestamp() * 1000:
+            newest = datetime.fromtimestamp(newest_ms / 1000, tz=timezone.utc)
+            logger.info("retention: giu index legacy %r - log moi nhat %s chua qua cutoff %s",
+                        self.log_index, newest.isoformat(), cutoff.isoformat())
+            return 0
+        try:
+            self.client.indices.delete(index=self.log_index)
+        except Exception as exc:  # noqa: BLE001
+            raise StorageError(f"legacy index deletion failed: {exc}") from exc
+        logger.info("retention: da drop index legacy %r (toan bo log da qua cutoff %s)",
+                    self.log_index, cutoff.isoformat())
+        return 1
+
+    def _drop_daily_indices(self, cutoff_iso: str) -> int:
         cutoff_day = datetime.fromisoformat(cutoff_iso.replace("Z", "+00:00")).date()
         pattern = re.compile(rf"{re.escape(self.log_index)}-(\d{{4}})\.(\d{{2}})\.(\d{{2}})")
         try:

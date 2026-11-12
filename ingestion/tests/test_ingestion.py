@@ -300,3 +300,79 @@ def test_bulk_failure_is_not_silenced():
         def bulk(self, **kw): return {"errors": True, "items": [{"index": {"status": 503}}]}
     with pytest.raises(StorageError, match="partially failed"):
         OpenSearchLogStore(FailingBulk()).write_logs_batch([("x", make_log())])
+
+
+# ---- Retention cho index `logs` monolithic cu (truoc khi tach theo ngay)
+
+class LegacyClient(FakeClient):
+    """FakeClient co san index legacy `logs`; `newest_ms` = max(timestamp) tra ve
+    tu aggregation (None = index rong)."""
+
+    def __init__(self, newest_ms):
+        super().__init__()
+        self.indices.created["logs"] = {}
+        self.newest_ms = newest_ms
+
+    def search(self, **kw):
+        if kw.get("index") == "logs" and "newest" in kw["body"].get("aggs", {}):
+            self.calls.append(("legacy_max", kw))
+            return {"hits": {"total": {"value": 0}, "hits": []},
+                    "aggregations": {"newest": {"value": self.newest_ms}}}
+        return super().search(**kw)
+
+
+def _ms(iso):
+    return datetime.fromisoformat(iso.replace("Z", "+00:00")).timestamp() * 1000
+
+
+def test_retention_drops_legacy_index_when_all_logs_expired():
+    client = LegacyClient(_ms("2026-09-01T00:00:00Z"))
+    store = OpenSearchLogStore(client)
+    store.write_log("old", make_log(timestamp="2026-10-01T10:00:00Z"))
+    # 1 index ngay + 1 index legacy
+    assert store.delete_older_than("2026-10-02T10:00:00Z") == 2
+    assert "logs" not in client.indices.created
+    assert "logs-2026.10.01" not in client.indices.created
+    assert all(call[0] != "dbq" for call in client.calls)  # drop ca index, khong delete_by_query
+
+
+def test_retention_keeps_legacy_index_while_it_has_logs_in_window():
+    client = LegacyClient(_ms("2026-10-02T11:00:00Z"))
+    store = OpenSearchLogStore(client)
+    assert store.delete_older_than("2026-10-02T10:00:00Z") == 0
+    assert "logs" in client.indices.created
+
+
+def test_retention_drops_empty_legacy_index():
+    client = LegacyClient(None)
+    assert OpenSearchLogStore(client).delete_older_than("2026-10-02T10:00:00Z") == 1
+    assert "logs" not in client.indices.created
+
+
+def test_retention_legacy_cleanup_can_be_disabled():
+    client = LegacyClient(_ms("2026-01-01T00:00:00Z"))
+    store = OpenSearchLogStore(client, drop_legacy_index=False)
+    assert store.delete_older_than("2026-10-02T10:00:00Z") == 0
+    assert "logs" in client.indices.created
+    assert all(call[0] != "legacy_max" for call in client.calls)
+
+
+def test_retention_never_drops_alias_named_like_legacy_index():
+    class AliasIndices(FakeIndices):
+        def get(self, index, **kw):
+            if index == "logs":  # `logs` la alias tro vao index khac
+                return {"logs-reindexed": {}}
+            return super().get(index, **kw)
+
+    client = LegacyClient(_ms("2026-01-01T00:00:00Z"))
+    created = client.indices.created
+    client.indices = AliasIndices()
+    client.indices.created = created
+    assert OpenSearchLogStore(client).delete_older_than("2026-10-02T10:00:00Z") == 0
+    assert "logs" in client.indices.created
+
+
+def test_retention_skips_when_no_legacy_index():
+    client = FakeClient()
+    assert OpenSearchLogStore(client).delete_older_than("2026-10-02T10:00:00Z") == 0
+    assert all(call[0] != "search" for call in client.calls)

@@ -37,6 +37,7 @@ Nhận structured log từ demo-app, validate schema, ghi vào kho dữ liệu. 
 | `OPENSEARCH_SHARDS` / `OPENSEARCH_REPLICAS` | `1` / `0` |
 | `RETENTION_DAYS` | `30` |
 | `RETENTION_INTERVAL_SECONDS` | `3600` (`0` = tắt, dùng cron) |
+| `RETENTION_DROP_LEGACY_INDEX` | `true` — drop index `logs` cũ khi log mới nhất trong đó đã quá `RETENTION_DAYS` (`false` = giữ lại) |
 | `INGEST_RATE_LIMIT_RPS` | `100` request/giây/process, chung `/ingest` và `/ingest/batch` |
 | `INGEST_MAX_BATCH_SIZE` | `500` log/request |
 
@@ -81,7 +82,9 @@ Invoke-RestMethod -Method Post -Uri 'http://localhost:8000/ingest/batch' -Conten
 - Query API và clustering đọc đồng thời **legacy index `logs`** và các daily index qua pattern `logs,logs-*,-logs-quarantine` (xem `LogStore.read_indices`), loại trừ `logs-quarantine` bằng cú pháp loại trừ `-` của multi-index. `get_logs` dùng truy vấn `_id` xuyên index thay cho `mget` một index.
   - ⚠️ **Phải dùng `*`, không dùng `?`**: OpenSearch chỉ hỗ trợ wildcard `*` khi khớp *tên index* (`?` chỉ là wildcard trong query string, không phải khi resolve index). Pattern `logs-????.??.??` khớp đúng 0 index, và vì mọi lệnh search đều đặt `ignore_unavailable=True` nên nó trả về rỗng **trong im lặng** — đã từng làm `/search`, Incident View và clustering không thấy log nào suốt nhiều ngày mà không báo lỗi gì.
 - Retention chỉ **drop toàn bộ daily index có ngày nhỏ hơn ngày cutoff**; làm tròn theo ngày nên dữ liệu có thể được giữ lâu hơn cấu hình tối đa khoảng 1 ngày. Không dùng `delete_by_query` cho daily indices. Kết quả retention của OpenSearch là **số index đã drop**, không phải số document.
-- **Không tự xoá legacy `logs`** để tránh mất dữ liệu. Dữ liệu cũ không được daily retention dọn dẹp; vận hành phải lên kế hoạch migrate/backup và dọn legacy index thủ công sau khi được trưởng nhóm phê duyệt.
+- **Legacy index `logs`** (trước khi tách theo ngày) được retention dọn theo cùng nguyên tắc "chỉ drop khi toàn bộ đã quá hạn": mỗi lần chạy, job lấy `max(timestamp)` trong `logs`; nếu log **mới nhất** đã cũ hơn cutoff (hoặc index rỗng) thì drop cả index, ngược lại giữ nguyên (không `delete_by_query` từng phần). Vì `logs` không còn nhận ghi mới, nó sẽ tự bị drop trong tối đa `RETENTION_DAYS` kể từ lúc migrate — không cần xoá tay và không mất log còn trong hạn.
+  - Chỉ drop đúng index vật lý tên `LOG_INDEX`; nếu `logs` là **alias** thì bỏ qua.
+  - Cần backup/migrate dữ liệu cũ trước khi nó hết hạn: đặt `RETENTION_DROP_LEGACY_INDEX=false`, làm xong rồi bật lại.
 - Tránh client phụ thuộc trực tiếp vào tên index `logs` mà không dùng `LogStore.read_indices`; xem thay đổi `clustering/src/storage.py`.
 
 ### Histogram & facets

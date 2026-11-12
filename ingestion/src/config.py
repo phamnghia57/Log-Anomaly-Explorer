@@ -26,6 +26,10 @@ NUMBER_OF_REPLICAS = int(os.environ.get("OPENSEARCH_REPLICAS", "0"))
 # Retention: so ngay luu, va chu ky chay job nen (giay). 0 = khong tu chay (dung cron + python -m src.retention)
 RETENTION_DAYS = int(os.environ.get("RETENTION_DAYS", "30"))
 RETENTION_INTERVAL_SECONDS = int(os.environ.get("RETENTION_INTERVAL_SECONDS", "3600"))
+# Index `logs` monolithic cu (truoc khi tach logs-YYYY.MM.DD): retention drop ca
+# index khi log MOI NHAT trong do da qua RETENTION_DAYS. false = giu nguyen (dung
+# khi can backup/migrate truoc) - xem ingestion/README.md.
+RETENTION_DROP_LEGACY_INDEX = _bool("RETENTION_DROP_LEGACY_INDEX", True)
 
 DEFAULT_SEARCH_LIMIT = int(os.environ.get("SEARCH_DEFAULT_LIMIT", "100"))
 MAX_SEARCH_LIMIT = int(os.environ.get("SEARCH_MAX_LIMIT", "1000"))

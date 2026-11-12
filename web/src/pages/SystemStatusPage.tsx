@@ -29,6 +29,7 @@ export function SystemStatusPage() {
                   Xử lý lần cuối {formatDateTime(service.lastProcessedAt)}
                 </p>
               )}
+              {service.lastCallAt && <p className="mt-1 text-xs text-muted-foreground">Gọi Azure OpenAI lần cuối {formatDateTime(service.lastCallAt)}</p>}
             </div>
           ))}
         </div>
