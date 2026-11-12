@@ -13,6 +13,8 @@ import {
   searchAggregations,
   getSystemHealth,
   sendAssistantMessage,
+  streamAssistantMessage,
+  type AssistantStreamEvent,
 } from "./api";
 import { AUTH_STORAGE_KEY, clearSession, getSession, saveSession, useAuthStore } from "./auth";
 
@@ -182,6 +184,63 @@ describe("query-api client", () => {
     expect(init).toMatchObject({ method: "POST" });
     expect(JSON.parse((init as RequestInit).body as string)).toEqual({ message: "Loi nay la gi?" });
     expect(body).toEqual(conversation);
+  });
+
+  it("streamAssistantMessage: cung endpoint, doc SSE va ghep lai cau tra loi", async () => {
+    const conversation = {
+      cluster_id: "c1",
+      messages: [
+        { role: "user", content: "Loi nay la gi?", created_at: "2026-10-29T00:00:00Z" },
+        { role: "assistant", content: "Nguyen nhan: X", created_at: "2026-10-29T00:00:01Z" },
+      ],
+    };
+    // Mot event bi cat giua 2 chunk - reader phai gom lai dung, khong mat chu.
+    const frames = [
+      'data: {"delta": "Nguyen "}\n\ndata: {"to',
+      'ol": "search_related_logs"}\n\n',
+      'data: {"delta": "nhan: X"}\n\n',
+      `data: ${JSON.stringify({ conversation })}\n\n`,
+    ];
+    fetchMock.mockResolvedValueOnce(new Response(new ReadableStream({
+      start(controller) {
+        const encoder = new TextEncoder();
+        for (const frame of frames) controller.enqueue(encoder.encode(frame));
+        controller.close();
+      },
+    }), { status: 200, headers: { "Content-Type": "text/event-stream" } }));
+
+    const events: AssistantStreamEvent[] = [];
+    const body = await streamAssistantMessage("c1", "Loi nay la gi?", (event) => events.push(event));
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(new URL(url as string).pathname).toBe("/assistant/clusters/c1/conversation/messages");
+    expect((init as RequestInit).method).toBe("POST");
+    expect((init as RequestInit).headers).toMatchObject({ Accept: "text/event-stream" });
+    expect(events).toEqual([
+      { delta: "Nguyen " }, { tool: "search_related_logs" }, { delta: "nhan: X" },
+    ]);
+    expect(body).toEqual(conversation);
+  });
+
+  it("streamAssistantMessage: event error giua stream thanh ApiError", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(
+      'data: {"delta": "dang tra loi"}\n\ndata: {"error": "AI Assistant loi: PermissionError"}\n\n',
+      { status: 200, headers: { "Content-Type": "text/event-stream" } },
+    ));
+
+    const error = await streamAssistantMessage("c1", "hi", () => {}).catch((e) => e);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error.message).toContain("PermissionError");
+  });
+
+  it("streamAssistantMessage: stream ngat truoc event conversation thi bao loi", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(
+      'data: {"delta": "dang tra loi roi mat ket noi"}\n\n',
+      { status: 200, headers: { "Content-Type": "text/event-stream" } },
+    ));
+
+    await expect(streamAssistantMessage("c1", "hi", () => {})).rejects.toBeInstanceOf(ApiError);
   });
 
   it("sendAssistantMessage: nem ApiError voi status 503 khi thieu AZURE_OPENAI_API_KEY", async () => {

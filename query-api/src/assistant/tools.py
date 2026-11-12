@@ -15,6 +15,10 @@ from datetime import datetime, timedelta, timezone
 # GET /search (api-contract.md), tranh quet toan bo lich su khi AI chi can
 # ngu canh gan day.
 DEFAULT_SEARCH_WINDOW_HOURS = 24
+# Stack trace that co the dai hang nghin ky tu; cat bot truoc khi dua vao prompt
+# (system prompt va ket qua tool) - phan dau da du de nhan ra nguyen nhan, giu
+# nguyen ca cai chi lam phinh token va cham vong goi model tiep theo.
+MAX_STACK_TRACE_CHARS = 500
 
 TOOL_SCHEMAS = [
     {
@@ -66,6 +70,14 @@ TOOL_SCHEMAS = [
 ]
 
 _CLUSTER_SUMMARY_FIELDS = ("cluster_id", "signature", "score", "status", "last_seen")
+_LOG_SUMMARY_FIELDS = ("timestamp", "service", "level", "message", "trace_id")
+
+
+def _log_summary(log: dict) -> dict:
+    summary = {field: log[field] for field in _LOG_SUMMARY_FIELDS if field in log}
+    if log.get("stack_trace"):
+        summary["stack_trace"] = log["stack_trace"][:MAX_STACK_TRACE_CHARS]
+    return summary
 
 
 class ToolExecutor:
@@ -101,7 +113,9 @@ class ToolExecutor:
             service=arguments.get("service"), query=arguments.get("q"),
             time_from=time_from, limit=limit,
         )
-        return {"total": total, "results": results}
+        # Chi giu field AI thuc su dung: nhoi nguyen log document (ca metadata,
+        # stack_trace day) vao message role=tool lam phinh token vong goi tiep theo.
+        return {"total": total, "results": [_log_summary(log) for log in results]}
 
     def _tool_list_active_clusters(self, arguments: dict) -> dict:
         if self.cluster_store is None:

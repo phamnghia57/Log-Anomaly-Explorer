@@ -206,6 +206,23 @@ thoại đã lưu sau lượt này (không chỉ tin nhắn mới).
   sẵn sàng (`STORAGE_BACKEND=memory`).
 - Response 502: lỗi gọi Azure OpenAI (timeout, quota, …) — không làm sập service.
 
+**Streaming (cùng endpoint, chọn theo header `Accept`)**: gửi `Accept: text/event-stream` thì
+nhận đúng nội dung đó dưới dạng SSE, đẩy dần từng đoạn chữ ngay khi model sinh ra (thấy chữ đầu
+sau 1–2s thay vì đợi hết lượt). **Không gửi header này thì vẫn trả JSON y như trên** — không có
+endpoint mới, client cũ không cần đổi gì. Mỗi event là một dòng `data: <JSON>` kết thúc bằng
+dòng trống, với đúng một trong các khoá:
+
+| Khoá | Ý nghĩa |
+|---|---|
+| `delta` | Một đoạn chữ model vừa sinh ra (nối dần lại thành câu trả lời) |
+| `tool` | Tên tool AI đang tự tra cứu, để UI hiện "đang tra cứu…" |
+| `conversation` | Event **cuối**: toàn bộ hội thoại đã lưu, đúng shape response JSON ở trên |
+| `error` | Lỗi xảy ra **sau khi** stream đã bắt đầu — HTTP status lúc đó đã là 200 nên không đổi được nữa (tương đương 502 của nhánh JSON) |
+
+Lỗi xảy ra **trước** khi stream bắt đầu (404 cụm không tồn tại, 503 thiếu cấu hình) vẫn trả HTTP
+status thật như nhánh JSON. Nếu stream kết thúc mà chưa có event `conversation` thì lượt chat đã
+bị ngắt giữa đường — client phải coi là lỗi, không được ghi hội thoại thiếu vào cache.
+
 ### `GET /assistant/health`
 Tình trạng AI Assistant cho trang "Trạng thái hệ thống" — **không yêu cầu token** (giống
 `/health`, `/ingestion/health`, `/demo/health`: trang status đọc bằng `fetch` thường, không kèm

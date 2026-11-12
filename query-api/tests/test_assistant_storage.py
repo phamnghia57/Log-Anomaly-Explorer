@@ -59,6 +59,19 @@ def test_ensure_ready_tao_index_voi_mapping_strict(repo):
     assert mapping["properties"]["messages"] == {"type": "object", "dynamic": False}
 
 
+def test_save_khong_cho_refresh(repo):
+    """refresh="wait_for" ton ~1s moi lan luu ma khong duoc gi: `get()` theo _id
+    la realtime trong OpenSearch va khong cho nao SEARCH index nay."""
+    repository, client = repo
+    seen = {}
+    original = client.index
+    client.index = lambda **kw: (seen.update(kw), original(**kw))[1]
+
+    repository.save("c1", [])
+
+    assert "refresh" not in seen
+
+
 def test_get_chua_co_conversation_tra_none(repo):
     repository, _client = repo
     assert repository.get("khong-ton-tai") is None

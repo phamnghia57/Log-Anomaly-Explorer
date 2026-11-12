@@ -69,7 +69,11 @@ class ConversationRepository:
             "messages": messages,
         }
         try:
-            self.client.index(index=self.index, id=cluster_id, body=document, refresh="wait_for")
+            # Khong dung refresh="wait_for" (ton ~1s cho refresh interval moi
+            # lan luu): `get()` doc theo _id la realtime trong OpenSearch
+            # (doc tu translog, khong can refresh) va khong cho nao SEARCH
+            # index nay - retention dung delete_by_query voi refresh rieng.
+            self.client.index(index=self.index, id=cluster_id, body=document)
         except Exception as exc:  # noqa: BLE001
             raise StorageError(f"save conversation failed: {exc}") from exc
         return document

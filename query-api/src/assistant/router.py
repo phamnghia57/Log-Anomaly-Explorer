@@ -6,15 +6,17 @@ trong main.py, vi day la du lieu log/stack trace noi bo va goi API OpenAI co phi
 
 from __future__ import annotations
 
+import json
 import logging
 
 from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from ingestion.src.storage import StorageError
 
 from . import config
-from .service import last_call_status, run_chat_turn
+from .service import last_call_status, run_chat_turn, stream_chat_turn
 
 logger = logging.getLogger("query-api.assistant")
 
@@ -91,10 +93,40 @@ def get_conversation(cluster_id: str, request: Request):
     return {"cluster_id": cluster_id, "messages": conversation["messages"] if conversation else []}
 
 
+def _sse(payload: dict) -> str:
+    return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
+
+
+def _sse_events(repository, cluster_id: str, history: list[dict], created_at: str | None, turn: dict):
+    """Day tung event cua 1 luot chat ra SSE: `delta` (doan chu model vua sinh),
+    `tool` (ten tool AI dang tra cuu), roi `conversation` - TOAN BO hoi thoai da
+    luu, dung shape voi response JSON de client dung chung mot cho xu ly.
+
+    Loi o day KHONG the tra HTTP 502 duoc nua (header 200 da gui roi) nen bao
+    bang event `error`; ca loi StorageError luc luu cung vay.
+    """
+    try:
+        for event in stream_chat_turn(**turn):
+            if "messages" not in event:
+                yield _sse(event)
+                continue
+            saved = repository.save(cluster_id, history + event["messages"], created_at=created_at)
+            yield _sse({"conversation": {"cluster_id": cluster_id, "messages": saved["messages"]}})
+    except Exception as exc:  # noqa: BLE001 - giong nhanh JSON: khong lam sap service
+        logger.exception("Assistant chat (stream) that bai cho cum %s", cluster_id)
+        yield _sse({"error": f"AI Assistant loi: {type(exc).__name__}"})
+
+
 @router.post("/clusters/{cluster_id}/conversation/messages")
 def post_message(cluster_id: str, payload: ChatRequest, request: Request):
     """Gui 1 tin nhan, AI co the tu goi tool de dieu tra truoc khi tra loi.
-    Tra ve TOAN BO hoi thoai (da luu) sau luot nay, khong chi tin nhan moi."""
+    Tra ve TOAN BO hoi thoai (da luu) sau luot nay, khong chi tin nhan moi.
+
+    Client gui `Accept: text/event-stream` thi nhan cung noi dung do duoi dang
+    SSE, day dan tung doan chu (thay chu dau sau 1-2s thay vi doi het luot
+    1-2 phut). Khong gui header do thi tra JSON y nhu truoc - CUNG mot
+    endpoint, khong co endpoint moi.
+    """
     cluster_store = _require_cluster_store(request)
     cluster = _get_cluster_or_404(cluster_store, cluster_id)
 
@@ -107,23 +139,34 @@ def post_message(cluster_id: str, payload: ChatRequest, request: Request):
         ) from None
 
     store = request.app.state.store
-    logs = store.get_logs((cluster.get("log_ids") or [])[:20])
+    # Chi lay 5 log: system prompt chi nhung 5 log mau (xem
+    # service._build_system_prompt) - lay 20 doc day du kem stack_trace la doc thua.
+    logs = store.get_logs((cluster.get("log_ids") or [])[:5])
 
     repository = _require_conversation_repository(request)
     existing = repository.get(cluster_id)
     history = existing["messages"] if existing else []
+    created_at = existing["created_at"] if existing else None
+
+    turn = dict(cluster=cluster, logs=logs, history=history, user_message=payload.message,
+                store=store, cluster_store=cluster_store, cluster_id=cluster_id)
+
+    if "text/event-stream" in request.headers.get("accept", ""):
+        return StreamingResponse(
+            _sse_events(repository, cluster_id, history, created_at, turn),
+            media_type="text/event-stream",
+            # Chan buffer cua proxy dung giua (xem deploy/Caddyfile) - buffer lai
+            # thi stream ve mot cuc o cuoi, mat dung cai dang can.
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
 
     try:
-        new_messages = run_chat_turn(
-            cluster=cluster, logs=logs, history=history, user_message=payload.message,
-            store=store, cluster_store=cluster_store, cluster_id=cluster_id,
-        )
+        new_messages = run_chat_turn(**turn)
     except StorageError:
         raise
     except Exception as exc:  # noqa: BLE001 - loi tu OpenAI/Langfuse khong duoc lam sap service
         logger.exception("Assistant chat that bai cho cum %s", cluster_id)
         raise HTTPException(status_code=502, detail=f"AI Assistant loi: {type(exc).__name__}") from None
 
-    all_messages = history + new_messages
-    saved = repository.save(cluster_id, all_messages, created_at=existing["created_at"] if existing else None)
+    saved = repository.save(cluster_id, history + new_messages, created_at=created_at)
     return {"cluster_id": cluster_id, "messages": saved["messages"]}
