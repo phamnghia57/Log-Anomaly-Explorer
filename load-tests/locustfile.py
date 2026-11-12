@@ -36,6 +36,23 @@ logger = logging.getLogger(__name__)
 INGESTION_HOST = os.environ.get("INGESTION_HOST", "http://localhost:8000")
 QUERY_API_HOST = os.environ.get("QUERY_API_HOST", "http://localhost:8002")
 
+# So log moi request /ingest/batch. De nho de do overhead-per-request cua batch
+# so voi /ingest don le, khong phai de do gioi han batch (server chan o
+# INGEST_MAX_BATCH_SIZE, mac dinh 500).
+BATCH_SIZE = int(os.environ.get("LOAD_TEST_BATCH_SIZE", "50"))
+
+# So card Dashboard mo phong trong 1 lan mo trang. Moi card TU goi
+# /clusters/{id}/history rieng (xem web/src/components/dashboard/ClusterCard.tsx),
+# nen mo Dashboard mot lan = N request vao endpoint nay, khong phai 1.
+# `GET /clusters` mac dinh tra toi 100 cum, tuc Dashboard that co the ban toi
+# 100 request - de mac dinh 12 cho phep do co kiem soat, tang len khi can.
+DASHBOARD_CARDS = int(os.environ.get("LOAD_TEST_DASHBOARD_CARDS", "12"))
+
+# PATCH /clusters/{id} DOI TRANG THAI incident that tren moi truong dang do,
+# nen tat mac dinh: bat co y bang LOAD_TEST_INCIDENT_WRITE=true.
+INCIDENT_WRITE_ENABLED = os.environ.get(
+    "LOAD_TEST_INCIDENT_WRITE", "").strip().lower() in {"true", "1", "yes"}
+
 SERVICES = ("demo-web", "demo-mobile-api")
 
 # Vai loai loi khac nhau de clustering co cai ma nhom, thay vi mot signature
@@ -76,6 +93,19 @@ class IngestionUser(HttpUser):
         payload = self._payload("ERROR", message)
         payload["stack_trace"] = f"Traceback (most recent call last):\n{exception}: {message}"
         self.client.post("/ingest", json=payload, name="POST /ingest (ERROR)")
+
+    @task(2)
+    def ingest_batch_logs(self):
+        """POST /ingest/batch - body la JSON ARRAY (khong phai object bao ngoai).
+
+        Do rieng voi /ingest de tra loi duoc cau hoi "batch giup gi": cung so
+        log nhung it request hon, nen so sanh req/s va p95 cua dong nay voi
+        `POST /ingest (INFO)` moi thay duoc phan overhead da tiet kiem.
+        """
+        batch = [self._payload("INFO", "Batch listed items successfully")
+                 for _ in range(BATCH_SIZE)]
+        self.client.post("/ingest/batch", json=batch,
+                         name=f"POST /ingest/batch ({BATCH_SIZE} log)")
 
     @task(1)
     def ingest_invalid_log(self):
@@ -175,3 +205,63 @@ class QueryUser(HttpUser):
             return
         cluster_id = random.choice(self.cluster_ids)
         self.client.get(f"/clusters/{cluster_id}", name="GET /clusters/{id}")
+
+    @task(2)
+    def search_aggregations(self):
+        """Histogram + facet cua trang Search.
+
+        Do rieng voi /search: endpoint nay chay aggregation (date_histogram +
+        2 terms agg) thay vi chi lay N log dau, nen chi phi khac han - gop
+        chung mot dong thong ke se che mat endpoint nao that su cham.
+        """
+        self.client.get("/search/aggregations", name="GET /search/aggregations", params={
+            "interval": "hour", "service": random.choice(SERVICES),
+        })
+
+    @task(2)
+    def dashboard_sparklines(self):
+        """Mo phong MOT lan mo Dashboard, khong phai mot request le.
+
+        Moi card goi /clusters/{id}/history rieng nen day la N request lien
+        tiep. Do nhu vay moi thay duoc tai that cua trang Dashboard; neu chi
+        goi 1 lan/task thi so do khong phan anh gi.
+        """
+        if not self.cluster_ids:
+            return
+        for cluster_id in self.cluster_ids[:DASHBOARD_CARDS]:
+            self.client.get(f"/clusters/{cluster_id}/history",
+                            name="GET /clusters/{id}/history")
+
+    @task(1)
+    def acknowledge_incident(self):
+        """PATCH /clusters/{id} - chi chay khi LOAD_TEST_INCIDENT_WRITE=true.
+
+        Tat mac dinh vi no DOI TRANG THAI incident that: chay tren ban deploy
+        se lam cac cum dang `open` thanh `acknowledged`, lam nhieu du lieu demo.
+
+        409 la KET QUA DUNG o day, khong phai loi: nhieu user ao cung ack mot
+        cum, hoac dot (`episode_id`) da doi trang thai giua luc doc va luc ghi
+        -> CAS tu choi dung nhu thiet ke. Tinh thanh loi se lam hong ty le loi
+        cua ca phep do.
+        """
+        if not INCIDENT_WRITE_ENABLED or not self.cluster_ids:
+            return
+        cluster_id = random.choice(self.cluster_ids)
+        response = self.client.get(f"/clusters/{cluster_id}",
+                                   name="GET /clusters/{id} (truoc ack)")
+        if response.status_code != 200:
+            return
+        incident = (response.json() or {}).get("incident") or {}
+        # Chi ack dot dang mo; dot da acknowledged/resolved thi PATCH chi tao
+        # them 409 vo nghia, khong do duoc gi ve duong ghi.
+        if incident.get("status") != "open" or not incident.get("episode_id"):
+            return
+        with self.client.patch(
+            f"/clusters/{cluster_id}",
+            json={"episode_id": incident["episode_id"], "action": "acknowledge"},
+            name="PATCH /clusters/{id} (acknowledge)", catch_response=True,
+        ) as response:
+            if response.status_code in (200, 409):
+                response.success()
+            else:
+                response.failure(f"Mong doi 200 hoac 409, nhan {response.status_code}")
