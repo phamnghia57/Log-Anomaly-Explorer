@@ -91,11 +91,100 @@ Các nguyên nhân thường gặp hơn và cách xử lý:
 6. Mở **Trạng thái hệ thống** trên web để đối chiếu `/health` của Query API, Ingestion và Demo App; màu xanh = HTTP 200 + `status=ok`, đỏ = degraded/không kết nối.
 7. Với dữ liệu tăng nhanh, kiểm tra daily indices `logs-YYYY.MM.DD` và retention theo `RETENTION_DAYS`. Retention drop trọn ngày cũ, và drop legacy `logs` khi log mới nhất trong đó đã quá `RETENTION_DAYS` (log ghi `retention: giu index legacy ...` / `da drop index legacy ...`). Cần giữ legacy để backup/migrate thì đặt `RETENTION_DROP_LEGACY_INDEX=false` trước khi nó hết hạn. Không xóa `logs-quarantine` bằng daily retention.
 
-## Khi sửa cấu hình (`.env`, `Caddyfile`) mà không thấy hiệu lực
+## Khi AI Assistant không trả lời được
+
+`GET /assistant/health` **luôn trả HTTP 200** — đây là một dòng thông tin trên trang "Trạng thái
+hệ thống", không phải healthcheck của container (trả 503 sẽ khiến UI chỉ hiện "HTTP 503" thay vì
+lý do thật). Vì vậy đọc field `status`, đừng đọc HTTP status; UI cũng dựa vào `status === "ok"`
+nên hết quota vẫn hiện đỏ đúng. Endpoint này **không gọi** Azure OpenAI (trang này poll 15s/lần,
+gọi thật sẽ tốn phí) — nó chỉ đọc cấu hình + kết quả **lần gọi thật gần nhất**, nên luôn kèm
+`last_call_at` (UI hiện "Gọi Azure OpenAI lần cuối ..."). Dùng mốc đó để biết sự cố xảy ra từ khi
+nào, và để phân biệt "chưa ai hỏi gì" với "hỏi rồi nhưng lỗi".
+
+```bash
+curl -s https://<domain>/assistant/health        # khong can dang nhap
+```
+
+| `status` | Nghĩa | Hành động |
+|---|---|---|
+| `ok` | cấu hình đủ, lần gọi gần nhất thành công (kèm `model`) | Không cần làm gì |
+| `chưa cấu hình` | thiếu `AZURE_OPENAI_API_KEY` hoặc `AZURE_OPENAI_ENDPOINT` (lý do cụ thể trong `detail`) | Bổ sung vào `.env` rồi `docker compose up -d --force-recreate query-api` (xem mục dưới: đổi `.env` **không** tự có hiệu lực) |
+| `kho hội thoại chưa sẵn sàng` | `query-api` khởi động khi OpenSearch chưa lên, nên index `assistant-conversations` chưa được tạo | Kiểm tra OpenSearch (`docker compose ps`), rồi `docker compose restart query-api` |
+| `lỗi gọi gần nhất: <Lỗi>` | lần gọi Azure OpenAI thật gần nhất đã lỗi | Theo loại lỗi bên dưới |
+
+Các `<Lỗi>` hay gặp (tên class của SDK, hiện nguyên văn trên UI):
+
+1. **`RateLimitError`** — hết quota/TPM của deployment. Kiểm tra quota trên Azure Portal cho
+   deployment `AZURE_OPENAI_DEPLOYMENT` (mặc định `gpt-5-mini`). Đây là lỗi hay gặp nhất khi demo
+   nhiều lần liên tiếp; chờ hết cửa sổ tính quota là tự hết, không cần sửa gì.
+2. **`APITimeoutError`** — một lần gọi vượt `AZURE_OPENAI_TIMEOUT_SECONDS` (mặc định `60`). Model
+   dòng reasoning có thể suy luận rất lâu; hỏi ngắn/cụ thể hơn, hoặc giảm
+   `ASSISTANT_REASONING_EFFORT` (mặc định `low`), hoặc giảm `ASSISTANT_MAX_TOOL_ROUNDS`
+   (mặc định `2`). Tăng timeout là lựa chọn cuối — nó chỉ dịch chỗ treo sang người dùng.
+3. **`PermissionDeniedError` / lỗi chặn theo vùng** — đã gặp thật: VM đặt ở vùng Azure Hong Kong
+   bị OpenAI trực tiếp chặn theo khu vực địa lý. Cách giải quyết đã áp dụng: dùng **Azure OpenAI**
+   (resource ở vùng không bị chặn) thay cho API OpenAI trực tiếp. Nếu tạo lại resource, kiểm tra
+   vùng trước khi deploy model.
+4. **`AuthenticationError`** — key đã rotate/hết hạn, hoặc `AZURE_OPENAI_ENDPOINT` trỏ sai
+   resource. Lưu ý endpoint phải ở dạng `<endpoint>/openai/v1/` (xem
+   `assistant/config.py::azure_openai_v1_base_url`) — dùng `api-version` cũ cố định sẽ khiến
+   `reasoning_effort` và các tham số mới **bị âm thầm bỏ qua**, không báo lỗi gì.
+
+Khi gửi câu hỏi mà UI báo lỗi, phân biệt 2 nhóm bằng **nội dung thông báo**:
+
+- **`AI Assistant loi: <TênLỗi>`** — lỗi từ phía model/storage, đã được backend bắt và báo về
+  (nhánh JSON trả 502, nhánh streaming gửi event `error`). Tra `<TênLỗi>` theo bảng trên.
+- **`Luồng trả lời của AI Assistant bị ngắt giữa chừng.`** — stream SSE kết thúc mà không có event
+  `conversation` cuối cùng. Đây **không phải** lỗi của model.
+
+### Khi "luồng trả lời bị ngắt giữa chừng"
+
+Dấu hiệu quyết định: **tải lại Incident View thấy câu trả lời đã có**. Nghĩa là backend đã chạy
+xong trọn vẹn và lưu hội thoại, chỉ có đường truyền về browser bị cắt — đừng đi debug model hay
+prompt. Đã gặp thật một lần, nguyên nhân là **lệch phiên bản giữa frontend và backend**: frontend
+trên Vercel tự deploy ngay khi merge vào `main`, còn container trên VM vẫn chạy image cũ, nên
+frontend gửi `Accept: text/event-stream` cho một backend chưa biết trả SSE. Cách xử lý: rebuild
+đúng các container bị ảnh hưởng (xem mục kế tiếp).
+
+Kiểm tra lệch phiên bản trước mọi thứ khác — nhanh và loại được nguyên nhân phổ biến nhất:
+
+```bash
+docker compose exec query-api grep -c "text/event-stream" query-api/src/assistant/router.py
+# 0 hoac bao khong co file -> image cu, rebuild; >0 -> code da moi, xem buoc duoi
+```
+
+Nếu code đã mới, khoanh vùng hop nào cắt stream bằng cách chạy **cùng một request qua 3 chặng** và
+so kết quả. Chặng nào kết thúc mà **không có** dòng `data: {"conversation":...}` chính là chặng cắt:
+
+```bash
+TOKEN=$(curl -s -X POST https://<domain>/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"<admin>","password":"<pass>"}' \
+  | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+
+probe() {
+  curl -N -s -X POST "$1/assistant/clusters/<cluster_id>/conversation/messages" \
+    -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+    -H 'Accept: text/event-stream' -d '{"message":"Loi nay do dau?"}' \
+  | while IFS= read -r l; do printf '[%s] %.120s\n' "$(date +%T)" "$l"; done
+}
+
+probe http://localhost:9002            # 1. thang query-api (bo qua Caddy + Vercel)
+probe https://<domain>                 # 2. qua Caddy gateway
+probe https://<app>.vercel.app/api     # 3. qua Vercel rewrite
+```
+
+Lưu ý khi đọc: stream có **khoảng lặng dài là bình thường** — vòng gọi tool đầu tiên không sinh
+chữ nào, nên có thể im lặng tới `AZURE_OPENAI_TIMEOUT_SECONDS` giây trước byte đầu tiên (UI hiện
+"AI đang điều tra…" kèm nút **Dừng**). Vercel cắt proxy tới origin ngoài nếu không nhận được dữ
+liệu nào trong 120 giây, nên nếu chặng 3 chết mà chặng 1–2 đủ, hướng xử lý là gửi heartbeat định
+kỳ trong lúc chờ (dòng comment `: ping` — client bỏ qua an toàn vì chỉ đọc dòng `data: `).
+
+## Khi sửa cấu hình (`.env`, `Caddyfile`) hoặc merge code mà không thấy hiệu lực
 
 Phát hiện thật qua vận hành: `docker compose up -d` (không kèm `--force-recreate`) **không tự
 khởi động lại container** nếu Compose không phát hiện thay đổi trong chính file
-`docker-compose.yml` (image, biến môi trường khai báo trực tiếp...). Hai trường hợp hay gặp:
+`docker-compose.yml` (image, biến môi trường khai báo trực tiếp...). Ba trường hợp hay gặp:
 
 - **Đổi giá trị trong `.env`** (biến đọc qua `${VAR:-default}`) mà container đã chạy từ trước khi
   `.env` tồn tại hoặc thay đổi — container cũ vẫn giữ giá trị môi trường lúc nó được tạo. Sửa:
@@ -104,6 +193,21 @@ khởi động lại container** nếu Compose không phát hiện thay đổi t
   file dù nội dung trên đĩa đã đổi, vì tiến trình bên trong chỉ đọc file **lúc khởi động**. Sửa:
   `docker compose restart <service>` (không cần `--force-recreate`, chỉ cần khởi động lại tiến
   trình để nó đọc lại file).
+- **Merge PR xong, `git pull` trên VM nhưng chưa rebuild image** — code Python được `COPY` vào
+  image lúc build, **không** mount volume, nên `git pull` một mình không đổi gì bên trong
+  container đang chạy. Sửa: `docker compose up -d --build <service>` cho **từng service có code
+  thay đổi**. Lưu ý `query-api` và `clustering` còn `COPY ingestion` (dùng chung
+  `ingestion.src.storage`), nên một PR chỉ sửa `ingestion/` vẫn có thể cần rebuild cả 3.
+
+  Đây là bẫy nguy hiểm nhất của bản deploy này, vì **frontend và backend không deploy cùng nhịp**:
+  `web/` trên Vercel tự deploy ngay khi merge vào `main`, còn backend trên VM chỉ đổi khi có người
+  rebuild. Khoảng lệch đó tạo ra lỗi khó đoán — đã gặp thật với AI Assistant (xem mục trên:
+  frontend mới gửi `Accept: text/event-stream` cho backend cũ chưa biết trả SSE). Sau mỗi lần
+  merge PR có đổi code backend, rebuild trước khi test UI, và xác nhận code đã thật sự vào
+  container:
+  ```bash
+  docker compose exec <service> grep -c "<chuoi-moi-cua-PR>" <duong/dan/file.py>
+  ```
 
 Luôn verify lại bằng lệnh đọc trực tiếp cấu hình đang chạy thật, đừng tin vào việc "đã sửa file
 là xong":
