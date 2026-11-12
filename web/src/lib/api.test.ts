@@ -433,10 +433,11 @@ describe("admin login and authenticated API requests", () => {
 });
 
 describe("getJaegerTraceUrl", () => {
-  it("tra ve null khi VITE_JAEGER_URL khong duoc cau hinh (mac dinh luc test)", () => {
-    // Khong co .env.local/.env.test trong repo nen VITE_JAEGER_URL luc test la
-    // undefined - dung lai module da import san (khong can stub).
-    expect(getJaegerTraceUrl("abc123")).toBeNull();
+  it("tra ve null khi VITE_JAEGER_URL khong duoc cau hinh (mac dinh luc test)", async () => {
+    vi.stubEnv("VITE_JAEGER_URL", undefined);
+    vi.resetModules();
+    const { getJaegerTraceUrl: getUrl } = await import("./api");
+    expect(getUrl("abc123")).toBeNull();
   });
 
   it("tra ve null khi trace_id rong, du da cau hinh JAEGER_URL", async () => {
