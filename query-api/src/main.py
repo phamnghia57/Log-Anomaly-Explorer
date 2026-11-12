@@ -24,9 +24,11 @@ mot index `clusters` ma worker cua Nam ghi vao.
 from __future__ import annotations
 
 import logging
+import asyncio
+from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
@@ -40,16 +42,44 @@ from .assistant.router import public_router as assistant_public_router, router a
 from .assistant.storage import ConversationRepository
 from .telemetry import setup_telemetry
 from .users import UserRepository
+from .sessions import SessionRepository
+from .login_limits import LoginLimiter
+from .incident_requests import IncidentPatch, ResolveIncident
+from . import config as query_config
+from clustering.src.incidents import IncidentConflict, IncidentRepository
 
 logger = logging.getLogger("query-api")
 
-app = FastAPI(title="Log Anomaly Explorer - Query & Incident API")
+@asynccontextmanager
+async def lifespan(app):
+    async def cleanup_auth():
+        while True:
+            await asyncio.sleep(3600)
+            for name in ("session_repository", "login_limiter"):
+                repository = getattr(app.state, name, None)
+                if repository is not None:
+                    try:
+                        await asyncio.to_thread(repository.cleanup)
+                    except StorageError:
+                        logger.warning("Expired records cleanup unavailable for %s", name)
+    task = asyncio.create_task(cleanup_auth())
+    try:
+        yield
+    finally:
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
+
+app = FastAPI(title="Log Anomaly Explorer - Query & Incident API", lifespan=lifespan)
 
 # API doc log (GET), login va Assistant JSON (POST) - frontend khac domain backend.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["GET", "POST"],
+    allow_origins=list(query_config.AUTH_ALLOWED_ORIGINS),
+    allow_methods=["GET", "POST", "PATCH"],
     allow_headers=["*"],
 )
 
@@ -71,6 +101,8 @@ setup_telemetry(app)
 store: LogStore = build_store()
 # Dung lai client hien co; memory backend chi ho tro cac route doc/dev, khong login.
 app.state.user_repository = UserRepository(store) if isinstance(store, OpenSearchLogStore) else None
+app.state.session_repository = SessionRepository(store) if isinstance(store, OpenSearchLogStore) else None
+app.state.login_limiter = LoginLimiter(store) if isinstance(store, OpenSearchLogStore) else None
 app.include_router(auth_router)
 
 
@@ -116,6 +148,7 @@ def _build_conversation_repository():
 # ma khong tao vong import voi main.py.
 app.state.store = store
 app.state.cluster_store = cluster_store
+app.state.incident_repository = IncidentRepository(cluster_store) if cluster_store is not None else None
 app.state.assistant_conversations = _build_conversation_repository()
 app.include_router(assistant_router, dependencies=[Depends(require_admin)])
 # /assistant/health KHONG gan require_admin: trang "Trang thai he thong" doc
@@ -223,6 +256,25 @@ def _require_cluster_store():
     return cluster_store
 
 
+@app.get("/clustering/health")
+def clustering_health():
+    last_processed_at = None
+    reason = "missing"
+    try:
+        last_processed_at = _require_cluster_store().get_heartbeat()
+        if last_processed_at is not None:
+            processed_at = datetime.fromisoformat(last_processed_at.replace("Z", "+00:00"))
+            age = (datetime.now(timezone.utc) - processed_at).total_seconds()
+            reason = "stale" if age > query_config.CLUSTER_HEARTBEAT_STALE_SECONDS else None
+    except (StorageError, HTTPException, ValueError, TypeError):
+        reason = "storage_unavailable"
+    return JSONResponse(
+        status_code=503 if reason else 200, headers={"Cache-Control": "no-store"},
+        content={"status": "degraded" if reason else "ok", "reason": reason,
+                 "last_processed_at": last_processed_at},
+    )
+
+
 @app.get("/clusters", dependencies=[Depends(require_admin)])
 def list_clusters(
     status: str | None = None,
@@ -249,6 +301,7 @@ def list_clusters(
 
 @app.get("/clusters/{cluster_id}", dependencies=[Depends(require_admin)])
 def get_cluster(
+    request: Request,
     cluster_id: str,
     logs_limit: int = Query(default=config.DEFAULT_SEARCH_LIMIT, ge=1, le=config.MAX_SEARCH_LIMIT),
     logs_offset: int = Query(default=0, ge=0),
@@ -272,7 +325,38 @@ def get_cluster(
 
     log_ids = cluster.get("log_ids", [])
     logs = store.get_logs(log_ids[logs_offset:logs_offset + logs_limit])
-    return {**cluster, "logs": logs, "logs_total": len(log_ids)}
+    incidents = getattr(request.app.state, "incident_repository", None)
+    incident = None
+    if incidents is not None:
+        try:
+            incident = incidents.current(cluster)
+        except StorageError:
+            logger.warning("Incident storage unavailable")
+    return {**cluster, "logs": logs, "logs_total": len(log_ids), "incident": incident}
+
+
+@app.patch("/clusters/{cluster_id}")
+def patch_cluster(request: Request, cluster_id: str, change: IncidentPatch,
+                  admin: dict = Depends(require_admin)):
+    cluster = _require_cluster_store().get_cluster(cluster_id)
+    if cluster is None:
+        raise HTTPException(404, "cluster not found")
+    incidents = getattr(request.app.state, "incident_repository", None)
+    if incidents is None:
+        raise HTTPException(503, "Incident storage unavailable")
+    resolution = None
+    if isinstance(change, ResolveIncident):
+        resolution = {
+            "disposition": change.disposition, "note": change.note,
+            "window_from": change.window_from.astimezone(timezone.utc).isoformat(),
+            "window_to": change.window_to.astimezone(timezone.utc).isoformat(),
+        }
+    try:
+        return incidents.apply(cluster, change.episode_id, change.action, admin["sub"], resolution)
+    except IncidentConflict as exc:
+        raise HTTPException(409, str(exc)) from None
+    except StorageError:
+        raise HTTPException(503, "Incident storage unavailable") from None
 
 
 @app.get("/clusters/{cluster_id}/history", dependencies=[Depends(require_admin)])

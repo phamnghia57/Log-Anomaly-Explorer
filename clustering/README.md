@@ -54,7 +54,26 @@ Chỉ nhóm ERROR/FATAL theo service và message chuẩn hoá. Baseline dùng c�
 trước đó, bao gồm cửa sổ không có lỗi. Cần đủ dữ liệu lịch sử để tránh cold-start.
 Đầu ra lưu đúng ClusterRecord vào index clusters, giữ log_ids và trace_ids.
 Mỗi cụm lưu cửa sổ quan sát mới nhất. Worker chạy một instance, không tự chạy bù
-khi dừng lâu; cooldown alert chỉ lưu trong bộ nhớ.
+khi dừng lâu; cooldown alert lưu bền vững trong OpenSearch ở index
+`<CLUSTER_INDEX>-alert-state` (mặc định `clusters-alert-state`). Worker tự tạo
+index này; tài khoản OpenSearch cần quyền tạo, đọc và ghi index.
+
+Cooldown dùng thời điểm epoch sau khi webhook trả 2xx, được đọc bằng realtime
+multi-get và ghi bằng bulk để tránh một request cho mỗi cluster. Restart worker
+vẫn giữ cooldown; webhook lỗi hoặc thiếu URL không bắt đầu cooldown. Lỗi đọc/ghi
+trạng thái được báo ra, không âm thầm chuyển sang RAM. Cần đồng bộ giờ máy worker.
+API gọi trực tiếp `check_and_alert(..., store=store)` dùng cùng cơ chế; bỏ `store`
+chỉ giữ chế độ RAM tương thích cho caller cũ và test.
+
+Chạy một worker tại một thời điểm. Cooldown không phải khóa phân tán cho nhiều
+worker. Webhook và OpenSearch không có transaction chung: nếu process dừng sau
+khi webhook nhận nhưng trước khi ghi cooldown, lần chạy sau có thể gửi lại.
+
+Unit test không cần OpenSearch hay webhook thật:
+
+```powershell
+python -m pytest clustering/tests -q
+```
 
 Query API có thể dùng `OpenSearchStore.list_clusters(status=None, since=None,
 limit=100, offset=0)` và `get_cluster(cluster_id)`. Danh sách sắp theo `last_seen`

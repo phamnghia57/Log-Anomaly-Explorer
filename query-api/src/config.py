@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from urllib.parse import urlsplit
 
 
 def _positive_int(name: str, default: int) -> int:
@@ -17,7 +18,32 @@ def _positive_int(name: str, default: int) -> int:
 
 # Khong co secret mac dinh. Auth phai goi require_jwt_secret() truoc khi dung.
 JWT_SECRET = os.environ.get("JWT_SECRET")
-JWT_EXPIRY_SECONDS = _positive_int("JWT_EXPIRY_SECONDS", 3600)
+JWT_EXPIRY_SECONDS = _positive_int("JWT_EXPIRY_SECONDS", 900)
+AUTH_REFRESH_TTL_SECONDS = _positive_int("AUTH_REFRESH_TTL_SECONDS", 604800)
+AUTH_SESSIONS_INDEX = os.environ.get("AUTH_SESSIONS_INDEX", "auth-sessions")
+AUTH_LOGIN_LIMIT_INDEX = os.environ.get("AUTH_LOGIN_LIMIT_INDEX", "auth-login-limits")
+AUTH_LOGIN_MAX_ATTEMPTS = _positive_int("AUTH_LOGIN_MAX_ATTEMPTS", 5)
+AUTH_LOGIN_WINDOW_SECONDS = _positive_int("AUTH_LOGIN_WINDOW_SECONDS", 300)
+AUTH_LOGIN_LOCK_SECONDS = _positive_int("AUTH_LOGIN_LOCK_SECONDS", 300)
+CLUSTER_HEARTBEAT_STALE_SECONDS = 3 * _positive_int("WINDOW_SECONDS", 60)
+if not AUTH_LOGIN_LIMIT_INDEX.strip():
+    raise ValueError("AUTH_LOGIN_LIMIT_INDEX must not be empty")
+if not AUTH_SESSIONS_INDEX.strip():
+    raise ValueError("AUTH_SESSIONS_INDEX must not be empty")
+_cookie_secure = os.environ.get("AUTH_COOKIE_SECURE", "true").lower()
+if _cookie_secure not in {"true", "false"}:
+    raise ValueError("AUTH_COOKIE_SECURE must be true or false")
+AUTH_COOKIE_SECURE = _cookie_secure == "true"
+AUTH_ALLOWED_ORIGINS = tuple(origin.strip() for origin in os.environ.get(
+    "AUTH_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
+).split(",") if origin.strip())
+for _origin in AUTH_ALLOWED_ORIGINS:
+    _url = urlsplit(_origin)
+    if (_url.scheme not in {"http", "https"} or not _url.hostname or _url.username is not None
+            or any(char in _origin for char in "*?#")
+            or _origin != f"{_url.scheme}://{_url.netloc}"):
+        raise ValueError("AUTH_ALLOWED_ORIGINS must contain exact HTTP(S) origins")
+    _url.port  # Validate an explicit port.
 ADMIN_SEED_USERNAME = os.environ.get("ADMIN_SEED_USERNAME")
 ADMIN_SEED_PASSWORD = os.environ.get("ADMIN_SEED_PASSWORD")
 USERS_INDEX = os.environ.get("USERS_INDEX", "users")

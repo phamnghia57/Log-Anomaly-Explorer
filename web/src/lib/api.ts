@@ -6,12 +6,12 @@
 // hinh qua bien moi truong (VITE_API_BASE_URL), khong hardcode.
 
 import {
-  clearSession, getSession, isAuthSession, SESSION_EXPIRED_MESSAGE, useAuthStore,
-  type AuthSession,
+  authGeneration, clearSession, getSession, loginSession, refreshSession,
+  SESSION_EXPIRED_MESSAGE, useAuthStore,
 } from "./auth";
+import { API_BASE_URL, ApiError } from "./api-base";
+export { API_BASE_URL, ApiError } from "./api-base";
 
-export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)
-  ?.replace(/\/$/, "") || "http://localhost:9002";
 
 // Jaeger UI (xem docker-compose.yml muc "jaeger") - rong = khong hien lien
 // ket trace (vd. moi truong chua trien khai Jaeger).
@@ -42,6 +42,25 @@ export interface StructuredLog {
 }
 
 export type ClusterStatus = "normal" | "anomalous" | "alerted";
+export type IncidentDisposition = "confirmed_incident" | "false_positive";
+
+export interface IncidentEpisode {
+  episode_id: string;
+  status: "open" | "acknowledged" | "resolved";
+  window_from: string;
+  window_to: string;
+  acknowledged_at?: string;
+  acknowledged_by?: string;
+  resolved_at?: string;
+  resolved_by?: string;
+  disposition?: IncidentDisposition;
+  note?: string;
+}
+
+export type IncidentAction =
+  | { episode_id: string; action: "acknowledge" }
+  | { episode_id: string; action: "resolve"; disposition: IncidentDisposition; note: string;
+      window_from: string; window_to: string };
 
 // ClusterRecord - docs/architect/contracts/cluster-record.schema.json
 // (+ "logs" duoc query-api dien them o GET /clusters/{id}, xem api-contract.md)
@@ -59,43 +78,10 @@ export interface ClusterRecord {
   // Tong so log_ids cua cum, khong bi cat boi logs_limit - de biet con bao
   // nhieu log chua tai (GET /clusters/{id} phan trang `logs`).
   logs_total?: number;
+  incident?: IncidentEpisode | null;
 }
 
-export class ApiError extends Error {
-  status: number;
-  constructor(message: string, status: number) {
-    super(message);
-    this.status = status;
-    this.name = "ApiError";
-  }
-}
-
-export async function loginAdmin(username: string, password: string): Promise<AuthSession> {
-  let res: Response;
-  try {
-    res = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-      cache: "no-store",
-    });
-  } catch {
-    throw new ApiError("Không kết nối được máy chủ. Vui lòng kiểm tra kết nối và thử lại.", 0);
-  }
-  if (!res.ok) {
-    throw new ApiError(
-      res.status >= 500
-        ? "Dịch vụ đăng nhập tạm thời không khả dụng. Vui lòng thử lại."
-        : "Đăng nhập không thành công. Vui lòng kiểm tra tên đăng nhập và mật khẩu.",
-      res.status,
-    );
-  }
-  const body: unknown = await res.json().catch(() => null);
-  if (!isAuthSession(body)) {
-    throw new ApiError("Không thể hoàn tất đăng nhập. Vui lòng thử lại.", 502);
-  }
-  return { token: body.token, expires_at: body.expires_at };
-}
+export const loginAdmin = loginSession;
 
 // Client chi nhan cac duong dan Query API, khong nhan URL tuy y/URL Jaeger.
 type QueryPath = "/search" | "/search/aggregations" | "/clusters" | `/clusters/${string}`
@@ -104,7 +90,9 @@ type QueryPath = "/search" | "/search/aggregations" | "/clusters" | `/clusters/$
 // `consume` thay cho res.json() khi response khong phai JSON (vd. SSE cua
 // POST .../messages) - dung chung toan bo phan xu ly auth/401/loi mang o duoi
 // thay vi viet lai mot client thu hai.
-async function queryJson<T>(path: QueryPath, params?: Record<string, string | undefined>, signal?: AbortSignal, payload?: Record<string, unknown>, consume?: (response: Response) => Promise<T>): Promise<T> {
+async function queryJson<T>(path: QueryPath, params?: Record<string, string | undefined>, signal?: AbortSignal,
+  payload?: Record<string, unknown>, method: "POST" | "PATCH" = "POST",
+  consume?: (response: Response) => Promise<T>): Promise<T> {
   const url = new URL(`${API_BASE_URL}${path}`);
   const base = new URL(API_BASE_URL);
   // Khong cho dot-segment trong ID thoat ra endpoint/base path da cau hinh.
@@ -115,32 +103,48 @@ async function queryJson<T>(path: QueryPath, params?: Record<string, string | un
     if (value) url.searchParams.set(key, value);
   }
 
-  let res: Response;
-  const session = getSession();
+  const generation = authGeneration();
+  let session = getSession();
   if (!session) throw new ApiError(useAuthStore.getState().status === "expired"
     ? SESSION_EXPIRED_MESSAGE : "Vui lòng đăng nhập để xem dữ liệu.", 401);
-  try {
-    res = await fetch(url.toString(), {
-      headers: {
-        Authorization: `Bearer ${session.token}`,
-        ...(payload ? { "Content-Type": "application/json" } : {}),
-        ...(consume ? { Accept: "text/event-stream" } : {}),
-      },
-      ...(payload ? { method: "POST", body: JSON.stringify(payload) } : {}),
-      signal, cache: "no-store", credentials: "omit", redirect: "error",
-    });
-  } catch (cause) {
-    if (signal?.aborted) throw cause;
-    throw new ApiError(
-      `Khong ket noi duoc toi API (${API_BASE_URL}). Kiem tra VITE_API_BASE_URL va backend co dang chay khong.`,
-      0,
-    );
-  }
-  if (res.status === 401) {
-    // Response cua request cu khong duoc xoa session moi vua dang nhap.
-    if (getSession()?.token === session.token) clearSession("expired");
-    throw new ApiError(useAuthStore.getState().status === "expired"
-      ? SESSION_EXPIRED_MESSAGE : "Vui lòng đăng nhập để xem dữ liệu.", 401);
+  const sessionId = session.session_id;
+  const checkSession = (candidateId: string) => {
+    if (generation !== authGeneration() || getSession()?.session_id !== sessionId) {
+      throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
+    }
+    if (candidateId !== sessionId) {
+      clearSession("expired");
+      throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
+    }
+  };
+  if (Date.parse(session.expires_at) <= Date.now()) session = await refreshSession();
+  let res!: Response;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    if (signal?.aborted) throw signal.reason;
+    checkSession(session.session_id);
+    try {
+      res = await fetch(url.toString(), {
+        headers: {
+          Authorization: `Bearer ${session.token}`,
+          ...(payload ? { "Content-Type": "application/json" } : {}),
+          ...(consume ? { Accept: "text/event-stream" } : {}),
+        },
+        ...(payload ? { method, body: JSON.stringify(payload) } : {}),
+        signal, cache: "no-store", credentials: "omit", redirect: "error",
+      });
+    } catch (cause) {
+      if (signal?.aborted) throw cause;
+      throw new ApiError("Không kết nối được tới API. Vui lòng thử lại.", 0);
+    }
+    checkSession(session.session_id);
+    if (res.status !== 401) break;
+    if (attempt === 0 && res.headers.get("X-Auth-Reason") === "access_expired") {
+      const latest = getSession();
+      session = latest && latest.token !== session.token ? latest : await refreshSession(true);
+      continue;
+    }
+    clearSession("expired");
+    throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
   }
   if (!res.ok) {
     const body = await res.text().catch(() => "");
@@ -148,7 +152,7 @@ async function queryJson<T>(path: QueryPath, params?: Record<string, string | un
   }
   const body = consume ? await consume(res) : await res.json() as T;
   // Request cu co the hoan tat sau logout/doi tai khoan; khong dua data do vao cache moi.
-  if (getSession()?.token !== session.token) throw new ApiError(SESSION_EXPIRED_MESSAGE, 401);
+  checkSession(session.session_id);
   return body;
 }
 
@@ -176,7 +180,7 @@ export function searchAggregations(params: SearchParams, signal?: AbortSignal) {
   return queryJson<SearchAggregations>("/search/aggregations", params, signal);
 }
 
-export type ServiceHealth = { name: string; ok: boolean; status: string };
+export type ServiceHealth = { name: string; ok: boolean; status: string; lastProcessedAt?: string };
 
 // Cac service co /health rieng. Khi deploy Vercel, health URL can tro ve
 // Caddy gateway HTTPS (xem deploy/Caddyfile), khong truy cap Docker host noi bo.
@@ -188,15 +192,22 @@ export const HEALTH_ENDPOINTS = [
   // bao trang thai cau hinh + ket qua goi Azure OpenAI gan nhat (het quota,
   // bi chan vung...), thu ma /health cua query-api khong thay duoc.
   { name: "AI Assistant", url: `${API_BASE_URL}/assistant/health` },
+  { name: "Clustering Worker", url: `${API_BASE_URL}/clustering/health` },
 ];
 
 export async function getSystemHealth(signal?: AbortSignal): Promise<ServiceHealth[]> {
   return Promise.all(HEALTH_ENDPOINTS.map(async ({ name, url }) => {
     try {
       const response = await fetch(url, { signal, cache: "no-store" });
-      if (!response.ok) return { name, ok: false, status: `HTTP ${response.status}` };
-      const body = await response.json() as { status?: string };
-      return { name, ok: body.status === "ok", status: body.status ?? "unknown" };
+      const body = await response.json().catch(() => null) as {
+        status?: string; last_processed_at?: string | null; reason?: string | null;
+      } | null;
+      return {
+        name,
+        ok: response.ok && body?.status === "ok",
+        status: body?.reason ?? (response.ok ? body?.status ?? "unknown" : `HTTP ${response.status}`),
+        ...(body?.last_processed_at ? { lastProcessedAt: body.last_processed_at } : {}),
+      };
     } catch {
       return { name, ok: false, status: "unreachable" };
     }
@@ -208,6 +219,10 @@ export function listClusters(params: { status?: ClusterStatus | ""; since?: stri
     status: params.status || undefined,
     since: params.since,
   }, signal);
+}
+
+export function updateIncident(clusterId: string, change: IncidentAction) {
+  return queryJson<IncidentEpisode>(`/clusters/${encodeURIComponent(clusterId)}`, undefined, undefined, change, "PATCH");
 }
 
 export function getCluster(clusterId: string, params?: { logsLimit?: number; logsOffset?: number }, signal?: AbortSignal) {
@@ -325,7 +340,7 @@ export function streamAssistantMessage(
 ): Promise<AssistantConversation> {
   return queryJson<AssistantConversation>(
     `/assistant/clusters/${encodeURIComponent(clusterId)}/conversation/messages`,
-    undefined, signal, { message },
+    undefined, signal, { message }, "POST",
     (response) => readConversationStream(response, onEvent),
   );
 }

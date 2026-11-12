@@ -6,6 +6,7 @@ import { getJaegerTraceUrl } from "@/lib/api";
 import { AppShell } from "@/components/layout/AppShell";
 import { ClusterStatusBadge } from "@/components/StatusBadge";
 import { LogTable } from "@/components/LogTable";
+import { IncidentActions } from "@/components/incident/IncidentActions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -94,6 +95,8 @@ export function ClusterDetailPage() {
                     <dd className="mt-1">{formatDateTime(cluster.last_seen)}</dd>
                   </div>
                 </dl>
+
+                <IncidentActions key={cluster.cluster_id} clusterId={cluster.cluster_id} incident={cluster.incident ?? null} />
 
                 {cluster.trace_ids?.length > 0 && (
                   <div className="mt-5 border-t pt-4">

@@ -1,26 +1,30 @@
 import { useEffect, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { AUTH_STORAGE_KEY, getSession, restoreSession, useAuthStore } from "@/lib/auth";
+import { getSession, refreshSession, startAuthSync, useAuthStore } from "@/lib/auth";
+import { SYSTEM_HEALTH_QUERY_KEY } from "@/lib/queries";
 
 export function AuthSessionManager({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // clear() huy query dang chay va xoa ca query/mutation cache khi doi phien.
-    const unsubscribe = useAuthStore.subscribe((state, previous) => {
-      if (state.session?.token !== previous.session?.token) queryClient.clear();
-    });
-    if (!getSession()) queryClient.clear();
-    const syncStorage = (event: StorageEvent) => {
-      if (event.key === AUTH_STORAGE_KEY || event.key === null) restoreSession();
+    const clearPrivateCache = () => {
+      queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== SYSTEM_HEALTH_QUERY_KEY[0] });
+      queryClient.getMutationCache().clear();
     };
-    const checkExpiration = () => { getSession(); };
-    window.addEventListener("storage", syncStorage);
+    const unsubscribe = useAuthStore.subscribe((state, previous) => {
+      if (state.generation !== previous.generation) clearPrivateCache();
+    });
+    if (!getSession()) clearPrivateCache();
+    const stopSync = startAuthSync();
+    const checkExpiration = () => {
+      const session = getSession();
+      if (session && Date.parse(session.expires_at) <= Date.now()) void refreshSession().catch(() => {});
+    };
     window.addEventListener("focus", checkExpiration);
     document.addEventListener("visibilitychange", checkExpiration);
     return () => {
       unsubscribe();
-      window.removeEventListener("storage", syncStorage);
+      stopSync();
       window.removeEventListener("focus", checkExpiration);
       document.removeEventListener("visibilitychange", checkExpiration);
     };

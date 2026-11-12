@@ -14,15 +14,16 @@ import {
   getSystemHealth,
   sendAssistantMessage,
   streamAssistantMessage,
+  updateIncident,
   type AssistantStreamEvent,
 } from "./api";
-import { AUTH_STORAGE_KEY, clearSession, getSession, saveSession, useAuthStore } from "./auth";
+import { AUTH_STORAGE_KEY, clearSession, getSession, saveSession, SessionExpiredError, useAuthStore } from "./auth";
 
 describe("query-api client", () => {
   const fetchMock = vi.fn();
 
   beforeEach(() => {
-    saveSession({ token: "test-token", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
+    saveSession({ token: "test-token", session_id: "test-session", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
     vi.stubGlobal("fetch", fetchMock);
   });
 
@@ -40,7 +41,7 @@ describe("query-api client", () => {
     await searchLogs({ service: "demo-web", trace_id: "abc123" });
 
     const calledUrl = new URL(fetchMock.mock.calls[0][0] as string);
-    expect(calledUrl.pathname).toBe("/search");
+    expect(calledUrl.pathname).toBe("/api/search");
     expect(calledUrl.searchParams.get("service")).toBe("demo-web");
     expect(calledUrl.searchParams.get("trace_id")).toBe("abc123");
   });
@@ -61,7 +62,7 @@ describe("query-api client", () => {
     fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ histogram: [], levels: [], services: [] })));
     await searchAggregations({ level: "ERROR", from: "2026-10-01" });
     const url = new URL(fetchMock.mock.calls[0][0] as string);
-    expect(url.pathname).toBe("/search/aggregations");
+    expect(url.pathname).toBe("/api/search/aggregations");
     expect(url.searchParams.get("level")).toBe("ERROR");
   });
 
@@ -101,7 +102,7 @@ describe("query-api client", () => {
     await listClusters({ status: "alerted" });
 
     const calledUrl = new URL(fetchMock.mock.calls[0][0] as string);
-    expect(calledUrl.pathname).toBe("/clusters");
+    expect(calledUrl.pathname).toBe("/api/clusters");
     expect(calledUrl.searchParams.get("status")).toBe("alerted");
   });
 
@@ -121,7 +122,7 @@ describe("query-api client", () => {
     await getCluster("c1", { logsLimit: 200 });
 
     const calledUrl = new URL(fetchMock.mock.calls[0][0] as string);
-    expect(calledUrl.pathname).toBe("/clusters/c1");
+    expect(calledUrl.pathname).toBe("/api/clusters/c1");
     expect(calledUrl.searchParams.get("logs_limit")).toBe("200");
   });
 
@@ -145,7 +146,7 @@ describe("query-api client", () => {
     const body = await getClusterHistory("c1");
 
     const calledUrl = new URL(fetchMock.mock.calls[0][0] as string);
-    expect(calledUrl.pathname).toBe("/clusters/c1/history");
+    expect(calledUrl.pathname).toBe("/api/clusters/c1/history");
     expect(body).toEqual({ cluster_id: "c1", points: [] });
   });
 
@@ -163,7 +164,7 @@ describe("query-api client", () => {
     const body = await getAssistantConversation("c1");
 
     const calledUrl = new URL(fetchMock.mock.calls[0][0] as string);
-    expect(calledUrl.pathname).toBe("/assistant/clusters/c1/conversation");
+    expect(calledUrl.pathname).toBe("/api/assistant/clusters/c1/conversation");
     expect(body).toEqual({ cluster_id: "c1", messages: [] });
   });
 
@@ -180,7 +181,7 @@ describe("query-api client", () => {
     const body = await sendAssistantMessage("c1", "Loi nay la gi?");
 
     const [url, init] = fetchMock.mock.calls[0];
-    expect(new URL(url as string).pathname).toBe("/assistant/clusters/c1/conversation/messages");
+    expect(new URL(url as string).pathname).toBe("/api/assistant/clusters/c1/conversation/messages");
     expect(init).toMatchObject({ method: "POST" });
     expect(JSON.parse((init as RequestInit).body as string)).toEqual({ message: "Loi nay la gi?" });
     expect(body).toEqual(conversation);
@@ -213,7 +214,7 @@ describe("query-api client", () => {
     const body = await streamAssistantMessage("c1", "Loi nay la gi?", (event) => events.push(event));
 
     const [url, init] = fetchMock.mock.calls[0];
-    expect(new URL(url as string).pathname).toBe("/assistant/clusters/c1/conversation/messages");
+    expect(new URL(url as string).pathname).toBe("/api/assistant/clusters/c1/conversation/messages");
     expect((init as RequestInit).method).toBe("POST");
     expect((init as RequestInit).headers).toMatchObject({ Accept: "text/event-stream" });
     expect(events).toEqual([
@@ -256,7 +257,7 @@ describe("query-api client", () => {
 
 describe("admin login and authenticated API requests", () => {
   const fetchMock = vi.fn();
-  const session = () => ({ token: "test-token", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
+  const session = () => ({ token: "test-token", session_id: "test-session", expires_at: new Date(Date.now() + 3_600_000).toISOString() });
 
   beforeEach(() => {
     clearSession();
@@ -278,8 +279,8 @@ describe("admin login and authenticated API requests", () => {
     await expect(loginAdmin("test-admin", "test-password")).resolves.toEqual(result);
 
     expect(fetchMock).toHaveBeenCalledWith(`${API_BASE_URL}/auth/login`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: "test-admin", password: "test-password" }), cache: "no-store",
+      method: "POST", headers: { "Content-Type": "application/json", "X-CSRF-Protection": "1" },
+      body: JSON.stringify({ username: "test-admin", password: "test-password" }), cache: "no-store", credentials: "same-origin", redirect: "error",
     });
     expect(localStorage.getItem(AUTH_STORAGE_KEY)).toBeNull();
   });
@@ -338,6 +339,7 @@ describe("admin login and authenticated API requests", () => {
     fetchMock.mockReturnValueOnce(new Promise<Response>((resolve) => { finish = resolve; }));
     const request = searchLogs({}).catch((cause) => cause);
     const newer = { ...session(), token: "newer-test-token" };
+    clearSession();
     saveSession(newer);
 
     finish(new Response("Unauthorized", { status: 401 }));
@@ -372,7 +374,7 @@ describe("admin login and authenticated API requests", () => {
 
     await loginAdmin("test-admin", "test-password");
 
-    expect(fetchMock.mock.calls[0][1].headers).toEqual({ "Content-Type": "application/json" });
+    expect(fetchMock.mock.calls[0][1].headers).toEqual({ "Content-Type": "application/json", "X-CSRF-Protection": "1" });
   });
 
   it.each([
@@ -389,17 +391,15 @@ describe("admin login and authenticated API requests", () => {
     expect(useAuthStore.getState().status).toBe("expired");
   });
 
-  it("does not fetch when anonymous or expired", async () => {
+  it("does not fetch business data when anonymous and refreshes expired access first", async () => {
     await expect(searchLogs({})).rejects.toMatchObject({ status: 401 });
-    saveSession(session());
-    vi.spyOn(Date, "now").mockReturnValue(Date.now() + 3_600_001);
-    try {
-      await expect(listClusters({})).rejects.toMatchObject({ status: 401 });
-      expect(getSession()).toBeNull();
-      expect(fetchMock).not.toHaveBeenCalled();
-    } finally {
-      vi.restoreAllMocks();
-    }
+    const old = session(); saveSession(old);
+    vi.spyOn(Date, "now").mockReturnValue(Date.parse(old.expires_at) + 1);
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 }));
+    await expect(listClusters({})).rejects.toMatchObject({ status: 401 });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0][0]).toContain("/auth/refresh");
+    vi.restoreAllMocks();
   });
 
   it.each(["..", "."])("rejects cluster IDs that normalize outside the protected endpoint: %s", async (id) => {
@@ -445,6 +445,49 @@ describe("admin login and authenticated API requests", () => {
 
     await expect(request).rejects.toBe(aborted);
     expect(fetchMock.mock.calls[0][1].signal).toBe(controller.signal);
+  });
+
+  it("retries a POST once only after an explicit expired-access rejection", async () => {
+    saveSession(session());
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 401, headers: { "X-Auth-Reason": "access_expired" } }));
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ ...session(), token: "refreshed-token" })));
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ cluster_id: "c1", messages: [] })));
+    await sendAssistantMessage("c1", "Investigate");
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls[1][0]).toContain("/auth/refresh");
+    expect(fetchMock.mock.calls[2][1].headers.Authorization).toBe("Bearer refreshed-token");
+  });
+
+  it.each([true, false])("retries an incident update only when refresh keeps the same session (%s)", async (sameSession) => {
+    const current = session();
+    saveSession(current);
+    const refreshed = { ...current, token: "refreshed-token", session_id: sameSession ? current.session_id : "other-admin" };
+    const change = { action: "acknowledge", episode_id: "c1:1" } as const;
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 401, headers: { "X-Auth-Reason": "access_expired" } }));
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(refreshed)));
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ episode_id: change.episode_id, status: "acknowledged" })));
+
+    const request = updateIncident("c1", change);
+    if (sameSession) {
+      await expect(request).resolves.toMatchObject({ status: "acknowledged" });
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+      expect(fetchMock.mock.calls[2][1]).toMatchObject({
+        method: "PATCH", headers: { Authorization: "Bearer refreshed-token" }, body: JSON.stringify(change),
+      });
+    } else {
+      await expect(request).rejects.toBeInstanceOf(SessionExpiredError);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(getSession()).toBeNull();
+    }
+    expect(fetchMock.mock.calls[1][0]).toContain("/auth/refresh");
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ expected_session_id: current.session_id });
+  });
+
+  it.each([503, 500])("does not replay a business POST on HTTP %s", async (status) => {
+    saveSession(session());
+    fetchMock.mockResolvedValueOnce(new Response("Unavailable", { status }));
+    await expect(sendAssistantMessage("c1", "Investigate")).rejects.toMatchObject({ status });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
 

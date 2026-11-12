@@ -23,6 +23,16 @@
       "type": "string",
       "format": "date-time",
       "description": "window_to cua chu ky clustering luc tinh diem nay - dung lam truc thoi gian khi ve bieu do"
+    },
+    "first_seen": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Bat dau khoang log cua chu ky, luu noi bo de xu ly incident tai phat"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Log moi nhat trong chu ky, luu noi bo de phat hien tai phat sau Resolve"
     }
   },
   "additionalProperties": false

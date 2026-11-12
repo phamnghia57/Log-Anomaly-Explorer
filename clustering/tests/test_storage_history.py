@@ -18,6 +18,9 @@ class FakeIndices:
     def create(self, index, body):
         self.created[index] = body
 
+    def put_mapping(self, index, body):
+        self.created[index]["mappings"]["properties"].update(body["properties"])
+
 
 class FakeClient:
     def __init__(self):
@@ -51,6 +54,37 @@ def test_ensure_ready_tao_index_history_voi_mapping_strict(store):
     assert mapping["properties"]["cluster_id"]["type"] == "keyword"
     assert mapping["properties"]["score"]["type"] == "double"
     assert mapping["properties"]["recorded_at"]["type"] == "date"
+
+
+def test_alert_state_batch_roundtrip_across_store_instances(store):
+    s, client = store
+    documents = {}
+    def bulk(*, body):
+        for action, record in zip(body[::2], body[1::2]):
+            assert action["index"]["_index"] == s.alert_state
+            documents[action["index"]["_id"]] = record
+        return {"errors": False}
+    def mget(*, index, body):
+        assert index == s.alert_state
+        return {"docs": [{"_id": key, "found": key in documents,
+                          "_source": documents.get(key)} for key in body["ids"]]}
+    client.bulk, client.mget = bulk, mget
+    s.write_alert_times(["c1", "c2"], 1234.5)
+    restarted = OpenSearchStore(log_store=OpenSearchLogStore(client))
+    assert restarted.get_alert_times(["c1", "c2", "missing"]) == {"c1": 1234.5, "c2": 1234.5}
+    assert client.indices.created[s.alert_state]["mappings"]["properties"] == {"sent_at": {"type": "double"}}
+
+
+@pytest.mark.parametrize("operation", ["read", "write"])
+def test_alert_state_rejects_partial_failures(store, operation):
+    s, client = store
+    client.mget = lambda **kw: {"docs": [{"error": "unavailable"}]}
+    client.bulk = lambda **kw: {"errors": True}
+    with pytest.raises(StorageError):
+        if operation == "read":
+            s.get_alert_times(["c1"])
+        else:
+            s.write_alert_times(["c1"], 1234)
 
 
 def test_list_history_loc_theo_cluster_id_va_sap_tang_dan(store):

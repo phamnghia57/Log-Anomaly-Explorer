@@ -1,9 +1,12 @@
 import { expect, test } from "@playwright/test";
 
 const STORAGE_KEY = "log-anomaly-explorer.auth";
+test.beforeEach(async ({ page }) => {
+  await page.route("**/auth/refresh", (route) => route.fulfill({ status: 401, json: { detail: "Unauthorized" } }));
+});
 
 test("login persists a session, redirects to dashboard and restores it after reload", async ({ page }, testInfo) => {
-  const session = { token: "browser-test-token", expires_at: new Date(Date.now() + 3_600_000).toISOString() };
+  const session = { token: "browser-test-token", session_id: "test-session", expires_at: new Date(Date.now() + 3_600_000).toISOString() };
   let authenticatedQueries = 0;
   await page.route("**/auth/login", async (route) => {
     expect(route.request().postDataJSON()).toEqual({ username: "test-admin", password: "test-password" });
@@ -27,7 +30,8 @@ test("login persists a session, redirects to dashboard and restores it after rel
   // StrictMode + AbortSignal co the huy mount dau va fetch lai trong dev.
   await expect.poll(() => authenticatedQueries).toBeGreaterThanOrEqual(1);
   const queriesBeforeReload = authenticatedQueries;
-  expect(await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), STORAGE_KEY)).toEqual(session);
+  expect(await page.evaluate((key) => localStorage.getItem(key), STORAGE_KEY)).toBeNull();
+  await page.route("**/auth/refresh", (route) => route.fulfill({ json: session }));
   await page.reload();
   await expect(page.getByRole("heading", { name: "Dashboard", exact: true })).toBeVisible();
   await expect.poll(() => authenticatedQueries).toBeGreaterThan(queriesBeforeReload);
@@ -59,7 +63,7 @@ test("an expired persisted session prompts a new login", async ({ page }) => {
 
   await page.goto("/login");
 
-  await expect(page.getByRole("status")).toHaveText("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+  await expect(page.getByRole("heading", { name: "Đăng nhập quản trị" })).toBeVisible();
   expect(await page.evaluate((key) => localStorage.getItem(key), STORAGE_KEY)).toBeNull();
   await expect(page.getByRole("button", { name: "Đăng nhập", exact: true })).toBeEnabled();
 });

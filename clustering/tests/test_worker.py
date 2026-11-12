@@ -15,7 +15,8 @@ def test_cycle_batches_alerts_then_appends_final_status(monkeypatch):
         def write_history(self, record, end):
             calls.append(("history", record["cluster_id"], record["status"], end))
         def close(self): calls.append(("close",))
-    def send(batch, *, window_to):
+    def send(batch, *, window_to, store):
+        assert isinstance(store, Store)
         assert batch is records
         calls.append(("digest", window_to))
         batch[0][1]["status"] = "alerted"
@@ -30,3 +31,19 @@ def test_cycle_batches_alerts_then_appends_final_status(monkeypatch):
         ("history", "c1", "alerted", "2026-10-26T00:01:00+00:00"),
         ("history", "c2", "normal", "2026-10-26T00:01:00+00:00")]
     assert calls[-1] == ("close",)
+
+
+def test_live_cycle_without_clusters_still_writes_heartbeat(monkeypatch):
+    from datetime import datetime
+    from unittest.mock import Mock
+
+    store = Mock()
+    store.read_logs.return_value = []
+    monkeypatch.setattr(sys, "argv", ["worker", "--once"])
+    monkeypatch.setenv("ML_AUGMENT_ENABLED", "false")
+    monkeypatch.setattr(worker, "OpenSearchStore", lambda: store)
+    worker.main()
+    store.write_heartbeat.assert_called_once()
+    timestamp = datetime.fromisoformat(store.write_heartbeat.call_args.args[0])
+    assert timestamp.tzinfo is not None
+    store.write_history.assert_not_called()
