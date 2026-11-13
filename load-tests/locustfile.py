@@ -152,7 +152,12 @@ class QueryUser(HttpUser):
 
         failure = None
         token = None
+        # X-CSRF-Protection la BAT BUOC voi moi POST /auth/* (xem
+        # query-api/src/auth.py::protect_auth_post) - thieu header nay thi
+        # login tra 403 chu khong phai 401, va ca nhom QueryUser dung ngay.
+        # Khong gui Origin: request khong tu trinh duyet nen bo qua check origin.
         with self.client.post("/auth/login", json={"username": username, "password": password},
+                              headers={"X-CSRF-Protection": "1"},
                               name="POST /auth/login", catch_response=True) as response:
             if response.status_code != 200:
                 failure = f"Query API login failed (HTTP {response.status_code}); stopping user."
