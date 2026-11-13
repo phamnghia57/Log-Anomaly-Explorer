@@ -23,4 +23,4 @@ Thumbs.db
 # lam bang chung chinh thuc trong load-tests/README.md
 load-tests/*.csv
 load-tests/*.html
-!load-tests/ket-qua-load-test_stats.csv
+!load-tests/ket-qua-load-test*_stats.csv
