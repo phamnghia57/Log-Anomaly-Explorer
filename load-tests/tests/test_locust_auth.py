@@ -76,6 +76,8 @@ def test_login_precedes_all_tasks_and_reuses_the_returned_token(query_user):
     assert sent[0].url.endswith("/auth/login")
     assert json.loads(sent[0].body) == credentials
     assert "Authorization" not in sent[0].headers
+    # Thieu header nay thi query-api tra 403 (protect_auth_post), khong phai 401.
+    assert sent[0].headers["X-CSRF-Protection"] == "1"
     assert [request.path_url.split("?")[0] for request in sent[1:]] == [
         "/search", "/search", "/clusters", "/clusters/real-cluster",
     ]
