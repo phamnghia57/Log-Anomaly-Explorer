@@ -147,17 +147,16 @@ tải với API/OpenSearch thật; chỉ ghi live load-test evidence khi thực 
 - `POST /ingest (sai schema)` trả **400 là đúng** — đã được đánh dấu `success` trong locustfile, không tính vào tỷ lệ lỗi.
 - `GET /clusters/{id}` chỉ bắt đầu chạy sau khi `GET /clusters` trả về cụm đầu tiên. Lúc mới khởi động, clustering chưa chạy xong chu kỳ nào nên endpoint này tạm thời không có request — đó là bình thường, không phải lỗi.
 
-## Cần đo lại (evidence hiện tại đã lỗi thời)
+## Cách đo lại
 
-Số liệu ở mục dưới đo ngày **2026-10-23**, **trước khi bật JWT**, và chỉ ở **một mức tải**
-(20 user). Từ đó tới nay hệ thống đã thêm: JWT + refresh/revocation, rate-limit đăng nhập,
-`POST /ingest/batch`, `GET /search/aggregations`, `PATCH /clusters/{cluster_id}` (vòng đời
-incident), daily indices `logs-YYYY.MM.DD`, và AI Assistant. Mỗi request đọc giờ phải qua
-verify JWT, nên **không được dùng lại số cũ** làm evidence cho bản hiện tại.
+Evidence đang dùng đo ngày **2026-11-13** ở **một mức tải** (20 user) — xem mục ngay dưới.
+Còn thiếu mức **10 và 50 user** để thấy điểm bắt đầu xuống cấp. Phải đo lại mỗi khi backend
+đổi thứ nằm trên đường request (auth, storage, endpoint mới): số của bản cũ không dùng lại
+được — bảng 2026-10-23 ở cuối file là ví dụ, đo trước khi bật JWT nên chỉ còn giá trị so sánh
+xu hướng.
 
-Cần chạy lại trên **đúng máy chủ deploy** (số cũ đo trên 2 vCPU/4GB chạy chung OpenSearch +
-Jaeger + clustering — đo ở máy khác thì không so sánh được), qua cổng nội bộ, ở **nhiều mức tải**
-để thấy điểm bắt đầu xuống cấp:
+Chạy trên **đúng máy chủ deploy** (2 vCPU/4GB chạy chung OpenSearch + Jaeger + clustering —
+đo ở máy khác thì không so sánh được), qua cổng nội bộ, không qua gateway:
 
 ```bash
 cd load-tests
@@ -169,18 +168,84 @@ export QUERY_API_USERNAME QUERY_API_PASSWORD
 export INGESTION_HOST=http://localhost:9000 QUERY_API_HOST=http://localhost:9002
 
 for u in 10 20 50; do
-  locust -f locustfile.py --headless --users "$u" --spawn-rate 5 --run-time 3m \
+  locust -f locustfile.py --headless --users "$u" --spawn-rate 1 --run-time 3m \
          --csv "ket-qua-load-test-${u}u"
+  sleep 330
 done
 
 unset QUERY_API_USERNAME QUERY_API_PASSWORD
 ```
 
 Đổi `9000`/`9002` theo `INGESTION_PORT`/`QUERY_API_PORT` trong `.env` của máy chủ. Mỗi mức tải
-sinh ra `ket-qua-load-test-<N>u_stats.csv` — commit cả 3 file vào thư mục này rồi cập nhật bảng
+sinh ra `ket-qua-load-test-<N>u_stats.csv` — commit file vào thư mục này rồi cập nhật bảng
 tóm tắt bên dưới (ghi rõ ngày đo và mức tải). Lưu ý `GET /clusters/{id}` và
 `GET /clusters/{id}/history` chỉ có request sau khi clustering đã chạy xong ít nhất một chu kỳ,
 nên để hệ thống chạy vài phút trước khi đo.
+
+**`--spawn-rate 1` và `sleep 330` không phải cho máy nghỉ.** Mọi simulated user dùng chung một
+tài khoản admin, mà rate-limit login là **5 lần/tài khoản trong 300 giây**, chạm ngưỡng thì khoá
+thêm 300 giây (`AUTH_LOGIN_MAX_ATTEMPTS`/`AUTH_LOGIN_WINDOW_SECONDS`, xem
+`query-api/src/login_limits.py`). Login thành công tự giải phóng budget, nhưng chỉ **sau** khi
+verify Argon2id xong (~160ms, xem bảng dưới), nên spawn nhanh làm nhiều login chồng nhau và
+user thứ 6 ăn 429 — khoá luôn cả đăng nhập web trong 5 phút. Spawn 1 user/giây thì không chồng.
+Nếu `*_failures.csv` vẫn có 429: chờ 5 phút, tạm đặt `AUTH_LOGIN_MAX_ATTEMPTS` cao trong `.env`
+của máy chủ, recreate `query-api`, đo xong trả lại giá trị cũ — và ghi rõ trong bảng là phép đo
+chạy với giới hạn đã nới.
+
+## Kết quả đo được (2026-11-13, 20 user) — evidence hiện hành
+
+Chạy thật trên máy chủ deploy (2 vCPU / 4GB, chạy chung với OpenSearch + Jaeger +
+`clustering`), qua cổng nội bộ, không qua gateway. Bản backend đã có JWT + refresh/revocation,
+rate-limit đăng nhập, `logs` phân trang, daily indices và AI Assistant:
+
+```bash
+locust -f locustfile.py --headless --users 20 --spawn-rate 1 --run-time 3m \
+       --csv ket-qua-load-test-20u
+```
+
+20 user được Locust chia đều cho hai nhóm: 10 `IngestionUser` + 10 `QueryUser`.
+File gốc: [`ket-qua-load-test-20u_stats.csv`](ket-qua-load-test-20u_stats.csv). Tóm tắt:
+
+| Endpoint | Request | Lỗi | Req/s | Median | p95 | p99 | Max |
+|---|---|---|---|---|---|---|---|
+| `POST /ingest` (INFO) | 2950 | 0 | 16.46 | 8 ms | 18 ms | 30 ms | 137 ms |
+| `POST /ingest` (ERROR) | 1215 | 0 | 6.78 | 8 ms | 19 ms | 28 ms | 280 ms |
+| `POST /ingest` (sai schema) | 445 | 0 | 2.48 | 8 ms | 16 ms | 25 ms | 44 ms |
+| `POST /ingest/batch` (50 log) | 851 | 0 | 4.75 | 15 ms | 31 ms | 46 ms | 90 ms |
+| `GET /search` | 396 | 0 | 2.21 | 12 ms | 30 ms | 47 ms | 72 ms |
+| `GET /search` (có filter) | 197 | 0 | 1.10 | 7 ms | 19 ms | 45 ms | 48 ms |
+| `GET /search/aggregations` | 129 | 0 | 0.72 | 14 ms | 34 ms | 48 ms | 60 ms |
+| `GET /clusters` | 227 | 0 | 1.27 | 8 ms | 22 ms | 32 ms | 33 ms |
+| `GET /clusters/{id}` | 166 | 0 | 0.93 | 12 ms | 32 ms | 52 ms | 79 ms |
+| `GET /clusters/{id}/history` | 1573 | 0 | 8.78 | 7 ms | 16 ms | 26 ms | 91 ms |
+| `POST /auth/login` | 10 | 0 | 0.06 | **160 ms** | 260 ms | 260 ms | 265 ms |
+| **Tổng** | **8159** | **0** | **45.52** | 9 ms | 22 ms | 36 ms | 280 ms |
+
+**Nhận xét**:
+- **0 lỗi trên toàn bộ 8159 request** ở 20 user đồng thời, gồm 10/10 login thành công — không
+  có 403 (CSRF) lẫn 429 (rate-limit). Throughput tổng 45.5 req/s, cao hơn mức 37.1 req/s của
+  lần 23/10 dù mỗi request đọc giờ phải verify JWT.
+- **`POST /auth/login` là request chậm nhất hệ thống** (median 160ms, ~20 lần endpoint đọc
+  trung bình). Đây là **đúng thiết kế**, không phải vấn đề hiệu năng: Argon2id cố tình tốn CPU
+  để chống brute-force. Mỗi user chỉ login một lần nên nó không ảnh hưởng tải đọc — khi đánh
+  giá tầng đọc phải tách riêng dòng này.
+- **`GET /clusters/{id}/history` là đường nóng nhất của tầng đọc**: 1573 request / 8.78 req/s,
+  gấp ~7 lần `GET /clusters`, đúng như cảnh báo ở đầu file (mỗi lần mở Dashboard bắn N request,
+  một cho mỗi card). Nó vẫn rẻ (median 7ms) nhưng là endpoint cần theo dõi đầu tiên khi tăng
+  số card hoặc số cụm.
+- **`GET /clusters/{id}` không còn là endpoint chậm nhất** như kết luận ngày 23/10: median
+  530ms → 12ms, p99 1.7s → 52ms. **Chưa xác định được nguyên nhân chắc chắn**, có hai ứng viên
+  và phép đo này không tách được chúng: (a) `logs` giờ được phân trang (`logs_limit` mặc định
+  100, `query-api/src/main.py`) nên không còn `mget` toàn bộ log của cụm — nhưng chỉ ảnh hưởng
+  cụm có hơn 100 log; (b) lượng dữ liệu trong OpenSearch và kích thước cụm lúc đo hai lần khác
+  nhau, không kiểm soát được. Không nên ghi "đã tối ưu xong" ở đâu dựa trên con số này.
+  Nó vẫn là endpoint đọc có đuôi dài nhất (p99 52ms, max 79ms).
+- Phương pháp khác lần 23/10 ở hai điểm, cần biết khi so: lần này **3 phút / spawn-rate 1**,
+  lần trước **2 phút / spawn-rate 2**. Spawn chậm hơn là bắt buộc vì rate-limit login (xem mục
+  trên); thời gian dài hơn cho số ổn định hơn. Throughput và percentile tính theo tỉ lệ nên vẫn
+  so sánh được.
+- **Chưa đo mức 10 và 50 user**, nên chưa biết điểm bắt đầu xuống cấp. Ở 20 user hệ thống còn
+  rất thoải mái (p99 toàn hệ thống 36ms), chưa thấy dấu hiệu bão hoà.
 
 ## Kết quả đo được (2026-10-23) — evidence lịch sử, đã lỗi thời
 
