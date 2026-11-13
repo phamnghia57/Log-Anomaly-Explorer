@@ -17,7 +17,7 @@
 
 ## Evidence sở hữu
 
-- **Labeled incidents**: `evaluation/labeled_incidents.json` — mỗi sự cố thật được gán nhãn thủ công, thường tạo ra từ fault injection của Mạnh
+- **Labeled incidents**: `evaluation/labeled_incidents.json` — đồng bộ bộ 10 incident của [run 23/10/2026](evaluation/runs/20261023T164049Z/labels.json), gồm hai platform và năm fault. Nhãn suy ra từ tham số fault injection, đang chờ nhóm review; không phải nhãn production đã được xác nhận độc lập.
 - **Precision/recall**: `evaluation/precision_recall.py` — đo trên labeled incidents ở trên
 - **Alert webhook (gửi thật)**: `ALERT_WEBHOOK_URL` trỏ sang một Custom Webhook trên Make.com,
   nối tiếp sang Gmail — đã test và **nhận được email thật** khi một cụm vượt
@@ -116,9 +116,14 @@ Thời gian trong file dùng UTC; run ID là thời điểm bắt đầu baselin
 Để tính lại metrics từ thư mục gốc, sau khi cài requirements:
 
 ```powershell
-python -B -m clustering.evaluation.precision_recall --predictions clustering/evaluation/runs/20261023T164049Z/predictions-rule.json --labels clustering/evaluation/runs/20261023T164049Z/labels.json
-python -B -m clustering.evaluation.precision_recall --predictions clustering/evaluation/runs/20261023T164049Z/predictions-ml.json --labels clustering/evaluation/runs/20261023T164049Z/labels.json
+python -B -m clustering.evaluation.precision_recall --predictions clustering/evaluation/runs/20261023T164049Z/predictions-rule.json
+python -B -m clustering.evaluation.precision_recall --predictions clustering/evaluation/runs/20261023T164049Z/predictions-ml.json
 ```
+
+Đã chạy lại hai lệnh trên ngày 13/11/2026 với nhãn mặc định và tái tạo đúng
+precision=1,0, recall=1,0, TP=10, FP=0, FN=0 cho cả hai phương án.
+Đây là tính lại từ predictions đã lưu, không phải một đợt fault injection mới.
+Chi tiết kiểm tra: [evaluation/REPRODUCIBILITY.md](evaluation/REPRODUCIBILITY.md).
 
 Harness tạo dữ liệu: `evaluation/fresh_run.py`, chạy trong mạng Docker có
 `opensearch`, `pr-eval-ingestion:8000`, `pr-eval-demo:8001`; ingestion phải dùng
