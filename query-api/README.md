@@ -74,9 +74,10 @@ Trace chỉ được gửi đi khi có `OTEL_EXPORTER_OTLP_ENDPOINT` (trong Dock
 sang `http://jaeger:4318`). Không đặt biến này thì service chạy bình thường, chỉ là không gửi
 span — Jaeger chết cũng **không** làm service lỗi (chỉ log `Failed to export spans batch`).
 
-Dùng để làm gì: load test đo được `GET /clusters/{id}` là endpoint chậm nhất (median 530ms,
-p99 1.7s — xem [`../load-tests/README.md`](../load-tests/README.md)). Có trace + metrics thì
-biết được thời gian đó tiêu ở đâu thay vì chỉ đoán.
+Dùng để làm gì: load test 2026-10-23 đo được `GET /clusters/{id}` là endpoint chậm nhất (median
+530ms, p99 1.7s); đo lại 2026-11-13 chỉ còn median 12ms, và chỗ tốn thời gian nhất giờ là
+`POST /auth/login` 160ms do Argon2id (xem [`../load-tests/README.md`](../load-tests/README.md)).
+Có trace + metrics thì biết được thời gian đó tiêu ở đâu thay vì chỉ đoán.
 
 **Lưu ý về `/clusters*`**: đọc cụm qua `clustering.src.storage.OpenSearchStore` (Nam), mà
 lớp này **bắt buộc `STORAGE_BACKEND=opensearch`**. Khi chạy `STORAGE_BACKEND=memory`,

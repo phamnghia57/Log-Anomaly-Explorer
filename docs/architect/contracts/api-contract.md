@@ -80,8 +80,9 @@ Response:
 }
 ```
 
-`logs` được **phân trang** — một cụm có thể gồm hàng trăm log, trả hết trong một response làm
-endpoint này chậm nhất hệ thống (đo thật: median 530ms, p99 1.7s — xem `load-tests/README.md`).
+`logs` được **phân trang** — một cụm có thể gồm hàng trăm log, trả hết trong một response từng
+làm endpoint này chậm nhất hệ thống (đo 2026-10-23, trước khi phân trang: median 530ms, p99
+1.7s; đo lại 2026-11-13: median 12ms, p99 52ms — xem `load-tests/README.md`).
 `logs_total` là tổng số `log_ids` của cụm (không bị cắt bởi `logs_limit`), để UI biết còn bao
 nhiêu log chưa tải. Lưu ý `len(logs)` có thể **nhỏ hơn** số lượng yêu cầu nếu log trong trang đó
 đã bị retention xoá.
