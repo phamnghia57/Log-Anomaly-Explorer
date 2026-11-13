@@ -31,7 +31,7 @@ jobs:
       # fail-fast: false de mot module hong khong huy ket qua cac module con lai
       fail-fast: false
       matrix:
-        module: [demo-app, ingestion, clustering, query-api]
+        module: [demo-app, ingestion, clustering, query-api, load-tests]
 
     steps:
       - uses: actions/checkout@v4
