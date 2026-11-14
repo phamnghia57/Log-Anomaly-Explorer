@@ -197,8 +197,10 @@ jobs:
           pip install -r query-api/requirements.txt -r ingestion/requirements.txt \
                       -r load-tests/requirements-dev.txt
 
-      - name: Seed tai khoan admin
-        run: python -m query-api.src.seed_admin
+      - name: Tao index auth va seed tai khoan admin
+        run: |
+          python -m query-api.src.manage_auth init
+          python -m query-api.src.seed_admin
 
       - name: Khoi dong ingestion va query-api
         run: |
