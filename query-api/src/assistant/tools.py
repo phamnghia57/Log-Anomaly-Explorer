@@ -9,7 +9,12 @@ Chi doc (read-only). Khong co tool ghi/sua du lieu.
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta, timezone
+
+import httpx
+
+from . import config
 
 # Mac dinh tim trong 24h gan nhat neu AI khong chi dinh - giong default cua
 # GET /search (api-contract.md), tranh quet toan bo lich su khi AI chi can
@@ -19,6 +24,10 @@ DEFAULT_SEARCH_WINDOW_HOURS = 24
 # (system prompt va ket qua tool) - phan dau da du de nhan ra nguyen nhan, giu
 # nguyen ca cai chi lam phinh token va cham vong goi model tiep theo.
 MAX_STACK_TRACE_CHARS = 500
+MAX_TRACE_SPANS = 50
+_TRACE_ID_PATTERN = re.compile(r"^[0-9a-fA-F]{1,32}$")
+TRACE_NOT_FOUND_HINT = ("Jaeger giu trace trong RAM nen trace cu hoac trace truoc lan restart "
+                        "gan nhat co the da bi day ra; khong ket luan la request khong xay ra.")
 
 TOOL_SCHEMAS = [
     {
@@ -69,8 +78,50 @@ TOOL_SCHEMAS = [
     },
 ]
 
+_GET_TRACE_SCHEMA = {
+    "type": "function",
+    "function": {
+        "name": "get_trace",
+        "description": (
+            "Doc trace phan tan theo trace_id lay tu log - tra ve danh sach span theo thu tu "
+            "thoi gian kem service, operation, thoi gian chay (ms) va co loi hay khong. Dung "
+            "de biet CHINH XAC buoc nao trong request bi cham hoac that bai, thay vi chi doan "
+            "tu message cua log."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "trace_id": {"type": "string", "description": "trace_id hex lay tu log mau hoac search_related_logs"},
+            },
+            "required": ["trace_id"],
+            "additionalProperties": False,
+        },
+    },
+}
+
+
+def tool_schemas() -> list[dict]:
+    if not config.JAEGER_QUERY_URL:
+        return list(TOOL_SCHEMAS)
+    return [*TOOL_SCHEMAS, _GET_TRACE_SCHEMA]
+
+
 _CLUSTER_SUMMARY_FIELDS = ("cluster_id", "signature", "score", "status", "last_seen")
 _LOG_SUMMARY_FIELDS = ("timestamp", "service", "level", "message", "trace_id")
+
+
+def _span_summary(span: dict, processes: dict) -> dict:
+    tags = {tag.get("key"): tag.get("value") for tag in span.get("tags") or []}
+    summary = {
+        "service": (processes.get(span.get("processID")) or {}).get("serviceName"),
+        "operation": span.get("operationName"),
+        "duration_ms": round((span.get("duration") or 0) / 1000, 1),
+    }
+    if tags.get("error") is True or str(tags.get("otel.status_code", "")).upper() == "ERROR":
+        summary["error"] = True
+    if "http.status_code" in tags:
+        summary["http_status"] = tags["http.status_code"]
+    return summary
 
 
 def _log_summary(log: dict) -> dict:
@@ -116,6 +167,28 @@ class ToolExecutor:
         # Chi giu field AI thuc su dung: nhoi nguyen log document (ca metadata,
         # stack_trace day) vao message role=tool lam phinh token vong goi tiep theo.
         return {"total": total, "results": [_log_summary(log) for log in results]}
+
+    def _tool_get_trace(self, arguments: dict) -> dict:
+        if not config.JAEGER_QUERY_URL:
+            return {"error": "jaeger is not configured"}
+        trace_id = str(arguments.get("trace_id") or "").strip()
+        if not _TRACE_ID_PATTERN.match(trace_id):
+            return {"error": "trace_id must be a hex string of at most 32 characters"}
+        response = httpx.get(f"{config.JAEGER_QUERY_URL}/api/traces/{trace_id}",
+                             timeout=config.JAEGER_TIMEOUT_SECONDS)
+        if response.status_code == 404:
+            return {"error": "trace not found", "hint": TRACE_NOT_FOUND_HINT}
+        response.raise_for_status()
+        traces = response.json().get("data") or []
+        if not traces:
+            return {"error": "trace not found", "hint": TRACE_NOT_FOUND_HINT}
+        processes = traces[0].get("processes") or {}
+        spans = sorted(traces[0].get("spans") or [], key=lambda span: span.get("startTime") or 0)
+        return {
+            "trace_id": traces[0].get("traceID") or trace_id,
+            "span_count": len(spans),
+            "spans": [_span_summary(span, processes) for span in spans[:MAX_TRACE_SPANS]],
+        }
 
     def _tool_list_active_clusters(self, arguments: dict) -> dict:
         if self.cluster_store is None:

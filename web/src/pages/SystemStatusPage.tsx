@@ -2,9 +2,13 @@ import { AppShell } from "@/components/layout/AppShell";
 import { useSystemHealth } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/format";
+import { getDeployMismatch, WEB_GIT_SHA } from "@/lib/api";
 
 export function SystemStatusPage() {
   const { data, isPending, refetch } = useSystemHealth();
+  const mismatchedBackend = getDeployMismatch(
+    WEB_GIT_SHA, data?.find((service) => service.name === "Query API")?.version,
+  );
   return (
     <AppShell title="Trạng thái hệ thống">
       <div className="space-y-4">
@@ -12,6 +16,13 @@ export function SystemStatusPage() {
           <p className="text-sm text-muted-foreground">Kiểm tra /health của từng dịch vụ, làm mới mỗi 15 giây.</p>
           <Button variant="outline" size="sm" onClick={() => { void refetch(); }}>Kiểm tra lại</Button>
         </div>
+        {mismatchedBackend && (
+          <div className="rounded-xl border border-amber-500 bg-amber-50 p-4 text-sm text-amber-900" role="alert">
+            Backend đang chạy bản <code>{mismatchedBackend}</code> còn giao diện này build từ bản{" "}
+            <code>{WEB_GIT_SHA}</code>. Hai bản lệch nhau — rebuild backend trên VM trước khi kết
+            luận lỗi, xem <code>docs/task/runbook.md</code>.
+          </div>
+        )}
         {isPending && <p role="status">Đang kiểm tra dịch vụ…</p>}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {data?.map((service) => (
@@ -24,6 +35,7 @@ export function SystemStatusPage() {
                 </span>
               </div>
               <p className="mt-3 text-xs text-muted-foreground">{service.status}</p>
+              {service.version && <p className="mt-1 text-xs text-muted-foreground">Bản {service.version}</p>}
               {service.lastProcessedAt && (
                 <p className="mt-1 text-xs text-muted-foreground">
                   Xử lý lần cuối {formatDateTime(service.lastProcessedAt)}

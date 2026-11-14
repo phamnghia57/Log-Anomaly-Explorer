@@ -5,6 +5,7 @@ import {
   getAssistantConversation,
   getCluster,
   getClusterHistory,
+  getDeployMismatch,
   getJaegerTraceUrl,
   HEALTH_ENDPOINTS,
   listClusters,
@@ -508,6 +509,25 @@ describe("admin login and authenticated API requests", () => {
     fetchMock.mockResolvedValueOnce(new Response("Unavailable", { status }));
     await expect(sendAssistantMessage("c1", "Investigate")).rejects.toMatchObject({ status });
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("getDeployMismatch", () => {
+  it("khong canh bao khi web chay local, chua build tren Vercel", () => {
+    expect(getDeployMismatch("dev", "abc1234")).toBeNull();
+  });
+
+  it("khong canh bao khi backend build ma khong truyen GIT_SHA", () => {
+    expect(getDeployMismatch("abc1234", "unknown")).toBeNull();
+    expect(getDeployMismatch("abc1234", undefined)).toBeNull();
+  });
+
+  it("khong canh bao khi cung commit du backend tra SHA day du", () => {
+    expect(getDeployMismatch("abc1234", "abc1234def5678901234")).toBeNull();
+  });
+
+  it("tra ve SHA cua backend khi hai ben lech commit", () => {
+    expect(getDeployMismatch("abc1234", "9999999")).toBe("9999999");
   });
 });
 

@@ -156,3 +156,71 @@ jobs:
       - name: Verify existing dashboard, incident and navigation flows
         working-directory: web
         run: npm run test:system-integration -- --reporter=line
+
+  load-smoke:
+    name: load test smoke
+    runs-on: ubuntu-latest
+    services:
+      opensearch:
+        image: opensearchproject/opensearch:2.17.1
+        env:
+          discovery.type: single-node
+          node.store.allow_mmap: "false"
+          DISABLE_SECURITY_PLUGIN: "true"
+          DISABLE_INSTALL_DEMO_CONFIG: "true"
+          OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+        ports:
+          - 9200:9200
+        options: >-
+          --health-cmd "curl -fsS http://localhost:9200/_cluster/health"
+          --health-interval 10s --health-timeout 5s --health-retries 30
+    env:
+      PYTHONPATH: .
+      OPENSEARCH_URL: http://127.0.0.1:9200
+      STORAGE_BACKEND: opensearch
+      JWT_SECRET: ci-smoke-jwt-secret-at-least-32-bytes
+      AUTH_COOKIE_SECURE: "false"
+      OTEL_EXPORTER_OTLP_ENDPOINT: ""
+      ADMIN_SEED_USERNAME: smoke-admin
+      ADMIN_SEED_PASSWORD: smoke-admin-password
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Cai dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r query-api/requirements.txt -r ingestion/requirements.txt \
+                      -r load-tests/requirements-dev.txt
+
+      - name: Seed tai khoan admin
+        run: python -m query-api.src.seed_admin
+
+      - name: Khoi dong ingestion va query-api
+        run: |
+          uvicorn ingestion.src.main:app --host 127.0.0.1 --port 8000 --log-level warning &
+          uvicorn query-api.src.main:app --host 127.0.0.1 --port 8002 --log-level warning &
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/health > /dev/null \
+               && curl -fsS http://127.0.0.1:8002/health > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error title=Smoke::ingestion hoac query-api khong khoi dong kip"
+          exit 1
+
+      - name: Chay locust voi backend that
+        working-directory: load-tests
+        env:
+          INGESTION_HOST: http://127.0.0.1:8000
+          QUERY_API_HOST: http://127.0.0.1:8002
+          QUERY_API_USERNAME: smoke-admin
+          QUERY_API_PASSWORD: smoke-admin-password
+        run: |
+          python -m locust -f locustfile.py --headless --users 3 --spawn-rate 1 \
+                 --run-time 30s --exit-code-on-error 1

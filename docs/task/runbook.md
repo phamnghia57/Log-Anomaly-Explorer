@@ -209,6 +209,15 @@ khởi động lại container** nếu Compose không phát hiện thay đổi t
   docker compose exec <service> grep -c "<chuoi-moi-cua-PR>" <duong/dan/file.py>
   ```
 
+  Với `query-api` thì có cách nhanh hơn `grep`: build kèm SHA commit, rồi hỏi thẳng `/health`.
+  ```bash
+  GIT_SHA=$(git rev-parse --short HEAD) docker compose up -d --build query-api
+  curl -s http://localhost:8002/health      # "version" phai khop git rev-parse --short HEAD
+  ```
+  Quên truyền `GIT_SHA` thì `version` là `unknown` — không phải lỗi, chỉ là không kiểm tra được.
+  Trang **Trạng thái hệ thống** của web cũng so SHA này với SHA mà Vercel build và hiện cảnh báo
+  khi hai bên lệch nhau, nên lỗi "frontend mới gọi backend cũ" không còn âm thầm.
+
 Luôn verify lại bằng lệnh đọc trực tiếp cấu hình đang chạy thật, đừng tin vào việc "đã sửa file
 là xong":
 ```bash

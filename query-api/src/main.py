@@ -37,6 +37,7 @@ from ingestion.src import config
 from ingestion.src.storage import LogStore, OpenSearchLogStore, StorageError, build_store
 
 from .auth import require_admin, router as auth_router
+from .config import GIT_SHA
 from .assistant.retention import start_scheduler as start_assistant_retention
 from .assistant.router import public_router as assistant_public_router, router as assistant_router
 from .assistant.storage import ConversationRepository
@@ -197,7 +198,7 @@ def _parse_dt(value: str | None, name: str) -> str | None:
 def health():
     ok = store.ping()
     body = {"status": "ok" if ok else "degraded", "service": "query-api",
-            "storage": config.STORAGE_BACKEND}
+            "storage": config.STORAGE_BACKEND, "version": GIT_SHA}
     return JSONResponse(status_code=200 if ok else 503, content=body)
 
 

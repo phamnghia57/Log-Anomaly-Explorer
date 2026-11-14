@@ -113,8 +113,18 @@ Hỗ trợ điều tra & đề xuất cách sửa cho một cụm lỗi — mô 
 [Elastic Observability AI Assistant](https://www.elastic.co/docs/solutions/observability/ai/observability-ai-assistant),
 thu gọn cho tài nguyên hiện tại: thay vì knowledge base dạng embedding (ELSER/E5, cần node ML
 riêng), AI tự gọi lại **dữ liệu thật đã có sẵn** qua function calling (xem `src/assistant/tools.py`:
-`get_cluster_history`, `search_related_logs`, `list_active_clusters`) trước khi trả lời — không
-bịa đặt dựa trên 1 đoạn text tĩnh.
+`get_cluster_history`, `search_related_logs`, `list_active_clusters`, `get_trace`) trước khi trả
+lời — không bịa đặt dựa trên 1 đoạn text tĩnh.
+
+- **`get_trace`** đọc trace phân tán từ Jaeger theo `trace_id` có sẵn trong log và trả về danh
+  sách span (service, operation, thời gian chạy, span nào lỗi). Đây là thứ phân biệt Assistant
+  này với một con bot đọc log: nó chỉ được ra **bước nào** trong request chậm hoặc hỏng, đúng
+  mục tiêu "liên kết bất thường về trace/request cụ thể" của đề tài. Bật bằng `JAEGER_QUERY_URL`
+  (xem `.env.example`) — **để trống thì tool này không được chào cho model**, tránh tốn một vòng
+  gọi chỉ để nhận lỗi ở môi trường không có Jaeger. URL phải kèm base path nếu Jaeger chạy dưới
+  tiền tố (`QUERY_BASE_PATH` trong `docker-compose.yml`), vì base path áp cho cả API lẫn UI.
+  Trace cũ có thể đã bị đẩy khỏi RAM của Jaeger — khi đó tool trả `trace not found` kèm ghi chú
+  để AI không kết luận nhầm là request chưa từng xảy ra.
 
 - **Model**: `gpt-5-mini` qua **Azure OpenAI** (không dùng OpenAI trực tiếp — VM chạy ở vùng Azure
   "East Asia"/Hong Kong, bị OpenAI chặn theo IP, xem `docs/architect/contracts/api-contract.md`

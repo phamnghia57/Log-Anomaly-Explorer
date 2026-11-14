@@ -130,6 +130,12 @@ python -m pytest -q tests
 python -m locust -f locustfile.py --list
 ```
 
+Ngoài bộ test trên, CI còn có job **`load test smoke`** (xem `.github/workflows/tests.yml`) dựng
+OpenSearch + ingestion + query-api thật rồi chạy locust 3 user trong 30 giây, fail nếu có bất kỳ
+request nào lỗi. Đây **không phải** phép đo hiệu năng (runner CI nhiễu, số vô nghĩa) mà là cổng
+chặn việc load test hỏng âm thầm: bug thiếu header `X-CSRF-Protection` từng khiến mọi `QueryUser`
+bị 403 suốt nhiều tuần mà test mock vẫn xanh.
+
 Tests dùng Locust HttpSession/events thật và mock requests transport: login trước task,
 header được dùng lại trên mọi endpoint, mỗi user có token riêng, login failure vẫn có
 statistics, thiếu/sai credentials, JSON/JWT hỏng và lỗi mạng dừng user. Không phải phép đo

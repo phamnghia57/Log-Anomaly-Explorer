@@ -20,7 +20,7 @@ from types import SimpleNamespace
 from langfuse.openai import OpenAI
 
 from . import config
-from .tools import MAX_STACK_TRACE_CHARS, TOOL_SCHEMAS, ToolExecutor
+from .tools import MAX_STACK_TRACE_CHARS, ToolExecutor, tool_schemas
 
 logger = logging.getLogger("query-api.assistant")
 
@@ -89,6 +89,7 @@ def _build_system_prompt(cluster: dict, logs: list[dict]) -> str:
     sample = logs[:5]
     sample_text = "\n".join(
         f"  [{item.get('timestamp')}] {item.get('service')}: {item.get('message')}"
+        + (f" (trace_id={item['trace_id']})" if item.get("trace_id") else "")
         + (f"\n    stack_trace: {item['stack_trace'][:MAX_STACK_TRACE_CHARS]}"
            if item.get("stack_trace") else "")
         for item in sample
@@ -223,7 +224,7 @@ def stream_chat_turn(
         # Vong CUOI khong gui `tools`: neu con tool thi model co the lai doi tra
         # cuu them va het luot ma chua tra loi - mat them 1 lan goi model chi de
         # nhan ve cau "da dat gioi han". Vong cuoi buoc phai tra loi bang chu.
-        tools = {"tools": TOOL_SCHEMAS} if round_index < config.MAX_TOOL_ROUNDS - 1 else {}
+        tools = {"tools": tool_schemas()} if round_index < config.MAX_TOOL_ROUNDS - 1 else {}
         try:
             response = client.chat.completions.create(
                 model=config.AZURE_OPENAI_DEPLOYMENT,

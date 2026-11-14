@@ -317,6 +317,29 @@ class TestPostMessage:
 
 # --------------------------------------------------------------------------- ToolExecutor (unit)
 
+class FakeJaegerResponse:
+    def __init__(self, status_code=200, payload=None):
+        self.status_code = status_code
+        self._payload = payload or {}
+
+    def json(self):
+        return self._payload
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise RuntimeError(f"HTTP {self.status_code}")
+
+
+def jaeger_trace(span_count=2):
+    spans = [{
+        "spanID": f"s{index}", "operationName": f"GET /step-{index}", "processID": "p1",
+        "startTime": 1000 - index, "duration": 2000, "tags": [],
+    } for index in range(span_count)]
+    return {"data": [{
+        "traceID": "a" * 32, "processes": {"p1": {"serviceName": "demo-web"}}, "spans": spans,
+    }]}
+
+
 class TestToolExecutor:
     def test_tool_khong_ton_tai_tra_error_khong_nem_exception(self):
         executor = assistant_tools.ToolExecutor(store=None, cluster_store=None, cluster_id="c1")
@@ -349,6 +372,74 @@ class TestToolExecutor:
 
         assert set(row) <= {"timestamp", "service", "level", "message", "trace_id", "stack_trace"}
         assert len(row["stack_trace"]) == assistant_tools.MAX_STACK_TRACE_CHARS
+
+    def test_get_trace_bi_tat_khi_chua_cau_hinh_jaeger(self, monkeypatch):
+        monkeypatch.setattr(assistant_config, "JAEGER_QUERY_URL", "")
+        executor = assistant_tools.ToolExecutor(store=None, cluster_store=None, cluster_id="c1")
+
+        assert executor.run("get_trace", {"trace_id": "a" * 32}) == {"error": "jaeger is not configured"}
+        assert "get_trace" not in [t["function"]["name"] for t in assistant_tools.tool_schemas()]
+
+    def test_get_trace_duoc_chao_cho_model_khi_da_cau_hinh_jaeger(self, monkeypatch):
+        monkeypatch.setattr(assistant_config, "JAEGER_QUERY_URL", "http://jaeger:16686/jaeger")
+        assert "get_trace" in [t["function"]["name"] for t in assistant_tools.tool_schemas()]
+
+    def test_get_trace_tu_choi_trace_id_sai_dinh_dang_truoc_khi_goi_jaeger(self, monkeypatch):
+        monkeypatch.setattr(assistant_config, "JAEGER_QUERY_URL", "http://jaeger:16686/jaeger")
+        monkeypatch.setattr(assistant_tools.httpx, "get", lambda *a, **kw: pytest.fail("da goi Jaeger"))
+        executor = assistant_tools.ToolExecutor(store=None, cluster_store=None, cluster_id="c1")
+
+        result = executor.run("get_trace", {"trace_id": "../../secret"})
+
+        assert result["error"].startswith("trace_id must be")
+
+    def test_get_trace_404_noi_ro_jaeger_luu_trong_ram(self, monkeypatch):
+        monkeypatch.setattr(assistant_config, "JAEGER_QUERY_URL", "http://jaeger:16686/jaeger")
+        monkeypatch.setattr(assistant_tools.httpx, "get",
+                            lambda *a, **kw: FakeJaegerResponse(status_code=404))
+        executor = assistant_tools.ToolExecutor(store=None, cluster_store=None, cluster_id="c1")
+
+        result = executor.run("get_trace", {"trace_id": "b" * 32})
+
+        assert result["error"] == "trace not found"
+        assert "RAM" in result["hint"]
+
+    def test_get_trace_tom_tat_span_theo_thu_tu_thoi_gian_va_giu_base_path(self, monkeypatch):
+        monkeypatch.setattr(assistant_config, "JAEGER_QUERY_URL", "http://jaeger:16686/jaeger")
+        called = {}
+        payload = jaeger_trace(span_count=2)
+        payload["data"][0]["spans"][0]["tags"] = [
+            {"key": "error", "value": True}, {"key": "http.status_code", "value": 500},
+        ]
+
+        def fake_get(url, **kwargs):
+            called["url"] = url
+            return FakeJaegerResponse(payload=payload)
+
+        monkeypatch.setattr(assistant_tools.httpx, "get", fake_get)
+        executor = assistant_tools.ToolExecutor(store=None, cluster_store=None, cluster_id="c1")
+
+        result = executor.run("get_trace", {"trace_id": "a" * 32})
+
+        assert called["url"] == f"http://jaeger:16686/jaeger/api/traces/{'a' * 32}"
+        assert result["span_count"] == 2
+        assert [span["operation"] for span in result["spans"]] == ["GET /step-1", "GET /step-0"]
+        assert result["spans"][1] == {
+            "service": "demo-web", "operation": "GET /step-0", "duration_ms": 2.0,
+            "error": True, "http_status": 500,
+        }
+        assert "error" not in result["spans"][0]
+
+    def test_get_trace_cat_bot_span_de_khong_phinh_token(self, monkeypatch):
+        monkeypatch.setattr(assistant_config, "JAEGER_QUERY_URL", "http://jaeger:16686")
+        monkeypatch.setattr(assistant_tools.httpx, "get", lambda *a, **kw: FakeJaegerResponse(
+            payload=jaeger_trace(span_count=assistant_tools.MAX_TRACE_SPANS + 10)))
+        executor = assistant_tools.ToolExecutor(store=None, cluster_store=None, cluster_id="c1")
+
+        result = executor.run("get_trace", {"trace_id": "c" * 32})
+
+        assert result["span_count"] == assistant_tools.MAX_TRACE_SPANS + 10
+        assert len(result["spans"]) == assistant_tools.MAX_TRACE_SPANS
 
     def test_loi_trong_tool_duoc_boc_thanh_error_khong_lam_vo_chat(self):
         class BoomStore:
