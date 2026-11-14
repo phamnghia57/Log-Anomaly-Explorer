@@ -197,10 +197,11 @@ jobs:
           pip install -r query-api/requirements.txt -r ingestion/requirements.txt \
                       -r load-tests/requirements-dev.txt
 
-      - name: Tao index auth va seed tai khoan admin
+      - name: Tao index va seed tai khoan admin
         run: |
           python -m query-api.src.manage_auth init
           python -m query-api.src.seed_admin
+          python -c "from clustering.src.storage import OpenSearchStore; OpenSearchStore().ensure_ready()"
 
       - name: Khoi dong ingestion va query-api
         run: |
