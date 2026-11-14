@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => {
   const target = process.env.API_PROXY_TARGET || env.API_PROXY_TARGET || 'http://localhost:8002'
   return {
   plugins: [react(), tailwindcss()],
+  define: {
+    __GIT_SHA__: JSON.stringify((process.env.VERCEL_GIT_COMMIT_SHA || 'dev').slice(0, 7)),
+  },
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),

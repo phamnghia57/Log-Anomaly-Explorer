@@ -20,5 +20,8 @@ ENV PYTHONPATH=/app
 RUN useradd -m appuser && chown -R appuser /app
 USER appuser
 
+ARG GIT_SHA=unknown
+ENV GIT_SHA=$GIT_SHA
+
 EXPOSE 8002
 CMD ["uvicorn", "query-api.src.main:app", "--host", "0.0.0.0", "--port", "8002"]

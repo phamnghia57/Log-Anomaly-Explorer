@@ -99,6 +99,8 @@ CONVERSATIONS_RETENTION_INTERVAL_SECONDS = _nonnegative_int(
 # Chi dung de HIEN THI trong system prompt cho AI biet nguong dang ap dung,
 # khong doc truc tiep tu clustering (khac process, khac bien moi truong).
 ANOMALY_THRESHOLD_HINT = os.environ.get("ANOMALY_THRESHOLD", "2.0")
+JAEGER_QUERY_URL = os.environ.get("JAEGER_QUERY_URL", "").strip().rstrip("/")
+JAEGER_TIMEOUT_SECONDS = _positive_int("JAEGER_TIMEOUT_SECONDS", 5)
 
 
 def require_azure_openai_api_key() -> str:

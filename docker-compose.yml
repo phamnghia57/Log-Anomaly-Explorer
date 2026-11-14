@@ -139,6 +139,8 @@ services:
     build:
       context: .
       dockerfile: query-api/Dockerfile
+      args:
+        GIT_SHA: ${GIT_SHA:-unknown}
     depends_on:
       ingestion:
         condition: service_healthy
@@ -166,6 +168,7 @@ services:
       # Trace cho chinh query-api (query-api/src/telemetry.py) - de xem endpoint
       # nao cua UI cham tren Jaeger, khong chi co trace cua demo-app.
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://jaeger:4318}
+      JAEGER_QUERY_URL: ${JAEGER_QUERY_URL:-}
       # AI Assistant (query-api/src/assistant/) - dung Azure OpenAI (xem
       # .env.example), de trong AZURE_OPENAI_API_KEY thi /assistant/* tra
       # 503, cac endpoint khac khong bi anh huong.

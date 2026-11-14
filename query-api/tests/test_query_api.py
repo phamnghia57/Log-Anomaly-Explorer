@@ -50,6 +50,7 @@ class TestHealth:
         body = resp.json()
         assert body["status"] == "ok"
         assert body["service"] == "query-api"
+        assert body["version"] == "unknown"
 
 
 class TestSearch:

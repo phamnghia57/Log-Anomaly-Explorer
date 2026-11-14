@@ -25,6 +25,16 @@ export function getJaegerTraceUrl(traceId: string): string | null {
   return `${JAEGER_URL}/trace/${encodeURIComponent(traceId)}`;
 }
 
+declare const __GIT_SHA__: string;
+
+export const WEB_GIT_SHA = typeof __GIT_SHA__ === "string" ? __GIT_SHA__ : "dev";
+
+export function getDeployMismatch(webSha: string, apiSha: string | undefined): string | null {
+  if (!apiSha || apiSha === "unknown" || webSha === "dev") return null;
+  const api = apiSha.slice(0, 7);
+  return api === webSha.slice(0, 7) ? null : api;
+}
+
 export type LogLevel = "DEBUG" | "INFO" | "WARN" | "ERROR" | "FATAL";
 
 // StructuredLog - docs/architect/contracts/log-schema.json
@@ -185,6 +195,7 @@ export type ServiceHealth = {
   // Chi AI Assistant co: thoi diem goi Azure OpenAI that gan nhat (thanh cong
   // hay loi) - xem GET /assistant/health trong api-contract.md.
   lastCallAt?: string;
+  version?: string;
 };
 
 // Cac service co /health rieng. Khi deploy Vercel, health URL can tro ve
@@ -206,7 +217,7 @@ export async function getSystemHealth(signal?: AbortSignal): Promise<ServiceHeal
       const response = await fetch(url, { signal, cache: "no-store" });
       const body = await response.json().catch(() => null) as {
         status?: string; last_processed_at?: string | null; reason?: string | null;
-        last_call_at?: string | null;
+        last_call_at?: string | null; version?: string | null;
       } | null;
       return {
         name,
@@ -214,6 +225,7 @@ export async function getSystemHealth(signal?: AbortSignal): Promise<ServiceHeal
         status: body?.reason ?? (response.ok ? body?.status ?? "unknown" : `HTTP ${response.status}`),
         ...(body?.last_processed_at ? { lastProcessedAt: body.last_processed_at } : {}),
         ...(body?.last_call_at ? { lastCallAt: body.last_call_at } : {}),
+        ...(body?.version ? { version: body.version } : {}),
       };
     } catch {
       return { name, ok: false, status: "unreachable" };

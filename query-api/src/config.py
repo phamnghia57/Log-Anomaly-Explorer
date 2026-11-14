@@ -16,6 +16,8 @@ def _positive_int(name: str, default: int) -> int:
     return value
 
 
+GIT_SHA = os.environ.get("GIT_SHA", "").strip() or "unknown"
+
 # Khong co secret mac dinh. Auth phai goi require_jwt_secret() truoc khi dung.
 JWT_SECRET = os.environ.get("JWT_SECRET")
 JWT_EXPIRY_SECONDS = _positive_int("JWT_EXPIRY_SECONDS", 900)
