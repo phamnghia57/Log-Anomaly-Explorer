@@ -1,0 +1,51 @@
+So sanh cau hinh TRUOC va SAU Task 01.
+Do ngay 2026-11-15 tren may dev (Docker Desktop 28.1.1, caddy:2.8-alpine v2.8.4).
+TRUOC = commit d58abfb (main truoc PR #94). SAU = commit caf04dc (merge vao main thanh adf51a7).
+Ca 2 doc cung .env.example (cong 9000/9001/9002/16686 nhu tren VM).
+
+=== 1. Port binding: docker compose config ===
+
+TRUOC (d58abfb)                      SAU (caf04dc)
+demo-app  0.0.0.0 + [::] :9001       demo-app  127.0.0.1:9001
+ingestion 0.0.0.0 + [::] :9000       ingestion 127.0.0.1:9000
+jaeger    0.0.0.0 + [::] :16686      jaeger    127.0.0.1:16686
+query-api 0.0.0.0 + [::] :9002       query-api 127.0.0.1:9002
+gateway   0.0.0.0 + [::] :80,:443    gateway   0.0.0.0 + [::] :80,:443  (khong doi, co y)
+
+=== 2. Route cua gateway: HTTP status ===
+
+Chay gateway that bang:
+  docker run --rm -p 127.0.0.1:18080:80 -e PUBLIC_ADDRESS=:80 \
+    -e GATEWAY_BASIC_AUTH_USER=ops -e GATEWAY_BASIC_AUTH_HASH='$2a$14$...' \
+    -v <Caddyfile>:/etc/caddy/Caddyfile:ro caddy:2.8-alpine
+Khong co upstream trong moi truong nay, nen doc nhu sau:
+  502 = request DA qua het lop auth va toi reverse_proxy (tren VM se la 200)
+  401 = bi basic auth chan truoc khi toi upstream
+  200 = route mac dinh cua gateway tra text, KHONG proxy toi query-api nua
+
+                               TRUOC          SAU khong-auth   SAU co-auth
+/jaeger/                       502            401              502
+/jaeger/trace/abc              502            401              502
+/demo/simulate-error?rate=1    502            401              502
+/demo/health                   502            502              502
+/ingestion/health              502            502              502
+/health                        502            502              502
+/docs                          502            200 (text)       200 (text)
+/redoc                         502            200 (text)       200 (text)
+/openapi.json                  502            200 (text)       200 (text)
+
+body cua /docs SAU: "Log Anomaly Explorer - xem /health, /search, /clusters, ..."
+-> khong con la Swagger UI; /docs roi vao route mac dinh cua gateway.
+WWW-Authenticate cua 401: Basic realm="restricted"
+
+=== 3. Khi GATEWAY_BASIC_AUTH_USER/HASH de trong ===
+
+/jaeger/ va /demo/* tra 401 cho MOI NGUOI (khoa han, khong mo public).
+Cac route khac khong doi, container gateway van "running".
+caddy validate: "Valid configuration" ca khi co bien lan khi de trong.
+
+=== 4. Hash bcrypt trong .env phai boc nhay don ===
+
+Khong boc:  level=warning msg="The \"bCIkQatFGBeO99Ylp5EfmuvM\" variable is not set."
+Boc nhay don, gia tri vao container nguyen ven:
+  ops $2a$14$bCIkQatFGBeO99Ylp5EfmuvM/cKoOjU6B0AAd2KHj/l1v43f6cUQy
