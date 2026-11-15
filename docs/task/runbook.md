@@ -18,6 +18,8 @@
 3. **Lần theo trace/request**: bấm icon ↗ cạnh một `trace_id` bất kỳ trong Incident View để mở
    trace thật trên Jaeger (`/jaeger/trace/{trace_id}`) — xem span nào trong request thực sự chậm
    hoặc lỗi, không chỉ đoán qua message.
+   - Jaeger nằm sau **basic auth** của gateway: lần đầu trình duyệt hỏi tài khoản (xem mục
+     "Truy cập Jaeger, fault injection và Swagger" bên dưới).
    - **Lưu ý**: Jaeger chỉ có span cho trace sinh ra **sau khi** `demo-app` đã cấu hình đúng
      `OTEL_EXPORTER_OTLP_ENDPOINT`. Trace cũ hơn thời điểm đó sẽ báo "trace not found" vĩnh viễn —
      đây không phải lỗi, không cần debug thêm, chỉ cần dùng trace mới.
@@ -212,7 +214,7 @@ khởi động lại container** nếu Compose không phát hiện thay đổi t
   Với `query-api` thì có cách nhanh hơn `grep`: build kèm SHA commit, rồi hỏi thẳng `/health`.
   ```bash
   GIT_SHA=$(git rev-parse --short HEAD) docker compose up -d --build query-api
-  curl -s http://localhost:8002/health      # "version" phai khop git rev-parse --short HEAD
+  curl -s http://localhost:9002/health      # QUERY_API_PORT trong .env; "version" phai khop git rev-parse --short HEAD
   ```
   Quên truyền `GIT_SHA` thì `version` là `unknown` — không phải lỗi, chỉ là không kiểm tra được.
   Trang **Trạng thái hệ thống** của web cũng so SHA này với SHA mà Vercel build và hiện cảnh báo
@@ -224,6 +226,25 @@ là xong":
 docker exec <container> env | grep <TEN_BIEN>      # xac nhan bien moi truong
 curl -sI https://<domain>/<route-vua-sua>            # xac nhan route/HTTP status
 ```
+
+## Truy cập Jaeger, fault injection và Swagger
+
+Từ ngoài VM chỉ còn cổng 80/443 của gateway. Cổng `9000`/`9001`/`9002`/`16686` chỉ bind
+`127.0.0.1`, nên các lệnh `curl http://localhost:9002/...` trong runbook này vẫn chạy, nhưng
+**chỉ khi gõ trên chính VM**.
+
+| Cần | Cách |
+|---|---|
+| Jaeger UI, `/demo/simulate-error` | `https://<domain>/jaeger/`, `https://<domain>/demo/...` — basic auth bằng `GATEWAY_BASIC_AUTH_USER` + mật khẩu gốc của `GATEWAY_BASIC_AUTH_HASH` trong `.env` trên VM (hỏi Nghĩa). `curl -u <user>:<pass> ...` |
+| `/health`, `/ingestion/health`, `/demo/health` | Public, không cần auth — trang Trạng thái hệ thống đọc các route này |
+| Swagger `/docs`, `/openapi.json` | Không còn public. `ssh -L 9002:localhost:9002 <user>@<vm>` rồi mở `http://localhost:9002/docs` |
+| `POST /ingest` hoặc Locust từ máy khác | SSH tunnel tương tự cho cổng `9000`/`9002` |
+
+Không có tài khoản nào thì `/jaeger` và `/demo/*` trả **401 cho mọi người** (không mở public);
+nếu đúng mật khẩu mà vẫn 401, kiểm tra `docker exec <gateway> env | grep GATEWAY_BASIC_AUTH`.
+Đổi mật khẩu: tạo hash mới (lệnh trong `.env.example`), sửa `.env` — hash phải bọc **nháy đơn**
+vì có ký tự `$` — rồi `docker compose up -d --force-recreate gateway` (đổi biến môi trường cần
+recreate, `restart` không đủ).
 
 ## Liên hệ
 

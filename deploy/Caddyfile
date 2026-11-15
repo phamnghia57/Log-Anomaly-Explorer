@@ -14,6 +14,11 @@
 # mot thoi diem. Neu may chu dang co dich vu khac cung dung 2 port nay, phai
 # giai phong truoc khi gateway nay khoi dong duoc - xem web/README.md muc
 # "Deploy len Vercel".
+#
+# GATEWAY_BASIC_AUTH_USER/HASH (xem .env.example): bao ve /jaeger va /demo/*.
+# De trong thi 2 route nay tra 401 cho moi nguoi (khoa han, khong mo public);
+# cac route khac van chay. /docs /redoc /openapi.json khong con route ra
+# ngoai; xem qua SSH tunnel toi cong QUERY_API_PORT tren VM.
 
 {$PUBLIC_ADDRESS} {
 	@webHealthOrigin header Origin {$CORS_WEB_ORIGIN:http://localhost:5173}
@@ -22,13 +27,6 @@
 	# query-api/src/assistant/router.py.
 	@query path /health /auth/login /auth/refresh /auth/logout /search* /clusters* /clustering/health /assistant*
 	handle @query {
-		reverse_proxy query-api:8002
-	}
-
-	# Swagger UI / OpenAPI tu sinh cua query-api - xem & test API qua trinh
-	# duyet, dung chung cong voi phan con lai.
-	@api-docs path /docs /redoc /openapi.json
-	handle @api-docs {
 		reverse_proxy query-api:8002
 	}
 
@@ -51,8 +49,12 @@
 	}
 
 	# /demo/* -> Demo App (Manh), vd. /demo/simulate-error - tien goi tu xa de
-	# tao du lieu demo ma khong can SSH vao VM.
+	# tao du lieu demo ma khong can SSH vao VM. Dat sau basic auth: goi duoc
+	# route nay la tao duoc cum bat thuong that va email alert that.
 	handle_path /demo/* {
+		basic_auth {
+			{$GATEWAY_BASIC_AUTH_USER} {$GATEWAY_BASIC_AUTH_HASH}
+		}
 		reverse_proxy demo-app:8001
 	}
 
@@ -61,8 +63,12 @@
 	# "handle_path"): Jaeger duoc cau hinh QUERY_BASE_PATH=/jaeger (xem
 	# docker-compose.yml) nen tu no can nhan duong dan CON NGUYEN tien to
 	# "/jaeger" - cat mat tien to se lam sai route/asset noi bo cua UI do.
+	# Trace chua URL/status/trace_id that nen dat sau basic auth.
 	@jaeger path /jaeger*
 	handle @jaeger {
+		basic_auth {
+			{$GATEWAY_BASIC_AUTH_USER} {$GATEWAY_BASIC_AUTH_HASH}
+		}
 		reverse_proxy jaeger:16686
 	}
 

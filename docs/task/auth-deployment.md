@@ -155,7 +155,8 @@ tắt recording và dùng credentials tạm. Không cần live Jaeger.
   CORS rộng cho web deploy khác origin; CORS không ngăn client ngoài browser gọi API.
 - OpenSearch users index phải chỉ truy cập từ backend/hạ tầng được tin cậy. Stack nội bộ
   mặc định không có auth/TLS OpenSearch; cần hardening riêng cho môi trường production.
-  Các route demo/Jaeger/docs public có sẵn không được JWT này bảo vệ.
+  Route `/demo/*` (trừ `/demo/health`) và `/jaeger` không được JWT này bảo vệ mà nằm sau basic auth của gateway;
+  `/docs` không còn route public (xem `docs/task/runbook.md`).
 - Không có deploy/merge trong bước này. Khi Docker/OpenSearch không sẵn sàng, test mock
   không xác nhận mapping/persistence/concurrency với cluster thật, Docker image build,
   gateway Caddy đang chạy, TLS/domain/firewall hoặc Vercel production. Ghi rõ các kiểm tra

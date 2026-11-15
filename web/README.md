@@ -213,8 +213,11 @@ curl https://20-1-2-3.sslip.io/health               # phai tra ve {"status":"ok"
 Jaeger UI cũng được route qua cùng domain tại `/jaeger` (xem `@jaeger` trong `deploy/Caddyfile`
 và `QUERY_BASE_PATH=/jaeger` trong `docker-compose.yml`):
 ```bash
-curl -sI https://20-1-2-3.sslip.io/jaeger    # phai tra 200, khong phai 404
+curl -sI https://20-1-2-3.sslip.io/jaeger                     # 401: dung, Jaeger sau basic auth
+curl -sI -u <user>:<pass> https://20-1-2-3.sslip.io/jaeger    # phai tra 200, khong phai 404
 ```
+Tài khoản là `GATEWAY_BASIC_AUTH_USER`/`GATEWAY_BASIC_AUTH_HASH` trong `.env` của máy chủ; trình
+duyệt hỏi một lần khi bấm nút "Xem trace trên Jaeger".
 `https://20-1-2-3.sslip.io/jaeger` chính là giá trị đặt cho `VITE_JAEGER_URL` trên Vercel.
 
 ## Evidence sở hữu

@@ -54,7 +54,7 @@ services:
       INGEST_RATE_LIMIT_RPS: ${INGEST_RATE_LIMIT_RPS:-100}
       INGEST_MAX_BATCH_SIZE: ${INGEST_MAX_BATCH_SIZE:-500}
     ports:
-      - "${INGESTION_PORT:-8000}:8000"
+      - "127.0.0.1:${INGESTION_PORT:-8000}:8000"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen('http://localhost:8000/health')\""]
@@ -82,7 +82,7 @@ services:
       # qua HTTPS cung domain voi query-api, khong can mo them port/subdomain.
       QUERY_BASE_PATH: /jaeger
     ports:
-      - "${JAEGER_UI_PORT:-16686}:16686"
+      - "127.0.0.1:${JAEGER_UI_PORT:-16686}:16686"
     restart: unless-stopped
     # Khong co healthcheck rieng: demo-app van chay binh thuong neu Jaeger
     # chua san sang, span chi bi mat (xem BatchSpanProcessor trong
@@ -102,7 +102,7 @@ services:
       # "/v1/traces", khop dung OTLP/HTTP receiver cua Jaeger o tren.
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://jaeger:4318}
     ports:
-      - "${DEMO_APP_PORT:-8001}:8001"
+      - "127.0.0.1:${DEMO_APP_PORT:-8001}:8001"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen('http://localhost:8001/health')\""]
@@ -187,7 +187,7 @@ services:
       LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
       LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL:-https://jp.cloud.langfuse.com}
     ports:
-      - "${QUERY_API_PORT:-8002}:8002"
+      - "127.0.0.1:${QUERY_API_PORT:-8002}:8002"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen('http://localhost:8002/health')\""]
@@ -215,6 +215,8 @@ services:
     environment:
       PUBLIC_ADDRESS: ${PUBLIC_ADDRESS:-:80}
       CORS_WEB_ORIGIN: ${CORS_WEB_ORIGIN:-http://localhost:5173}
+      GATEWAY_BASIC_AUTH_USER: ${GATEWAY_BASIC_AUTH_USER:-}
+      GATEWAY_BASIC_AUTH_HASH: ${GATEWAY_BASIC_AUTH_HASH:-}
     ports:
       - "80:80"
       - "443:443"
