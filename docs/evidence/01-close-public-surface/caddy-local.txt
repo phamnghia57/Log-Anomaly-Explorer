@@ -1,0 +1,41 @@
+Do ngay 2026-11-15 tren may dev (Windows, Docker Desktop 28.1.1), caddy:2.8-alpine v2.8.4.
+Gateway chay rieng bang `docker compose run --no-deps -p 127.0.0.1:18080:80 gateway`
+(khong co upstream -> 502 nghia la request DA qua lop auth va toi reverse_proxy).
+Mat khau test: ops / test-pass (hash sinh tam, khong dung o dau khac).
+
+--- GATEWAY_BASIC_AUTH_USER/HASH co gia tri
+/jaeger/                       khong-auth=401 dung-auth=502 sai-auth=401
+/jaeger/trace/abc              khong-auth=401 dung-auth=502 sai-auth=401
+/demo/simulate-error?rate=1    khong-auth=401 dung-auth=502 sai-auth=401
+/demo/health                   khong-auth=502 dung-auth=502 sai-auth=502
+/ingestion/health              khong-auth=502 dung-auth=502 sai-auth=502
+/health                        khong-auth=502 dung-auth=502 sai-auth=502
+/docs                          khong-auth=200 dung-auth=200 sai-auth=200
+/redoc                         khong-auth=200 dung-auth=200 sai-auth=200
+/openapi.json                  khong-auth=200 dung-auth=200 sai-auth=200
+body /docs: Log Anomaly Explorer - xem /health, /search, /clusters, /clusters/{id}, /assistant/*, /demo/*, /jaeger/*
+WWW-Authenticate: Basic realm="restricted"
+
+--- GATEWAY_BASIC_AUTH_USER/HASH de trong (.env.example nguyen ban)
+/jaeger/                       khong-auth=401 dung-auth=401 sai-auth=401
+/jaeger/trace/abc              khong-auth=401 dung-auth=401 sai-auth=401
+/demo/simulate-error?rate=1    khong-auth=401 dung-auth=401 sai-auth=401
+/demo/health                   khong-auth=502 dung-auth=502 sai-auth=502
+/ingestion/health              khong-auth=502 dung-auth=502 sai-auth=502
+/health                        khong-auth=502 dung-auth=502 sai-auth=502
+/docs                          khong-auth=200 dung-auth=200 sai-auth=200
+/redoc                         khong-auth=200 dung-auth=200 sai-auth=200
+/openapi.json                  khong-auth=200 dung-auth=200 sai-auth=200
+container state: running
+
+--- docker compose --env-file /dev/null config (default CI/dev, khong co .env)
+demo-app [('127.0.0.1', '8001', 8001)]
+gateway [(None, '80', 80), (None, '443', 443), (None, '443', 443)]
+ingestion [('127.0.0.1', '8000', 8000)]
+jaeger [('127.0.0.1', '16686', 16686)]
+query-api [('127.0.0.1', '8002', 8002)]
+
+--- Hash bcrypt trong .env KHONG boc nhay don
+level=warning msg="The \"bCIkQatFGBeO99Ylp5EfmuvM\" variable is not set. Defaulting to a blank string."
+-> Compose doc "$..." trong hash thanh bien. Boc nhay don thi gia tri vao container nguyen ven:
+ops $2a$14$bCIkQatFGBeO99Ylp5EfmuvM/cKoOjU6B0AAd2KHj/l1v43f6cUQy
