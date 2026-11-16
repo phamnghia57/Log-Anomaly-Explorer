@@ -211,11 +211,9 @@ khởi động lại container** nếu Compose không phát hiện thay đổi t
   docker compose exec <service> grep -c "<chuoi-moi-cua-PR>" <duong/dan/file.py>
   ```
 
-  Với `query-api` thì có cách nhanh hơn `grep`: build kèm SHA commit, rồi hỏi thẳng `/health`.
-  ```bash
-  GIT_SHA=$(git rev-parse --short HEAD) docker compose up -d --build query-api
-  curl -s http://localhost:9002/health      # QUERY_API_PORT trong .env; "version" phai khop git rev-parse --short HEAD
-  ```
+  Nhưng đừng rebuild bằng chuỗi lệnh tay: `deploy/deploy.sh` (mục "Deploy và rollback" bên dưới)
+  build đủ service, đặt `GIT_SHA` và tự kiểm `/health` thay cho cả bước xác nhận ở trên.
+
   Quên truyền `GIT_SHA` thì `version` là `unknown` — không phải lỗi, chỉ là không kiểm tra được.
   Trang **Trạng thái hệ thống** của web cũng so SHA này với SHA mà Vercel build và hiện cảnh báo
   khi hai bên lệch nhau, nên lỗi "frontend mới gọi backend cũ" không còn âm thầm.
@@ -226,6 +224,31 @@ là xong":
 docker exec <container> env | grep <TEN_BIEN>      # xac nhan bien moi truong
 curl -sI https://<domain>/<route-vua-sua>            # xac nhan route/HTTP status
 ```
+
+## Deploy và rollback
+
+```bash
+cd ~/prj2
+./deploy/deploy.sh main        # deploy ban moi nhat tren main
+./deploy/deploy.sh caf04dc     # rollback: cung script, dua SHA cu
+```
+
+Script tự làm 5 việc mà làm tay hay quên: `git fetch`, đặt `GIT_SHA`, build **cả 4** service
+Python (`query-api` và `clustering` đều `COPY ingestion`, nên không phải nhớ service nào phụ thuộc
+service nào), nạp lại gateway, rồi chờ tối đa 60 giây để `/health` trả đúng `version == GIT_SHA`.
+**Thoát mã khác 0 khi không khớp** — đó là lúc đừng đi test UI mà đọc `docker compose logs query-api`.
+
+Ba điều cần biết:
+
+- Script **không** đụng tới `jaeger` và `opensearch`. Jaeger giữ trace trong RAM nên recreate là
+  mất hết; deploy không được phép xoá dữ liệu điều tra.
+- Sau khi chạy, repo ở trạng thái **detached HEAD** tại đúng commit đã deploy. Đó là cố ý: VM không
+  phải chỗ để code, và nó loại luôn bẫy "`git checkout main` nhưng local `main` đang cũ". Muốn
+  xem đang ở đâu: `git rev-parse --short HEAD`.
+- Script **từ chối chạy** nếu cây làm việc trên VM không sạch, vì sửa tay trên VM rồi deploy sẽ tạo
+  một bản không tái lập được từ git. Sửa tay có chủ đích thì `git stash` trước.
+
+Build cả 4 image trên VM 2 vCPU mất vài phút và làm CPU tăng vọt → **đừng deploy sát giờ demo**.
 
 ## Truy cập Jaeger, fault injection và Swagger
 
