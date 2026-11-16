@@ -63,12 +63,11 @@ services:
       retries: 5
 
   jaeger:
-    # :latest (khong ghim phien ban cu the): khong co mang tu moi truong dev
-    # de xac nhan tag so cu the nao dang ton tai that tren Docker Hub luc nay -
-    # doan sai se lam `docker compose up` loi ngay buoc pull. Neu can ghim
-    # phien ban cho on dinh lau dai, kiem tra tag that tren Docker Hub roi
-    # thay vao day.
-    image: jaegertracing/all-in-one:latest
+    # Ghim digest cua image dang chay that tren VM (= tag 1.76.0, push
+    # 2025-12-03) de `docker compose up` khong keo ve ban khac bat ky luc nao.
+    # Doi phien ban: lay digest moi bang
+    #   docker inspect --format '{{index .RepoDigests 0}}' <image:tag>
+    image: jaegertracing/all-in-one:1.76.0@sha256:ab6f1a1f0fb49ea08bcd19f6b84f6081d0d44b364b6de148e1798eb5816bacac
     environment:
       # Nhan OTLP (gRPC :4317, HTTP :4318) truc tiep - khong can OTel Collector
       # rieng, ban Jaeger nay da ho tro OTLP native.
