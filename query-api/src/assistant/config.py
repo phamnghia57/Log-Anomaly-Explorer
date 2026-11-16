@@ -80,7 +80,7 @@ CONVERSATIONS_INDEX = os.environ.get("ASSISTANT_CONVERSATIONS_INDEX", "assistant
 # Gioi han so vong AI tu goi tool trong 1 luot chat - bao ve chi phi/do tre va
 # tranh vong lap tool-calling khong diem dung. De THAP (khong phai 5): du lieu
 # cua du an nay la log TU SINH/MO PHONG trong demo, AI chi can neu nguyen
-# nhan co ban tu sample log da co san trong system prompt, khong can dieu tra
+# nhan co ban tu sample log da co san trong ngu canh, khong can dieu tra
 # nhieu vong - giam ca do tre va chi phi (dac biet voi model dong reasoning
 # nhu gpt-5-mini).
 MAX_TOOL_ROUNDS = _positive_int("ASSISTANT_MAX_TOOL_ROUNDS", 2)
@@ -98,6 +98,8 @@ CONVERSATIONS_RETENTION_INTERVAL_SECONDS = _nonnegative_int(
     "ASSISTANT_RETENTION_INTERVAL_SECONDS", 86_400)
 # Chi dung de HIEN THI trong system prompt cho AI biet nguong dang ap dung,
 # khong doc truc tiep tu clustering (khac process, khac bien moi truong).
+# docker-compose.yml phai truyen ANOMALY_THRESHOLD cho CA `clustering` va
+# `query-api`, neu khong AI se noi nguong 2.0 trong khi worker chay nguong khac.
 ANOMALY_THRESHOLD_HINT = os.environ.get("ANOMALY_THRESHOLD", "2.0")
 JAEGER_QUERY_URL = os.environ.get("JAEGER_QUERY_URL", "").strip().rstrip("/")
 JAEGER_TIMEOUT_SECONDS = _positive_int("JAEGER_TIMEOUT_SECONDS", 5)
