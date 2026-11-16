@@ -134,6 +134,16 @@ lời — không bịa đặt dựa trên 1 đoạn text tĩnh.
   (không commit) — thiếu thì `/assistant/*` trả `503`, các endpoint khác **không** bị ảnh hưởng.
   Resource Azure OpenAI tạo ở vùng khác (không phải East Asia) là đủ để né lỗi, không liên quan
   vùng của VM gọi đến nó.
+- **Log là dữ liệu, không phải chỉ dẫn**: nội dung log đến từ client gọi `POST /ingest`, nên
+  `service`, `signature`, `message` và `stack_trace` **không** nằm trong system prompt mà ở một
+  message riêng, bọc trong thẻ `<untrusted_logs>`; system prompt nói rõ phần trong thẻ là dữ liệu
+  để phân tích và không được làm theo yêu cầu xuất hiện trong đó. Chuỗi `</untrusted_logs>` xuất
+  hiện trong log bị loại, nếu không một log soạn đúng cách sẽ thoát ra ngoài vùng dữ liệu. Thiệt
+  hại nếu thiếu lớp này là **AI kết luận sai nguyên nhân theo ý kẻ tấn công** rồi người trực tin
+  theo — các tool đều read-only nên không ghi/xoá được gì.
+- **Ngưỡng báo động AI nói ra**: đọc từ `ANOMALY_THRESHOLD`, biến này phải được truyền cho **cả**
+  `clustering` và `query-api` trong `docker-compose.yml`. Thiếu ở `query-api` thì AI vẫn nói ngưỡng
+  `2.0` sau khi runbook đã hướng dẫn tăng lên `3.0`.
 - **Theo dõi chi phí/độ trễ/token**: qua [Langfuse](https://jp.cloud.langfuse.com) — tự động,
   không cần đổi code gọi Azure OpenAI (dùng `langfuse.openai.OpenAI` trỏ `base_url` vào
   `<endpoint>/openai/v1/`). Để trống `LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY` thì assistant vẫn

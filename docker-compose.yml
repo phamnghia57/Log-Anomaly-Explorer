@@ -150,6 +150,10 @@ services:
       HISTORY_INDEX: ${HISTORY_INDEX:-cluster-history}
       RETENTION_DAYS: ${RETENTION_DAYS:-30}
       WINDOW_SECONDS: ${WINDOW_SECONDS:-60}
+      # Chi de AI Assistant NOI dung nguong dang ap dung (assistant/config.py
+      # ANOMALY_THRESHOLD_HINT) - phai khop gia tri truyen cho `clustering` o
+      # tren, neu khong AI se noi mot nguong khac voi nguong that dang chay.
+      ANOMALY_THRESHOLD: ${ANOMALY_THRESHOLD:-2.0}
       # Login/query routes bat JWT admin; khong co secret mac dinh. /health public.
       JWT_SECRET: ${JWT_SECRET:-}
       JWT_EXPIRY_SECONDS: ${JWT_EXPIRY_SECONDS:-900}
