@@ -1,0 +1,14 @@
+[
+  {
+    "id": "value-422-01",
+    "cluster_id": "DOI-THANH-CLUSTER-ID-THAT",
+    "question": "Lỗi này do đâu? Tầng nào hỏng?",
+    "expected": "Nêu đúng lỗi nghiệp vụ / HTTP 422 (metadata.error_type=value), trích dẫn message hoặc trace_id có thật trong log, không bịa thêm nguyên nhân hạ tầng."
+  },
+  {
+    "id": "connection-502-01",
+    "cluster_id": "DOI-THANH-CLUSTER-ID-THAT",
+    "question": "Cụm này có phải do downstream không? Bằng chứng nào?",
+    "expected": "Nêu đúng lỗi hạ tầng / HTTP 502 (metadata.error_type=connection), trích dẫn bằng chứng thật, không khẳng định chắc chắn khi dữ liệu không đủ."
+  }
+]

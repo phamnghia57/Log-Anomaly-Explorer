@@ -28,7 +28,7 @@ hết quota, đĩa đầy, hoặc cả VM tắt — hệ thống im lặng, và 
 | Period / Grace đã đặt trên Healthchecks | `5 phút / 3 phút` |
 | Ping cuối cùng `(09:53)` | `5` |
 | Nhận email "is DOWN" `(10:00)` | `3` |
-| **Chênh lệch thật** | ** `1 phút` ** |
+| **Chênh lệch thật** | ** `0 phút` ** |
 
 ## Kết quả
 
