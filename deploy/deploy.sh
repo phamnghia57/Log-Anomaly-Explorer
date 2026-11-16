@@ -10,9 +10,9 @@ fi
 
 cd "$(dirname "$0")/.."
 
-if [ -n "$(git status --porcelain)" ]; then
-	echo "that bai: cay lam viec khong sach, commit hoac stash truoc khi deploy" >&2
-	git status --short >&2
+if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+	echo "that bai: co file da commit bi sua tay tren VM, commit hoac stash truoc khi deploy" >&2
+	git status --short --untracked-files=no >&2
 	exit 2
 fi
 

@@ -245,8 +245,21 @@ Ba điều cần biết:
 - Sau khi chạy, repo ở trạng thái **detached HEAD** tại đúng commit đã deploy. Đó là cố ý: VM không
   phải chỗ để code, và nó loại luôn bẫy "`git checkout main` nhưng local `main` đang cũ". Muốn
   xem đang ở đâu: `git rev-parse --short HEAD`.
-- Script **từ chối chạy** nếu cây làm việc trên VM không sạch, vì sửa tay trên VM rồi deploy sẽ tạo
-  một bản không tái lập được từ git. Sửa tay có chủ đích thì `git stash` trước.
+- Script **từ chối chạy** nếu có file đã commit bị sửa tay trên VM, vì deploy như vậy tạo một bản
+  không tái lập được từ git và `GIT_SHA` sẽ nói sai về code đang chạy. Sửa tay có chủ đích thì
+  `git stash` trước. File untracked (venv, log, file evidence) không bị chặn — `.dockerignore` đã
+  loại chúng khỏi build context.
+
+**Bẫy: rollback về commit có trước `83dbc0d` sẽ xoá chính `deploy/deploy.sh`**, vì ở đó file chưa
+tồn tại và `git checkout` dọn theo. Đã gặp thật ngày 2026-11-16 khi rollback về `caf04dc`. Cách
+thoát, không cần script:
+
+```bash
+git checkout main && git pull --ff-only origin main
+./deploy/deploy.sh main
+```
+
+Với các commit từ `83dbc0d` trở đi thì không gặp, vì script đã nằm trong mọi commit.
 
 Build cả 4 image trên VM 2 vCPU mất vài phút và làm CPU tăng vọt → **đừng deploy sát giờ demo**.
 
