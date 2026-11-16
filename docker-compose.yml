@@ -126,6 +126,7 @@ services:
       INGESTION_LAG_SECONDS: ${INGESTION_LAG_SECONDS:-10}
       ANOMALY_THRESHOLD: ${ANOMALY_THRESHOLD:-2.0}
       ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL:-}
+      HEALTHCHECK_PING_URL: ${HEALTHCHECK_PING_URL:-}
       ML_AUGMENT_ENABLED: ${ML_AUGMENT_ENABLED:-true}
     volumes:
       # State cua ML augment (template -> signature dai dien): giu qua restart
