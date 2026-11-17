@@ -1,0 +1,29 @@
+{
+  "validated_at_utc": "2026-11-17T20:29:35.568498+00:00",
+  "source_base": "b083a3ead2ee620c5df5e05f5dfa2d9bcf2dbcce",
+  "python": "3.11.18",
+  "generator_seed": 98,
+  "sha256": {
+    "logs.json": "59a559e30c272064c2e19e98ebc07b2ddcdfc9375810e2253393efee7cf1aff8",
+    "labels.json": "98a8c8646ebd549a24360c378b518dcd4b5518d8a8740c1479afccda90bcc1e2",
+    "config.json": "a8a8ca2ddfb19684aced9decedff25591b95db72dd8360b915d82fd3c686a91b"
+  },
+  "two_independent_cli_runs_byte_identical": true,
+  "logs": 2070,
+  "incidents": 10,
+  "injected_logs": 276,
+  "background_logs": 1794,
+  "all_logs_match_shared_schema": true,
+  "quiet_minutes": 114.0,
+  "rule_only_smoke": {
+    "window_seconds": 60,
+    "history_windows": 30,
+    "threshold": 2.0,
+    "ml_enabled": false,
+    "windows_replayed": 150,
+    "cluster_records": 1686,
+    "all_records_match_schema": true
+  },
+  "tests": "100 passed; see pytest-clustering.txt",
+  "part03b": "PENDING: full 32-combination sweep, metrics and recommendation"
+}

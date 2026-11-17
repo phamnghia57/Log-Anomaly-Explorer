@@ -2,6 +2,9 @@
 
 "Bộ não" phát hiện bất thường: nhóm lỗi tương tự, tính anomaly score, phát alert khi vượt ngưỡng.
 
+Issue #98, phần 03a: [generator timeline synthetic và hợp đồng bàn giao 03b](evaluation/README.md).
+Bộ mới chưa thay thế benchmark đã công bố; replay/sweep và kết luận tham số thuộc phần 03b.
+
 ## Trách nhiệm
 
 - [x] Hoàn thiện thuật toán nhóm lỗi trong `src/clustering.py` (chuẩn hoá giá trị động và hoa/thường)

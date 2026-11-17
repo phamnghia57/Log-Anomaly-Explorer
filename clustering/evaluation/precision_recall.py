@@ -27,9 +27,15 @@ def _cluster_overlaps_incident(cluster, incident):
     first, last = timestamp(cluster["first_seen"]), timestamp(cluster["last_seen"])
     if start >= end or first > last:
         raise ValueError("Invalid incident or cluster interval")
-    expected = incident["expected_cluster_signature"]
+    expected = incident.get("expected_cluster_signatures")
+    if expected is None:
+        expected = [incident["expected_cluster_signature"]]
+    if (not isinstance(expected, list) or not expected
+            or any(not isinstance(value, str) or not value.strip() for value in expected)):
+        raise ValueError("Expected signatures must be a nonempty list of nonempty strings")
+    signatures = {value for item in expected for value in (item, normalize_message(item))}
     signature = cluster.get("signature")
-    return (signature in (expected, normalize_message(expected))
+    return (signature in signatures
             and cluster["cluster_id"] == make_cluster_id(incident["service"], signature)
             and first < end and last >= start)
 
