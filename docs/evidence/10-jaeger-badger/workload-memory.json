@@ -1,0 +1,20 @@
+{
+  "storage": "memory",
+  "completed_at_utc": "2026-11-17T19:20:47.346065+00:00",
+  "elapsed_seconds": 720.0020207999987,
+  "warmup_requests": 60,
+  "measured_requests": 600,
+  "target_rps": 1,
+  "concurrency": 1,
+  "idle_seconds": 60,
+  "status_counts_including_warmup": {
+    "500 (expected 500)": 66,
+    "200 (expected 200)": 594
+  },
+  "network_errors": [],
+  "sample_count": 64,
+  "unexpected_status_requests": [],
+  "sample_errors": [],
+  "peak_memory_bytes": 16525557.76,
+  "idle_median_memory_bytes": 16399728.64
+}

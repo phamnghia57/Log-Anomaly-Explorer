@@ -476,7 +476,16 @@ class TestToolExecutor:
 
         assert result["error"].startswith("trace_id must be")
 
-    def test_get_trace_404_noi_ro_jaeger_luu_trong_ram(self, monkeypatch):
+    def test_trace_not_found_hint_giai_thich_ttl_va_trace_chua_duoc_thu_thap(self):
+        hint = assistant_tools.TRACE_NOT_FOUND_HINT
+
+        assert "TTL" in hint
+        assert "chua tung duoc thu thap" in hint
+        assert "khong ket luan la request khong xay ra" in hint
+        assert "RAM" not in hint
+        assert "restart" not in hint.lower()
+
+    def test_get_trace_404_tra_hint_ve_retention(self, monkeypatch):
         monkeypatch.setattr(assistant_config, "JAEGER_QUERY_URL", "http://jaeger:16686/jaeger")
         monkeypatch.setattr(assistant_tools.httpx, "get",
                             lambda *a, **kw: FakeJaegerResponse(status_code=404))
@@ -484,8 +493,18 @@ class TestToolExecutor:
 
         result = executor.run("get_trace", {"trace_id": "b" * 32})
 
-        assert result["error"] == "trace not found"
-        assert "RAM" in result["hint"]
+        assert result == {"error": "trace not found", "hint": assistant_tools.TRACE_NOT_FOUND_HINT}
+
+    @pytest.mark.parametrize("payload", [{"data": []}, {"data": None}, {}])
+    def test_get_trace_khong_co_data_tra_cung_hint(self, monkeypatch, payload):
+        monkeypatch.setattr(assistant_config, "JAEGER_QUERY_URL", "http://jaeger:16686/jaeger")
+        monkeypatch.setattr(assistant_tools.httpx, "get",
+                            lambda *a, **kw: FakeJaegerResponse(payload=payload))
+        executor = assistant_tools.ToolExecutor(store=None, cluster_store=None, cluster_id="c1")
+
+        result = executor.run("get_trace", {"trace_id": "b" * 32})
+
+        assert result == {"error": "trace not found", "hint": assistant_tools.TRACE_NOT_FOUND_HINT}
 
     def test_get_trace_tom_tat_span_theo_thu_tu_thoi_gian_va_giu_base_path(self, monkeypatch):
         monkeypatch.setattr(assistant_config, "JAEGER_QUERY_URL", "http://jaeger:16686/jaeger")

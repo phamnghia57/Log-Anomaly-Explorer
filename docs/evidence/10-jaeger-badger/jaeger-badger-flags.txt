@@ -1,0 +1,6 @@
+      --badger.directory-key string                               Path to store the keys (indexes), this directory should reside in SSD disk. Set ephemeral to false if you want to define this setting. (default "/go/bin/data/keys")
+      --badger.directory-value string                             Path to store the values (spans). Set ephemeral to false if you want to define this setting. (default "/go/bin/data/values")
+      --badger.ephemeral                                          Mark this storage ephemeral, data is stored in tmpfs. (default true)
+      --badger.span-store-ttl duration                            How long to store the data. Format is time.Duration (https://golang.org/pkg/time/#Duration) (default 72h0m0s)
+      --collector.otlp.enabled                                    Enables OpenTelemetry OTLP receiver on dedicated HTTP and gRPC ports (default true)
+      --query.base-path string                                    The base path for all HTTP routes, e.g. /jaeger; useful when running behind a reverse proxy. See https://github.com/jaegertracing/jaeger/blob/main/examples/reverse-proxy/README.md (default "/")

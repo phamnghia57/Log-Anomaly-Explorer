@@ -1,0 +1,25 @@
+
+> web@0.0.0 test:auth-integration
+> playwright test --config=playwright.auth-integration.config.ts --reporter=line
+
+[WebServer] (node:4452) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+
+Running 9 tests using 1 worker
+
+(node:12360) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1/9] [chromium] › e2e\integration\auth.spec.ts:19:1 › login uses HttpOnly cookie through proxy; logout revokes copied access
+[2/9] [chromium] › e2e\integration\auth.spec.ts:35:1 › reload and simultaneous tabs rotate safely; logout synchronizes all tabs
+[3/9] [chromium] › e2e\integration\auth.spec.ts:52:1 › logout revokes the current token when the refresh cookie is missing
+[4/9] [chromium] › e2e\integration\auth.spec.ts:65:1 › access expiry automatically refreshes without sending the user to login
+[5/9] [chromium] › e2e\integration\auth.spec.ts:76:1 › auth POST rejects cross-site and missing CSRF headers through proxy
+[6/9] [chromium] › e2e\integration\auth.spec.ts:88:1 › logout failure is visible and can be retried without false success
+[7/9] [chromium] › e2e\integration\auth.spec.ts:105:1 › Incident View acknowledges, closes and opens a new episode after a recurrence
+[8/9] [chromium] › e2e\integration\incident-bounds.spec.ts:6:3 › resolve preserves the later DST occurrence when both bounds are unchanged
+[9/9] [chromium] › e2e\integration\incident-bounds.spec.ts:6:3 › resolve preserves the later DST occurrence when only the start is edited
+  1 skipped
+  8 passed (29.0s)

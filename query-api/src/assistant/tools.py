@@ -26,8 +26,10 @@ DEFAULT_SEARCH_WINDOW_HOURS = 24
 MAX_STACK_TRACE_CHARS = 500
 MAX_TRACE_SPANS = 50
 _TRACE_ID_PATTERN = re.compile(r"^[0-9a-fA-F]{1,32}$")
-TRACE_NOT_FOUND_HINT = ("Jaeger giu trace trong RAM nen trace cu hoac trace truoc lan restart "
-                        "gan nhat co the da bi day ra; khong ket luan la request khong xay ra.")
+TRACE_NOT_FOUND_HINT = (
+    "Trace co the da qua TTL hoac chua tung duoc thu thap vao Jaeger; "
+    "khong ket luan la request khong xay ra chi vi khong tim thay trace."
+)
 
 TOOL_SCHEMAS = [
     {

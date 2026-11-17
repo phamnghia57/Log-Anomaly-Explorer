@@ -1,0 +1,52 @@
+[
+  {
+    "module": "query-api",
+    "exit_code": 0,
+    "environment": "Python 3.11 Linux; GIT_SHA=unknown",
+    "targeted": "53 passed",
+    "full": "331 passed, 7 skipped; live tests run separately"
+  },
+  {
+    "module": "demo-app",
+    "exit_code": 0,
+    "tail": [
+      "",
+      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+      "53 passed, 1 warning in 3.35s"
+    ]
+  },
+  {
+    "module": "ingestion",
+    "exit_code": 0,
+    "tail": [
+      "",
+      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+      "27 passed, 1 warning in 2.02s"
+    ]
+  },
+  {
+    "module": "clustering",
+    "exit_code": 0,
+    "tail": [
+      "...................................................................      [100%]",
+      "67 passed in 1.72s"
+    ]
+  },
+  {
+    "module": "load-tests",
+    "exit_code": 0,
+    "tail": [
+      "........................                                                 [100%]",
+      "24 passed in 1.49s"
+    ]
+  },
+  {
+    "module": "query-api live OpenSearch",
+    "exit_code": 0,
+    "tail": [
+      "",
+      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+      "7 passed, 1 warning in 24.93s"
+    ]
+  }
+]

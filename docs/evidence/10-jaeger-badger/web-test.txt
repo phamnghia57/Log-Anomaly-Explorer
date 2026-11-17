@@ -1,0 +1,12 @@
+
+> web@0.0.0 test
+> vitest run
+
+
+ RUN  v5.0.3 D:/SE/Log-Anomaly-Explorer/web
+
+
+ Test Files  9 passed (9)
+      Tests  133 passed (133)
+   Start at  02:04:06
+   Duration  19.51s (environment 69%, import 14%, tests 9%, setup 5%, transform 2%)
