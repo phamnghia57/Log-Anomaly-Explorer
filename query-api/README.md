@@ -170,6 +170,23 @@ curl -X POST "http://localhost:8002/assistant/clusters/<cluster_id>/conversation
   -d '{"message": "Lỗi này do đâu, cách sửa thế nào?"}'
 ```
 
+## AI Assistant — chất lượng đo được
+
+Issue #108 đã có [bộ 20 câu và hướng dẫn chạy](tests/golden/README.md), script xác minh
+cluster thật và [rubric/bảng chấm hai người](../docs/evidence/11-assistant-golden-set/README.md).
+Bộ câu hỏi gồm 4 câu mỗi nhóm value/422, connection/502, timeout/504, runtime/500 và
+bad_schema. Nhóm bad_schema kiểm tra việc AI nêu thiếu dữ liệu quarantine; chưa đo khả
+năng điều tra quarantine trực tiếp.
+
+- `MAX_TOOL_ROUNDS=1` (không có tool): điểm/60, token, chi phí trung bình/câu, latency
+  trung bình/p95, số câu lệch giữa hai người chấm — **pending**.
+- `MAX_TOOL_ROUNDS=2` (tối đa một vòng tool rồi trả lời): các số đo trên — **pending**.
+- Khuyến nghị giữ 1 hay 2 và 2–3 dạng câu trả lời yếu nhất — **pending** đến khi Nghĩa
+  chạy Azure/Langfuse thật và hai người chấm độc lập, đối chiếu rồi chốt điểm.
+
+Đây là phần chuẩn bị của Mạnh, chưa chứng minh chất lượng hay chi phí thực tế. PR không
+đổi cấu hình mặc định 2; dữ liệu runtime và bảng chấm cuối sẽ được bổ sung sau.
+
 ## Evidence sở hữu
 
 - **Runbook**: [`../docs/task/runbook.md`](../docs/task/runbook.md)

@@ -1,0 +1,39 @@
+[
+  {
+    "name": "prepare_help",
+    "command": [
+      "D:\\SE\\tmp\\issue107\\venv\\Scripts\\python.exe",
+      "D:\\SE\\Log-Anomaly-Explorer\\query-api\\tests\\golden\\prepare_assistant_golden.py",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "usage: prepare_assistant_golden.py [-h] [--questions QUESTIONS] --bindings\n                                   BINDINGS --output OUTPUT\n\nXac minh 4 cluster that va gan 20 cau golden\n\noptions:\n  -h, --help            show this help message and exit\n  --questions QUESTIONS\n  --bindings BINDINGS\n  --output OUTPUT\n",
+    "stderr": ""
+  },
+  {
+    "name": "unbound_catalog_rejected",
+    "command": [
+      "D:\\SE\\tmp\\issue107\\venv\\Scripts\\python.exe",
+      "D:\\SE\\Log-Anomaly-Explorer\\query-api\\tests\\golden\\run_assistant_golden.py",
+      "--output",
+      "D:\\SE\\tmp\\issue108\\unbound-must-not-create.csv"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "usage: run_assistant_golden.py [-h] [--questions QUESTIONS] --output OUTPUT\n                               [--delay DELAY] [--keep-history]\nrun_assistant_golden.py: error: value-422-01: cluster_id chua gan ID that; chay prepare_assistant_golden.py\n"
+  },
+  {
+    "name": "empty_bindings_rejected",
+    "command": [
+      "D:\\SE\\tmp\\issue107\\venv\\Scripts\\python.exe",
+      "D:\\SE\\Log-Anomaly-Explorer\\query-api\\tests\\golden\\prepare_assistant_golden.py",
+      "--bindings",
+      "D:\\SE\\Log-Anomaly-Explorer\\query-api\\tests\\golden\\cluster-bindings.example.json",
+      "--output",
+      "D:\\SE\\tmp\\issue108\\unbound-must-not-create"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "usage: prepare_assistant_golden.py [-h] [--questions QUESTIONS] --bindings\n                                   BINDINGS --output OUTPUT\nprepare_assistant_golden.py: error: value-422: cluster_id chua gan ID that; chay prepare_assistant_golden.py\n"
+  }
+]

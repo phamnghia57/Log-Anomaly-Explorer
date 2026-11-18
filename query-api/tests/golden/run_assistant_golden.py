@@ -7,29 +7,46 @@ import os
 import pathlib
 import time
 from datetime import datetime, timezone
+from urllib.parse import quote
 
 import httpx
 
-BASE_URL = os.environ.get("QUERY_API_HOST", "http://query-api:8002")
+BASE_URL = os.environ.get("QUERY_API_HOST", "http://query-api:8002").rstrip("/")
 OPENSEARCH_URL = os.environ.get("OPENSEARCH_URL", "http://opensearch:9200")
 CONVERSATIONS_INDEX = os.environ.get("ASSISTANT_CONVERSATIONS_INDEX", "assistant-conversations")
 FIELDS = ["id", "cluster_id", "question", "expected", "answer", "error", "latency_s", "asked_at"]
 REQUIRED = {"id", "cluster_id", "question"}
 
 
-def load_questions(path: str) -> list[dict]:
-    data = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
+def validate_questions(data: object, *, allow_unbound: bool = False) -> list[dict]:
     if not isinstance(data, list) or not data:
-        raise ValueError(f"{path}: can mot danh sach cau hoi khong rong")
+        raise ValueError("can mot danh sach cau hoi khong rong")
     seen: set[str] = set()
     for item in data:
+        if not isinstance(item, dict):
+            raise ValueError("moi cau hoi phai la object")
         missing = REQUIRED - set(item)
         if missing:
             raise ValueError(f"cau hoi {item.get('id', '?')} thieu truong {sorted(missing)}")
+        for field in ("id", "question"):
+            if not isinstance(item[field], str) or not item[field].strip():
+                raise ValueError(f"{field} phai la chuoi khong rong")
         if item["id"] in seen:
             raise ValueError(f"id trung: {item['id']}")
         seen.add(item["id"])
+        cluster_id = item["cluster_id"]
+        if allow_unbound and cluster_id is None:
+            continue
+        if (not isinstance(cluster_id, str) or not cluster_id.strip()
+                or cluster_id != cluster_id.strip()
+                or cluster_id.upper().startswith(("DOI-THANH", "PLACEHOLDER"))):
+            raise ValueError(f"{item['id']}: cluster_id chua gan ID that; chay prepare_assistant_golden.py")
     return data
+
+
+def load_questions(path: str, *, allow_unbound: bool = False) -> list[dict]:
+    data = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
+    return validate_questions(data, allow_unbound=allow_unbound)
 
 
 def login(client: httpx.Client, username: str, password: str) -> str:
@@ -41,13 +58,16 @@ def login(client: httpx.Client, username: str, password: str) -> str:
 
 
 def reset_conversation(client: httpx.Client, cluster_id: str) -> None:
-    client.delete(f"{OPENSEARCH_URL}/{CONVERSATIONS_INDEX}/_doc/{cluster_id}")
+    response = client.delete(
+        f"{OPENSEARCH_URL}/{quote(CONVERSATIONS_INDEX, safe='')}/_doc/{quote(cluster_id, safe='')}")
+    if response.status_code != 404:
+        response.raise_for_status()
 
 
 def ask(client: httpx.Client, token: str, cluster_id: str, question: str) -> tuple[str, float]:
     started = time.monotonic()
     response = client.post(
-        f"{BASE_URL}/assistant/clusters/{cluster_id}/conversation/messages",
+        f"{BASE_URL}/assistant/clusters/{quote(cluster_id, safe='')}/conversation/messages",
         json={"message": question},
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -60,12 +80,14 @@ def ask(client: httpx.Client, token: str, cluster_id: str, question: str) -> tup
 
 def run(client: httpx.Client, questions: list[dict], *, token: str,
         reset: bool = True, delay: float = 0.0) -> list[dict]:
+    validate_questions(questions)
     rows = []
     for index, item in enumerate(questions):
-        if reset:
-            reset_conversation(client, item["cluster_id"])
         asked_at = datetime.now(timezone.utc).isoformat()
         try:
+            if reset:
+                reset_conversation(client, item["cluster_id"])
+            asked_at = datetime.now(timezone.utc).isoformat()
             answer, latency = ask(client, token, item["cluster_id"], item["question"])
             error = ""
         except Exception as exc:  # noqa: BLE001
@@ -95,7 +117,10 @@ def main() -> int:
     parser.add_argument("--keep-history", action="store_true")
     args = parser.parse_args()
 
-    questions = load_questions(args.questions)
+    try:
+        questions = load_questions(args.questions)
+    except (ValueError, OSError) as exc:
+        parser.error(str(exc))
     with httpx.Client(timeout=300.0) as client:
         token = login(client, os.environ["QUERY_API_USERNAME"], os.environ["QUERY_API_PASSWORD"])
         started_at = datetime.now(timezone.utc).isoformat()

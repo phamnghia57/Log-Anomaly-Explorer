@@ -1,0 +1,21 @@
+........................................................................ [ 18%]
+........................................................................ [ 36%]
+........................................................................ [ 54%]
+....................sssssss............................................. [ 73%]
+........................................................................ [ 91%]
+.................................                                        [100%]
+============================== warnings summary ===============================
+..\..\tmp\issue107\venv\Lib\site-packages\fastapi\testclient.py:1
+  D:\SE\tmp\issue107\venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_live_auth_sessions.py:48: AUTH_TEST_OPENSEARCH_URL is required for live storage tests
+SKIPPED [1] tests\test_live_auth_sessions.py:64: AUTH_TEST_OPENSEARCH_URL is required for live storage tests
+SKIPPED [1] tests\test_live_auth_sessions.py:92: AUTH_TEST_OPENSEARCH_URL is required for live storage tests
+SKIPPED [1] tests\test_live_auth_sessions.py:109: AUTH_TEST_OPENSEARCH_URL is required for live storage tests
+SKIPPED [1] tests\test_live_auth_sessions.py:121: AUTH_TEST_OPENSEARCH_URL is required for live storage tests
+SKIPPED [1] tests\test_live_incidents.py:40: Requires a disposable OpenSearch cluster
+SKIPPED [1] tests\test_live_incidents.py:126: Requires a disposable OpenSearch cluster
+386 passed, 7 skipped, 1 warning in 14.33s
