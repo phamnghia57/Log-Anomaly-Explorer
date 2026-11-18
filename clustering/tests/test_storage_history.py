@@ -56,6 +56,49 @@ def test_ensure_ready_tao_index_history_voi_mapping_strict(store):
     assert mapping["properties"]["recorded_at"]["type"] == "date"
 
 
+def test_heartbeat_mapping_migration_and_metrics(store):
+    s, client = store
+    client.indices.created[s.heartbeat]["mappings"]["properties"] = {"last_processed_at": {"type": "date"}}
+    s.ensure_ready()
+    fields = client.indices.created[s.heartbeat]["mappings"]["properties"]
+    assert fields["cycle_seconds"] == {"type": "double"}
+    assert fields["logs_read"] == fields["clusters_out"] == {"type": "long"}
+    client.index = lambda **kw: client.calls.append(("index", kw))
+    s.write_heartbeat("2026-10-26T00:00:00Z", cycle_seconds=12.5, logs_read=100, clusters_out=3)
+    assert client.calls[-1][1]["body"] == {"last_processed_at": "2026-10-26T00:00:00Z",
+                                             "cycle_seconds": 12.5, "logs_read": 100, "clusters_out": 3}
+
+
+def test_history_retention_deletes_only_points_before_cutoff(store):
+    s, client = store
+    calls = []
+    def delete_by_query(**kwargs):
+        calls.append(kwargs)
+        return {"deleted": 2, "timed_out": False, "failures": [], "version_conflicts": 0}
+    client.delete_by_query = delete_by_query
+    assert s.delete_history_before("2026-10-01T00:00:00+00:00") == 2
+    assert calls == [{"index": "cluster-history", "body": {"query": {"range": {
+        "recorded_at": {"lt": "2026-10-01T00:00:00+00:00"}}}}, "conflicts": "proceed", "refresh": False}]
+
+
+@pytest.mark.parametrize("response", [{"deleted": 0, "timed_out": True},
+                                      {"deleted": 1, "failures": [{"cause": "error"}]},
+                                      {"deleted": 1, "version_conflicts": 1}])
+def test_history_retention_reports_incomplete_delete(store, response):
+    s, client = store
+    client.delete_by_query = lambda **kw: response
+    with pytest.raises(StorageError, match="retention failed"):
+        s.delete_history_before("2026-10-01T00:00:00Z")
+
+
+def test_history_retention_rejects_index_patterns(store):
+    s, client = store
+    s.history = "*"
+    client.delete_by_query = lambda **kw: pytest.fail("must not issue broad deletion")
+    with pytest.raises(StorageError, match="explicit index"):
+        s.delete_history_before("2026-10-01T00:00:00Z")
+
+
 def test_alert_state_batch_roundtrip_across_store_instances(store):
     s, client = store
     documents = {}
@@ -95,7 +138,26 @@ def test_list_history_loc_theo_cluster_id_va_sap_tang_dan(store):
                         "recorded_at": "2026-10-24T00:00:00+00:00"}]
     body = client.calls[-1][1]["body"]
     assert {"term": {"cluster_id": "c1"}} in body["query"]["bool"]["filter"]
-    assert body["sort"] == [{"recorded_at": "asc"}]
+    assert body["sort"] == [{"recorded_at": "desc"}]
+
+
+def test_list_history_lay_diem_moi_nhat_va_tra_theo_thoi_gian(store):
+    s, client = store
+    records = [
+        {"cluster_id": "c1", "score": n, "status": "normal",
+         "recorded_at": f"2026-10-{n:02d}T00:00:00Z"}
+        for n in range(1, 6)
+    ]
+
+    def search(**kw):
+        body = kw["body"]
+        assert body["sort"] == [{"recorded_at": "desc"}]
+        assert body["size"] == 3
+        return {"hits": {"hits": [{"_source": point} for point in
+                                   sorted(records, key=lambda p: p["recorded_at"], reverse=True)[:body["size"]]]}}
+
+    client.search = search
+    assert [point["score"] for point in s.list_history("c1", limit=3)] == [3, 4, 5]
 
 
 def test_list_history_co_since_them_filter_range(store):

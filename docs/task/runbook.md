@@ -103,8 +103,8 @@ ngưỡng, nên báo động giả dồn dập liên tục thường không ph�
 
 Các nguyên nhân thường gặp hơn và cách xử lý:
 
-1. **Ngưỡng `ANOMALY_THRESHOLD` (mặc định `2.0`) quá nhạy** — tăng giá trị này trong `.env`
-   (`ANOMALY_THRESHOLD=3.0` chẳng hạn), áp dụng cho `clustering` service, cần
+1. **Ngưỡng `ANOMALY_THRESHOLD` (mặc định Compose `3.0`) quá nhạy** — tăng giá trị này trong `.env`
+   (`ANOMALY_THRESHOLD=4.0` chẳng hạn), áp dụng cho `clustering` service, cần
    `docker compose up -d --force-recreate clustering` để nhận cấu hình mới (xem mục "Khi sửa
    cấu hình mà không thấy hiệu lực" bên dưới).
 2. **Baseline tự thích nghi "quên" mất burst cũ** — hệ thống tính baseline từ
@@ -308,6 +308,42 @@ Với các commit từ `83dbc0d` trở đi thì không gặp, vì script đã n�
 
 Build cả 4 image trên VM 2 vCPU mất vài phút và làm CPU tăng vọt → **đừng deploy sát giờ demo**.
 
+## Giám sát bên ngoài và dead-man switch
+
+Hai nguồn cảnh báo có ý nghĩa khác nhau: anomaly từ webhook của worker báo một
+cụm log vượt ngưỡng; uptime/dead-man từ dịch vụ bên ngoài báo endpoint lỗi,
+worker ngừng ping, hoặc webhook gửi thất bại. Không nhận email anomaly không có
+nghĩa hệ thống giám sát còn hoạt động.
+
+Healthchecks.io nhận ping định kỳ, không chủ động kiểm tra HTTP endpoint. Tạo
+một check worker với period 60 giây, grace đủ cho thời gian xử lý và mạng nhưng
+cùng period phải dưới 10 phút để thử tiêu chí; liên kết email hộp thư nhóm và
+kiểm tra kênh email. Đặt URL ping bí mật vào `HEALTHCHECK_PING_URL` trong `.env`
+trên VM rồi recreate service clustering. Worker chỉ ping sau khi ghi heartbeat
+thành công; replay `--window-to` không ping. Webhook lỗi gửi `/fail`, không gửi
+success ngay trong chu kỳ đó; khi webhook đã lỗi, worker chờ lần gửi webhook
+thành công tiếp theo trước khi gửi success để tránh báo recovered giả. Trạng
+thái lỗi webhook này chỉ ở bộ nhớ, mất khi worker restart; kiểm tra webhook và
+Healthchecks trực tiếp sau restart. Không đưa URL ping vào ảnh, log hay commit.
+Để trống biến thì tắt ping; lỗi ping được ghi cảnh báo chung và không dừng worker.
+
+Dùng một dịch vụ HTTP uptime bên ngoài riêng, chẳng hạn UptimeRobot, để kiểm tra
+`https://<domain>/health`, `/clustering/health`, `/ingestion/health` và bật email
+down/recovered cho hộp thư nhóm. Gói miễn phí được công bố hỗ trợ 50 monitor,
+chu kỳ 5 phút; cần xác nhận quyền truy cập URL và thử thời gian gửi thật, không
+coi khoảng kiểm tra là cam kết email đến trong 10 phút. Cấu hình period/grace và
+thời gian chờ phù hợp tải thật của worker, kể cả lúc OpenSearch chậm.
+
+Khi bảo trì có chủ đích, thông báo ca trực và pause cả các monitor liên quan;
+với Healthchecks chọn chế độ giữ pause khi có ping, nếu không ping có thể tự
+resume check. Sau bảo trì resume, xác nhận ping/endpoint xanh và email hoạt động.
+Trên môi trường được phép thử, ghi timestamp lúc `docker compose stop clustering`,
+email down, lúc `docker compose start clustering`, email recovered; thử webhook
+sai và xác nhận `/fail` trong Events. Lưu ảnh và thời gian vào
+`docs/evidence/06-dead-man-switch/`, che URL ping và thông tin riêng tư. Khôi phục
+biến webhook đúng sau thử nghiệm. Không khẳng định tiêu chí thời gian cho đến khi
+đo được trên deploy thật.
+
 ## Truy cập Jaeger, fault injection và Swagger
 
 Từ ngoài VM chỉ còn cổng 80/443 của gateway. Cổng `9000`/`9001`/`9002`/`16686` chỉ bind
@@ -317,7 +353,7 @@ Từ ngoài VM chỉ còn cổng 80/443 của gateway. Cổng `9000`/`9001`/`900
 | Cần | Cách |
 |---|---|
 | Jaeger UI, `/demo/simulate-error` | `https://<domain>/jaeger/`, `https://<domain>/demo/...` — basic auth bằng `GATEWAY_BASIC_AUTH_USER` + mật khẩu gốc của `GATEWAY_BASIC_AUTH_HASH` trong `.env` trên VM (hỏi Nghĩa). `curl -u <user>:<pass> ...` |
-| `/health`, `/ingestion/health`, `/demo/health` | Public, không cần auth — trang Trạng thái hệ thống đọc các route này |
+| `/health`, `/clustering/health`, `/ingestion/health`, `/demo/health` | Public, không cần auth — trang Trạng thái hệ thống đọc các route này |
 | Swagger `/docs`, `/openapi.json` | Không còn public. `ssh -L 9002:localhost:9002 <user>@<vm>` rồi mở `http://localhost:9002/docs` |
 | `POST /ingest` hoặc Locust từ máy khác | SSH tunnel tương tự cho cổng `9000`/`9002` |
 

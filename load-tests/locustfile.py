@@ -26,9 +26,12 @@ import logging
 import os
 import random
 import re
+import sys
+from pathlib import Path
+from uuid import uuid4
 from datetime import datetime, timezone
 
-from locust import HttpUser, between, task
+from locust import HttpUser, between, constant_throughput, task
 from locust.exception import StopUser
 
 logger = logging.getLogger(__name__)
@@ -133,6 +136,35 @@ class IngestionUser(HttpUser):
             "span_id": f"{random.getrandbits(64):016x}",
             "message": message,
         }
+
+
+class ErrorStormUser(HttpUser):
+    """One user targets an ERROR request rate; only run against an isolated stack."""
+
+    host = INGESTION_HOST
+    wait_time = constant_throughput(float(os.environ.get("ERROR_STORM_RPS", "10")))
+
+    def on_start(self):
+        if os.environ.get("LOAD_TEST_ERROR_STORM", "").lower() != "true":
+            logger.error("ErrorStormUser disabled; set LOAD_TEST_ERROR_STORM=true on an isolated stack")
+            raise StopUser()
+        # Reuse 03a's seeded, schema-valid fault families and message variations.
+        root = str(Path(__file__).resolve().parents[1])
+        if root not in sys.path:
+            sys.path.insert(0, root)
+        from clustering.evaluation.generate_timeline import generate_timeline
+        self.logs, _, _ = generate_timeline(seed=int(os.environ.get("ERROR_STORM_SEED", "98")))
+        self.position = 0
+
+    @task
+    def ingest_error(self):
+        original = self.logs[self.position % len(self.logs)]
+        self.position += 1
+        payload = {**original, "timestamp": _now_iso(), "trace_id": uuid4().hex, "span_id": uuid4().hex[:16]}
+        with self.client.post("/ingest", json=payload, name="POST /ingest (ERROR storm)",
+                              catch_response=True) as response:
+            if response.status_code != 202:
+                response.failure(f"Expected 202; got {response.status_code}")
 
 
 class QueryUser(HttpUser):

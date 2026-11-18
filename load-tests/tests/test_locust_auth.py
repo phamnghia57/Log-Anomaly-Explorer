@@ -23,6 +23,36 @@ locustfile = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(locustfile)
 
 
+def test_error_storm_requires_opt_in(monkeypatch):
+    monkeypatch.delenv("LOAD_TEST_ERROR_STORM", raising=False)
+    user = locustfile.ErrorStormUser(Environment(user_classes=[locustfile.ErrorStormUser]))
+    with pytest.raises(StopUser):
+        user.on_start()
+    user.client.close()
+
+
+def test_error_storm_reuses_03a_with_unique_ids(monkeypatch):
+    monkeypatch.setenv("LOAD_TEST_ERROR_STORM", "true")
+    sent = []
+    def send(session, request, **kwargs):
+        sent.append(json.loads(request.body))
+        response = requests.Response()
+        response.status_code = 202
+        response._content = b"{}"
+        response.url, response.request = request.url, request
+        return response
+    monkeypatch.setattr(requests.Session, "send", send)
+    user = locustfile.ErrorStormUser(Environment(user_classes=[locustfile.ErrorStormUser]))
+    user.on_start()
+    user.ingest_error()
+    user.position = 0
+    user.ingest_error()
+    assert all(item["level"] == "ERROR" for item in sent)
+    assert sent[0]["message"] == user.logs[0]["message"]
+    assert sent[0]["trace_id"] != sent[1]["trace_id"]
+    user.client.close()
+
+
 def _jwt():
     def encode(value):
         return base64.urlsafe_b64encode(json.dumps(value).encode()).rstrip(b"=").decode()

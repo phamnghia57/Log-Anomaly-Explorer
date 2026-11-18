@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/phamnghia57/Log-Anomaly-Explorer/docs/architect/contracts/cluster-history-schema.json",
   "title": "ClusterHistoryPoint",
-  "description": "Hop dong giua clustering (Nam, ben ghi) va query-api / UI xu huong (Nghia, ben doc). Khac voi cluster-record.schema.json (ban ghi 'hien tai' cua mot cum, upsert theo cluster_id): moi lan pipeline tinh diem bat thuong cho mot cum (moi chu ky WINDOW_SECONDS), THEM MOI (khong upsert) mot ClusterHistoryPoint - dung de ve bieu do xu huong score theo thoi gian. Khong doi/dung lai cluster-record.schema.json.",
+  "description": "Hop dong giua clustering va query-api / UI xu huong: moi chu ky THEM MOI mot ClusterHistoryPoint. Retention: worker xoa cac diem co recorded_at nho hon thoi gian UTC hien tai tru RETENTION_DAYS (mac dinh 30 ngay, toi thieu 1), kiem tra sau chu ky va toi da moi gio mot lan trong moi process; diem tai cutoff duoc giu. Diem qua han co the con den lan don tiep theo hoac lau hon khi worker dung/loi; du lieu qua han khong duoc dam bao. Replay --window-to khong chay retention. History duoc dung ca cho phat hien incident tai phat, nen viec xoa co the gioi han bang chung tai phat cu. Khong doi/dung lai cluster-record.schema.json.",
   "type": "object",
   "required": ["cluster_id", "score", "status", "recorded_at"],
   "properties": {

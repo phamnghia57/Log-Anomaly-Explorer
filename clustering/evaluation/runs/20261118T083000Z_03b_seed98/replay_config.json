@@ -1,0 +1,16 @@
+{
+  "window_seconds": 60,
+  "history_windows": 30,
+  "cooldown_seconds": 600,
+  "ml_margin": 0.05,
+  "ml_max_templates": 2000,
+  "warmup_replayed": true,
+  "delivery": "simulated successful; no webhook or incident acknowledgement",
+  "precision": "fraction of sent cluster alerts matching an incident by service, signature and time overlap; repeated alerts count",
+  "recall": "fraction of incidents matched by at least one sent alert",
+  "quiet_rate": "unmatched sent alerts in globally quiet windows / quiet hours",
+  "delay": "mean completed 60s windows from incident start to first matching sent alert; excludes missed incidents",
+  "python": "3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "scikit_learn": "1.9.1"
+}

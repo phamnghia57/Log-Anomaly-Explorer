@@ -6,8 +6,10 @@ import math
 import logging
 import os
 import time
+from urllib.parse import quote
 
 import httpx
+from .healthcheck import ping
 
 logger = logging.getLogger("clustering.alert")
 
@@ -50,7 +52,7 @@ def check_and_alert(cluster: dict, service: str = "", *, store=None) -> bool:
     return bool(check_and_alert_batch([(service, cluster)], store=store))
 
 
-def check_and_alert_batch(records, *, window_to=None, store=None) -> int:
+def check_and_alert_batch(records, *, window_to=None, store=None, incidents=None, on_delivery=None) -> int:
     """Send one digest per cycle; only successful delivery starts cooldown."""
     records = list(records)
     threshold = get_threshold()
@@ -66,6 +68,8 @@ def check_and_alert_batch(records, *, window_to=None, store=None) -> int:
             cluster["status"] = "normal"
             continue
         cluster["status"] = "anomalous"
+        if incidents is not None and incidents.current(cluster)["status"] == "acknowledged":
+            continue
         last = last_alert.get(cluster["cluster_id"])
         if last is not None and now - last < cooldown:
             cluster["status"] = "alerted"
@@ -77,14 +81,18 @@ def check_and_alert_batch(records, *, window_to=None, store=None) -> int:
     if not webhook:
         logger.warning("ALERT_WEBHOOK_URL is missing; %d alerts remain unsent", len(pending))
         return 0
+    web_url = os.environ.get("ALERT_WEB_BASE_URL", "").strip().rstrip("/")
     alerts = [{
         "cluster_id": cluster["cluster_id"], "score": cluster["score"],
         "service": service, "first_seen": cluster["first_seen"],
+        "signature": cluster.get("signature", ""),
+        "incident_url": f"{web_url}/clusters/{quote(cluster['cluster_id'], safe='')}" if web_url else None,
         "trace_id": next(iter(cluster.get("trace_ids") or []), None),
     } for service, cluster in pending]
     subject = f"Log Anomaly Explorer: {len(alerts)} alerts"
     message = "\n\n".join(
         f"Service: {a['service']}\nCluster: {a['cluster_id']}\nScore: {a['score']}"
+        f"\nSignature: {a['signature'] or '-'}\nIncident: {a['incident_url'] or '-'}"
         f"\nFirst seen: {a['first_seen']}\nTrace: {a['trace_id'] or '-'}"
         for a in alerts
     )
@@ -94,8 +102,13 @@ def check_and_alert_batch(records, *, window_to=None, store=None) -> int:
     try:
         response = httpx.post(webhook, json=payload, timeout=3.0)
         response.raise_for_status()
-    except httpx.HTTPError as exc:
-        logger.error("Alert digest failed: %s", exc)
+    except (httpx.HTTPError, httpx.InvalidURL):
+        # HTTP client errors may contain the private webhook URL.
+        logger.error("Alert digest failed")
+        if on_delivery is not None:
+            on_delivery(False)
+        else:
+            ping(failed=True)
         return 0
     sent_at = clock()
     if store is not None:
@@ -104,4 +117,6 @@ def check_and_alert_batch(records, *, window_to=None, store=None) -> int:
         if store is None:
             _last_alert[cluster["cluster_id"]] = sent_at
         cluster["status"] = "alerted"
+    if on_delivery is not None:
+        on_delivery(True)
     return len(pending)

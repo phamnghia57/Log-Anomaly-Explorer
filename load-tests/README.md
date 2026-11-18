@@ -1,5 +1,53 @@
 # load-tests
 
+## Error storm / worker (issue #103)
+
+**Chưa có số đo 10/50/100 ERROR/s**: máy thực hiện thay đổi không kết nối được
+Docker Engine; không dùng bảng HTTP cũ để kết luận worker có lỡ cửa sổ hay không.
+
+| Tốc độ mục tiêu | cycle_seconds | Lỡ cửa sổ |
+|---:|---|---|
+| 10 ERROR/s | Chưa đo | Chưa xác định |
+| 50 ERROR/s | Chưa đo | Chưa xác định |
+| 100 ERROR/s | Chưa đo | Chưa xác định |
+
+`ErrorStormUser` phát log ERROR từ bộ sinh 03a (seed mặc định 98), gán timestamp
+và ID mới; cần chủ động đặt `LOAD_TEST_ERROR_STORM=true`. Chỉ chạy trên stack cô lập,
+với webhook và healthcheck ngoài đã tắt, dữ liệu và index riêng. Một user nhắm
+`ERROR_STORM_RPS` request/giây; đây là tốc độ mục tiêu, không đảm bảo đạt nếu
+server/client chậm. Kiểm tra số 202, 429, lỗi và throughput thực trong Locust;
+nếu không đạt mục tiêu thì kết quả không đại diện mức đó. Không chạy chung các
+user khác vì chúng làm sai tốc độ và tải.
+
+Ví dụ từ root repo, chạy một lần cho mỗi `RATE` (10, 50, 100), dùng thư mục
+evidence mới và cấu hình kết nối OpenSearch riêng qua biến môi trường của dự án:
+
+```sh
+export LOAD_TEST_ERROR_STORM=true ERROR_STORM_RPS=10 ERROR_STORM_SEED=98
+export INGESTION_HOST=http://localhost:8000
+# Terminal 1: ghi heartbeat, khởi chạy trước Locust; đổi tên file cho mỗi RATE.
+python -m load-tests.capture_worker_cycles --rate 10 --seconds 360 --output cycle-10.csv
+# Terminal 2: sau khi collector bắt đầu, chạy 5 phút và giữ output CSV.
+locust -f load-tests/locustfile.py ErrorStormUser --headless -u 1 -r 1 -t 5m --csv storm-10
+# Terminal 3: lưu output theo thời gian, Ctrl-C sau mỗi lượt.
+docker stats --format '{{.Name}},{{.CPUPerc}},{{.MemUsage}}' > docker-stats-10.txt
+```
+
+Collector đọc heartbeat mới nhất mỗi giây; trường `window_to` giúp đối chiếu
+với log worker: các cửa sổ liên tiếp phải cách nhau đúng 60 giây. Collector có
+thể bỏ lỡ heartbeat nếu ngừng chạy hoặc polling chậm, vì vậy đối chiếu log
+trước khi kết luận worker bỏ cửa sổ. `cycle_seconds` đo từ đầu xử lý đến sau
+ghi cluster/history, trước ghi heartbeat và ping ngoài; không gồm sleep. Nếu bất
+kỳ chu kỳ vượt 30 giây, xem xét bước 2; không đồng nhất vượt 30 giây với đã bỏ
+cửa sổ. Kiểm tra `window_to` và thời gian thực để xác định bỏ cửa sổ.
+
+Chạy 5 phút từ index trống chỉ tạo khoảng 5 phút lịch sử, **không đại diện**
+31 phút duy trì tải. Muốn kết luận về bão lỗi kéo dài phải nạp 30 phút dữ liệu
+cùng phân phối trước khi đo, hoặc chạy đủ lâu; mô tả cách nạp và lưu lượng thực
+vào evidence. Ghi rõ giới hạn CPU/RAM, CPU dùng chung, seed, cấu hình, cooldown,
+thời điểm tải và thời điểm từng heartbeat. Chưa thực hiện bước lấy mẫu/giới hạn
+`log_ids` vì chưa có phép đo kích hoạt.
+
 Dùng chung giữa Minh (load test tầng ingestion) và Nghĩa (load test end-to-end). Công cụ: [Locust](https://locust.io/).
 
 Hai nhóm người dùng trong [`locustfile.py`](locustfile.py):

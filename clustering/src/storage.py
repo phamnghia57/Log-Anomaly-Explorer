@@ -51,7 +51,14 @@ class OpenSearchStore:
             self.client.indices.put_mapping(index=self.history, body={"properties": evidence_fields})
         except Exception as exc:
             raise StorageError("cannot migrate cluster history timestamps") from exc
-        self._ensure_index(self.heartbeat, {"last_processed_at": {"type": "date"}})
+        heartbeat_fields = {"last_processed_at": {"type": "date"}, "window_to": {"type": "date"},
+                            "cycle_seconds": {"type": "double"},
+                            "logs_read": {"type": "long"}, "clusters_out": {"type": "long"}}
+        self._ensure_index(self.heartbeat, heartbeat_fields)
+        try:
+            self.client.indices.put_mapping(index=self.heartbeat, body={"properties": heartbeat_fields})
+        except Exception as exc:
+            raise StorageError("cannot migrate clustering heartbeat metrics") from exc
         self._ensure_index(self.alert_state, {"sent_at": {"type": "double"}})
 
     def get_alert_times(self, cluster_ids):
@@ -81,9 +88,12 @@ class OpenSearchStore:
         except Exception as exc:
             raise StorageError("cannot persist alert cooldowns") from exc
 
-    def write_heartbeat(self, processed_at):
+    def write_heartbeat(self, processed_at, *, cycle_seconds=None, logs_read=None, clusters_out=None, window_to=None):
+        body = {"last_processed_at": processed_at}
+        body.update({key: value for key, value in (("cycle_seconds", cycle_seconds),
+                    ("logs_read", logs_read), ("clusters_out", clusters_out), ("window_to", window_to)) if value is not None})
         try:
-            self.client.index(index=self.heartbeat, id="worker", body={"last_processed_at": processed_at})
+            self.client.index(index=self.heartbeat, id="worker", body=body)
         except Exception as exc:
             raise StorageError("cannot write clustering heartbeat") from exc
 
@@ -138,6 +148,21 @@ class OpenSearchStore:
         except Exception as exc:
             raise StorageError(f"write_history failed: {exc}") from exc
 
+    def delete_history_before(self, cutoff):
+        """Delete only history points strictly older than an ISO-8601 cutoff."""
+        if not self.history or self.history == "_all" or any(char in self.history for char in "*,?"):
+            raise StorageError("history retention requires one explicit index or alias")
+        try:
+            result = self.client.delete_by_query(
+                index=self.history, body={"query": {"range": {"recorded_at": {"lt": cutoff}}}},
+                conflicts="proceed", refresh=False,
+            )
+            if result.get("timed_out") or result.get("failures") or result.get("version_conflicts", 0):
+                raise RuntimeError("history retention incomplete")
+            return result["deleted"]
+        except Exception as exc:
+            raise StorageError("cluster history retention failed") from exc
+
     def list_clusters(self, *, status=None, since=None, limit=100, offset=0):
         """Return records by last_seen descending; since includes that instant."""
         if limit < 1 or offset < 0:
@@ -167,7 +192,7 @@ class OpenSearchStore:
         return response["_source"] if response.get("found") else None
 
     def list_history(self, cluster_id, *, since=None, limit=100):
-        """Return ClusterHistoryPoint[] for one cluster, oldest first (chart order).
+        """Return the latest points for one cluster, oldest first (chart order).
         """
         if limit < 1:
             raise ValueError("limit must be positive")
@@ -175,13 +200,13 @@ class OpenSearchStore:
         if since is not None:
             filters.append({"range": {"recorded_at": {"gte": since}}})
         body = {"query": {"bool": {"filter": filters}},
-                "sort": [{"recorded_at": "asc"}], "size": limit}
+                "sort": [{"recorded_at": "desc"}], "size": limit}
         try:
             response = self.client.search(index=self.history, body=body)
         except Exception as exc:
             raise StorageError(f"list_history failed: {exc}") from exc
         return [{field: hit["_source"][field] for field in ("cluster_id", "score", "status", "recorded_at")}
-                for hit in response["hits"]["hits"]]
+                for hit in reversed(response["hits"]["hits"])]
 
     def first_anomaly_after(self, cluster_id, resolved_at):
         body = {
