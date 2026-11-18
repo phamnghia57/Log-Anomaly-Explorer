@@ -1,0 +1,4 @@
+# Preserve reproducible dataset hashes on Windows checkouts with core.autocrlf.
+*_issue98_seed*/logs.json text eol=lf
+*_issue98_seed*/labels.json text eol=lf
+*_issue98_seed*/config.json text eol=lf

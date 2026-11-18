@@ -1,0 +1,4 @@
+-r requirements.txt
+pytest>=8
+# Validate generated evaluation logs against the shared ingestion contract.
+jsonschema>=4.22
