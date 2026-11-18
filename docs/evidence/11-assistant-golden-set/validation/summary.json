@@ -1,0 +1,39 @@
+{
+  "validated_at": "2026-11-18T06:44:49.050187+00:00",
+  "kind": "offline_tests_only_not_deployed_runtime_evidence",
+  "python": "3.11.18",
+  "platform": "Windows-10-10.0.26300-SP0",
+  "source_base_commit": "cf9bfa72cec11fdd5bcbffb7bf0500115b425d0a",
+  "source_note": "working tree includes the Issue #108 PR changes",
+  "pytest": {
+    "command": "python -m pytest -q -rs",
+    "cwd": "query-api",
+    "exit_code": 0,
+    "passed": 386,
+    "skipped": 7,
+    "warnings": 1,
+    "duration_s": 14.33,
+    "skip_reason": "AUTH_TEST_OPENSEARCH_URL is not configured for live storage tests"
+  },
+  "cli_checks": [
+    {
+      "name": "prepare_help",
+      "exit_code": 0
+    },
+    {
+      "name": "unbound_catalog_rejected",
+      "exit_code": 2
+    },
+    {
+      "name": "empty_bindings_rejected",
+      "exit_code": 2
+    }
+  ],
+  "pending": [
+    "deployed cluster bindings and snapshots",
+    "Azure MAX_TOOL_ROUNDS=1 and =2 runs",
+    "Langfuse token/cost/latency exports",
+    "two independent human ratings and adjudication",
+    "final recommendation and weakest question types"
+  ]
+}

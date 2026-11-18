@@ -142,3 +142,65 @@ def test_csv_giu_du_cot_de_cham_diem(tmp_path):
 
     assert lines[0].split(",") == runner.FIELDS
     assert len(lines) == 2
+
+
+@pytest.mark.parametrize("cluster_id", [None, "", " ", 123, [], " c1", "c1 ",
+                                       "DOI-THANH-CLUSTER-ID-THAT", "placeholder-id"])
+def test_unbound_id_rejected_before_any_http(cluster_id):
+    data = [{**questions(1)[0], "cluster_id": cluster_id}]
+    with client_for(lambda request: pytest.fail("unbound ID must not call HTTP")) as client:
+        with pytest.raises(ValueError, match="cluster_id"):
+            runner.run(client, data, token="t")
+
+
+@pytest.mark.parametrize("data", [[None], ["question"], [{}],
+                                 [{"id": [], "cluster_id": "c1", "question": "q"}],
+                                 [{"id": "q1", "cluster_id": "c1", "question": " "}]])
+def test_malformed_questions_report_value_error(data):
+    with pytest.raises(ValueError):
+        runner.validate_questions(data)
+
+
+@pytest.mark.parametrize("status", [401, 403, 500])
+def test_failed_reset_does_not_call_model_and_keeps_later_rows(status):
+    asked = []
+
+    def handler(request):
+        if request.method == "DELETE":
+            return httpx.Response(status if request.url.path.endswith("c0") else 200)
+        asked.append(request.url.path)
+        return httpx.Response(200, json=conversation())
+
+    with client_for(handler) as client:
+        rows = runner.run(client, questions(2), token="t")
+    assert len(rows) == 2
+    assert "HTTPStatusError" in rows[0]["error"]
+    assert rows[0]["answer"] == rows[0]["latency_s"] == ""
+    assert rows[1]["error"] == ""
+    assert len(asked) == 1 and "/c1/" in asked[0]
+
+
+def test_reset_404_is_empty_history_and_expected_is_not_sent_to_model():
+    bodies = []
+
+    def handler(request):
+        if request.method == "DELETE":
+            return httpx.Response(404)
+        bodies.append(json.loads(request.content))
+        return httpx.Response(200, json=conversation())
+
+    with client_for(handler) as client:
+        rows = runner.run(client, questions(1), token="t")
+    assert bodies == [{"message": "cau 0"}]
+    assert rows[0]["expected"] == "x"
+    assert not rows[0]["error"]
+
+
+def test_reset_network_error_is_recorded():
+    def handler(request):
+        assert request.method == "DELETE"
+        raise httpx.ConnectError("reset unavailable", request=request)
+
+    with client_for(handler) as client:
+        rows = runner.run(client, questions(1), token="t")
+    assert "ConnectError" in rows[0]["error"] and not rows[0]["answer"]
