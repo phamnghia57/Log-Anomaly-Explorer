@@ -1,0 +1,37 @@
+{
+  "trace_id": "a03e347ec32cb97998178a27beee0607",
+  "cluster_id": "bca2eea604629975",
+  "demo_http_status": 500,
+  "incident_url": "http://127.0.0.1:15173/clusters/bca2eea604629975",
+  "trace_link": "http://127.0.0.1:18080/jaeger/trace/a03e347ec32cb97998178a27beee0607",
+  "stages": [
+    {
+      "stage": "before-restart",
+      "utc": "2026-11-17T19:39:16.950Z",
+      "status": "PASS",
+      "span_count": 3,
+      "container_id": "fac6e34f23c5db36d7aebadd44f1b41912b29723ce8061f612204306739f765b"
+    },
+    {
+      "stage": "after-jaeger-restart",
+      "utc": "2026-11-17T19:39:22.165Z",
+      "status": "PASS",
+      "span_count": 3,
+      "container_id": "fac6e34f23c5db36d7aebadd44f1b41912b29723ce8061f612204306739f765b"
+    },
+    {
+      "stage": "after-stack-restart",
+      "utc": "2026-11-17T19:39:55.330Z",
+      "status": "PASS",
+      "span_count": 3,
+      "container_id": "fac6e34f23c5db36d7aebadd44f1b41912b29723ce8061f612204306739f765b"
+    },
+    {
+      "stage": "after-recreate",
+      "utc": "2026-11-17T19:40:03.730Z",
+      "status": "PASS",
+      "span_count": 3,
+      "container_id": "ed1f82383d8cbb20fb28d55489a6d4cc12322ece36bc9684286bbd083e032da4"
+    }
+  ]
+}

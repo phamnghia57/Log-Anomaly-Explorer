@@ -1,0 +1,245 @@
+{
+  "data": [
+    {
+      "traceID": "a03e347ec32cb97998178a27beee0607",
+      "spans": [
+        {
+          "traceID": "a03e347ec32cb97998178a27beee0607",
+          "spanID": "77f4f42dec721179",
+          "operationName": "GET /simulate-error",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "a03e347ec32cb97998178a27beee0607",
+              "spanID": "fd8d431cf052214c"
+            }
+          ],
+          "startTime": 1794944319571590,
+          "duration": 14444,
+          "tags": [
+            {
+              "key": "error",
+              "type": "bool",
+              "value": true
+            },
+            {
+              "key": "http.flavor",
+              "type": "string",
+              "value": "1.1"
+            },
+            {
+              "key": "http.host",
+              "type": "string",
+              "value": "172.23.0.6:8001"
+            },
+            {
+              "key": "http.method",
+              "type": "string",
+              "value": "GET"
+            },
+            {
+              "key": "http.route",
+              "type": "string",
+              "value": "/simulate-error"
+            },
+            {
+              "key": "http.scheme",
+              "type": "string",
+              "value": "http"
+            },
+            {
+              "key": "http.server_name",
+              "type": "string",
+              "value": "127.0.0.1:18001"
+            },
+            {
+              "key": "http.status_code",
+              "type": "int64",
+              "value": 500
+            },
+            {
+              "key": "http.target",
+              "type": "string",
+              "value": "/simulate-error"
+            },
+            {
+              "key": "http.url",
+              "type": "string",
+              "value": "http://127.0.0.1:18001/simulate-error?rate=1&fault=runtime&seed=107"
+            },
+            {
+              "key": "http.user_agent",
+              "type": "string",
+              "value": "node"
+            },
+            {
+              "key": "net.host.port",
+              "type": "int64",
+              "value": 8001
+            },
+            {
+              "key": "net.peer.ip",
+              "type": "string",
+              "value": "172.23.0.1"
+            },
+            {
+              "key": "net.peer.port",
+              "type": "int64",
+              "value": 50196
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.fastapi"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "otel.status_code",
+              "type": "string",
+              "value": "ERROR"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "server"
+            }
+          ],
+          "logs": [],
+          "processID": "p1",
+          "warnings": [
+            "invalid parent span IDs=fd8d431cf052214c; skipping clock skew adjustment"
+          ]
+        },
+        {
+          "traceID": "a03e347ec32cb97998178a27beee0607",
+          "spanID": "1d791d4236480934",
+          "operationName": "GET /simulate-error http send",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "a03e347ec32cb97998178a27beee0607",
+              "spanID": "77f4f42dec721179"
+            }
+          ],
+          "startTime": 1794944319585119,
+          "duration": 135,
+          "tags": [
+            {
+              "key": "asgi.event.type",
+              "type": "string",
+              "value": "http.response.start"
+            },
+            {
+              "key": "error",
+              "type": "bool",
+              "value": true
+            },
+            {
+              "key": "http.status_code",
+              "type": "int64",
+              "value": 500
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.fastapi"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "otel.status_code",
+              "type": "string",
+              "value": "ERROR"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "internal"
+            }
+          ],
+          "logs": [],
+          "processID": "p1",
+          "warnings": null
+        },
+        {
+          "traceID": "a03e347ec32cb97998178a27beee0607",
+          "spanID": "b1c4d63116f32162",
+          "operationName": "GET /simulate-error http send",
+          "references": [
+            {
+              "refType": "CHILD_OF",
+              "traceID": "a03e347ec32cb97998178a27beee0607",
+              "spanID": "77f4f42dec721179"
+            }
+          ],
+          "startTime": 1794944319585835,
+          "duration": 30,
+          "tags": [
+            {
+              "key": "asgi.event.type",
+              "type": "string",
+              "value": "http.response.body"
+            },
+            {
+              "key": "otel.scope.name",
+              "type": "string",
+              "value": "opentelemetry.instrumentation.fastapi"
+            },
+            {
+              "key": "otel.scope.version",
+              "type": "string",
+              "value": "0.66b2"
+            },
+            {
+              "key": "span.kind",
+              "type": "string",
+              "value": "internal"
+            }
+          ],
+          "logs": [],
+          "processID": "p1",
+          "warnings": null
+        }
+      ],
+      "processes": {
+        "p1": {
+          "serviceName": "demo-web",
+          "tags": [
+            {
+              "key": "service.instance.id",
+              "type": "string",
+              "value": "0472d217-674b-4ed1-9940-6db246306141"
+            },
+            {
+              "key": "telemetry.sdk.language",
+              "type": "string",
+              "value": "python"
+            },
+            {
+              "key": "telemetry.sdk.name",
+              "type": "string",
+              "value": "opentelemetry"
+            },
+            {
+              "key": "telemetry.sdk.version",
+              "type": "string",
+              "value": "1.45.2"
+            }
+          ]
+        }
+      },
+      "warnings": null
+    }
+  ],
+  "total": 0,
+  "limit": 0,
+  "offset": 0,
+  "errors": null
+}

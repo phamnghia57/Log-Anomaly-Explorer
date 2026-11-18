@@ -1,0 +1,13 @@
+{
+  "Id": "sha256:ab6f1a1f0fb49ea08bcd19f6b84f6081d0d44b364b6de148e1798eb5816bacac",
+  "RepoDigests": [
+    "jaegertracing/all-in-one@sha256:ab6f1a1f0fb49ea08bcd19f6b84f6081d0d44b364b6de148e1798eb5816bacac"
+  ],
+  "Created": "2025-12-03T17:07:31.304698052Z",
+  "Architecture": "amd64",
+  "Os": "linux",
+  "User": "10001",
+  "Entrypoint": [
+    "/go/bin/all-in-one-linux"
+  ]
+}

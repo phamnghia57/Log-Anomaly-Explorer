@@ -20,9 +20,11 @@
    hoặc lỗi, không chỉ đoán qua message.
    - Jaeger nằm sau **basic auth** của gateway: lần đầu trình duyệt hỏi tài khoản (xem mục
      "Truy cập Jaeger, fault injection và Swagger" bên dưới).
-   - **Lưu ý**: Jaeger chỉ có span cho trace sinh ra **sau khi** `demo-app` đã cấu hình đúng
-     `OTEL_EXPORTER_OTLP_ENDPOINT`. Trace cũ hơn thời điểm đó sẽ báo "trace not found" vĩnh viễn —
-     đây không phải lỗi, không cần debug thêm, chỉ cần dùng trace mới.
+   - **Lưu ý**: trace mới được lưu trên disk bằng Badger, còn qua restart Jaeger hoặc toàn
+     stack khi named volume còn nguyên. "Trace not found" có thể do quá TTL hoặc chưa từng
+     được thu thập (ví dụ `demo-app` chưa cấu hình đúng `OTEL_EXPORTER_OTLP_ENDPOINT` lúc đó).
+     Không kết luận request chưa xảy ra chỉ vì không thấy trace. Trace đã mất từ thời dùng
+     memory storage không tự khôi phục được; có thể gọi lại `demo-app` để tạo trace demo mới.
 4. **Xác định phạm vi ảnh hưởng**: service nào (`demo-web` hay `demo-mobile-api`), từ khi nào
    (`first_seen` → `last_seen`), bao nhiêu log liên quan (`log_ids`).
 5. **Hành động theo đúng loại lỗi** — `demo-app` ghi `metadata.error_type` trong mỗi log, chỉ có
@@ -49,6 +51,49 @@ Nam có thể xuất nhãn dương từ cùng OpenSearch bằng
 Dùng `precision_recall.py --labels <file.json> --predictions <predictions.json>`
 cho cùng khoảng đánh giá. Để đo recall, bổ sung cả sự cố được xác nhận độc lập
 trong khoảng này mà detector đã bỏ sót.
+
+## Vận hành Jaeger Badger và retention trace
+
+- `jaeger-data` mount tại `/badger`; span nằm trong `/badger/data`, index trong `/badger/key`.
+  Service `jaeger-init` tạo và cấp quyền các thư mục cho UID `10001` trước khi Jaeger chạy.
+  `JAEGER_TRACE_TTL=168h` mặc định giữ span 7 ngày. Đổi TTL cần recreate Jaeger bằng
+  `docker compose up -d jaeger`; chỉ `restart` không áp dụng environment hoặc mount mới.
+- `docker compose restart jaeger`, `docker compose restart` và recreate container vẫn giữ
+  dữ liệu đã ghi khi volume còn nguyên. `docker compose down` thông thường cũng giữ named
+  volume; lần `up` sau cần dùng cùng Compose project để gắn lại đúng volume. **Không dùng
+  `docker compose down -v`** khi cần giữ dữ liệu: lệnh đó xóa cả named volumes của stack,
+  gồm Jaeger và OpenSearch. Không gắn một Badger volume cho nhiều Jaeger writer cùng lúc.
+- Snapshot OpenSearch của **Task 04 không backup Jaeger Badger volume**. Trong phạm vi #107,
+  trace **không có backup riêng**; mất volume/disk thì không có quy trình restore trace từ
+  snapshot OpenSearch. Trace demo có thể tái tạo bằng cách gọi `demo-app`, ví dụ
+  `/demo/simulate-error?rate=1&fault=runtime&seed=107` qua gateway với basic auth, rồi mở
+  trace ID mới trong Incident View. Trace mới không khôi phục lại ID/nội dung trace đã mất.
+- Theo dõi dung lượng disk: TTL giới hạn tuổi span, **không phải hard quota**; maintenance,
+  compaction và tốc độ ingest ảnh hưởng dung lượng thực tế. Không xóa file Badger đang chạy
+  để giải phóng disk. Xem TTL hiệu lực bằng:
+
+  ```sh
+  docker inspect "$(docker compose ps -q jaeger)" --format '{{range .Config.Env}}{{println .}}{{end}}' | grep '^BADGER_SPAN_STORE_TTL='
+  ```
+
+  Xác định volume và mount thực (tên có tiền tố Compose project, không giả định tên cố định):
+
+  ```sh
+  cid=$(docker compose ps -q jaeger)
+  docker inspect "$cid" --format '{{range .Mounts}}{{if eq .Destination "/badger"}}{{.Name}} {{.Source}}{{end}}{{end}}'
+  ```
+
+  Đo volume bằng helper read-only; thay `<volume-name>` bằng tên vừa đọc. Cách này dùng được
+  cả khi mountpoint nằm trong Linux VM của Docker Desktop, không truy cập trực tiếp từ host:
+
+  ```sh
+  docker run --rm --user 0 \
+    --mount type=volume,source=<volume-name>,target=/badger,readonly \
+    --entrypoint /bin/sh caddy:2.8-alpine -c 'du -sh /badger; du -sk /badger'
+  ```
+
+  Ghi thời điểm, TTL, workload và số đo T0/T+24h cho Task 12; xem
+  [evidence và hướng dẫn kiểm thử #107](../evidence/10-jaeger-badger/README.md).
 
 ## Khi hệ thống báo động giả (false positive) nhiều
 

@@ -1,0 +1,23 @@
+2026/11/17 18:53:35 maxprocs: Leaving GOMAXPROCS=12: CPU quota undefined
+
+*******************************************************************************
+
+🛑  WARNING: End-of-life Notice for Jaeger v1
+
+You are currently running a v1 version of Jaeger, which is deprecated and will
+reach end-of-life on December 31st, 2025. This means there will be no further
+development, bug fixes, or security patches for v1 after this date.
+
+We strongly recommend migrating to Jaeger v2 for continued support and access
+to new features.
+
+For detailed migration instructions, please refer to the official Jaeger
+documentation:  https://www.jaegertracing.io/docs/latest/migration/
+
+Tracking issue: https://github.com/jaegertracing/jaeger/issues/6321
+
+🛑  WARNING: End-of-life Notice for Jaeger v1
+
+*******************************************************************************
+2026/11/17 18:53:35 application version: git-commit=63b27e1810a710ac54dc4522da0538e540bdc545, git-version=v1.76.0, build-date=2025-12-03T16:07:08Z
+{"gitCommit":"63b27e1810a710ac54dc4522da0538e540bdc545","gitVersion":"v1.76.0","buildDate":"2025-12-03T16:07:08Z"}

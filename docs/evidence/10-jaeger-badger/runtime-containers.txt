@@ -1,0 +1,8 @@
+lae107-jaeger-1 | Up 2 minutes | 127.0.0.1:26686->16686/tcp
+lae107-query-api-1 | Up 2 minutes (healthy) | 127.0.0.1:18002->8002/tcp
+lae107-jaeger-init-1 | Exited (0) 2 minutes ago |
+lae107-ingestion-1 | Up 2 minutes (healthy) | 127.0.0.1:18000->8000/tcp
+lae107-opensearch-1 | Up 2 minutes (healthy) | 127.0.0.1:19200->9200/tcp
+lae107-gateway-1 | Up 2 minutes | 127.0.0.1:18080->80/tcp, 127.0.0.1:18443->443/tcp, 127.0.0.1:18443->443/udp
+lae107-clustering-1 | Up About a minute |
+lae107-demo-app-1 | Up 2 minutes (healthy) | 127.0.0.1:18001->8001/tcp

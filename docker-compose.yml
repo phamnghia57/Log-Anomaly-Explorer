@@ -62,24 +62,46 @@ services:
       timeout: 5s
       retries: 5
 
+  jaeger-init:
+    # Image Jaeger chay bang UID 10001; volume moi can duoc cap quyen truoc.
+    # Dung lai image Alpine cua gateway, chi chay mot lan va khong mo port.
+    image: caddy:2.8-alpine
+    user: "0:0"
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        mkdir -p /badger/data /badger/key
+        chown 10001:10001 /badger /badger/data /badger/key
+        chmod 0750 /badger /badger/data /badger/key
+    volumes:
+      - jaeger-data:/badger
+    restart: "no"
+
   jaeger:
     # Ghim digest cua image dang chay that tren VM (= tag 1.76.0, push
     # 2025-12-03) de `docker compose up` khong keo ve ban khac bat ky luc nao.
     # Doi phien ban: lay digest moi bang
     #   docker inspect --format '{{index .RepoDigests 0}}' <image:tag>
     image: jaegertracing/all-in-one:1.76.0@sha256:ab6f1a1f0fb49ea08bcd19f6b84f6081d0d44b364b6de148e1798eb5816bacac
+    depends_on:
+      jaeger-init:
+        condition: service_completed_successfully
     environment:
       # Nhan OTLP (gRPC :4317, HTTP :4318) truc tiep - khong can OTel Collector
       # rieng, ban Jaeger nay da ho tro OTLP native.
       COLLECTOR_OTLP_ENABLED: "true"
-      SPAN_STORAGE_TYPE: memory
-      # Gioi han so trace giu trong RAM - VM nho, tranh phinh RAM khong gioi
-      # han khi demo chay nhieu ngay (trace cu nhat bi day ra khi day).
-      MEMORY_MAX_TRACES: ${JAEGER_MAX_TRACES:-20000}
+      SPAN_STORAGE_TYPE: badger
+      BADGER_EPHEMERAL: "false"
+      BADGER_DIRECTORY_VALUE: /badger/data
+      BADGER_DIRECTORY_KEY: /badger/key
+      # Luu span tren disk, mac dinh 7 ngay; van can giam sat dung luong volume.
+      BADGER_SPAN_STORE_TTL: ${JAEGER_TRACE_TTL:-168h}
       # Phuc vu UI duoi tien to "/jaeger" (khop voi route @jaeger trong
       # deploy/Caddyfile) de nut "Xem trace tren Jaeger" cua web/ goi duoc
       # qua HTTPS cung domain voi query-api, khong can mo them port/subdomain.
       QUERY_BASE_PATH: /jaeger
+    volumes:
+      - jaeger-data:/badger
     ports:
       - "127.0.0.1:${JAEGER_UI_PORT:-16686}:16686"
     restart: unless-stopped
@@ -231,3 +253,4 @@ volumes:
   opensearch-data:
   clustering-data:
   caddy-data:
+  jaeger-data:

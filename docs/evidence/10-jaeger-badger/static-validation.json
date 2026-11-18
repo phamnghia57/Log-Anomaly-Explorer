@@ -1,0 +1,131 @@
+{
+  "checks": [
+    {
+      "check": "pinned image unchanged",
+      "status": "PASS"
+    },
+    {
+      "check": "SPAN_STORAGE_TYPE",
+      "status": "PASS"
+    },
+    {
+      "check": "BADGER_EPHEMERAL",
+      "status": "PASS"
+    },
+    {
+      "check": "BADGER_DIRECTORY_VALUE",
+      "status": "PASS"
+    },
+    {
+      "check": "BADGER_DIRECTORY_KEY",
+      "status": "PASS"
+    },
+    {
+      "check": "COLLECTOR_OTLP_ENABLED",
+      "status": "PASS"
+    },
+    {
+      "check": "QUERY_BASE_PATH",
+      "status": "PASS"
+    },
+    {
+      "check": "TTL interpolation None",
+      "status": "PASS"
+    },
+    {
+      "check": "TTL interpolation ''",
+      "status": "PASS"
+    },
+    {
+      "check": "TTL interpolation '24h'",
+      "status": "PASS"
+    },
+    {
+      "check": "Jaeger UI ports unchanged",
+      "status": "PASS"
+    },
+    {
+      "check": "persistent named volume",
+      "status": "PASS"
+    },
+    {
+      "check": "existing volumes unchanged",
+      "status": "PASS"
+    },
+    {
+      "check": "new named volume declared",
+      "status": "PASS"
+    },
+    {
+      "check": "unrelated services unchanged",
+      "status": "PASS"
+    },
+    {
+      "check": "init completes before Jaeger",
+      "status": "PASS"
+    },
+    {
+      "check": "init only writes same named volume",
+      "status": "PASS"
+    },
+    {
+      "check": "memory configuration removed",
+      "status": "PASS"
+    }
+  ],
+  "jaeger": {
+    "restart": "unless-stopped",
+    "command": null,
+    "entrypoint": null,
+    "environment": {
+      "BADGER_DIRECTORY_KEY": "/badger/key",
+      "BADGER_DIRECTORY_VALUE": "/badger/data",
+      "BADGER_EPHEMERAL": "false",
+      "BADGER_SPAN_STORE_TTL": "168h",
+      "COLLECTOR_OTLP_ENABLED": "true",
+      "QUERY_BASE_PATH": "/jaeger",
+      "SPAN_STORAGE_TYPE": "badger"
+    },
+    "image": "jaegertracing/all-in-one:1.76.0@sha256:ab6f1a1f0fb49ea08bcd19f6b84f6081d0d44b364b6de148e1798eb5816bacac",
+    "networks": {
+      "default": null
+    },
+    "volumes": [
+      {
+        "type": "volume",
+        "source": "jaeger-data",
+        "target": "/badger",
+        "volume": {}
+      }
+    ],
+    "depends_on": {
+      "jaeger-init": {
+        "condition": "service_completed_successfully",
+        "required": true
+      }
+    },
+    "ports": [
+      {
+        "mode": "ingress",
+        "host_ip": "127.0.0.1",
+        "target": 16686,
+        "published": "16686",
+        "protocol": "tcp"
+      }
+    ]
+  },
+  "volumes": {
+    "caddy-data": {
+      "name": "lae107_caddy-data"
+    },
+    "clustering-data": {
+      "name": "lae107_clustering-data"
+    },
+    "jaeger-data": {
+      "name": "lae107_jaeger-data"
+    },
+    "opensearch-data": {
+      "name": "lae107_opensearch-data"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "Type": "volume",
+  "Name": "lae107_jaeger-data",
+  "Source": "/var/lib/docker/volumes/lae107_jaeger-data/_data",
+  "Destination": "/badger",
+  "Driver": "local",
+  "Mode": "rw",
+  "RW": true,
+  "Propagation": ""
+}

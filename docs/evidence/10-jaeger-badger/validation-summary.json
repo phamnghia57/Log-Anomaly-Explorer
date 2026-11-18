@@ -1,0 +1,28 @@
+{
+  "jaeger_version": "v1.76.0",
+  "static_checks": "18 PASS",
+  "python_tests": "502 unit + 7 live OpenSearch PASS; targeted assistant 53 PASS (included in unit count)",
+  "frontend_tests": "133 unit PASS; browser 9 real auth + 8 mock auth + 12 system PASS; lint/build PASS",
+  "persistence": "PASS",
+  "runtime_trace_id": "a03e347ec32cb97998178a27beee0607",
+  "ram_acceptance": "FAIL",
+  "ram_mib": {
+    "memory": {
+      "peak_memory": 15.76,
+      "idle_median_memory": 15.64
+    },
+    "badger": {
+      "peak_memory": 30.96,
+      "idle_median_memory": 30.88
+    }
+  },
+  "disk_initial": "40 KiB; see disk-initial.txt",
+  "disk_24h": "NOT VERIFIED / PENDING",
+  "load_smoke": {
+    "exit_code": 0,
+    "users": 3,
+    "spawn_rate": 1,
+    "run_seconds": 30
+  },
+  "pr_state": "Draft"
+}

@@ -1,0 +1,57 @@
+2026-11-17T19:35:25.672Z docker compose exec -T query-api python -m query-api.src.manage_auth init
+Auth administration completed.
+
+2026-11-17T19:35:27.131Z docker compose exec -T query-api python -m query-api.src.seed_admin
+Admin created.
+
+2026-11-17T19:38:38.941Z docker compose exec -T query-api python -m query-api.src.manage_auth init
+Auth administration completed.
+
+2026-11-17T19:38:39.550Z docker compose exec -T query-api python -m query-api.src.seed_admin
+Existing account preserved; no changes made.
+
+2026-11-17T19:39:17.248Z docker compose ps -q jaeger
+fac6e34f23c5db36d7aebadd44f1b41912b29723ce8061f612204306739f765b
+
+2026-11-17T19:39:18.726Z docker compose restart jaeger
+ Container lae107-jaeger-1 Restarting
+ Container lae107-jaeger-1 Started
+
+2026-11-17T19:39:22.508Z docker compose ps -q jaeger
+fac6e34f23c5db36d7aebadd44f1b41912b29723ce8061f612204306739f765b
+
+2026-11-17T19:39:28.147Z docker compose restart
+ Container lae107-gateway-1 Restarting
+ Container lae107-ingestion-1 Restarting
+ Container lae107-clustering-1 Restarting
+ Container lae107-jaeger-1 Restarting
+ Container lae107-opensearch-1 Restarting
+ Container lae107-demo-app-1 Restarting
+ Container lae107-jaeger-init-1 Restarting
+ Container lae107-query-api-1 Restarting
+ Container lae107-jaeger-init-1 Started
+ Container lae107-gateway-1 Started
+ Container lae107-ingestion-1 Started
+ Container lae107-opensearch-1 Started
+ Container lae107-demo-app-1 Started
+ Container lae107-jaeger-1 Started
+ Container lae107-clustering-1 Started
+ Container lae107-query-api-1 Started
+
+2026-11-17T19:39:55.731Z docker compose ps -q jaeger
+fac6e34f23c5db36d7aebadd44f1b41912b29723ce8061f612204306739f765b
+
+2026-11-17T19:39:56.095Z docker compose ps -q jaeger
+fac6e34f23c5db36d7aebadd44f1b41912b29723ce8061f612204306739f765b
+
+2026-11-17T19:40:00.976Z docker compose up -d --no-deps --force-recreate jaeger
+ Container lae107-jaeger-1 Recreate
+ Container lae107-jaeger-1 Recreated
+ Container lae107-jaeger-1 Starting
+ Container lae107-jaeger-1 Started
+
+2026-11-17T19:40:01.271Z docker compose ps -q jaeger
+ed1f82383d8cbb20fb28d55489a6d4cc12322ece36bc9684286bbd083e032da4
+
+2026-11-17T19:40:04.117Z docker compose ps -q jaeger
+ed1f82383d8cbb20fb28d55489a6d4cc12322ece36bc9684286bbd083e032da4

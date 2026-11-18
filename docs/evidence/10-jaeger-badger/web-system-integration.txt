@@ -1,0 +1,117 @@
+
+> web@0.0.0 test:system-integration
+> playwright test --config=playwright.system-integration.config.ts --reporter=line
+
+[WebServer] (node:9224) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+
+Running 12 tests using 1 worker
+
+
+(node:6836) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[1/12] [chromium] › e2e\auth.spec.ts:14:1 › deep link returns after login, navigation works, and logout blocks history access
+[2/12] [chromium] › e2e\auth.spec.ts:48:1 › 401 clears auth, redirects to login, and a failed login stays on the form
+[3/12] [chromium] › e2e\auth.spec.ts:73:1 › expiration removes a protected page without waiting for an API request
+[4/12] [chromium] › e2e\auth.spec.ts:90:1 › mobile admin menu logs out and synchronizes another open tab
+[5/12] [chromium] › e2e\dashboard-facets.spec.ts:7:1 › facet Status va Service dem cheo nhau, khong tu loc chinh no
+[6/12] [chromium] › e2e\dashboard.spec.ts:3:1 › dashboard tai duoc va hien sidebar + tieu de
+[7/12] [chromium] › e2e\dashboard.spec.ts:9:1 › doi facet trang thai khong lam vo trang (Alerted/Anomalous/Normal)
+[8/12] [chromium] › e2e\history-runbook.spec.ts:3:1 › dashboard renders score history and links to the runbook
+[9/12] [chromium] › e2e\incident-view.spec.ts:4:1 › bam vao 1 cum -> xem Incident View -> bam trace -> nhay sang Search loc dung
+[10/12] [chromium] › e2e\login.spec.ts:8:1 › login persists a session, redirects to dashboard and restores it after reload
+[WebServer] ERROR:    Exception in ASGI application
+[WebServer] Traceback (most recent call last):
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 422, in run_asgi
+[WebServer]     result = await app(  # type: ignore[func-returns-value]
+[WebServer]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 63, in __call__
+[WebServer]     return await self.app(scope, receive, send)
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\fastapi\applications.py", line 1199, in __call__
+[WebServer]     await self._native_telemetry(
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\fastapi\telemetry\_asgi.py", line 274, in __call__
+[WebServer]     await app(scope, receive, send)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\starlette\applications.py", line 96, in __call__
+[WebServer]     await self.middleware_stack(scope, receive, send)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+[WebServer]     raise exc
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+[WebServer]     await self.app(scope, receive, _send)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\opentelemetry\instrumentation\asgi\__init__.py", line 779, in __call__
+[WebServer]     await self.app(scope, otel_receive, otel_send)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+[WebServer]     raise exc
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+[WebServer]     await self.app(scope, receive, _send)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\opentelemetry\instrumentation\fastapi\__init__.py", line 360, in __call__
+[WebServer]     await self.app(scope, receive, send)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\fastapi\telemetry\_asgi.py", line 151, in __call__
+[WebServer]     await self.app(scope, receive, send)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\prometheus_fastapi_instrumentator\middleware.py", line 180, in __call__
+[WebServer]     raise exc
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\prometheus_fastapi_instrumentator\middleware.py", line 178, in __call__
+[WebServer]     await self.app(scope, receive, send_wrapper)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\starlette\middleware\cors.py", line 91, in __call__
+[WebServer]     await self.simple_response(scope, receive, send, request_headers=headers)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\starlette\middleware\cors.py", line 149, in simple_response
+[WebServer]     await self.app(scope, receive, send)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+[WebServer]     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+[WebServer]     raise exc
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+[WebServer]     await app(scope, receive, sender)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+[WebServer]     await self.app(scope, receive, send)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\starlette\routing.py", line 683, in __call__
+[WebServer]     await self.middleware_stack(scope, receive, send)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\fastapi\routing.py", line 2811, in app
+[WebServer]     await route.handle(scope, receive, send)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\fastapi\routing.py", line 1330, in handle
+[WebServer]     await super().handle(scope, receive, send)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\starlette\routing.py", line 289, in handle
+[WebServer]     await self.app(scope, receive, send)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\fastapi\routing.py", line 166, in app
+[WebServer]     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+[WebServer]     raise exc
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+[WebServer]     await app(scope, receive, sender)
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\fastapi\routing.py", line 152, in app
+[WebServer]     response = await f(request)
+
+[WebServer]                ^^^^^^^^^^^^^^^^
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\fastapi\routing.py", line 745, in app
+[WebServer]     raw_response = await run_endpoint_function(
+[WebServer]                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\fastapi\routing.py", line 374, in run_endpoint_function
+[WebServer]     return await run_in_threadpool(
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\starlette\concurrency.py", line 34, in run_in_threadpool
+[WebServer]     return await anyio.to_thread.run_sync(func)
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\anyio\to_thread.py", line 65, in run_sync
+[WebServer]     return await get_async_backend().run_sync_in_worker_thread(
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2779, in run_sync_in_worker_thread
+[WebServer]     return await future
+[WebServer]            ^^^^^^^^^^^^
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 1124, in run
+[WebServer]     result = context.run(func, *args)
+[WebServer]              ^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "D:\SE\tmp\issue107\venv\Lib\site-packages\fastapi\telemetry\_api.py", line 244, in _run_sync_endpoint
+[WebServer]     return function(**arguments)
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "D:\SE\Log-Anomaly-Explorer\query-api\src\main.py", line 248, in search_aggregations
+[WebServer]     return store.aggregate_logs(service=service, trace_id=trace_id, level=level, query=q,
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "D:\SE\Log-Anomaly-Explorer\ingestion\src\storage.py", line 338, in aggregate_logs
+[WebServer]     aggs = resp["aggregations"]
+[WebServer]            ~~~~^^^^^^^^^^^^^^^^
+[WebServer] KeyError: 'aggregations'
+[11/12] [chromium] › e2e\login.spec.ts:40:1 › mobile login shows a generic failure and keeps passwords out of storage
+[12/12] [chromium] › e2e\login.spec.ts:59:1 › an expired persisted session prompts a new login
+  12 passed (31.9s)
