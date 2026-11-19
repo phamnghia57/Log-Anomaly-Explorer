@@ -1,0 +1,18 @@
+PR #117 real OpenSearch verification - 2026-11-19
+Base HEAD: 96a8bf057391a42da16b02376ae4465b0159e009
+Modified verifier SHA256: 102442c356d2f1292b85c415c93c80741c28975da52a41913798a3fc825dfda3
+Python: 3.13.7
+OpenSearch: 2.17.1
+Environment: isolated local Docker Desktop; container CPU limit=2; memory limit=2 GiB; JVM heap=512 MiB
+Command: LIVE_TEST_OPENSEARCH_URL=http://127.0.0.1:19277 python -m clustering.evaluation.verify_live_history
+Exit code: 0
+
+PASS: latest history and retention cutoff (point exactly at cutoff retained)
+PASS: 150 synthetic minute points; latest 100 = 51..150; latest 50 = 101..150; since inclusive
+PASS: heartbeat metrics persisted on real OpenSearch
+PASS: acknowledged incident suppresses webhook on real OpenSearch
+PASS: temporary test indices cleaned up; no webhook delivery or production data used
+
+
+Scope: synthetic timestamps span 150 minutes; not a worker running for 2+ hours or a deployed UI screenshot.
+No real email, webhook or production data used.

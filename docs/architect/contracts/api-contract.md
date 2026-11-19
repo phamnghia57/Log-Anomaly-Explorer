@@ -131,13 +131,33 @@ ví dụ trước khi Nam triển khai phần ghi).
 Khi `score > ngưỡng`, Clustering service tự gọi webhook/email cấu hình sẵn — **không** đi qua query-api. Payload tối thiểu:
 
 ```json
-{ "cluster_id": "...", "score": 0.0, "service": "...", "first_seen": "...", "trace_id": "..." }
+{
+  "cluster_id": "...",
+  "score": 0.0,
+  "service": "...",
+  "first_seen": "...",
+  "trace_id": "...",
+  "signature": "connection timeout after <NUM> ms",
+  "incident_url": "https://<web-domain>/clusters/<URL-encoded-cluster-id>"
+}
 ```
 
 `trace_id` là **một trace đại diện** của cụm (phần tử đầu trong `trace_ids` của
 [`cluster-record.schema.json`](./cluster-record.schema.json)), để kênh nhận alert ghép được link
 mở thẳng trace đó trên Jaeger: `https://<domain>/jaeger/trace/<trace_id>`. Key **luôn có mặt**,
 giá trị `null` khi cụm không có trace nào — bên nhận không cần xử lý trường hợp thiếu key.
+
+`signature` là mẫu lỗi chuẩn hóa; chuỗi rỗng nếu record cũ chưa có mẫu.
+`incident_url` luôn có mặt, bằng `null` khi chưa đặt `ALERT_WEB_BASE_URL`; nếu có,
+URL trỏ tới frontend Incident View `/clusters/{cluster_id}` với ID được URL-encode.
+Người nhận bấm link trong email; frontend yêu cầu đăng nhập và quay lại trang đó
+sau khi xác thực. Đây là hai field bổ sung, giữ nguyên các field hiện có.
+
+Worker gửi một digest mỗi chu kỳ: `alerts` chứa các phần tử theo cấu trúc trên,
+`count` là số alert, `window_to` là mốc cuối cửa sổ (có thể `null` với caller cũ),
+`subject` và `message` là nội dung thông báo. Các field của alert đầu tiên vẫn có
+ở top-level để tương thích consumer cũ. Incident đã `acknowledged` không được gửi;
+nếu đọc incident lỗi `StorageError`, worker cảnh báo và vẫn xét gửi theo ngưỡng/cooldown.
 
 ### `GET /clustering/health`
 

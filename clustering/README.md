@@ -50,12 +50,16 @@ Cấu hình kết nối dùng chung qua `ingestion.src.storage.build_store()`:
 `OPENSEARCH_VERIFY_CERTS` (false), `OPENSEARCH_TIMEOUT` (10), `LOG_INDEX` (logs).
 Worker yêu cầu `STORAGE_BACKEND=opensearch` (mặc định).
 Cấu hình clustering: `CLUSTER_INDEX` (clusters), `WINDOW_SECONDS` (60),
-`HISTORY_WINDOWS` (30), `INGESTION_LAG_SECONDS` (10), `ANOMALY_THRESHOLD` (2.0),
+`HISTORY_WINDOWS` (30), `INGESTION_LAG_SECONDS` (10), `ANOMALY_THRESHOLD` (3.0 trong Compose
+và `.env.example`; fallback của API Python khi không đặt env vẫn là 2.0),
 `ALERT_WEBHOOK_URL`, `ALERT_WEB_BASE_URL` (địa chỉ web công khai, ví dụ `https://example.com`)
 và `ALERT_COOLDOWN_SECONDS` (600). Alert chứa signature và `incident_url` dẫn đến trang
 chi tiết cụm; `incident_url` là null khi chưa cấu hình địa chỉ web. Worker bỏ qua các
 incident đang được tiếp nhận (`acknowledged`); khi đã resolve, cảnh báo được xét lại
-theo ngưỡng và cooldown. Không gửi alert nếu không đọc được trạng thái incident.
+theo ngưỡng và cooldown. Nếu đọc incident gặp `StorageError`, ghi cảnh báo và vẫn
+gửi alert theo ngưỡng/cooldown (fail-open); không ghi chi tiết lỗi có thể chứa secret.
+Các lỗi khác vẫn được phát ra để không che lỗi lập trình. Lỗi đọc incident không
+ngăn worker ghi cluster, history và heartbeat khi các thao tác còn lại thành công.
 
 Worker chạy retention của `cluster-history` sau chu kỳ live đầu tiên, sau đó
 không quá một lần mỗi giờ trong cùng process. `RETENTION_DAYS` (mặc định 30,
@@ -175,6 +179,8 @@ python -B -m clustering.src.worker --once
 ```
 
 `ML_AUGMENT_ENABLED` mặc định `true`; đặt `false` để chạy hoàn toàn rule-based.
+Khi tắt ML, đặt đồng thời `ANOMALY_THRESHOLD=1.5`: rule-only ở ngưỡng 3.0 không
+phát hiện incident nào trên replay seed 98. Xem giới hạn phép đo trong [BENCHMARK.md](BENCHMARK.md).
 Nếu chỉ cài requirements cơ bản và thiếu scikit-learn, worker cảnh báo rồi dùng rule.
 API `analyze()` chỉ augment khi được truyền `augmenter`.
 

@@ -3,6 +3,7 @@
 """
 import httpx
 import pytest
+from ingestion.src.storage import StorageError
 
 from clustering.src import alert
 
@@ -105,7 +106,20 @@ def test_acknowledged_incident_is_skipped_but_open_and_resolved_are_sent(sent):
     assert [cluster["status"] for _, cluster in records] == ["anomalous", "alerted", "alerted"]
 
 
-def test_incident_lookup_failure_prevents_delivery(sent):
+def test_incident_storage_failure_sends_alert_and_warns(sent, caplog):
+    class Incidents:
+        def current(self, cluster):
+            raise StorageError("private-storage-details")
+
+    cluster = record()
+    assert alert.check_and_alert_batch([("web", cluster)], incidents=Incidents()) == 1
+    assert cluster["status"] == "alerted"
+    assert len(sent) == 1
+    assert "Cannot read incident state for c1; alert is sent anyway" in caplog.text
+    assert "private-storage-details" not in caplog.text
+
+
+def test_incident_programming_failure_is_not_hidden(sent):
     class Incidents:
         def current(self, cluster):
             raise RuntimeError("incident storage offline")

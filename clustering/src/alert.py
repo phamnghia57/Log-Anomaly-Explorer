@@ -9,6 +9,7 @@ import time
 from urllib.parse import quote
 
 import httpx
+from ingestion.src.storage import StorageError
 from .healthcheck import ping
 
 logger = logging.getLogger("clustering.alert")
@@ -68,8 +69,12 @@ def check_and_alert_batch(records, *, window_to=None, store=None, incidents=None
             cluster["status"] = "normal"
             continue
         cluster["status"] = "anomalous"
-        if incidents is not None and incidents.current(cluster)["status"] == "acknowledged":
-            continue
+        if incidents is not None:
+            try:
+                if incidents.current(cluster)["status"] == "acknowledged":
+                    continue
+            except StorageError:
+                logger.warning("Cannot read incident state for %s; alert is sent anyway", cluster["cluster_id"])
         last = last_alert.get(cluster["cluster_id"])
         if last is not None and now - last < cooldown:
             cluster["status"] = "alerted"

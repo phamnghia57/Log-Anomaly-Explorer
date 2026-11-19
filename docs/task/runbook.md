@@ -5,14 +5,15 @@
 
 ## Khi nhận được Alert
 
-1. **Nhận alert** (webhook) — nội dung gồm `cluster_id`, `score`, `service`, `first_seen` và
-   `trace_id` (một trace đại diện của cụm; xem payload chuẩn trong
+1. **Nhận alert** (webhook/email) — nội dung gồm `cluster_id`, `score`, `service`, `first_seen`,
+   `signature`, `incident_url` và `trace_id` (một trace đại diện của cụm; xem payload chuẩn trong
    `docs/architect/contracts/api-contract.md` mục "Alert"). Nếu kênh nhận alert đã cấu hình link
    từ `trace_id` thì bấm thẳng vào đó để xem ngay một request lỗi cụ thể trên Jaeger, không cần
    qua bước 2–3.
-2. **Mở Incident View**: đăng nhập web tại `/login` bằng tài khoản admin được cấp quyền,
-   rồi mở `/clusters/{cluster_id}` với ID trong alert (route UI `/clusters/:id`) để xem
-   signature, score và danh sách log liên quan. Chi tiết được tải từ `GET /clusters/{cluster_id}`.
+2. **Mở Incident View**: bấm trực tiếp `incident_url` trong email để xem signature, score
+   và danh sách log liên quan. `ALERT_WEB_BASE_URL` phải là URL gốc frontend đúng môi trường;
+   nếu chưa cấu hình thì `incident_url=null`, khi đó mới cần mở web và tìm cluster theo ID.
+   Chi tiết được tải từ `GET /clusters/{cluster_id}`.
    Nếu mở link khi chưa đăng nhập, web chuyển tới `/login` và quay lại Incident View sau
    khi đăng nhập thành công.
 3. **Lần theo trace/request**: bấm icon ↗ cạnh một `trace_id` bất kỳ trong Incident View để mở
@@ -117,7 +118,11 @@ Các nguyên nhân thường gặp hơn và cách xử lý:
 3. **Lớp TF-IDF augment (`ML_AUGMENT_ENABLED`, mặc định `true`) gộp nhầm 2 cụm khác nhau thành
    một** — kiểm tra bằng cách so `signature` hiển thị trên UI với `message` log gốc; nếu gộp sai,
    tăng `ML_SIMILARITY_THRESHOLD` (mặc định `0.9`) trong `.env`, hoặc tắt hẳn bằng
-   `ML_AUGMENT_ENABLED=false` (xem `clustering/README.md` mục "ML augment"). Phối hợp với Nam
+   `ML_AUGMENT_ENABLED=false` (xem `clustering/README.md` mục "ML augment"). **Nếu tắt ML,
+   phải đặt đồng thời `ANOMALY_THRESHOLD=1.5` và recreate clustering**: trên replay seed 98,
+   rule-only ở ngưỡng 3.0 có recall=0 và 0 alert; ở 1.5 có precision=1.0, recall=0.9,
+   0 alert giả/giờ yên tĩnh và 54 alert. Đây là kết quả synthetic, không bảo đảm chất lượng
+   production; xem `clustering/BENCHMARK.md` và sweep 03b. Phối hợp với Nam
    trước khi đổi ngưỡng này trên bản deploy chính, vì đổi `signature` đại diện làm đổi `cluster_id`
    của các cụm đã gộp trước đó.
 
@@ -321,10 +326,12 @@ cùng period phải dưới 10 phút để thử tiêu chí; liên kết email h
 kiểm tra kênh email. Đặt URL ping bí mật vào `HEALTHCHECK_PING_URL` trong `.env`
 trên VM rồi recreate service clustering. Worker chỉ ping sau khi ghi heartbeat
 thành công; replay `--window-to` không ping. Webhook lỗi gửi `/fail`, không gửi
-success ngay trong chu kỳ đó; khi webhook đã lỗi, worker chờ lần gửi webhook
-thành công tiếp theo trước khi gửi success để tránh báo recovered giả. Trạng
-thái lỗi webhook này chỉ ở bộ nhớ, mất khi worker restart; kiểm tra webhook và
-Healthchecks trực tiếp sau restart. Không đưa URL ping vào ảnh, log hay commit.
+success ngay trong chu kỳ đó. Cờ webhook lỗi được reset ở đầu mỗi chu kỳ: chu kỳ
+tiếp theo hoàn tất và ghi heartbeat thành công sẽ ping success, kể cả không có
+alert cần gửi hoặc không cấu hình webhook. Ping success xác nhận worker hoàn tất
+chu kỳ đó, không xác nhận đường gửi email/webhook đã phục hồi; một lần gửi webhook
+lỗi mới vẫn phát `/fail`. Kiểm tra webhook và Healthchecks trực tiếp khi xử lý cảnh báo.
+Không đưa URL ping vào ảnh, log hay commit.
 Để trống biến thì tắt ping; lỗi ping được ghi cảnh báo chung và không dừng worker.
 
 Dùng một dịch vụ HTTP uptime bên ngoài riêng, chẳng hạn UptimeRobot, để kiểm tra

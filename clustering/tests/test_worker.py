@@ -1,5 +1,6 @@
 """Verify cycle orchestration without OpenSearch or external webhooks."""
 import sys
+import pytest
 from clustering.src import worker
 
 
@@ -56,7 +57,12 @@ def test_live_cycle_without_clusters_still_writes_heartbeat(monkeypatch):
     store.write_history.assert_not_called()
 
 
-def test_failure_signal_is_not_immediately_overwritten_and_recovers_on_delivery(monkeypatch):
+@pytest.mark.parametrize("outcomes, expected_signals", [
+    ([False, None, True], [True, False, False]),
+    ([False, None, None, None, None, None], [True, False, False, False, False, False]),
+    ([False, False, None], [True, True, False]),
+])
+def test_failure_signal_is_not_overwritten_within_the_same_cycle(monkeypatch, outcomes, expected_signals):
     from unittest.mock import Mock
     store = Mock()
     store.read_logs.return_value = []
@@ -66,21 +72,61 @@ def test_failure_signal_is_not_immediately_overwritten_and_recovers_on_delivery(
     monkeypatch.setattr(worker, "analyze", lambda *a, **kw: [])
     signals = []
     monkeypatch.setattr(worker, "ping", lambda **kw: signals.append(kw.get("failed", False)))
-    outcomes = iter([False, None, True])
+    cycles = len(outcomes)
+    outcomes = iter(outcomes)
     def send(*args, on_delivery, **kwargs):
         result = next(outcomes)
         if result is not None:
             on_delivery(result)
     monkeypatch.setattr(worker, "check_and_alert_batch", send)
     def sleep(_):
-        if store.write_heartbeat.call_count == 3:
+        if store.write_heartbeat.call_count == cycles:
             raise KeyboardInterrupt
     monkeypatch.setattr(worker.time, "sleep", sleep)
     import pytest
     with pytest.raises(KeyboardInterrupt):
         worker.main()
-    assert signals == [True, False]
-    assert store.write_heartbeat.call_count == 3
+    assert signals == expected_signals
+    assert store.write_heartbeat.call_count == cycles
+
+
+def test_incident_storage_failure_does_not_interrupt_live_cycle(monkeypatch, caplog):
+    import httpx
+    from unittest.mock import Mock
+    from clustering.src import alert
+
+    store = Mock()
+    store.read_logs.return_value = []
+    store.get_alert_times.return_value = {}
+    store.delete_history_before.return_value = 0
+    incidents = Mock()
+    incidents.current.side_effect = worker.StorageError("private-storage-details")
+    cluster = {"cluster_id": "c1", "score": 5, "status": "anomalous",
+               "first_seen": "2026-11-19T00:00:00Z"}
+    monkeypatch.setattr(sys, "argv", ["worker", "--once"])
+    monkeypatch.setenv("ML_AUGMENT_ENABLED", "false")
+    monkeypatch.setenv("ANOMALY_THRESHOLD", "2")
+    monkeypatch.setenv("ALERT_WEBHOOK_URL", "http://webhook.test/hook")
+    monkeypatch.setattr(worker, "OpenSearchStore", lambda: store)
+    monkeypatch.setattr(worker, "IncidentRepository", lambda store: incidents)
+    monkeypatch.setattr(worker, "analyze", lambda *a, **kw: [("web", cluster)])
+    post = Mock(return_value=httpx.Response(200, request=httpx.Request("POST", "http://webhook.test/hook")))
+    ping = Mock()
+    monkeypatch.setattr(alert.httpx, "post", post)
+    monkeypatch.setattr(worker, "ping", ping)
+
+    worker.main()
+
+    post.assert_called_once()
+    store.write_alert_times.assert_called_once()
+    store.write_cluster.assert_called_once_with(cluster)
+    store.write_history.assert_called_once()
+    store.write_heartbeat.assert_called_once()
+    store.close.assert_called_once()
+    ping.assert_called_once_with()
+    assert cluster["status"] == "alerted"
+    assert "Cannot read incident state for c1" in caplog.text
+    assert "private-storage-details" not in caplog.text
 
 
 def test_retention_runs_at_most_hourly_and_retries_failure(monkeypatch):

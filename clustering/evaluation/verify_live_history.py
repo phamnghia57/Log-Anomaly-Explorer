@@ -1,5 +1,6 @@
 """Verify history reads and retention on OpenSearch using one temporary index."""
 import os
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from opensearchpy import OpenSearch
@@ -37,6 +38,22 @@ def main():
         client.indices.refresh(index=index)
         assert [p["score"] for p in store.list_history("c1")] == [2, 3]
         assert [p["score"] for p in store.list_history("c2")] == [9]
+        print("PASS: latest history and retention cutoff (point exactly at cutoff retained)")
+        bulk = []
+        start = datetime(2026, 1, 2, tzinfo=timezone.utc)
+        for minute in range(1, 151):
+            bulk.extend([{"index": {"_index": index}}, {
+                "cluster_id": "c150", "score": minute, "status": "normal",
+                "recorded_at": (start + timedelta(minutes=minute)).isoformat(),
+            }])
+        assert not client.bulk(body=bulk)["errors"]
+        client.indices.refresh(index=index)
+        assert [p["score"] for p in store.list_history("c150", limit=100)] == list(range(51, 151))
+        assert [p["score"] for p in store.list_history("c150", limit=50)] == list(range(101, 151))
+        assert [p["score"] for p in store.list_history(
+            "c150", since=(start + timedelta(minutes=140)).isoformat(), limit=100
+        )] == list(range(140, 151))
+        print("PASS: 150 synthetic minute points; latest 100 = 51..150; latest 50 = 101..150; since inclusive")
         client.indices.create(index=heartbeat_index, body={"mappings": {"dynamic": "strict", "properties": {
             "last_processed_at": {"type": "date"}, "window_to": {"type": "date"},
             "cycle_seconds": {"type": "double"}, "logs_read": {"type": "long"}, "clusters_out": {"type": "long"},
@@ -46,6 +63,7 @@ def main():
                               cycle_seconds=1.25, logs_read=12, clusters_out=3)
         heartbeat = client.get(index=heartbeat_index, id="worker")["_source"]
         assert heartbeat["cycle_seconds"] == 1.25 and heartbeat["logs_read"] == 12
+        print("PASS: heartbeat metrics persisted on real OpenSearch")
         incidents = IncidentRepository(store)
         incidents.ensure_ready()
         created_indices.append(incident_index)
@@ -62,12 +80,13 @@ def main():
         alert.httpx.post = unexpected_webhook
         assert alert.check_and_alert_batch([("test", cluster)], incidents=incidents) == 0
         assert cluster["status"] == "anomalous"
-        print("PASS: latest history, retention cutoff, heartbeat metrics, acknowledged incident on real OpenSearch")
+        print("PASS: acknowledged incident suppresses webhook on real OpenSearch")
     finally:
         for created_index in created_indices:
             assert created_index.startswith("codex-history-test-")
             client.indices.delete(index=created_index)
         client.close()
+    print("PASS: temporary test indices cleaned up; no webhook delivery or production data used")
 
 
 if __name__ == "__main__":

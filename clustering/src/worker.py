@@ -51,6 +51,7 @@ def main():
 
         while True:
             cycle_start = time.perf_counter()
+            delivery_failed = False
             now = datetime.now(timezone.utc).timestamp() - lag
             end = _parse_ts(args.window_to) if args.window_to else datetime.fromtimestamp(
                 (now // seconds) * seconds, timezone.utc)

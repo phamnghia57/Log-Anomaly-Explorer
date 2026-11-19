@@ -26,6 +26,13 @@ vẫn bỏ sót một incident và chậm trung bình hơn cấu hình cũ; 0 al
 incident; 17 alert cho 9 incident được phát hiện cho thấy vẫn có nguy cơ mệt mỏi
 do cảnh báo. Cần kiểm tra trên nhiều seed và log có nhãn thực tế trước rollout.
 
+**Fallback khi tắt ML:** phải đặt đồng thời `ML_AUGMENT_ENABLED=false` và
+`ANOMALY_THRESHOLD=1.5`. Trên chính sweep seed 98 này, rule-only ở ngưỡng 3.0
+có precision=0, recall=0 và 0 alert ở cả bốn similarity; im lặng không chứng minh
+hệ thống không có incident. Ở 1.5, rule-only đạt precision=1.0, recall=0.9,
+0 alert giả/giờ yên tĩnh và 54 alert. Đây là kết quả synthetic của một seed,
+không phải bảo đảm precision/recall trên production.
+
 Precision là tỷ lệ alert được gửi mô phỏng khớp service, signature và khoảng
 thời gian của ít nhất một incident; alert lặp được tính riêng. Recall là tỷ lệ
 incident có ít nhất một alert khớp; trễ là số cửa sổ hoàn tất trung bình đến
@@ -41,7 +48,8 @@ nhãn, cấu hình và lệnh tái lập nằm tại
 TF-IDF + cosine có thể dùng làm augment nhẹ cho workload đã đo: tối đa 1.800
 template/36.000 log trong khoảng dữ liệu lịch sử + hiện tại, một worker, không
 gọi dịch vụ ML bên ngoài. Rule-only nhanh hơn và tốn ít RAM hơn; ML có ích khi
-template khác câu chữ nhưng tương tự về từ vựng. Giữ rule-based làm fallback.
+template khác câu chữ nhưng tương tự về từ vựng. Giữ rule-based làm fallback,
+với `ANOMALY_THRESHOLD=1.5` khi tắt ML theo kết quả replay ở trên.
 
 Đây là kết quả **container giới hạn 2 CPU/4 GiB trên Docker Desktop**, chưa phải
 nghiệm thu trên VM riêng 2 vCPU/4 GB. Chưa có quyền truy cập VM đó. Không khẳng

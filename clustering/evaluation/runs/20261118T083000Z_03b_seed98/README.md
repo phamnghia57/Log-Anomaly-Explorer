@@ -16,9 +16,23 @@ python -m clustering.evaluation.sweep --seed 98 --output /tmp/issue98-03b-new
 python -m clustering.evaluation.generate_timeline --seed 98 --output /tmp/issue98-03a-new
 ```
 
-The generator CLI was rerun separately: `logs.json`, `labels.json` and
-`config.json` have identical SHA-256 hashes to this run and the committed 03a
-dataset (respectively `59a559e30c272064c2e19e98ebc07b2ddcdfc9375810e2253393efee7cf1aff8`,
-`98a8c8646ebd549a24360c378b518dcd4b5518d8a8740c1479afccda90bcc1e2`,
-`a8a8ca2ddfb19684aced9decedff25591b95db72dd8360b915d82fd3c686a91b`).
+## Dataset hashes checked for PR #117
+
+On 2026-11-19, the three files in the worktree and Git blobs at `96a8bf0`
+were compared with the committed 03a dataset and a fresh generator CLI run.
+All four copies are byte-identical and their parsed JSON values are identical.
+The serialization mismatch reported in the review is not present in this
+snapshot. The actual hashes of the 03b files are:
+
+| File | Bytes | SHA-256 (03b, 03a and regenerated) |
+|---|---:|---|
+| `logs.json` | 926522 | `59a559e30c272064c2e19e98ebc07b2ddcdfc9375810e2253393efee7cf1aff8` |
+| `labels.json` | 15141 | `98a8c8646ebd549a24360c378b518dcd4b5518d8a8740c1479afccda90bcc1e2` |
+| `config.json` | 3053 | `a8a8ca2ddfb19684aced9decedff25591b95db72dd8360b915d82fd3c686a91b` |
+
+See [asset-verification.txt](asset-verification.txt) for the checks against each
+copy, source revision and Python version. To check a differently serialized
+copy, compare `json.loads(path.read_bytes())` for both files as well as their
+SHA-256 hashes; parsed equality alone does not imply byte equality.
+
 This is offline simulation, not proof of live webhook delivery or production quality.
