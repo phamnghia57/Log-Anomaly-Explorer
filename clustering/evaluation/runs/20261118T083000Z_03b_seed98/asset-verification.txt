@@ -1,0 +1,25 @@
+PR #117 dataset asset verification
+Source HEAD: 96a8bf057391a42da16b02376ae4465b0159e009
+Python: 3.13.7
+Command: python -m clustering.evaluation.generate_timeline --seed 98 --output <new temporary directory>
+
+logs.json
+  03a: bytes=926522 sha256=59a559e30c272064c2e19e98ebc07b2ddcdfc9375810e2253393efee7cf1aff8
+  03b: bytes=926522 sha256=59a559e30c272064c2e19e98ebc07b2ddcdfc9375810e2253393efee7cf1aff8
+  regenerated: bytes=926522 sha256=59a559e30c272064c2e19e98ebc07b2ddcdfc9375810e2253393efee7cf1aff8
+  git-03b: bytes=926522 sha256=59a559e30c272064c2e19e98ebc07b2ddcdfc9375810e2253393efee7cf1aff8
+  PASS: byte-identical and parsed JSON identical in all four copies
+labels.json
+  03a: bytes=15141 sha256=98a8c8646ebd549a24360c378b518dcd4b5518d8a8740c1479afccda90bcc1e2
+  03b: bytes=15141 sha256=98a8c8646ebd549a24360c378b518dcd4b5518d8a8740c1479afccda90bcc1e2
+  regenerated: bytes=15141 sha256=98a8c8646ebd549a24360c378b518dcd4b5518d8a8740c1479afccda90bcc1e2
+  git-03b: bytes=15141 sha256=98a8c8646ebd549a24360c378b518dcd4b5518d8a8740c1479afccda90bcc1e2
+  PASS: byte-identical and parsed JSON identical in all four copies
+config.json
+  03a: bytes=3053 sha256=a8a8ca2ddfb19684aced9decedff25591b95db72dd8360b915d82fd3c686a91b
+  03b: bytes=3053 sha256=a8a8ca2ddfb19684aced9decedff25591b95db72dd8360b915d82fd3c686a91b
+  regenerated: bytes=3053 sha256=a8a8ca2ddfb19684aced9decedff25591b95db72dd8360b915d82fd3c686a91b
+  git-03b: bytes=3053 sha256=a8a8ca2ddfb19684aced9decedff25591b95db72dd8360b915d82fd3c686a91b
+  PASS: byte-identical and parsed JSON identical in all four copies
+
+PASS: all three committed datasets match 03a and a fresh seed-98 CLI run.

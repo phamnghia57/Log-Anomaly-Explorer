@@ -1,0 +1,3 @@
+Minh ơi, trong PR #117 mình đã thêm `ErrorStormUser` cho #103 và tái dùng generator 03a seed 98, nên bạn không cần viết trùng phần sinh log. Scenario được bật bằng `LOAD_TEST_ERROR_STORM=true`, rate qua `ERROR_STORM_RPS`; có collector `load-tests/capture_worker_cycles.py`.
+
+Phần còn lại cần thống nhất người chạy: 10/50/100 ERROR/s, mỗi mức 5 phút trên stack cô lập với webhook/dead-man bên ngoài tắt, ghi throughput thực/202/429/lỗi, Docker stats, cấu hình CPU/RAM và baseline, heartbeat/cycle CSV rồi đối chiếu log worker để kết luận lỡ cửa sổ. Bảng trong `load-tests/README.md` hiện vẫn ghi chưa đo. Nhờ Minh và Nghĩa chốt ai có môi trường/quyền VM để chạy và lưu evidence `docs/evidence/07-worker-load/`.

@@ -1,0 +1,245 @@
+{
+  "evaluation_from": "2026-01-01T00:30:00.000000Z",
+  "evaluation_to": "2026-01-01T03:00:00.000000Z",
+  "incidents": [
+    {
+      "expected_cluster_signature": "validationerror: invalid item value; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+      "expected_cluster_signatures": [
+        "validationerror: invalid item value; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "validationerror: invalid item value; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "validationerror: invalid item value; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "validationerror: item validation rejected; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "validationerror: item validation rejected; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "validationerror: item validation rejected; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>"
+      ],
+      "family": "value",
+      "fault": "value",
+      "incident_id": "synthetic-01",
+      "injected_log_count": 40,
+      "service": "demo-web",
+      "shape": "step",
+      "window_from": "2026-01-01T00:40:00.000000Z",
+      "window_to": "2026-01-01T00:45:00.000000Z"
+    },
+    {
+      "expected_cluster_signature": "connecterror: cannot reach downstream dependency; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+      "expected_cluster_signatures": [
+        "connecterror: cannot reach downstream dependency; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "connecterror: cannot reach downstream dependency; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "connecterror: cannot reach downstream dependency; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "connecterror: downstream dependency unreachable; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "connecterror: downstream dependency unreachable; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "connecterror: downstream dependency unreachable; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>"
+      ],
+      "family": "connection",
+      "fault": "connection",
+      "incident_id": "synthetic-02",
+      "injected_log_count": 40,
+      "service": "demo-mobile-api",
+      "shape": "step",
+      "window_from": "2026-01-01T00:50:00.000000Z",
+      "window_to": "2026-01-01T00:55:00.000000Z"
+    },
+    {
+      "expected_cluster_signature": "timeouterror: downstream request timed out; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+      "expected_cluster_signatures": [
+        "timeouterror: downstream request timed out; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "timeouterror: downstream request timed out; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "timeouterror: downstream request timed out; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "timeouterror: downstream timeout exceeded; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "timeouterror: downstream timeout exceeded; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "timeouterror: downstream timeout exceeded; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>"
+      ],
+      "family": "timeout",
+      "fault": "timeout",
+      "incident_id": "synthetic-03",
+      "injected_log_count": 30,
+      "service": "demo-web",
+      "shape": "ramp",
+      "window_from": "2026-01-01T01:05:00.000000Z",
+      "window_to": "2026-01-01T01:10:00.000000Z"
+    },
+    {
+      "expected_cluster_signature": "runtimeerror: application runtime failure; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+      "expected_cluster_signatures": [
+        "runtimeerror: application runtime failure; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: application runtime failure; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: application runtime failure; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: runtime operation failed; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: runtime operation failed; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: runtime operation failed; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>"
+      ],
+      "family": "runtime",
+      "fault": "runtime",
+      "incident_id": "synthetic-04",
+      "injected_log_count": 30,
+      "service": "demo-mobile-api",
+      "shape": "ramp",
+      "window_from": "2026-01-01T01:20:00.000000Z",
+      "window_to": "2026-01-01T01:25:00.000000Z"
+    },
+    {
+      "expected_cluster_signature": "runtimeerror: downstream processing failed; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+      "expected_cluster_signatures": [
+        "runtimeerror: downstream processing failed; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: downstream processing failed; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: downstream processing failed; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: remote processing failure; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: remote processing failure; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: remote processing failure; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>"
+      ],
+      "family": "downstream",
+      "fault": "downstream",
+      "incident_id": "synthetic-05",
+      "injected_log_count": 12,
+      "service": "demo-web",
+      "shape": "spike",
+      "window_from": "2026-01-01T01:35:00.000000Z",
+      "window_to": "2026-01-01T01:36:00.000000Z"
+    },
+    {
+      "expected_cluster_signature": "shippinggatewayerror: new shipping gateway refused connection; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+      "expected_cluster_signatures": [
+        "shippinggatewayerror: new shipping gateway refused connection; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "shippinggatewayerror: new shipping gateway refused connection; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "shippinggatewayerror: new shipping gateway refused connection; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "shippinggatewayerror: new shipping gateway unreachable; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "shippinggatewayerror: new shipping gateway unreachable; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "shippinggatewayerror: new shipping gateway unreachable; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>"
+      ],
+      "family": "new-connection",
+      "fault": "connection",
+      "incident_id": "synthetic-06",
+      "injected_log_count": 32,
+      "service": "demo-web",
+      "shape": "new_cluster",
+      "window_from": "2026-01-01T01:45:00.000000Z",
+      "window_to": "2026-01-01T01:49:00.000000Z"
+    },
+    {
+      "expected_cluster_signature": "inventoryvalidationerror: new inventory item rejected; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+      "expected_cluster_signatures": [
+        "inventoryvalidationerror: new inventory item rejected; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "inventoryvalidationerror: new inventory item rejected; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "inventoryvalidationerror: new inventory item rejected; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "inventoryvalidationerror: new inventory validation failed; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "inventoryvalidationerror: new inventory validation failed; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "inventoryvalidationerror: new inventory validation failed; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>"
+      ],
+      "family": "new-value",
+      "fault": "value",
+      "incident_id": "synthetic-07",
+      "injected_log_count": 32,
+      "service": "demo-mobile-api",
+      "shape": "new_cluster",
+      "window_from": "2026-01-01T01:55:00.000000Z",
+      "window_to": "2026-01-01T01:59:00.000000Z"
+    },
+    {
+      "expected_cluster_signature": "runtimeerror: application runtime failure; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+      "expected_cluster_signatures": [
+        "runtimeerror: application runtime failure; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: application runtime failure; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: application runtime failure; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: runtime operation failed; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: runtime operation failed; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: runtime operation failed; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>"
+      ],
+      "family": "runtime",
+      "fault": "runtime",
+      "incident_id": "synthetic-08",
+      "injected_log_count": 24,
+      "service": "demo-web",
+      "shape": "repeated_burst",
+      "window_from": "2026-01-01T02:10:00.000000Z",
+      "window_to": "2026-01-01T02:13:00.000000Z"
+    },
+    {
+      "expected_cluster_signature": "runtimeerror: application runtime failure; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+      "expected_cluster_signatures": [
+        "runtimeerror: application runtime failure; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: application runtime failure; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: application runtime failure; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: runtime operation failed; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: runtime operation failed; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "runtimeerror: runtime operation failed; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>"
+      ],
+      "family": "runtime",
+      "fault": "runtime",
+      "incident_id": "synthetic-09",
+      "injected_log_count": 24,
+      "service": "demo-web",
+      "shape": "repeated_burst",
+      "window_from": "2026-01-01T02:17:00.000000Z",
+      "window_to": "2026-01-01T02:20:00.000000Z"
+    },
+    {
+      "expected_cluster_signature": "timeouterror: downstream request timed out; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+      "expected_cluster_signatures": [
+        "timeouterror: downstream request timed out; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "timeouterror: downstream request timed out; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "timeouterror: downstream request timed out; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "timeouterror: downstream timeout exceeded; order <NUM>; host cache-a.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "timeouterror: downstream timeout exceeded; order <NUM>; host cache-b.internal; status <NUM>; latency <NUM> ms; request <UUID>",
+        "timeouterror: downstream timeout exceeded; order <NUM>; host worker-c.internal; status <NUM>; latency <NUM> ms; request <UUID>"
+      ],
+      "family": "timeout",
+      "fault": "timeout",
+      "incident_id": "synthetic-10",
+      "injected_log_count": 12,
+      "service": "demo-mobile-api",
+      "shape": "spike",
+      "window_from": "2026-01-01T02:40:00.000000Z",
+      "window_to": "2026-01-01T02:41:00.000000Z"
+    }
+  ],
+  "quiet_intervals": [
+    {
+      "window_from": "2026-01-01T00:30:00.000000Z",
+      "window_to": "2026-01-01T00:40:00.000000Z"
+    },
+    {
+      "window_from": "2026-01-01T00:45:00.000000Z",
+      "window_to": "2026-01-01T00:50:00.000000Z"
+    },
+    {
+      "window_from": "2026-01-01T00:55:00.000000Z",
+      "window_to": "2026-01-01T01:05:00.000000Z"
+    },
+    {
+      "window_from": "2026-01-01T01:10:00.000000Z",
+      "window_to": "2026-01-01T01:20:00.000000Z"
+    },
+    {
+      "window_from": "2026-01-01T01:25:00.000000Z",
+      "window_to": "2026-01-01T01:35:00.000000Z"
+    },
+    {
+      "window_from": "2026-01-01T01:36:00.000000Z",
+      "window_to": "2026-01-01T01:45:00.000000Z"
+    },
+    {
+      "window_from": "2026-01-01T01:49:00.000000Z",
+      "window_to": "2026-01-01T01:55:00.000000Z"
+    },
+    {
+      "window_from": "2026-01-01T01:59:00.000000Z",
+      "window_to": "2026-01-01T02:10:00.000000Z"
+    },
+    {
+      "window_from": "2026-01-01T02:13:00.000000Z",
+      "window_to": "2026-01-01T02:17:00.000000Z"
+    },
+    {
+      "window_from": "2026-01-01T02:20:00.000000Z",
+      "window_to": "2026-01-01T02:40:00.000000Z"
+    },
+    {
+      "window_from": "2026-01-01T02:41:00.000000Z",
+      "window_to": "2026-01-01T03:00:00.000000Z"
+    }
+  ],
+  "source": "Synthetic scheduled fault injection, not production incidents or captured Jaeger spans",
+  "warmup_from": "2026-01-01T00:00:00.000000Z",
+  "warmup_to": "2026-01-01T00:30:00.000000Z"
+}

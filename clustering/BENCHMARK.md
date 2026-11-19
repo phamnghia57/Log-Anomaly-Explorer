@@ -1,11 +1,55 @@
 # Benchmark clustering — 22/10/2026
 
+## Issue #98 / 03b: replay và quét tham số
+
+Cấu hình Compose trước thay đổi: cửa sổ 60 giây, 30 cửa sổ lịch sử,
+`ANOMALY_THRESHOLD=2.0`, ML bật, similarity `0.9`, margin `0.05`; cấu hình
+thực tế có thể bị `.env` hoặc môi trường deploy ghi đè. Replay seed 98 trên
+2.070 log tổng hợp, gồm 30 phút warm-up và 150 phút đánh giá với 10 incident;
+114 phút yên tĩnh được định nghĩa là không có incident ở bất kỳ service nào.
+Không có OpenSearch, webhook hay dữ liệu production trong phép đo này.
+
+| Ngưỡng | ML | Similarity | Precision | Recall | Alert giả/giờ yên tĩnh | Trễ TB (cửa sổ) | Tổng alert |
+|---:|---|---:|---:|---:|---:|---:|---:|
+| 2.0 | bật | 0.9 | 0.559 | 0.9 | 5.789 | 1.222 | 34 |
+| 3.0 | bật | 0.9 | 1.000 | 0.9 | 0.000 | 1.556 | 17 |
+| 3.0 | bật | 0.8 | 1.000 | 0.9 | 0.000 | 1.222 | 16 |
+| 1.5 | tắt | không áp dụng | 1.000 | 0.9 | 0.000 | 1.111 | 54 |
+
+Chọn **3.0 / ML bật / similarity 0.9** cho mặc định Compose: cùng recall 9/10,
+precision và tỷ lệ alert giả yên tĩnh trên bộ này tốt hơn cấu hình cũ, đồng thời
+giữ nguyên cách gộp và `cluster_id` hiện tại. Rule-only 1.5 phát hiện nhanh hơn
+nhưng phát 54 alert; similarity 0.8 nhanh hơn và có 16 alert, song thay đổi
+chính sách gộp/ID, nên không chọn chỉ từ một seed tổng hợp. Cấu hình được chọn
+vẫn bỏ sót một incident và chậm trung bình hơn cấu hình cũ; 0 alert giả trên
+114 phút không chứng minh tỷ lệ vận hành bằng 0. Nhiều alert có thể khớp cùng
+incident; 17 alert cho 9 incident được phát hiện cho thấy vẫn có nguy cơ mệt mỏi
+do cảnh báo. Cần kiểm tra trên nhiều seed và log có nhãn thực tế trước rollout.
+
+**Fallback khi tắt ML:** phải đặt đồng thời `ML_AUGMENT_ENABLED=false` và
+`ANOMALY_THRESHOLD=1.5`. Trên chính sweep seed 98 này, rule-only ở ngưỡng 3.0
+có precision=0, recall=0 và 0 alert ở cả bốn similarity; im lặng không chứng minh
+hệ thống không có incident. Ở 1.5, rule-only đạt precision=1.0, recall=0.9,
+0 alert giả/giờ yên tĩnh và 54 alert. Đây là kết quả synthetic của một seed,
+không phải bảo đảm precision/recall trên production.
+
+Precision là tỷ lệ alert được gửi mô phỏng khớp service, signature và khoảng
+thời gian của ít nhất một incident; alert lặp được tính riêng. Recall là tỷ lệ
+incident có ít nhất một alert khớp; trễ là số cửa sổ hoàn tất trung bình đến
+alert khớp đầu tiên, chỉ tính incident được phát hiện (cửa sổ đầu là 1).
+Replay mô phỏng webhook thành công, cooldown 600 giây theo cluster và không có
+acknowledgement; nó không đo việc gửi thực tế. Các cấu hình ML tắt lặp kết quả
+với mọi similarity vì tham số đó không được sử dụng. Toàn bộ 32 dòng, dự đoán,
+nhãn, cấu hình và lệnh tái lập nằm tại
+[`evaluation/runs/20261118T083000Z_03b_seed98`](evaluation/runs/20261118T083000Z_03b_seed98/README.md).
+
 ## Kết luận hiện tại
 
 TF-IDF + cosine có thể dùng làm augment nhẹ cho workload đã đo: tối đa 1.800
 template/36.000 log trong khoảng dữ liệu lịch sử + hiện tại, một worker, không
 gọi dịch vụ ML bên ngoài. Rule-only nhanh hơn và tốn ít RAM hơn; ML có ích khi
-template khác câu chữ nhưng tương tự về từ vựng. Giữ rule-based làm fallback.
+template khác câu chữ nhưng tương tự về từ vựng. Giữ rule-based làm fallback,
+với `ANOMALY_THRESHOLD=1.5` khi tắt ML theo kết quả replay ở trên.
 
 Đây là kết quả **container giới hạn 2 CPU/4 GiB trên Docker Desktop**, chưa phải
 nghiệm thu trên VM riêng 2 vCPU/4 GB. Chưa có quyền truy cập VM đó. Không khẳng

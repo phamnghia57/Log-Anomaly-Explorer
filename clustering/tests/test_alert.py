@@ -3,6 +3,7 @@
 """
 import httpx
 import pytest
+from ingestion.src.storage import StorageError
 
 from clustering.src import alert
 
@@ -83,6 +84,51 @@ def test_batch_sends_one_digest_and_preserves_cooldown(sent):
     assert len(sent) == 1
 
 
+def test_digest_includes_signature_and_encoded_incident_link(monkeypatch, sent):
+    monkeypatch.setenv("ALERT_WEB_BASE_URL", "https://example.com/app/")
+    cluster = record(cluster_id="service/a b", signature="error <id>")
+    assert alert.check_and_alert(cluster, "web")
+    payload = sent[0]["json"]
+    assert payload["signature"] == "error <id>"
+    assert payload["incident_url"] == "https://example.com/app/clusters/service%2Fa%20b"
+    assert payload["incident_url"] in payload["message"]
+    assert payload["signature"] in payload["message"]
+
+
+def test_acknowledged_incident_is_skipped_but_open_and_resolved_are_sent(sent):
+    class Incidents:
+        def current(self, cluster):
+            return {"status": {"c1": "acknowledged", "c2": "open", "c3": "resolved"}[cluster["cluster_id"]]}
+
+    records = [("web", record(cluster_id=key)) for key in ("c1", "c2", "c3")]
+    assert alert.check_and_alert_batch(records, incidents=Incidents()) == 2
+    assert [item["cluster_id"] for item in sent[0]["json"]["alerts"]] == ["c2", "c3"]
+    assert [cluster["status"] for _, cluster in records] == ["anomalous", "alerted", "alerted"]
+
+
+def test_incident_storage_failure_sends_alert_and_warns(sent, caplog):
+    class Incidents:
+        def current(self, cluster):
+            raise StorageError("private-storage-details")
+
+    cluster = record()
+    assert alert.check_and_alert_batch([("web", cluster)], incidents=Incidents()) == 1
+    assert cluster["status"] == "alerted"
+    assert len(sent) == 1
+    assert "Cannot read incident state for c1; alert is sent anyway" in caplog.text
+    assert "private-storage-details" not in caplog.text
+
+
+def test_incident_programming_failure_is_not_hidden(sent):
+    class Incidents:
+        def current(self, cluster):
+            raise RuntimeError("incident storage offline")
+
+    with pytest.raises(RuntimeError, match="incident storage offline"):
+        alert.check_and_alert_batch([("web", record())], incidents=Incidents())
+    assert not sent
+
+
 def test_failed_batch_retries_all_clusters(monkeypatch, sent):
     post = alert.httpx.post
     def fail(*args, **kwargs):
@@ -94,6 +140,26 @@ def test_failed_batch_retries_all_clusters(monkeypatch, sent):
     monkeypatch.setattr(alert.httpx, "post", post)
     assert alert.check_and_alert_batch(records) == 2
     assert len(sent) == 1
+
+
+def test_webhook_failure_reports_fail_signal(monkeypatch):
+    signals = []
+    monkeypatch.setattr(alert, "ping", lambda **kw: signals.append(kw))
+    monkeypatch.setattr(alert.httpx, "post", lambda *a, **kw: httpx.Response(
+        500, request=httpx.Request("POST", "http://webhook.test")))
+    assert not alert.check_and_alert(record())
+    assert signals == [{"failed": True}]
+
+
+def test_invalid_webhook_reports_failure_without_exposing_url(monkeypatch, caplog):
+    signals = []
+    monkeypatch.setattr(alert, "ping", lambda **kw: signals.append(kw))
+    def fail(*args, **kwargs):
+        raise httpx.InvalidURL("secret-webhook-token")
+    monkeypatch.setattr(alert.httpx, "post", fail)
+    assert not alert.check_and_alert(record())
+    assert signals == [{"failed": True}]
+    assert "secret-webhook-token" not in caplog.text
 
 
 def test_missing_webhook_does_not_start_cooldown(monkeypatch, sent):

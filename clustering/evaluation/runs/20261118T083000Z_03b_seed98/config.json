@@ -1,0 +1,152 @@
+{
+  "background_rates_per_minute_per_service": {
+    "connection": 1.0,
+    "downstream": 1.0,
+    "runtime": 1.0,
+    "timeout": 1.0,
+    "value": 1.0
+  },
+  "duration_minutes": 180,
+  "end": "2026-01-01T03:00:00.000000Z",
+  "generator_version": 1,
+  "history_windows": 30,
+  "injected_log_count": 276,
+  "log_count": 2070,
+  "quiet_definition": "No incident in any service; warm-up excluded; half-open intervals",
+  "scenarios": [
+    {
+      "extra_errors_per_minute": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "family": "value",
+      "incident_id": "synthetic-01",
+      "service": "demo-web",
+      "shape": "step",
+      "start_minute": 40
+    },
+    {
+      "extra_errors_per_minute": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "family": "connection",
+      "incident_id": "synthetic-02",
+      "service": "demo-mobile-api",
+      "shape": "step",
+      "start_minute": 50
+    },
+    {
+      "extra_errors_per_minute": [
+        2,
+        4,
+        6,
+        8,
+        10
+      ],
+      "family": "timeout",
+      "incident_id": "synthetic-03",
+      "service": "demo-web",
+      "shape": "ramp",
+      "start_minute": 65
+    },
+    {
+      "extra_errors_per_minute": [
+        2,
+        4,
+        6,
+        8,
+        10
+      ],
+      "family": "runtime",
+      "incident_id": "synthetic-04",
+      "service": "demo-mobile-api",
+      "shape": "ramp",
+      "start_minute": 80
+    },
+    {
+      "extra_errors_per_minute": [
+        12
+      ],
+      "family": "downstream",
+      "incident_id": "synthetic-05",
+      "service": "demo-web",
+      "shape": "spike",
+      "start_minute": 95
+    },
+    {
+      "extra_errors_per_minute": [
+        8,
+        8,
+        8,
+        8
+      ],
+      "family": "new-connection",
+      "incident_id": "synthetic-06",
+      "service": "demo-web",
+      "shape": "new_cluster",
+      "start_minute": 105
+    },
+    {
+      "extra_errors_per_minute": [
+        8,
+        8,
+        8,
+        8
+      ],
+      "family": "new-value",
+      "incident_id": "synthetic-07",
+      "service": "demo-mobile-api",
+      "shape": "new_cluster",
+      "start_minute": 115
+    },
+    {
+      "extra_errors_per_minute": [
+        8,
+        8,
+        8
+      ],
+      "family": "runtime",
+      "incident_id": "synthetic-08",
+      "service": "demo-web",
+      "shape": "repeated_burst",
+      "start_minute": 130
+    },
+    {
+      "extra_errors_per_minute": [
+        8,
+        8,
+        8
+      ],
+      "family": "runtime",
+      "incident_id": "synthetic-09",
+      "service": "demo-web",
+      "shape": "repeated_burst",
+      "start_minute": 137
+    },
+    {
+      "extra_errors_per_minute": [
+        12
+      ],
+      "family": "timeout",
+      "incident_id": "synthetic-10",
+      "service": "demo-mobile-api",
+      "shape": "spike",
+      "start_minute": 160
+    }
+  ],
+  "seed": 98,
+  "services": [
+    "demo-web",
+    "demo-mobile-api"
+  ],
+  "start": "2026-01-01T00:00:00.000000Z",
+  "warmup_minutes": 30,
+  "window_seconds": 60
+}
