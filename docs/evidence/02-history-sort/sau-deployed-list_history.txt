@@ -1,0 +1,17 @@
+    def list_history(self, cluster_id, *, since=None, limit=100):
+        """Return the latest points for one cluster, oldest first (chart order).
+        """
+        if limit < 1:
+            raise ValueError("limit must be positive")
+        filters = [{"term": {"cluster_id": cluster_id}}]
+        if since is not None:
+            filters.append({"range": {"recorded_at": {"gte": since}}})
+        body = {"query": {"bool": {"filter": filters}},
+                "sort": [{"recorded_at": "desc"}], "size": limit}
+        try:
+            response = self.client.search(index=self.history, body=body)
+        except Exception as exc:
+            raise StorageError(f"list_history failed: {exc}") from exc
+        return [{field: hit["_source"][field] for field in ("cluster_id", "score", "status", "recorded_at")}
+                for hit in reversed(response["hits"]["hits"])]
+
