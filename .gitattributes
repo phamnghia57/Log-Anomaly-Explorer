@@ -1,0 +1,4 @@
+# Script shell luon LF, ke ca khi checkout tren Windows (core.autocrlf=true):
+# bash bao "syntax error: unexpected end of file" voi file CRLF, vd. khi chay
+# deploy/restore-drill.sh trong Git Bash.
+*.sh text eol=lf

@@ -9,3 +9,4 @@ venv
 **/tests
 load-tests
 clustering/data
+backups

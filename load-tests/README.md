@@ -2,51 +2,144 @@
 
 ## Error storm / worker (issue #103)
 
-**Chưa có số đo 10/50/100 ERROR/s**: máy thực hiện thay đổi không kết nối được
-Docker Engine; không dùng bảng HTTP cũ để kết luận worker có lỡ cửa sổ hay không.
+Đo `cycle_seconds` của clustering worker khi có 10 / 50 / 100 log ERROR mỗi giây, để biết ở mức
+tải nào worker bắt đầu **lỡ cửa sổ** (bỏ qua một cửa sổ 60 giây). Heartbeat
+`<CLUSTER_INDEX>-heartbeat` có `cycle_seconds`, `logs_read`, `clusters_out`, `window_to`
+(PR #117); collector [`capture_worker_cycles.py`](capture_worker_cycles.py) chép heartbeat ra CSV.
 
-| Tốc độ mục tiêu | cycle_seconds | Lỡ cửa sổ |
-|---:|---|---|
-| 10 ERROR/s | Chưa đo | Chưa xác định |
-| 50 ERROR/s | Chưa đo | Chưa xác định |
-| 100 ERROR/s | Chưa đo | Chưa xác định |
+### Kết quả
 
-`ErrorStormUser` phát log ERROR từ bộ sinh 03a (seed mặc định 98), gán timestamp
-và ID mới; cần chủ động đặt `LOAD_TEST_ERROR_STORM=true`. Chỉ chạy trên stack cô lập,
-với webhook và healthcheck ngoài đã tắt, dữ liệu và index riêng. Một user nhắm
-`ERROR_STORM_RPS` request/giây; đây là tốc độ mục tiêu, không đảm bảo đạt nếu
-server/client chậm. Kiểm tra số 202, 429, lỗi và throughput thực trong Locust;
-nếu không đạt mục tiêu thì kết quả không đại diện mức đó. Không chạy chung các
-user khác vì chúng làm sai tốc độ và tải.
+Bảng giữa hai marker dưới đây do [`summarize_worker_cycles.py`](summarize_worker_cycles.py) sinh
+từ file gốc trong [`docs/evidence/07-worker-load/`](../docs/evidence/07-worker-load/) — **không
+sửa tay**; đo xong chạy `load-tests/run_worker_storm.sh summary` để điền lại.
 
-Ví dụ từ root repo, chạy một lần cho mỗi `RATE` (10, 50, 100), dùng thư mục
-evidence mới và cấu hình kết nối OpenSearch riêng qua biến môi trường của dự án:
+<!-- worker-storm:begin -->
+Chưa đo trên VM — chạy quy trình bên dưới rồi `load-tests/run_worker_storm.sh summary`.
 
-```sh
-export LOAD_TEST_ERROR_STORM=true ERROR_STORM_RPS=10 ERROR_STORM_SEED=98
-export INGESTION_HOST=http://localhost:8000
-# Terminal 1: ghi heartbeat, khởi chạy trước Locust; đổi tên file cho mỗi RATE.
-python -m load-tests.capture_worker_cycles --rate 10 --seconds 360 --output cycle-10.csv
-# Terminal 2: sau khi collector bắt đầu, chạy 5 phút và giữ output CSV.
-locust -f load-tests/locustfile.py ErrorStormUser --headless -u 1 -r 1 -t 5m --csv storm-10
-# Terminal 3: lưu output theo thời gian, Ctrl-C sau mỗi lượt.
-docker stats --format '{{.Name}},{{.CPUPerc}},{{.MemUsage}}' > docker-stats-10.txt
-```
+| Mức mục tiêu | Throughput thực | 202 / 429 / lỗi khác | Baseline nạp trước | Số chu kỳ | cycle_seconds median / p95 / max | logs_read max | Cửa sổ lỡ | Đại diện mức tải? |
+|---:|---:|---|---|---:|---|---:|---|---|
+| 10 ERROR/s | — | — | — | — | Chưa đo | — | Chưa xác định | — |
+| 50 ERROR/s | — | — | — | — | Chưa đo | — | Chưa xác định | — |
+| 100 ERROR/s | — | — | — | — | Chưa đo | — | Chưa xác định | — |
+<!-- worker-storm:end -->
 
-Collector đọc heartbeat mới nhất mỗi giây; trường `window_to` giúp đối chiếu
-với log worker: các cửa sổ liên tiếp phải cách nhau đúng 60 giây. Collector có
-thể bỏ lỡ heartbeat nếu ngừng chạy hoặc polling chậm, vì vậy đối chiếu log
-trước khi kết luận worker bỏ cửa sổ. `cycle_seconds` đo từ đầu xử lý đến sau
-ghi cluster/history, trước ghi heartbeat và ping ngoài; không gồm sleep. Nếu bất
-kỳ chu kỳ vượt 30 giây, xem xét bước 2; không đồng nhất vượt 30 giây với đã bỏ
-cửa sổ. Kiểm tra `window_to` và thời gian thực để xác định bỏ cửa sổ.
+Cách đọc bảng:
 
-Chạy 5 phút từ index trống chỉ tạo khoảng 5 phút lịch sử, **không đại diện**
-31 phút duy trì tải. Muốn kết luận về bão lỗi kéo dài phải nạp 30 phút dữ liệu
-cùng phân phối trước khi đo, hoặc chạy đủ lâu; mô tả cách nạp và lưu lượng thực
-vào evidence. Ghi rõ giới hạn CPU/RAM, CPU dùng chung, seed, cấu hình, cooldown,
-thời điểm tải và thời điểm từng heartbeat. Chưa thực hiện bước lấy mẫu/giới hạn
-`log_ids` vì chưa có phép đo kích hoạt.
+- **Cửa sổ lỡ** đếm từ log worker (`Processed <window_to>: ...`), không từ CSV của collector:
+  collector poll 1 giây/lần nên có thể lỡ một heartbeat dù worker không bỏ cửa sổ. Các `window_to`
+  liên tiếp phải cách nhau **đúng 60 giây**; khoảng 120 giây = 1 cửa sổ bị bỏ.
+- `cycle_seconds` đo từ đầu xử lý đến sau khi ghi cluster/history, trước khi ghi heartbeat và
+  ping ngoài, không gồm sleep. Vượt 30 giây **chưa chắc** đã bỏ cửa sổ (worker có ~50 giây trước
+  cửa sổ kế tiếp), nhưng là ngưỡng mở bước 2 của #103 (lấy mẫu TF-IDF, chặn trần `log_ids`).
+  Có chu kỳ > 30 giây thì `summary` sinh sẵn `issue-step2.md` để mở issue:
+  `gh issue create --title "perf(clustering): buoc 2 cua #103 - lay mau TF-IDF, chan tran log_ids" --body-file docs/evidence/07-worker-load/issue-step2.md`.
+- **Đại diện mức tải?** = Locust đạt ≥ 95% RATE và không có 429. Không đạt thì số đo **không
+  đại diện** mức đó, bảng ghi rõ.
+- **Baseline nạp trước**: worker đọc 31 cửa sổ (`HISTORY_WINDOWS + 1`). Chạy 5 phút trên index
+  trống chỉ có ~5 cửa sổ dữ liệu → `logs_read` và chi phí TF-IDF thấp hơn nhiều so với bão lỗi
+  kéo dài. Vì vậy script nạp trước 30 phút log lùi thời gian cùng tốc độ
+  ([`prefill_error_storm.py`](prefill_error_storm.py), cùng bộ sinh 03a, cùng seed).
+
+### Vì sao chạy kiểu này
+
+- **Không dựng stack thứ hai**: VM 2 vCPU / 4 GB không đủ cho 2 OpenSearch. Thay vào đó
+  `ingestion` + `clustering` được bật lại với index riêng `storm-logs`, `storm-clusters`,
+  `storm-cluster-history`, webhook và Healthchecks ping tắt, file state TF-IDF riêng
+  (`ML_STATE_PATH=clustering/data/storm-ml_templates-<R>.json`) để template của log tải giả
+  không làm đổi `cluster_id` thật.
+- **Collector chạy trong compose network**: OpenSearch không publish 9200 ra host.
+- **Phải mount `load-tests/`** vào container `query-api`: Dockerfile chỉ COPY `query-api`,
+  `ingestion`, `clustering`, và `.dockerignore` loại `load-tests`.
+- **Locust chạy trên VM** gọi ingestion qua `127.0.0.1:9000` (`INGESTION_PORT` trong `.env`).
+- **Số Locust user**: một user đồng bộ không vượt được 1/latency (median ~8 ms, p95 ~18 ms) nên
+  không chắc đạt 100 req/s. Mặc định 10 → 1 user, 50 → 2 user × 25, 100 → 4 user × 25 req/s
+  (`LOCUST_USERS` để đổi). Tổng vẫn là RATE.
+- **Rate limit ingest**: `INGEST_RATE_LIMIT_RPS=100` là giới hạn **chung** cho mọi request ingest,
+  gồm cả `demo-app` đang chạy thật. Ở mức 100 chắc chắn có 429, nên riêng lúc đo script đặt
+  `max(100, 2 × RATE)` (tức 200 ở mức 100, giữ nguyên 100 ở mức 10/50) và ghi vào `run-<R>.json`.
+  Phép đo này đo worker, không đo ingestion. `restore` trả lại giá trị trong `.env`.
+
+### Quy trình (trên VM, từ `~/prj2`)
+
+> **Không chạy sát giờ demo.** Trong lúc đo, log demo thật cũng đi vào `storm-logs`, nên
+> `clusters` / `cluster-history` thật có một khoảng trống không hồi phục được (~10 phút mỗi mức).
+> Index `storm-*` lớn nhất ở mức 100: ~210k log (180k prefill + 30k Locust), kiểm tra `df -h`
+> trước (cần vài trăm MB trống).
+
+1. **Pause** check Healthchecks (chọn giữ pause khi có ping) và các monitor UptimeRobot.
+2. Cài Locust một lần:
+
+   ```bash
+   cd ~/prj2
+   python3 -m venv ~/locust && ~/locust/bin/pip install -r load-tests/requirements-dev.txt
+   ```
+
+3. Chạy từng mức (mỗi mức ~10 phút: prefill + 5 phút Locust + 1 phút đuôi). Script tự xoá
+   `storm-*` trước mỗi mức nên các mức độc lập với nhau:
+
+   ```bash
+   load-tests/run_worker_storm.sh run 10
+   load-tests/run_worker_storm.sh run 50
+   load-tests/run_worker_storm.sh run 100
+   ```
+
+   Script làm đúng các bước của issue, gói lại cho khỏi gõ nhầm:
+
+   ```bash
+   # 1. ingestion + clustering -> index rieng, tat webhook/ping (+ state TF-IDF rieng)
+   docker compose stop ingestion clustering
+   docker compose exec -T opensearch curl -s -XDELETE 'localhost:9200/storm-*'
+   LOG_INDEX=storm-logs CLUSTER_INDEX=storm-clusters HISTORY_INDEX=storm-cluster-history \
+   ALERT_WEBHOOK_URL= HEALTHCHECK_PING_URL= INGEST_RATE_LIMIT_RPS=<max(100,2*RATE)> \
+   ML_STATE_PATH=clustering/data/storm-ml_templates-<RATE>.json \
+     docker compose up -d --no-deps --force-recreate ingestion clustering
+   # 2. baseline 30 phut
+   python3 load-tests/prefill_error_storm.py --rate <RATE> --minutes 30 \
+     --host http://localhost:9000 --report docs/evidence/07-worker-load/prefill-<RATE>.json
+   # 3. collector trong network (nen), docker stats (nen), Locust
+   docker compose run --rm --no-deps -T --user "$(id -u):$(id -g)" \
+     -e CLUSTER_INDEX=storm-clusters -e OPENSEARCH_URL=http://opensearch:9200 \
+     -v "$PWD/load-tests:/app/load-tests:ro" -v "$PWD/docs/evidence/07-worker-load:/out" \
+     --entrypoint python query-api load-tests/capture_worker_cycles.py \
+     --rate <RATE> --seconds 360 --output /out/cycle-<RATE>.csv &
+   LOAD_TEST_ERROR_STORM=true ERROR_STORM_RPS=<RATE/USERS> ERROR_STORM_SEED=98 \
+   INGESTION_HOST=http://localhost:9000 \
+     ~/locust/bin/locust -f load-tests/locustfile.py ErrorStormUser \
+     --headless -u <USERS> -r <USERS> -t 300s --csv docs/evidence/07-worker-load/storm-<RATE>
+   # 4. log worker de dem cua so
+   docker compose logs clustering --since <T0> --no-log-prefix > docs/evidence/07-worker-load/worker-<RATE>.log
+   ```
+
+   `--no-deps` là cố ý: không có nó, nếu `opensearch` trong compose đã đổi cấu hình (vd. thêm
+   `path.repo`) mà chưa recreate, Compose sẽ recreate luôn OpenSearch giữa chừng.
+   Sau mỗi mức xem `locust-<RATE>.txt`: số request, `Expected 202; got 429`, req/s thực tế.
+
+4. **Khôi phục** (bắt buộc, kể cả khi bị Ctrl-C giữa chừng):
+
+   ```bash
+   load-tests/run_worker_storm.sh restore
+   # = docker compose up -d --no-deps --force-recreate ingestion clustering
+   #   docker compose exec -T opensearch curl -s -XDELETE 'localhost:9200/storm-*'
+   #   + xoa clustering/data/storm-ml_templates-*.json
+   ```
+
+   Rồi **resume** Healthchecks + UptimeRobot, chờ ~2 phút, xác nhận
+   `docker compose logs clustering --tail 5` có `Processed ...` mới và check xanh lại.
+
+5. Điền bảng và commit evidence:
+
+   ```bash
+   load-tests/run_worker_storm.sh summary   # sua bang o tren + summary.md/json
+   git add docs/evidence/07-worker-load load-tests/README.md
+   ```
+
+   Evidence mỗi mức: `cycle-<R>.csv`, `worker-<R>.log`, `storm-<R>_stats.csv`,
+   `storm-<R>_failures.csv`, `storm-<R>_exceptions.csv`, `locust-<R>.txt`, `docker-stats-<R>.txt`,
+   `prefill-<R>.json`, `run-<R>.json` (commit, vCPU, RAM, heap OpenSearch, seed, số user, rate limit).
+
+`ErrorStormUser` phát log ERROR từ bộ sinh 03a (seed mặc định 98), gán timestamp và ID mới; phải
+chủ động đặt `LOAD_TEST_ERROR_STORM=true`. Không chạy chung các user khác vì chúng làm sai tốc độ
+và tải. Chưa làm bước lấy mẫu / chặn trần `log_ids`: chỉ làm khi phép đo trên cho thấy cần.
 
 Dùng chung giữa Minh (load test tầng ingestion) và Nghĩa (load test end-to-end). Công cụ: [Locust](https://locust.io/).
 

@@ -33,11 +33,18 @@ services:
       - DISABLE_SECURITY_PLUGIN=true
       - DISABLE_INSTALL_DEMO_CONFIG=true
       - "OPENSEARCH_JAVA_OPTS=-Xms${OPENSEARCH_HEAP:-512m} -Xmx${OPENSEARCH_HEAP:-512m}"
+      # Snapshot repo kieu "fs" (deploy/backup.sh). OpenSearch CHI doc path.repo
+      # luc khoi dong -> doi dong nay phai `docker compose up -d --force-recreate
+      # opensearch` (deploy.sh khong dung toi opensearch). Thu muc host phai
+      # thuoc UID 1000 (user `opensearch` trong image), neu khong dang ky repo
+      # se bao "location is not accessible" - xem runbook muc "Khi mat du lieu".
+      - path.repo=/snapshots
     ulimits:
       memlock: { soft: -1, hard: -1 }
       nofile: { soft: 65536, hard: 65536 }
     volumes:
       - opensearch-data:/usr/share/opensearch/data
+      - ./backups/os:/snapshots
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
       interval: 10s
@@ -169,6 +176,10 @@ services:
       HEALTHCHECK_PING_URL: ${HEALTHCHECK_PING_URL:-}
       ML_AUGMENT_ENABLED: ${ML_AUGMENT_ENABLED:-true}
       ML_SIMILARITY_THRESHOLD: ${ML_SIMILARITY_THRESHOLD:-0.9}
+      # File state TF-IDF (tuong doi so voi /app). Doi tam thoi khi do error
+      # storm (load-tests/run_worker_storm.sh) de template cua log tai gia
+      # khong lan vao state that -> cluster_id that khong bi doi.
+      ML_STATE_PATH: ${ML_STATE_PATH:-clustering/data/ml_templates.json}
     volumes:
       # State cua ML augment (template -> signature dai dien): giu qua restart
       # de cluster_id on dinh, xem clustering/README.md muc "ML augment".
