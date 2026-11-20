@@ -1,0 +1,39 @@
+# Evidence #109 - tran cua cluster-history: so diem SE bi xoa theo tung cutoff
+# 2026-11-20T03:04:58Z tren VM log-anomaly-vps
+#
+# delete_by_query khong co che do dry-run, va ha RETENTION_DAYS that se XOA
+# du lieu history that. Nen do bang _count voi dung cau truy van ma
+# delete_history_before dung (range recorded_at < cutoff) - khong xoa gi.
+
+## Tong so diem trong cluster-history
+{"count":384,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0}}
+## Diem cu nhat / moi nhat
+{"took":3,"timed_out":false,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0},"hits":{"total":{"value":384,"relation":"eq"},"max_score":null,"hits":[]},"aggregations":{"cu_nhat":{"value":1.79361276E12,"value_as_string":"2026-11-02T09:46:00.000Z"},"moi_nhat":{"value":1.79514348E12,"value_as_string":"2026-11-20T02:58:00.000Z"}}}
+RETENTION_DAYS=30 -> cutoff=2026-10-21T03:04:59Z -> so diem se bi xoa: 0
+RETENTION_DAYS=20 -> cutoff=2026-10-31T03:04:59Z -> so diem se bi xoa: 0
+RETENTION_DAYS=10 -> cutoff=2026-11-10T03:04:59Z -> so diem se bi xoa: 305
+RETENTION_DAYS=5 -> cutoff=2026-11-15T03:05:00Z -> so diem se bi xoa: 381
+
+## RETENTION_DAYS dang ap dung cho clustering
+30
+## _cat/indices theo dung lieu
+health status index                     uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+green  open   logs-2026.11.13           WP1MI2waQtq-QZvUbEnQhA   1   0      46878            0       11mb           11mb
+green  open   logs                      tQ68Og4dTXWNxwetRBkJpg   1   0      18497            0        5mb            5mb
+green  open   logs-2026.11.14           XXhHfaCGSKS3DsatddnjWQ   1   0        700            0    371.7kb        371.7kb
+green  open   logs-2026.11.12           Gzm_jBGrSzOKHFqmzvFBNA   1   0        700            0      342kb          342kb
+green  open   clusters                  7WJGB0xLTfWKQAzpGZJR4g   1   0         19            0    174.1kb        174.1kb
+green  open   logs-2026.11.11           KcvzaGjFSTqDVgEkE0A8cA   1   0        355            0    153.8kb        153.8kb
+green  open   cluster-history           WtFUJ50-RjKgYzCKiACrkQ   1   0        384            0    118.3kb        118.3kb
+green  open   clusters-heartbeat        x-K1C95cSZuf9iI6lNDJLg   1   0          1         2861     97.2kb         97.2kb
+green  open   assistant-conversations   l0a5T__iTqGxnHEQ2wtfHA   1   0          6            1     57.2kb         57.2kb
+green  open   logs-quarantine           JEMPL_THRH6zQ_tmuhmlXw   1   0        445            0     40.1kb         40.1kb
+green  open   logs-2026.11.20           6TBZU_yQTl6b5nuUIrMrBg   1   0         72            0     39.6kb         39.6kb
+green  open   users                     _UCjfAGVTlSbeeAkm3EIkQ   1   0          4            0     16.5kb         16.5kb
+green  open   auth-sessions             ZcA7LTY3RAyjMUCnHw7G_g   1   0         13            0     11.6kb         11.6kb
+green  open   clusters-incidents        UcyrQVRHRC65KM-yFYOMbA   1   0          1            0      7.3kb          7.3kb
+green  open   logs-2026.11.16           SZZBLG36SayQgnLwO8m76Q   1   0          1            0      6.6kb          6.6kb
+green  open   .plugins-ml-config        IqeJQnABQl-n-qNXA4fK6Q   1   0          1            0      3.9kb          3.9kb
+green  open   auth-login-limits         FSXAFrJgQ8G5JTuNjxL00w   1   0          0            0      3.4kb          3.4kb
+green  open   clusters-alert-state      jsBmDGaPTdG36-yCsZobzw   1   0          0            0       208b           208b
+green  open   .opensearch-observability NRznmGE9S8efMHMg0PrrZg   1   0          0            0       208b           208b
