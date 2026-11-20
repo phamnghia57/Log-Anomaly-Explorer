@@ -1,0 +1,1 @@
+{"_index":"clusters-heartbeat","_id":"worker","_version":4864,"_seq_no":4863,"_primary_term":7,"found":true,"_source":{"last_processed_at":"2026-11-19T16:45:10.005466+00:00","cycle_seconds":0.005341260985005647,"logs_read":0,"clusters_out":0,"window_to":"2026-11-19T16:45:00+00:00"}}

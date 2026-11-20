@@ -1,0 +1,71 @@
+{
+  "captured_at": "2026-11-19T16:44:34.684016+00:00",
+  "source": "clustering.src.storage.OpenSearchStore.list_history trong container query-api dang chay",
+  "cluster_id": "50bc2ae687c58466",
+  "since": "2026-10-20T16:44:34.673928+00:00",
+  "limit10_points": [
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 3.1709266976213017,
+      "status": "alerted",
+      "recorded_at": "2026-11-05T18:16:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 0.9385365790109502,
+      "status": "normal",
+      "recorded_at": "2026-11-05T18:18:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 5.70655717192332,
+      "status": "alerted",
+      "recorded_at": "2026-11-05T18:19:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 4.951159300604078,
+      "status": "alerted",
+      "recorded_at": "2026-11-05T18:20:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 0.0,
+      "status": "normal",
+      "recorded_at": "2026-11-05T18:21:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 20.0,
+      "status": "alerted",
+      "recorded_at": "2026-11-12T02:06:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 38.0,
+      "status": "alerted",
+      "recorded_at": "2026-11-12T07:37:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 1.5470759957602063,
+      "status": "normal",
+      "recorded_at": "2026-11-12T07:38:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 33.0,
+      "status": "alerted",
+      "recorded_at": "2026-11-14T08:24:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 5.958557519525898,
+      "status": "alerted",
+      "recorded_at": "2026-11-14T08:25:00+00:00"
+    }
+  ],
+  "total_points": 42,
+  "store_oldest": "2026-11-03T09:00:00+00:00",
+  "store_newest": "2026-11-14T08:25:00+00:00"
+}

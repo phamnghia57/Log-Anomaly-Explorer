@@ -1,0 +1,71 @@
+{
+  "captured_at": "2026-11-19T16:42:03.315634+00:00",
+  "source": "clustering.src.storage.OpenSearchStore.list_history trong container query-api dang chay",
+  "cluster_id": "50bc2ae687c58466",
+  "since": "2026-10-20T16:42:03.302547+00:00",
+  "limit10_points": [
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 15.0,
+      "status": "alerted",
+      "recorded_at": "2026-11-03T09:00:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 7.12039324756716,
+      "status": "alerted",
+      "recorded_at": "2026-11-03T09:04:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 5.3102552878429226,
+      "status": "alerted",
+      "recorded_at": "2026-11-03T09:08:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 5.606964695567926,
+      "status": "alerted",
+      "recorded_at": "2026-11-03T09:09:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 5.806028927013058,
+      "status": "alerted",
+      "recorded_at": "2026-11-03T09:10:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 1.769006221939008,
+      "status": "normal",
+      "recorded_at": "2026-11-03T09:11:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 15.0,
+      "status": "alerted",
+      "recorded_at": "2026-11-05T05:22:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 20.265734627691145,
+      "status": "alerted",
+      "recorded_at": "2026-11-05T05:23:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 8.732835746793025,
+      "status": "alerted",
+      "recorded_at": "2026-11-05T05:24:00+00:00"
+    },
+    {
+      "cluster_id": "50bc2ae687c58466",
+      "score": 1.0389999007015465,
+      "status": "normal",
+      "recorded_at": "2026-11-05T05:25:00+00:00"
+    }
+  ],
+  "total_points": 42,
+  "store_oldest": "2026-11-03T09:00:00+00:00",
+  "store_newest": "2026-11-14T08:25:00+00:00"
+}
