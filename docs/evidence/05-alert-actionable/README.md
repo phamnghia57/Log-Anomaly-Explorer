@@ -51,6 +51,33 @@ docker compose up -d --force-recreate --no-deps clustering          # tra webhoo
 Tức `ALERT_WEB_BASE_URL` **đã được đặt đúng trên VM** và `incident_url` không còn `null` —
 đây là điều kiện cần của tiêu chí "từ email tới stack trace trong ít thao tác" của #101.
 
-**Vẫn chưa đo:** số thao tác thật từ email → stack trace. Phép đo này chỉ chứng minh payload
-mang đủ thông tin và link trỏ đúng cụm; nó **không** chứng minh Make.com render link đó vào
-email, cũng không đếm số click. Muốn đóng #101 vẫn cần ảnh một email thật và đếm thao tác tay.
+## Email thật đã nhận (2026-11-20)
+
+[email-alert-that.png](email-alert-that.png) — email báo động **thật** do Make.com gửi tới hộp thư
+nhóm lúc **11:12 giờ VN (04:12:11 UTC)**, cho cụm `583498fff9a5c679`.
+
+Nguồn gốc: 60 request `fault=downstream` được bơm lúc 04:11:57 trong khi đo #108 (xem
+[measurement-nghia.md](../11-assistant-golden-set/measurement-nghia.md) mục 5). Đây là một alert
+tự nhiên của hệ thống, không phải email dựng sẵn. Mốc gửi lấy từ
+`clusters-alert-state/_doc/583498fff9a5c679` → `sent_at = 2026-11-20T04:12:11.888580+00:00`,
+khớp với giờ hiển thị trong ảnh.
+
+Email xác nhận Make.com **có** render đúng những trường mà payload mang sang:
+
+| Trường | Hiển thị trong email |
+|---|---|
+| `service` | `Service: demo-web` |
+| `cluster_id` | `Cluster: 583498fff9a5c679` |
+| `score` | `Score: 60.0` |
+| `signature` | `Signature: simulated downstream failure` |
+| `incident_url` | `Incident: https://log-anomaly-explorer.vercel.app/clusters/583498fff9a5c679` — **link bấm được** |
+| `first_seen` | `First seen: 2026-11-20T04:11:57.392818+00:00` |
+| `trace_id` | `Trace: 00eef0e9760a02eeb14c27879c2e995f` |
+
+Dòng người gửi/người nhận đã được **che** (email và MSSV của 4 thành viên); subject, mốc thời gian
+và toàn bộ thân email giữ nguyên.
+
+**Vẫn chưa đo:** số thao tác thật từ email → stack trace. Ảnh trên chứng minh link có trong email
+và trỏ đúng cụm, nhưng **không** đếm số click: `incident_url` mở Incident View, không tự mở hộp
+thoại stack trace, và số thao tác còn phụ thuộc trạng thái đăng nhập. Chưa đo thì không tuyên bố
+"email → stack trace chỉ còn một click".
