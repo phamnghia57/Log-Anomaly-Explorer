@@ -1,0 +1,34 @@
+# Evidence #109 - TRUOC khi dat logging driver
+# 2026-11-20T02:59:57Z tren VM log-anomaly-vps, GIT_SHA deployed = 6d3e3bd
+
+## docker info --format {{.LoggingDriver}}
+json-file
+
+## /etc/docker/daemon.json
+(khong co file -> Docker dung mac dinh: json-file KHONG gioi han kich thuoc)
+
+## docker inspect LogConfig cua tung container
+### /prj2-clustering-1
+{"Type":"json-file","Config":{}}
+### /prj2-demo-app-1
+{"Type":"json-file","Config":{}}
+### /prj2-gateway-1
+{"Type":"json-file","Config":{}}
+### /prj2-ingestion-1
+{"Type":"json-file","Config":{}}
+### /prj2-jaeger-1
+{"Type":"json-file","Config":{}}
+### /prj2-opensearch-1
+{"Type":"json-file","Config":{}}
+### /prj2-query-api-1
+{"Type":"json-file","Config":{}}
+
+## kich thuoc file log hien tai
+4.8M	/var/lib/docker/containers
+8.0K	/var/lib/docker/containers/6f855a32e9eb68959f28887f34d4f7b699c57ca4705b26b03294cd550772a34b/6f855a32e9eb68959f28887f34d4f7b699c57ca4705b26b03294cd550772a34b-json.log
+36K	/var/lib/docker/containers/5cde4c108a760c2560115afa813c278669fcec31502d77a9757db150dc038dbc/5cde4c108a760c2560115afa813c278669fcec31502d77a9757db150dc038dbc-json.log
+68K	/var/lib/docker/containers/efaa064a268e2b4eee46a6e5e9853fdc6c86ea7bd04cfbf3d835d8476f4c7fff/efaa064a268e2b4eee46a6e5e9853fdc6c86ea7bd04cfbf3d835d8476f4c7fff-json.log
+316K	/var/lib/docker/containers/54742859ee7846ad83154add2c1b17362a9f7793d54070491d014e9e225cafbc/54742859ee7846ad83154add2c1b17362a9f7793d54070491d014e9e225cafbc-json.log
+320K	/var/lib/docker/containers/b841babf8ce800467a00a1f7ec8b421d46063d91c4df9d0dff7c29d450989160/b841babf8ce800467a00a1f7ec8b421d46063d91c4df9d0dff7c29d450989160-json.log
+1.8M	/var/lib/docker/containers/3e46f9fc66853f6639639039dca7f111e2d4e4740a73dd639922c383156e72cb/3e46f9fc66853f6639639039dca7f111e2d4e4740a73dd639922c383156e72cb-json.log
+2.0M	/var/lib/docker/containers/93c75ff1744174088f629b20a572156258caac858ca89cfaa0d9772d2f5cb1c2/93c75ff1744174088f629b20a572156258caac858ca89cfaa0d9772d2f5cb1c2-json.log

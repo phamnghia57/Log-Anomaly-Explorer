@@ -15,6 +15,16 @@
 # Khac voi ingestion/docker-compose.yml (chi dung OpenSearch, phuc vu dev
 # rieng le module ingestion) - file nay la stack DEPLOY day du.
 
+# Tran cho log container: mac dinh json-file cua Docker KHONG xoay vong, file
+# log cu lon mai den khi het dia -> OpenSearch chuyen index sang read-only o
+# muc 95% va moi POST /ingest tra 503. Moi service dung chung anchor nay
+# (toi da 3 file x 10MB moi container).
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   opensearch:
     image: opensearchproject/opensearch:2.17.1
@@ -34,6 +44,7 @@ services:
       timeout: 5s
       retries: 20
     restart: unless-stopped
+    logging: *logging
     # KHONG publish port 9200 ra host: day la kho du lieu noi bo, chi
     # ingestion/clustering/query-api (cung mang docker) duoc truy cap.
 
@@ -56,6 +67,7 @@ services:
     ports:
       - "127.0.0.1:${INGESTION_PORT:-8000}:8000"
     restart: unless-stopped
+    logging: *logging
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen('http://localhost:8000/health')\""]
       interval: 15s
@@ -76,6 +88,7 @@ services:
     volumes:
       - jaeger-data:/badger
     restart: "no"
+    logging: *logging
 
   jaeger:
     # Ghim digest cua image dang chay that tren VM (= tag 1.76.0, push
@@ -105,6 +118,7 @@ services:
     ports:
       - "127.0.0.1:${JAEGER_UI_PORT:-16686}:16686"
     restart: unless-stopped
+    logging: *logging
     # Khong co healthcheck rieng: demo-app van chay binh thuong neu Jaeger
     # chua san sang, span chi bi mat (xem BatchSpanProcessor trong
     # demo-app/src/telemetry.py - gui nen theo lo, loi khong lam sap app).
@@ -125,6 +139,7 @@ services:
     ports:
       - "127.0.0.1:${DEMO_APP_PORT:-8001}:8001"
     restart: unless-stopped
+    logging: *logging
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen('http://localhost:8001/health')\""]
       interval: 15s
@@ -159,6 +174,7 @@ services:
       # de cluster_id on dinh, xem clustering/README.md muc "ML augment".
       - clustering-data:/app/clustering/data
     restart: unless-stopped
+    logging: *logging
     # Job nen (khong phai HTTP service) - khong co port/healthcheck.
 
   query-api:
@@ -219,6 +235,7 @@ services:
     ports:
       - "127.0.0.1:${QUERY_API_PORT:-8002}:8002"
     restart: unless-stopped
+    logging: *logging
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen('http://localhost:8002/health')\""]
       interval: 15s
@@ -252,6 +269,7 @@ services:
       - "443:443"
       - "443:443/udp"
     restart: unless-stopped
+    logging: *logging
 
 volumes:
   opensearch-data:

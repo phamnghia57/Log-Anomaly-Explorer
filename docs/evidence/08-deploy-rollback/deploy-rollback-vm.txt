@@ -1,0 +1,719 @@
+Evidence #104 - deploy va rollback that tren VM log-anomaly-vps (23.98.41.222)
+Chay luc: 2026-11-20T03:03:43Z UTC
+Bat dau tu version: {"status":"ok","service":"query-api","storage":"opensearch","version":"6d3e3bd"}
+Rollback point da ghi truoc: 6d3e3bd
+
+########################################################################
+# LAN 1 - DEPLOY tien len : deploy/deploy.sh main
+# bat dau : 2026-11-20T03:03:43Z
+Previous HEAD position was 6d3e3bd Merge pull request #117 from phamnghia57/dev/namvk
+HEAD is now at f21d294 Merge pull request #123 from phamnghia57/dev/nghiapb
+deploy 'main' -> f21d294
+ Image prj2-query-api Building 
+ Image prj2-demo-app Building 
+ Image prj2-ingestion Building 
+ Image prj2-clustering Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.81kB done
+#1 DONE 0.0s
+
+#2 [demo-app internal] load build definition from Dockerfile
+#2 transferring dockerfile:
+#2 transferring dockerfile: 860B done
+#2 DONE 0.0s
+
+#3 [ingestion internal] load build definition from Dockerfile
+#3 transferring dockerfile: 783B done
+#3 DONE 0.0s
+
+#4 [clustering internal] load build definition from Dockerfile
+#4 transferring dockerfile: 1.16kB done
+#4 DONE 0.1s
+
+#5 [query-api internal] load build definition from Dockerfile
+#5 transferring dockerfile: 762B done
+#5 DONE 0.1s
+
+#6 [query-api internal] load metadata for docker.io/library/python:3.11-slim
+#6 DONE 1.2s
+
+#7 [clustering internal] load .dockerignore
+#7 transferring context: 146B done
+#7 DONE 0.0s
+
+#8 [clustering 1/7] FROM docker.io/library/python:3.11-slim@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535
+#8 resolve docker.io/library/python:3.11-slim@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535 0.0s done
+#8 DONE 0.1s
+
+#9 [clustering internal] load build context
+#9 ...
+
+#10 [demo-app internal] load build context
+#10 transferring context: 23.88kB 0.1s done
+#10 DONE 0.1s
+
+#11 [demo-app 3/6] COPY demo-app/requirements.txt demo-app/requirements.txt
+#11 CACHED
+
+#12 [demo-app 4/6] RUN pip install --no-cache-dir -r demo-app/requirements.txt
+#12 CACHED
+
+#13 [demo-app 5/6] COPY demo-app demo-app
+#13 CACHED
+
+#14 [demo-app 2/7] WORKDIR /app
+#14 CACHED
+
+#15 [demo-app 6/6] RUN useradd -m appuser && chown -R appuser /app
+#15 CACHED
+
+#9 [clustering internal] load build context
+#9 transferring context: 6.05MB 0.1s done
+#9 DONE 0.2s
+
+#16 [query-api internal] load build context
+#16 transferring context: 127.86kB 0.1s done
+#16 DONE 0.1s
+
+#17 [ingestion internal] load build context
+#17 transferring context: 1.77MB 0.1s done
+#17 DONE 0.2s
+
+#18 [query-api 5/8] COPY query-api query-api
+#18 CACHED
+
+#14 [query-api 2/7] WORKDIR /app
+#14 CACHED
+
+#19 [query-api 4/8] RUN pip install --no-cache-dir -r query-api/requirements.txt
+#19 CACHED
+
+#20 [query-api 3/8] COPY query-api/requirements.txt query-api/requirements.txt
+#20 CACHED
+
+#21 [query-api 6/8] COPY ingestion ingestion
+#21 CACHED
+
+#22 [demo-app] exporting to image
+#22 exporting layers done
+#22 exporting manifest sha256:94c50fcb5f7bc6034c1a4da73cf0413ce4e07d39a6f62a300eb5cce67942b8bf done
+#22 exporting config sha256:8d36d2b10e16226b7f90dcb44e7188274f73f7ad4d15c44e71d9e70997bbde8f done
+#22 exporting attestation manifest sha256:9ae37d994f402f0245a5032d6435651741b5ae54fba6d1ff3cddd100eceba082
+#22 ...
+
+#23 [clustering 3/8] COPY clustering/requirements.txt clustering/requirements.txt
+#23 CACHED
+
+#24 [clustering 4/8] COPY clustering/requirements-ml.txt clustering/requirements-ml.txt
+#24 CACHED
+
+#25 [clustering 5/8] RUN pip install --no-cache-dir -r clustering/requirements-ml.txt
+#25 CACHED
+
+#14 [clustering 2/7] WORKDIR /app
+#14 CACHED
+
+#26 [ingestion 4/7] RUN pip install --no-cache-dir -r ingestion/requirements.txt
+#26 CACHED
+
+#27 [ingestion 3/7] COPY ingestion/requirements.txt ingestion/requirements.txt
+#27 CACHED
+
+#28 [ingestion 5/7] COPY ingestion ingestion
+#28 CACHED
+
+#22 [demo-app] exporting to image
+#22 exporting attestation manifest sha256:9ae37d994f402f0245a5032d6435651741b5ae54fba6d1ff3cddd100eceba082 0.1s done
+#22 exporting manifest list sha256:0ae108283d29ebefa35310ce0bc7145ee76408f5e04513334874e162912dc03a 0.1s done
+#22 naming to docker.io/library/prj2-demo-app:latest
+#22 naming to docker.io/library/prj2-demo-app:latest 0.0s done
+#22 unpacking to docker.io/library/prj2-demo-app:latest 0.0s done
+#22 DONE 0.3s
+
+#29 [query-api 7/8] COPY clustering clustering
+#29 ...
+
+#30 [ingestion 6/7] COPY docs docs
+#30 DONE 0.4s
+
+#31 [clustering 6/8] COPY clustering clustering
+#31 DONE 0.4s
+
+#29 [query-api 7/8] COPY clustering clustering
+#29 DONE 0.4s
+
+#32 [query-api 8/8] RUN useradd -m appuser && chown -R appuser /app
+#32 ...
+
+#33 [clustering 7/8] COPY ingestion ingestion
+#33 DONE 0.3s
+
+#34 [demo-app] resolving provenance for metadata file
+#34 DONE 0.0s
+
+#35 [clustering 8/8] RUN useradd -m appuser && mkdir -p /app/clustering/data && chown -R appuser /app
+#35 DONE 1.2s
+
+#36 [ingestion 7/7] RUN useradd -m appuser && chown -R appuser /app
+#36 ...
+
+#32 [query-api 8/8] RUN useradd -m appuser && chown -R appuser /app
+#32 DONE 1.7s
+
+#36 [ingestion 7/7] RUN useradd -m appuser && chown -R appuser /app
+#36 DONE 1.8s
+
+#37 [query-api] exporting to image
+#37 exporting layers 0.8s done
+#37 exporting manifest sha256:7f4e121f77656323387bd746f6e15d82fde74dca311cbf4c08a650924dec5c38 0.1s done
+#37 exporting config sha256:abed9c78fb2cd916e7ca03efe98a9b549ce660f43f83231b2166fd66deb46644
+#37 exporting config sha256:abed9c78fb2cd916e7ca03efe98a9b549ce660f43f83231b2166fd66deb46644 0.1s done
+#37 exporting attestation manifest sha256:a1747116eca194989f1534520a874bde1195afd32eaddd96fa2e2930838f50eb
+#37 exporting attestation manifest sha256:a1747116eca194989f1534520a874bde1195afd32eaddd96fa2e2930838f50eb 0.1s done
+#37 exporting manifest list sha256:1797063fb5de6cfe87c41b49599685d824012672f41d814c758ae47da0b5f3e6 0.1s done
+#37 naming to docker.io/library/prj2-query-api:latest
+#37 naming to docker.io/library/prj2-query-api:latest 0.0s done
+#37 unpacking to docker.io/library/prj2-query-api:latest
+#37 ...
+
+#38 [clustering] exporting to image
+#38 exporting layers 0.8s done
+#38 exporting manifest sha256:d4443e2e8e9f4bba1c642b4975995e8a059196bf47e59285907418b068b81737 0.1s done
+#38 exporting config sha256:83c295911245b255975ca6a9e8b6cbf39b87f073211e36c644af65b2af9d18dd 0.1s done
+#38 exporting attestation manifest sha256:8d70b9f88df5963fd34d4ec573577e36f8e9723bec5946d1d7ffef949ed9817c 0.1s done
+#38 exporting manifest list sha256:885c878cc788b9da07025f759c0e77d1f6a8f70a515ba1bff9a0b4b39aa0f0f3 0.1s done
+#38 naming to docker.io/library/prj2-clustering:latest 0.0s done
+#38 unpacking to docker.io/library/prj2-clustering:latest 0.4s done
+#38 DONE 1.6s
+
+#39 [ingestion] exporting to image
+#39 exporting layers 0.7s done
+#39 exporting manifest sha256:e6f7cc44d15691652b9e164490f8e9ec0598e9ceab0ad6588531a528818f0cf1 0.1s done
+#39 exporting config sha256:7411e6118e73ed1047628bb8593d307f11716c9ba640c699d2bb092e0c9ecb02 0.1s done
+#39 exporting attestation manifest sha256:27de227614e110b1617352b4a9dde9fa3d673421ac8fd864ca39fbb21139866f 0.1s done
+#39 exporting manifest list sha256:11db674ec76604c7b17a6eb7a7fb7d252a35ed726d4400fb3e729125e572ac48 0.1s done
+#39 naming to docker.io/library/prj2-ingestion:latest done
+#39 unpacking to docker.io/library/prj2-ingestion:latest 0.3s done
+#39 DONE 1.3s
+
+#37 [query-api] exporting to image
+#37 unpacking to docker.io/library/prj2-query-api:latest 0.3s done
+#37 DONE 1.5s
+
+#40 [clustering] resolving provenance for metadata file
+#40 ...
+
+#41 [ingestion] resolving provenance for metadata file
+#41 DONE 0.1s
+
+#40 [clustering] resolving provenance for metadata file
+#40 DONE 0.2s
+
+#42 [query-api] resolving provenance for metadata file
+#42 DONE 0.0s
+ Image prj2-ingestion Built 
+ Image prj2-demo-app Built 
+ Image prj2-query-api Built 
+ Image prj2-clustering Built 
+ Container prj2-demo-app-1 Running 
+ Container prj2-gateway-1 Running 
+ Container prj2-opensearch-1 Running 
+ Container prj2-ingestion-1 Recreate 
+ Container prj2-ingestion-1 Recreated 
+ Container prj2-clustering-1 Recreate 
+ Container prj2-query-api-1 Recreate 
+ Container prj2-query-api-1 Recreated 
+ Container prj2-clustering-1 Recreated 
+ Container prj2-opensearch-1 Waiting 
+ Container prj2-opensearch-1 Healthy 
+ Container prj2-ingestion-1 Starting 
+ Container prj2-ingestion-1 Started 
+ Container prj2-ingestion-1 Waiting 
+ Container prj2-ingestion-1 Waiting 
+ Container prj2-ingestion-1 Waiting 
+ Container prj2-ingestion-1 Healthy 
+ Container prj2-clustering-1 Starting 
+ Container prj2-ingestion-1 Healthy 
+ Container prj2-ingestion-1 Healthy 
+ Container prj2-query-api-1 Starting 
+ Container prj2-clustering-1 Started 
+ Container prj2-query-api-1 Started 
+ Container prj2-gateway-1 Restarting 
+ Container prj2-gateway-1 Started 
+ok: http://127.0.0.1:9002/health tra version=f21d294
+# ket thuc: 2026-11-20T03:04:22Z
+# keo dai : 39 giay
+# exit    : 0
+# /health : {"status":"ok","service":"query-api","storage":"opensearch","version":"f21d294"}
+# /clustering/health: {"status":"ok","reason":null,"last_processed_at":"2026-11-20T03:04:19.999595+00:00"}
+# web_git_sha tren trang System Status lay tu /health o tren.
+
+########################################################################
+# LAN 2 - ROLLBACK ve ban truoc : deploy/deploy.sh 6d3e3bd
+# bat dau : 2026-11-20T03:04:22Z
+Previous HEAD position was f21d294 Merge pull request #123 from phamnghia57/dev/nghiapb
+HEAD is now at 6d3e3bd Merge pull request #117 from phamnghia57/dev/namvk
+deploy '6d3e3bd' -> 6d3e3bd
+ Image prj2-query-api Building 
+ Image prj2-ingestion Building 
+ Image prj2-demo-app Building 
+ Image prj2-clustering Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.81kB done
+#1 DONE 0.0s
+
+#2 [clustering internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.16kB done
+#2 DONE 0.0s
+
+#3 [ingestion internal] load build definition from Dockerfile
+#3 transferring dockerfile: 783B done
+#3 DONE 0.0s
+
+#4 [query-api internal] load build definition from Dockerfile
+#4 transferring dockerfile: 762B done
+#4 DONE 0.1s
+
+#5 [demo-app internal] load build definition from Dockerfile
+#5 transferring dockerfile: 860B done
+#5 DONE 0.1s
+
+#6 [demo-app internal] load metadata for docker.io/library/python:3.11-slim
+#6 DONE 0.7s
+
+#7 [demo-app internal] load .dockerignore
+#7 transferring context: 146B done
+#7 DONE 0.0s
+
+#8 [demo-app 1/8] FROM docker.io/library/python:3.11-slim@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535
+#8 resolve docker.io/library/python:3.11-slim@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535 0.0s done
+#8 DONE 0.0s
+
+#9 [demo-app internal] load build context
+#9 transferring context: 358B done
+#9 DONE 0.0s
+
+#10 [clustering internal] load build context
+#10 transferring context: 11.46kB done
+#10 DONE 0.1s
+
+#11 [query-api internal] load build context
+#11 transferring context: 12.71kB done
+#11 DONE 0.1s
+
+#12 [ingestion internal] load build context
+#12 transferring context: 8.42kB done
+#12 DONE 0.1s
+
+#13 [demo-app 4/6] RUN pip install --no-cache-dir -r demo-app/requirements.txt
+#13 CACHED
+
+#14 [demo-app 5/6] COPY demo-app demo-app
+#14 CACHED
+
+#15 [demo-app 3/6] COPY demo-app/requirements.txt demo-app/requirements.txt
+#15 CACHED
+
+#16 [demo-app 6/6] RUN useradd -m appuser && chown -R appuser /app
+#16 CACHED
+
+#17 [ingestion 4/7] RUN pip install --no-cache-dir -r ingestion/requirements.txt
+#17 CACHED
+
+#18 [ingestion 3/7] COPY ingestion/requirements.txt ingestion/requirements.txt
+#18 CACHED
+
+#19 [ingestion 5/7] COPY ingestion ingestion
+#19 CACHED
+
+#20 [query-api 4/8] RUN pip install --no-cache-dir -r query-api/requirements.txt
+#20 CACHED
+
+#21 [query-api 5/8] COPY query-api query-api
+#21 CACHED
+
+#22 [query-api 7/8] COPY clustering clustering
+#22 CACHED
+
+#23 [query-api 6/8] COPY ingestion ingestion
+#23 CACHED
+
+#24 [query-api 3/8] COPY query-api/requirements.txt query-api/requirements.txt
+#24 CACHED
+
+#25 [query-api 8/8] RUN useradd -m appuser && chown -R appuser /app
+#25 CACHED
+
+#26 [clustering 3/8] COPY clustering/requirements.txt clustering/requirements.txt
+#26 CACHED
+
+#27 [clustering 7/8] COPY ingestion ingestion
+#27 CACHED
+
+#28 [clustering 4/8] COPY clustering/requirements-ml.txt clustering/requirements-ml.txt
+#28 CACHED
+
+#29 [clustering 6/8] COPY clustering clustering
+#29 CACHED
+
+#30 [query-api 2/8] WORKDIR /app
+#30 CACHED
+
+#31 [clustering 5/8] RUN pip install --no-cache-dir -r clustering/requirements-ml.txt
+#31 CACHED
+
+#32 [clustering 8/8] RUN useradd -m appuser && mkdir -p /app/clustering/data && chown -R appuser /app
+#32 CACHED
+
+#33 [clustering] exporting to image
+#33 exporting layers done
+#33 exporting manifest sha256:67063605ec26b6d9bb48fdc652ff137f5e1815392948e1a21d1d7fd9104679b6
+#33 exporting manifest sha256:67063605ec26b6d9bb48fdc652ff137f5e1815392948e1a21d1d7fd9104679b6 0.0s done
+#33 exporting config sha256:1241cadf3b909d8888dd73d5d7537010943af68fe9eedb04035b0e835bde342d 0.1s done
+#33 ...
+
+#34 [ingestion 6/7] COPY docs docs
+#34 DONE 0.3s
+
+#35 [demo-app] exporting to image
+#35 exporting layers done
+#35 exporting manifest sha256:94c50fcb5f7bc6034c1a4da73cf0413ce4e07d39a6f62a300eb5cce67942b8bf 0.0s done
+#35 exporting config sha256:8d36d2b10e16226b7f90dcb44e7188274f73f7ad4d15c44e71d9e70997bbde8f 0.0s done
+#35 exporting attestation manifest sha256:00f0132ab947090eed79844af102a6dc57f52174cd25670c4f9a0007d4d56453 0.2s done
+#35 exporting manifest list sha256:c5c9f60505693cf2d01fa169423d25d027993c2b8264ed8ce3e63de957d96254 0.1s done
+#35 naming to docker.io/library/prj2-demo-app:latest
+#35 naming to docker.io/library/prj2-demo-app:latest 0.0s done
+#35 unpacking to docker.io/library/prj2-demo-app:latest 0.1s done
+#35 DONE 0.6s
+
+#36 [query-api] exporting to image
+#36 exporting layers done
+#36 exporting manifest sha256:a213c30d4f9dee57ac301ec8ab69e7cb8e8d739db783c71b090acc6c8876886c 0.0s done
+#36 exporting config sha256:471bf8ed47932fe8f0e314db94f4a1ca7c6bfff79be907be52039c3b4f3a1d2b 0.2s done
+#36 exporting attestation manifest sha256:d5c43d96c51b4a913f507a03c3c11ba48a1ed8635af44e25f138cd8cf506fbde 0.1s done
+#36 exporting manifest list sha256:8d3594f296eac8ea5fea8ab4d50ea9e1e0b8d20b3ef22127901d94aa9dbe9dd9 0.1s done
+#36 naming to docker.io/library/prj2-query-api:latest 0.0s done
+#36 unpacking to docker.io/library/prj2-query-api:latest
+#36 unpacking to docker.io/library/prj2-query-api:latest 0.4s done
+#36 DONE 0.9s
+
+#37 [demo-app] resolving provenance for metadata file
+#37 DONE 0.0s
+
+#33 [clustering] exporting to image
+#33 exporting attestation manifest sha256:e587587487f4da5a194de6ddd817119dd68abe894da11ee9bc351103d440e921 0.1s done
+#33 exporting manifest list sha256:e469d65c28350b661cbc36bb2bf6fc358b4992728991822831d2a3cb3c73fb5f 0.1s done
+#33 naming to docker.io/library/prj2-clustering:latest 0.0s done
+#33 unpacking to docker.io/library/prj2-clustering:latest 0.4s done
+#33 DONE 1.0s
+
+#38 [ingestion 7/7] RUN useradd -m appuser && chown -R appuser /app
+#38 ...
+
+#39 [query-api] resolving provenance for metadata file
+#39 DONE 0.1s
+
+#40 [clustering] resolving provenance for metadata file
+#40 DONE 0.0s
+
+#38 [ingestion 7/7] RUN useradd -m appuser && chown -R appuser /app
+#38 DONE 1.4s
+
+#41 [ingestion] exporting to image
+#41 exporting layers 0.3s done
+#41 exporting manifest sha256:dfd857c65685b9b637a79fc59be856f92732013120367dae525d9de83909d621 0.0s done
+#41 exporting config sha256:f67ff91edd9b309a7fc43547712fdb6dc2a432ccb011d6730f2cd3f76e374537 0.0s done
+#41 exporting attestation manifest sha256:057500dd1de6b6898f8c6e348e29047f46842429dd7630c4f9263c4b41e9d54c 0.0s done
+#41 exporting manifest list sha256:dfdcd2e060a734924fabb0f2fd00f0fec8862d61c29510273c97d984b5bbe92f
+#41 exporting manifest list sha256:dfdcd2e060a734924fabb0f2fd00f0fec8862d61c29510273c97d984b5bbe92f 0.0s done
+#41 naming to docker.io/library/prj2-ingestion:latest done
+#41 unpacking to docker.io/library/prj2-ingestion:latest 0.1s done
+#41 DONE 0.6s
+
+#42 [ingestion] resolving provenance for metadata file
+#42 DONE 0.0s
+ Image prj2-ingestion Built 
+ Image prj2-query-api Built 
+ Image prj2-clustering Built 
+ Image prj2-demo-app Built 
+ Container prj2-gateway-1 Running 
+ Container prj2-demo-app-1 Running 
+ Container prj2-opensearch-1 Running 
+ Container prj2-ingestion-1 Recreate 
+ Container prj2-ingestion-1 Recreated 
+ Container prj2-clustering-1 Recreate 
+ Container prj2-query-api-1 Recreate 
+ Container prj2-query-api-1 Recreated 
+ Container prj2-clustering-1 Recreated 
+ Container prj2-opensearch-1 Waiting 
+ Container prj2-opensearch-1 Healthy 
+ Container prj2-ingestion-1 Starting 
+ Container prj2-ingestion-1 Started 
+ Container prj2-ingestion-1 Waiting 
+ Container prj2-ingestion-1 Waiting 
+ Container prj2-ingestion-1 Waiting 
+ Container prj2-ingestion-1 Healthy 
+ Container prj2-query-api-1 Starting 
+ Container prj2-ingestion-1 Healthy 
+ Container prj2-clustering-1 Starting 
+ Container prj2-ingestion-1 Healthy 
+ Container prj2-query-api-1 Started 
+ Container prj2-clustering-1 Started 
+ Container prj2-gateway-1 Restarting 
+ Container prj2-gateway-1 Started 
+ok: http://127.0.0.1:9002/health tra version=6d3e3bd
+# ket thuc: 2026-11-20T03:04:58Z
+# keo dai : 36 giay
+# exit    : 0
+# /health : {"status":"ok","service":"query-api","storage":"opensearch","version":"6d3e3bd"}
+# /clustering/health: {"status":"ok","reason":null,"last_processed_at":"2026-11-20T03:04:56.863355+00:00"}
+# web_git_sha tren trang System Status lay tu /health o tren.
+
+########################################################################
+# LAN 3 - DEPLOY lai ban moi (tra production ve dung trang thai) : deploy/deploy.sh main
+# bat dau : 2026-11-20T03:04:58Z
+Previous HEAD position was 6d3e3bd Merge pull request #117 from phamnghia57/dev/namvk
+HEAD is now at f21d294 Merge pull request #123 from phamnghia57/dev/nghiapb
+deploy 'main' -> f21d294
+ Image prj2-ingestion Building 
+ Image prj2-demo-app Building 
+ Image prj2-query-api Building 
+ Image prj2-clustering Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.81kB done
+#1 DONE 0.0s
+
+#2 [clustering internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.16kB done
+#2 DONE 0.0s
+
+#3 [query-api internal] load build definition from Dockerfile
+#3 transferring dockerfile: 762B done
+#3 DONE 0.1s
+
+#4 [demo-app internal] load build definition from Dockerfile
+#4 transferring dockerfile: 860B done
+#4 DONE 0.1s
+
+#5 [ingestion internal] load build definition from Dockerfile
+#5 transferring dockerfile: 783B done
+#5 DONE 0.1s
+
+#6 [demo-app internal] load metadata for docker.io/library/python:3.11-slim
+#6 DONE 0.8s
+
+#7 [clustering internal] load .dockerignore
+#7 transferring context: 146B done
+#7 DONE 0.0s
+
+#8 [ingestion 1/6] FROM docker.io/library/python:3.11-slim@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535
+#8 resolve docker.io/library/python:3.11-slim@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535 0.0s done
+#8 DONE 0.1s
+
+#9 [demo-app internal] load build context
+#9 transferring context: 23.88kB 0.0s done
+#9 DONE 0.0s
+
+#10 [demo-app 5/6] COPY demo-app demo-app
+#10 CACHED
+
+#11 [demo-app 2/6] WORKDIR /app
+#11 CACHED
+
+#12 [demo-app 3/6] COPY demo-app/requirements.txt demo-app/requirements.txt
+#12 CACHED
+
+#13 [demo-app 4/6] RUN pip install --no-cache-dir -r demo-app/requirements.txt
+#13 CACHED
+
+#14 [demo-app 6/6] RUN useradd -m appuser && chown -R appuser /app
+#14 CACHED
+
+#15 [query-api internal] load build context
+#15 transferring context: 12.84kB 0.0s done
+#15 DONE 0.1s
+
+#16 [demo-app] exporting to image
+#16 exporting layers done
+#16 exporting manifest sha256:94c50fcb5f7bc6034c1a4da73cf0413ce4e07d39a6f62a300eb5cce67942b8bf 0.0s done
+#16 exporting config sha256:8d36d2b10e16226b7f90dcb44e7188274f73f7ad4d15c44e71d9e70997bbde8f
+#16 ...
+
+#17 [ingestion internal] load build context
+#17 transferring context: 23.01kB 0.0s done
+#17 DONE 0.1s
+
+#18 [clustering internal] load build context
+#18 transferring context: 6.10MB 0.1s done
+#18 DONE 0.2s
+
+#19 [query-api 6/8] COPY ingestion ingestion
+#19 CACHED
+
+#20 [query-api 5/8] COPY query-api query-api
+#20 CACHED
+
+#21 [query-api 3/8] COPY query-api/requirements.txt query-api/requirements.txt
+#21 CACHED
+
+#22 [query-api 4/8] RUN pip install --no-cache-dir -r query-api/requirements.txt
+#22 CACHED
+
+#23 [query-api 7/8] COPY clustering clustering
+#23 CACHED
+
+#24 [query-api 8/8] RUN useradd -m appuser && chown -R appuser /app
+#24 CACHED
+
+#11 [ingestion 2/6] WORKDIR /app
+#11 CACHED
+
+#25 [ingestion 5/7] COPY ingestion ingestion
+#25 CACHED
+
+#26 [ingestion 6/7] COPY docs docs
+#26 CACHED
+
+#27 [ingestion 4/7] RUN pip install --no-cache-dir -r ingestion/requirements.txt
+#27 CACHED
+
+#28 [ingestion 3/7] COPY ingestion/requirements.txt ingestion/requirements.txt
+#28 CACHED
+
+#29 [ingestion 7/7] RUN useradd -m appuser && chown -R appuser /app
+#29 CACHED
+
+#16 [demo-app] exporting to image
+#16 exporting config sha256:8d36d2b10e16226b7f90dcb44e7188274f73f7ad4d15c44e71d9e70997bbde8f 0.0s done
+#16 exporting attestation manifest sha256:516853e3d4ef1d3e020e0e3012e5783ffbb35f9f1dcff58f1c0c1752f158de10
+#16 ...
+
+#11 [clustering 2/6] WORKDIR /app
+#11 CACHED
+
+#30 [clustering 3/8] COPY clustering/requirements.txt clustering/requirements.txt
+#30 CACHED
+
+#31 [clustering 5/8] RUN pip install --no-cache-dir -r clustering/requirements-ml.txt
+#31 CACHED
+
+#32 [clustering 4/8] COPY clustering/requirements-ml.txt clustering/requirements-ml.txt
+#32 CACHED
+
+#33 [clustering 7/8] COPY ingestion ingestion
+#33 CACHED
+
+#34 [clustering 6/8] COPY clustering clustering
+#34 CACHED
+
+#35 [clustering 8/8] RUN useradd -m appuser && mkdir -p /app/clustering/data && chown -R appuser /app
+#35 CACHED
+
+#16 [demo-app] exporting to image
+#16 exporting attestation manifest sha256:516853e3d4ef1d3e020e0e3012e5783ffbb35f9f1dcff58f1c0c1752f158de10 0.1s done
+#16 exporting manifest list sha256:46e88a045abddf97dedb7e764fbf36311a8023a3cb054788ef1a4d65d1f62cca 0.1s done
+#16 naming to docker.io/library/prj2-demo-app:latest 0.0s done
+#16 unpacking to docker.io/library/prj2-demo-app:latest
+#16 unpacking to docker.io/library/prj2-demo-app:latest 0.1s done
+#16 DONE 0.4s
+
+#36 [ingestion] exporting to image
+#36 exporting layers done
+#36 exporting manifest sha256:e6f7cc44d15691652b9e164490f8e9ec0598e9ceab0ad6588531a528818f0cf1 0.1s done
+#36 exporting config sha256:7411e6118e73ed1047628bb8593d307f11716c9ba640c699d2bb092e0c9ecb02 0.0s done
+#36 exporting attestation manifest sha256:3ddfebdfbf6f22739c9f7af47576efa75727bf3d81c55bec42135c61c3def377 0.2s done
+#36 exporting manifest list sha256:38d86d3ae8ceb8ffdbe68529d0ce0632c77f53da8607d1d78804b48351a2995b
+#36 exporting manifest list sha256:38d86d3ae8ceb8ffdbe68529d0ce0632c77f53da8607d1d78804b48351a2995b 0.1s done
+#36 naming to docker.io/library/prj2-ingestion:latest
+#36 naming to docker.io/library/prj2-ingestion:latest 0.0s done
+#36 unpacking to docker.io/library/prj2-ingestion:latest
+#36 unpacking to docker.io/library/prj2-ingestion:latest 0.3s done
+#36 DONE 0.8s
+
+#37 [demo-app] resolving provenance for metadata file
+#37 DONE 0.0s
+
+#38 [query-api] exporting to image
+#38 exporting layers done
+#38 exporting manifest sha256:7f4e121f77656323387bd746f6e15d82fde74dca311cbf4c08a650924dec5c38 0.1s done
+#38 exporting config sha256:abed9c78fb2cd916e7ca03efe98a9b549ce660f43f83231b2166fd66deb46644 0.0s done
+#38 exporting attestation manifest sha256:0612072dd52f11f6115d2874217c4e82a0226abc3bbc24bce866b4577ff3572a 0.1s done
+#38 exporting manifest list sha256:996137bf6164f5be417238d92db39d589038bf1a1ea17163dc9675aa86b386a3 0.1s done
+#38 naming to docker.io/library/prj2-query-api:latest 0.0s done
+#38 unpacking to docker.io/library/prj2-query-api:latest 0.2s done
+#38 DONE 0.8s
+
+#39 [clustering] exporting to image
+#39 exporting layers done
+#39 exporting manifest sha256:d4443e2e8e9f4bba1c642b4975995e8a059196bf47e59285907418b068b81737 0.1s done
+#39 exporting config sha256:83c295911245b255975ca6a9e8b6cbf39b87f073211e36c644af65b2af9d18dd 0.0s done
+#39 exporting attestation manifest sha256:97ddf77d2ab3a548fa1099a1e2986e31d24f41cfd6e124029cd2c2938f578a2a 0.1s done
+#39 exporting manifest list sha256:9867562b825c1572ad66484b298660d2f283070575f8d6979b2a3eee4d4ad031 0.1s done
+#39 naming to docker.io/library/prj2-clustering:latest 0.0s done
+#39 unpacking to docker.io/library/prj2-clustering:latest
+#39 unpacking to docker.io/library/prj2-clustering:latest 0.4s done
+#39 DONE 0.9s
+
+#40 [query-api] resolving provenance for metadata file
+#40 ...
+
+#41 [ingestion] resolving provenance for metadata file
+#41 DONE 0.1s
+
+#40 [query-api] resolving provenance for metadata file
+#40 DONE 0.2s
+
+#42 [clustering] resolving provenance for metadata file
+#42 DONE 0.0s
+ Image prj2-clustering Built 
+ Image prj2-ingestion Built 
+ Image prj2-demo-app Built 
+ Image prj2-query-api Built 
+ Container prj2-demo-app-1 Running 
+ Container prj2-opensearch-1 Running 
+ Container prj2-gateway-1 Running 
+ Container prj2-ingestion-1 Recreate 
+ Container prj2-ingestion-1 Recreated 
+ Container prj2-query-api-1 Recreate 
+ Container prj2-clustering-1 Recreate 
+ Container prj2-query-api-1 Recreated 
+ Container prj2-clustering-1 Recreated 
+ Container prj2-opensearch-1 Waiting 
+ Container prj2-opensearch-1 Healthy 
+ Container prj2-ingestion-1 Starting 
+ Container prj2-ingestion-1 Started 
+ Container prj2-ingestion-1 Waiting 
+ Container prj2-ingestion-1 Waiting 
+ Container prj2-ingestion-1 Waiting 
+ Container prj2-ingestion-1 Healthy 
+ Container prj2-query-api-1 Starting 
+ Container prj2-ingestion-1 Healthy 
+ Container prj2-ingestion-1 Healthy 
+ Container prj2-clustering-1 Starting 
+ Container prj2-query-api-1 Started 
+ Container prj2-clustering-1 Started 
+ Container prj2-gateway-1 Restarting 
+ Container prj2-gateway-1 Started 
+ok: http://127.0.0.1:9002/health tra version=f21d294
+# ket thuc: 2026-11-20T03:05:34Z
+# keo dai : 36 giay
+# exit    : 0
+# /health : {"status":"ok","service":"query-api","storage":"opensearch","version":"f21d294"}
+# /clustering/health: {"status":"ok","reason":null,"last_processed_at":"2026-11-20T03:05:33.029045+00:00"}
+# web_git_sha tren trang System Status lay tu /health o tren.
+
+########################################################################
+# Trang thai cuoi
+# 2026-11-20T03:05:34Z
+# /health            : {"status":"ok","service":"query-api","storage":"opensearch","version":"f21d294"}
+# /ingestion/health  : {"detail":"Not Found"}
+# /clustering/health : {"status":"ok","reason":null,"last_processed_at":"2026-11-20T03:05:33.029045+00:00"}
+# docker compose ps  :
+#   clustering Up 4 seconds
+#   demo-app Up 2 days (healthy)
+#   gateway Up 3 seconds
+#   ingestion Up 20 seconds (healthy)
+#   jaeger Up 2 days
+#   opensearch Up 2 days (healthy)
+#   query-api Up 4 seconds (health: starting)
+# grep -c ':latest' docker-compose.yml -> 0

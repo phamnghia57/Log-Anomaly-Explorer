@@ -1,0 +1,12 @@
+{
+  "env_ANOMALY_THRESHOLD": "3.0",
+  "config_ANOMALY_THRESHOLD_HINT": "3.0",
+  "git_sha": "6d3e3bd",
+  "question": "Nguong bao dong (anomaly threshold) ma he thong dang ap dung la bao nhieu, va cum nay co vuot nguong do khong?",
+  "answer": "Nguyên nhân có thể:\n- Cụm không vượt ngưỡng báo động hiện tại; điểm anomaly thấp (0.4519) cho thấy bản ghi này chưa bị hệ thống coi là bất thường theo ngưỡng đang áp dụng.\n\nBằng chứng:\n- Ngưỡng báo động (anomaly threshold) đang áp dụng: 3.0.\n- Anomaly score của cụm (cluster_id=2eb682698b92e5d7): 0.4518777328759243 (thấp hơn 3.0).\n- Trạng thái cụm: normal.\n- Mẫu log thuộc cụm (service=injection-test, time=2026-11-20T02:47:06.867437Z): \"ValueError: invalid literal for int() with base 10: 'abc'\" (1 log).\n\nĐề xuất hướng xử lý:\n- Nếu bạn muốn phát hiện dạng lỗi này làm cảnh báo, giảm ngưỡng anomaly hoặc tạo rule cảnh báo dựa trên signature/log message (ví dụ: bắt các ValueError liên quan parsing) để bắt loại sự kiện này ngay cả khi điểm anomaly thấp.",
+  "latency_seconds": 5.83,
+  "tokens_in": 887,
+  "tokens_out": 502,
+  "cluster_score": 0.4518777328759243,
+  "cluster_status": "normal"
+}
