@@ -28,6 +28,8 @@ def main():
     if seconds <= 0 or history < 1 or lag < 0 or retention_days < 1:
         parser.error("WINDOW_SECONDS > 0, HISTORY_WINDOWS >= 1, INGESTION_LAG_SECONDS >= 0 and RETENTION_DAYS >= 1 required")
     logging.basicConfig(level=logging.INFO)
+    # httpx log URL day du o INFO, lam lo token cua HEALTHCHECK_PING_URL.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     augmenter = None
     if os.getenv("ML_AUGMENT_ENABLED", "true").lower() in {"true", "1", "yes"}:
         augmenter = TfidfAugmenter(
