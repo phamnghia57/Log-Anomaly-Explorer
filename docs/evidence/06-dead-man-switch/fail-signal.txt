@@ -1,0 +1,84 @@
+# Evidence #102 tieu chi 3: ALERT_WEBHOOK_URL sai co y -> su co that -> tin hieu /fail
+# VM log-anomaly-vps (23.98.41.222), GIT_SHA deployed = 6d3e3bd
+# T0 (doi webhook + bom log): 2026-11-20T02:57:38Z - 02:57:54Z
+# T1 (thu log)              : 2026-11-20T03:01:07Z
+# ALERT_WEBHOOK_URL cua container clustering luc do: http://invalid.alert.test/hook
+# 60 log ERROR signature moi (service alert-path-test) bom vao cua so 02:57:00-02:58:00Z
+#
+# LUU Y: token cua HEALTHCHECK_PING_URL bi che bang sed. Ban deploy 6d3e3bd CHUA co
+# fix 48339f1 (httpx log URL day du o INFO), nen log tho CO chua URL ping - do la
+# chinh ly do commit 48339f1 ton tai.
+
+## Cum duoc tao
+{
+    "took": 3,
+    "timed_out": false,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 1,
+            "relation": "eq"
+        },
+        "max_score": 2.5902672,
+        "hits": [
+            {
+                "_index": "clusters",
+                "_id": "dc59234a91502b5f",
+                "_score": 2.5902672,
+                "_source": {
+                    "score": 60.0,
+                    "cluster_id": "dc59234a91502b5f",
+                    "first_seen": "2026-11-20T02:57:00Z",
+                    "last_seen": "2026-11-20T02:57:49Z",
+                    "status": "anomalous"
+                }
+            }
+        ]
+    }
+}
+
+## Log worker (token ping da che)
+clustering-1  | 2026-11-20T02:57:49.381251208Z INFO:opensearch:HEAD http://opensearch:9200/logs-quarantine [status:200 request:0.002s]
+clustering-1  | 2026-11-20T02:57:49.382178830Z INFO:opensearch:HEAD http://opensearch:9200/clusters [status:200 request:0.002s]
+clustering-1  | 2026-11-20T02:57:49.383202623Z INFO:opensearch:HEAD http://opensearch:9200/cluster-history [status:200 request:0.001s]
+clustering-1  | 2026-11-20T02:57:49.396198264Z INFO:opensearch:PUT http://opensearch:9200/cluster-history/_mapping [status:200 request:0.013s]
+clustering-1  | 2026-11-20T02:57:49.397176491Z INFO:opensearch:HEAD http://opensearch:9200/clusters-heartbeat [status:200 request:0.001s]
+clustering-1  | 2026-11-20T02:57:49.404176760Z INFO:opensearch:PUT http://opensearch:9200/clusters-heartbeat/_mapping [status:200 request:0.007s]
+clustering-1  | 2026-11-20T02:57:49.405190845Z INFO:opensearch:HEAD http://opensearch:9200/clusters-alert-state [status:200 request:0.001s]
+clustering-1  | 2026-11-20T02:57:49.410180638Z INFO:opensearch:POST http://opensearch:9200/logs,logs-*,-logs-quarantine/_search?allow_no_indices=true&ignore_unavailable=true&scroll=2m [status:200 request:0.004s]
+clustering-1  | 2026-11-20T02:57:49.411191146Z INFO:opensearch:POST http://opensearch:9200/_search/scroll?scroll=2m [status:200 request:0.001s]
+clustering-1  | 2026-11-20T02:57:49.412176407Z INFO:opensearch:DELETE http://opensearch:9200/_search/scroll [status:200 request:0.001s]
+clustering-1  | 2026-11-20T02:57:50.344604630Z INFO:opensearch:PUT http://opensearch:9200/clusters-heartbeat/_doc/worker [status:200 request:0.009s]
+clustering-1  | 2026-11-20T02:57:50.953815378Z INFO:httpx:HTTP Request: GET https://hc-ping.com/<TOKEN-DA-CHE> "HTTP/1.1 200 OK"
+clustering-1  | 2026-11-20T02:57:50.954140529Z INFO:root:Processed 2026-11-20T02:57:00+00:00: cycle_seconds=0.930 logs_read=12 clusters_out=0
+clustering-1  | 2026-11-20T02:57:50.956823682Z INFO:opensearch:POST http://opensearch:9200/cluster-history/_delete_by_query?conflicts=proceed&refresh=false [status:200 request:0.002s]
+clustering-1  | 2026-11-20T02:57:50.956841265Z INFO:root:Cluster history retention: deleted=0 cutoff=2026-10-21T02:57:50.954077+00:00
+clustering-1  | 2026-11-20T02:58:10.009198756Z INFO:opensearch:POST http://opensearch:9200/logs,logs-*,-logs-quarantine/_search?allow_no_indices=true&ignore_unavailable=true&scroll=2m [status:200 request:0.007s]
+clustering-1  | 2026-11-20T02:58:10.014179151Z INFO:opensearch:POST http://opensearch:9200/_search/scroll?scroll=2m [status:200 request:0.004s]
+clustering-1  | 2026-11-20T02:58:10.014380429Z INFO:opensearch:DELETE http://opensearch:9200/_search/scroll [status:200 request:0.001s]
+clustering-1  | 2026-11-20T02:58:10.028835345Z INFO:opensearch:POST http://opensearch:9200/clusters-alert-state/_mget [status:200 request:0.004s]
+clustering-1  | 2026-11-20T02:58:10.030010723Z INFO:opensearch:POST http://opensearch:9200/clusters-incidents/_search?ignore_unavailable=true [status:200 request:0.002s]
+clustering-1  | 2026-11-20T02:58:10.031029967Z WARNING:opensearch:GET http://opensearch:9200/clusters-incidents/_doc/dc59234a91502b5f%3A1?realtime=true [status:404 request:0.001s]
+clustering-1  | 2026-11-20T02:58:10.092211684Z ERROR:clustering.alert:Alert digest failed
+clustering-1  | 2026-11-20T02:58:10.826787213Z INFO:httpx:HTTP Request: GET https://hc-ping.com/<TOKEN-DA-CHE>/fail "HTTP/1.1 200 OK"
+clustering-1  | 2026-11-20T02:58:11.243014428Z INFO:opensearch:PUT http://opensearch:9200/clusters/_doc/dc59234a91502b5f?refresh=wait_for [status:201 request:0.415s]
+clustering-1  | 2026-11-20T02:58:12.242201627Z INFO:opensearch:POST http://opensearch:9200/cluster-history/_doc?refresh=wait_for [status:201 request:0.999s]
+clustering-1  | 2026-11-20T02:58:12.252398913Z INFO:opensearch:PUT http://opensearch:9200/clusters-heartbeat/_doc/worker [status:200 request:0.010s]
+clustering-1  | 2026-11-20T02:58:12.252412849Z INFO:root:Processed 2026-11-20T02:58:00+00:00: cycle_seconds=2.242 logs_read=72 clusters_out=1
+clustering-1  | 2026-11-20T02:59:10.005221806Z INFO:opensearch:POST http://opensearch:9200/logs,logs-*,-logs-quarantine/_search?allow_no_indices=true&ignore_unavailable=true&scroll=2m [status:200 request:0.005s]
+clustering-1  | 2026-11-20T02:59:10.008192756Z INFO:opensearch:POST http://opensearch:9200/_search/scroll?scroll=2m [status:200 request:0.003s]
+clustering-1  | 2026-11-20T02:59:10.008870421Z INFO:opensearch:DELETE http://opensearch:9200/_search/scroll [status:200 request:0.001s]
+clustering-1  | 2026-11-20T02:59:10.021090812Z INFO:opensearch:PUT http://opensearch:9200/clusters-heartbeat/_doc/worker [status:200 request:0.010s]
+clustering-1  | 2026-11-20T02:59:10.755389053Z INFO:httpx:HTTP Request: GET https://hc-ping.com/<TOKEN-DA-CHE> "HTTP/1.1 200 OK"
+clustering-1  | 2026-11-20T02:59:10.755794334Z INFO:root:Processed 2026-11-20T02:59:00+00:00: cycle_seconds=0.011 logs_read=72 clusters_out=0
+clustering-1  | 2026-11-20T03:00:10.005185649Z INFO:opensearch:POST http://opensearch:9200/logs,logs-*,-logs-quarantine/_search?allow_no_indices=true&ignore_unavailable=true&scroll=2m [status:200 request:0.005s]
+clustering-1  | 2026-11-20T03:00:10.009223654Z INFO:opensearch:POST http://opensearch:9200/_search/scroll?scroll=2m [status:200 request:0.002s]
+clustering-1  | 2026-11-20T03:00:10.009237220Z INFO:opensearch:DELETE http://opensearch:9200/_search/scroll [status:200 request:0.001s]
+clustering-1  | 2026-11-20T03:00:10.021117299Z INFO:opensearch:PUT http://opensearch:9200/clusters-heartbeat/_doc/worker [status:200 request:0.009s]
+clustering-1  | 2026-11-20T03:00:10.841329594Z INFO:httpx:HTTP Request: GET https://hc-ping.com/<TOKEN-DA-CHE> "HTTP/1.1 200 OK"
+clustering-1  | 2026-11-20T03:00:10.841717223Z INFO:root:Processed 2026-11-20T03:00:00+00:00: cycle_seconds=0.012 logs_read=72 clusters_out=0
