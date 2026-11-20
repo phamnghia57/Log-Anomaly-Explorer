@@ -1,0 +1,172 @@
+{
+  "validated_at": "2026-11-20T15:32:21.683624+00:00",
+  "source_commit": "11704339da47cd5ac9be959c888c520603667182",
+  "reviewer_id": "Codex",
+  "reviewer_type": "AI",
+  "status": "advisory_not_human_adjudication",
+  "review_context": "Read Nghia's preliminary observations before grading; not blinded or independent human evidence",
+  "capability_policy": "Evaluate tool access in the actual request; rounds=1 receives no tools",
+  "checks": {
+    "prepared_manifest_sha256": {
+      "questions.json": "passed",
+      "clusters/value-422.json": "passed",
+      "clusters/connection-502.json": "passed",
+      "clusters/timeout-504.json": "passed",
+      "clusters/runtime-500.json": "passed"
+    },
+    "source_rows_and_bindings": "passed",
+    "telemetry_join_and_coverage": "passed",
+    "source_summary_arithmetic": "passed",
+    "advisory_csv_roundtrip_and_totals": "passed",
+    "citation_and_concern_quotes": "passed",
+    "source_evidence_and_human_templates_unchanged": "passed"
+  },
+  "source_files_sha256_git_blobs": {
+    "docs/evidence/11-assistant-golden-set/RUBRIC.md": "2c79e882a90753bb1cb28c5f512a6fba0d9d7b3e69d911b34acbbd58b1054244",
+    "docs/evidence/11-assistant-golden-set/scores-round1.csv": "bf3a129798447f116a0bac16c34837ad4eefc05f26fa1c7c3dd732a44f29fa09",
+    "docs/evidence/11-assistant-golden-set/scores-round2.csv": "f1391e1b664f4f7ca7f731cc91e8daf8aeca10f19827c351604a55611aa8600e",
+    "docs/evidence/11-assistant-golden-set/langfuse-summary.csv": "4aed8127505555ca5711a63ffb9c5d0b4105d3b4db8c26da84f9435716344775",
+    "docs/evidence/11-assistant-golden-set/langfuse-per-question.csv": "be4f513edae083a1c283f0c5e9d235009a290b8faa0feed204d3e10446359f17",
+    "docs/evidence/11-assistant-golden-set/measurement-nghia.md": "af1efa33d48e522312e8798588f2313adc2bcca14ff244914a7c94f8d4adbdb7",
+    "docs/evidence/11-assistant-golden-set/tool-rounds-fair.json": "4dde363f6930bbf4d2c7bab92fd321b25709175c4ab6a6ea0f8064da1f2b8b62",
+    "docs/evidence/11-assistant-golden-set/prepared/manifest.json": "5dbf831fb599f465bc5f9f58c32bb92b7cd7139a46b97112c05b9391b4a349c7",
+    "docs/evidence/11-assistant-golden-set/prepared/questions.json": "44478c94c13af28c0df039aaa46a1747bb09e81ef18c0d24687019d7ac4950ac",
+    "docs/evidence/11-assistant-golden-set/prepared/clusters/value-422.json": "95708a7443e71f015050855b87c8ba6a88a90cce6b5f5d831bfda0d92ad87bca",
+    "docs/evidence/11-assistant-golden-set/prepared/clusters/connection-502.json": "bd8e4cdd96fe21fc5414a796c92938518119fbb951b7681a2a34d1d731625aea",
+    "docs/evidence/11-assistant-golden-set/prepared/clusters/timeout-504.json": "16dcc864665da65d42f5738a0bb216b080da8766f1aeb0a5cf1f02457d21837e",
+    "docs/evidence/11-assistant-golden-set/prepared/clusters/runtime-500.json": "55d6a2d18a889b65aa2757b7256b96fa7f500ac051150af458821fe5a2892606",
+    "docs/evidence/11-assistant-golden-set/rater-a-round1.template.csv": "5d6d13450471a26232b9342f31ce58ba9bc103fb9d2849889f72b1256e9da9ff",
+    "docs/evidence/11-assistant-golden-set/rater-a-round2.template.csv": "eee6316c77c390f1237610c4048a77a1346c3d34f1ad2290829969baecba7602",
+    "docs/evidence/11-assistant-golden-set/rater-b-round1.template.csv": "5d6d13450471a26232b9342f31ce58ba9bc103fb9d2849889f72b1256e9da9ff",
+    "docs/evidence/11-assistant-golden-set/rater-b-round2.template.csv": "eee6316c77c390f1237610c4048a77a1346c3d34f1ad2290829969baecba7602",
+    "docs/evidence/11-assistant-golden-set/adjudication.template.csv": "8aa843f5dbd82dbe8b42bd0b572987b8a929d816c77ddc26817f30838da23699",
+    "docs/evidence/11-assistant-golden-set/summary.template.csv": "08e30fa22de7e02652ae600b7ff1bbeaaf513af0769e775f7fc1dda70881baf5",
+    "docs/evidence/11-assistant-golden-set/questions.json": "55cae32acac568be7a7c07180c838b53de84d4dfd208f264b3245c3c8c5581b8"
+  },
+  "deployment_service": {
+    "commit": "38defc34239a7a45c7abe05f230cf4fb33c8df64",
+    "path": "query-api/src/assistant/service.py",
+    "sha256_git_blob": "92403496b66af91dd8c74e45abd974eefd62bdeb7d2d465f58262488f6f84d5c"
+  },
+  "generated_files_sha256": {
+    "round1.csv": "4bbc7809ae229a8d4db970eb5020bfe99805b43d4285d6659ff7a273084b3418",
+    "round2.csv": "6a00fba826ef6c932d714d5797daade6b39b52842a45b69c97d42f26aa2a7836"
+  },
+  "rounds": {
+    "1": {
+      "question_count": 20,
+      "advisory_score_out_of_60": 55,
+      "advisory_fully_correct_out_of_20": 17,
+      "criterion_totals_out_of_20": {
+        "layer_status": 19,
+        "evidence": 19,
+        "no_fabrication": 17
+      },
+      "category_scores_out_of_12": {
+        "value-422": 12,
+        "connection-502": 9,
+        "timeout-504": 11,
+        "runtime-500": 11,
+        "bad_schema": 12
+      },
+      "api_errors": 0,
+      "nonempty_answers": 19,
+      "empty_answer_ids": [
+        "connection-502-04"
+      ],
+      "empty_answer_output_tokens": {
+        "connection-502-04": 1200
+      },
+      "telemetry_coverage": "20/20",
+      "generations": 20,
+      "questions_with_extra_generation": [],
+      "needs_human_review_ids": [
+        "value-422-03",
+        "connection-502-04",
+        "timeout-504-01",
+        "timeout-504-03",
+        "runtime-500-03"
+      ],
+      "metrics_recomputed_from_per_question": {
+        "mean_input_tokens": "1059.05",
+        "mean_output_tokens": "784.1",
+        "total_cost_usd": "0.03435525",
+        "mean_cost_usd": "0.0017177625",
+        "mean_model_latency_s": "7.72655",
+        "p95_model_latency_s": "10.075",
+        "mean_api_latency_s": "7.7615",
+        "p95_api_latency_s": "10.11"
+      }
+    },
+    "2": {
+      "question_count": 20,
+      "advisory_score_out_of_60": 56,
+      "advisory_fully_correct_out_of_20": 18,
+      "criterion_totals_out_of_20": {
+        "layer_status": 19,
+        "evidence": 19,
+        "no_fabrication": 18
+      },
+      "category_scores_out_of_12": {
+        "value-422": 12,
+        "connection-502": 9,
+        "timeout-504": 11,
+        "runtime-500": 12,
+        "bad_schema": 12
+      },
+      "api_errors": 0,
+      "nonempty_answers": 19,
+      "empty_answer_ids": [
+        "connection-502-04"
+      ],
+      "empty_answer_output_tokens": {
+        "connection-502-04": 1200
+      },
+      "telemetry_coverage": "20/20",
+      "generations": 24,
+      "questions_with_extra_generation": [
+        "value-422-03",
+        "connection-502-03",
+        "timeout-504-03",
+        "runtime-500-03"
+      ],
+      "needs_human_review_ids": [
+        "connection-502-04",
+        "timeout-504-01",
+        "timeout-504-03"
+      ],
+      "metrics_recomputed_from_per_question": {
+        "mean_input_tokens": "1714",
+        "mean_output_tokens": "889.6",
+        "total_cost_usd": "0.03957480",
+        "mean_cost_usd": "0.00197874",
+        "mean_model_latency_s": "8.3309",
+        "p95_model_latency_s": "10.492",
+        "mean_api_latency_s": "8.3645",
+        "p95_api_latency_s": "10.53"
+      }
+    }
+  },
+  "official_human_scores": "pending",
+  "human_disagreement_count": "pending",
+  "issue_completion": "pending two independent human reviews and adjudication",
+  "empty_answer_cause": "Not established: both have tokens_out=1200, but archived finish_reason is unavailable",
+  "supplemental_archive_checks": {
+    "round1_runs_without_tools": 2,
+    "round2_runs_with_archived_http_status_500": 2,
+    "tool_payload_fragment_lengths": [
+      200,
+      200
+    ],
+    "limitation": "Only truncated tool payload fragments are archived; not full spans or a repeated quality benchmark"
+  },
+  "final_artifact_verification": {
+    "verified_at": "2026-11-20T15:35:53.522676+00:00",
+    "advisory_rows": 40,
+    "all_ids_points_totals_refs_quotes": "passed",
+    "source_and_templates_preserved": "passed",
+    "relative_markdown_links_checked": 26,
+    "git_diff_check_exit_code": 0,
+    "backend_tests": "not rerun: only documentation, CSV and JSON artifacts changed"
+  }
+}
