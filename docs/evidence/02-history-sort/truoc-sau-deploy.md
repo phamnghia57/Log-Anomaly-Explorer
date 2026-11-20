@@ -44,8 +44,10 @@ và [sau-deployed-list_history.txt](sau-deployed-list_history.txt) (`sort: desc`
   **không biểu hiện trên UI** — biểu đồ trước và sau sẽ giống nhau. Bản sửa mang tính phòng
   ngừa: nó chỉ có tác dụng thấy được khi một cụm vượt 50/100 điểm (với `WINDOW_SECONDS=60`
   là khoảng 50–100 phút có lỗi liên tục).
-- Tiêu chí "cụm > 100 điểm" của #97 vì vậy chưa kiểm được; cần đo lại khi có cụm đầu tiên
-  vượt mốc đó, hoặc chủ động bơm lỗi liên tục ~1 giờ để tạo ra cụm như vậy.
+- Tiêu chí "cụm > 100 điểm" của #97 vì vậy chưa kiểm được trên UI thật.
+- Tiêu chí ảnh biểu đồ Incident View trước/sau (#118) đã được nhóm quyết định **bỏ**: dữ liệu
+  hiện tại không có cụm nào đủ lớn để tạo khác biệt quan sát được trên biểu đồ, và nhóm không
+  bơm thêm log giả chỉ để đạt mốc 100 điểm.
 - `first_anomaly_after` **không** bị lỗi tương tự: nó dùng `size: 1` + `asc` có chủ đích để
   tìm lần tái phát ĐẦU TIÊN sau `resolved_at`. Không đổi hàm này.
 

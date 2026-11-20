@@ -86,13 +86,17 @@ Hai điều phép đo này chứng minh thêm:
   đúng là lỗi mà bản sửa `delivery_failed = False` đầu mỗi chu kỳ (PR #117) vá — trước đó một lần
   webhook lỗi sẽ chặn mọi ping về sau và dead-man switch báo động giả vĩnh viễn.
 - Vì `02:58:10` có `/fail` và `02:59:10` có ping thành công, Healthchecks chuyển **DOWN → UP**
-  trong vòng 1 phút → email "is DOWN" và email "is UP (recovered)" phải tới hộp thư nhóm quanh
-  **09:58 và 09:59 giờ VN**. Đây là bằng chứng cho tiêu chí "ping lại → nhận email recovered";
-  ảnh chụp hộp thư cần được thêm vào thư mục này.
+  trong vòng 1 phút → dự kiến email "is DOWN"/"is UP" quanh 09:58–09:59 giờ VN. Email thật chụp
+  được lại đến từ một lần `clustering` ngừng ping sau đó, trong lúc đo #108 (container bị dừng
+  ~03:46–03:53 UTC = 10:46–10:53 giờ VN) — lúc đó Period trên Healthchecks đã đổi thành **1
+  phút**, không còn 5/3 như lần đo 2026-11-16. Email "is UP (recovered)" thật nhận lúc **10:52
+  giờ VN**, downtime 45 giây. Vẫn là bằng chứng hợp lệ cho tiêu chí "ping lại → nhận email
+  recovered" (worker ngừng ping thật → email thật), chỉ khác mốc giờ so với dự đoán ở trên.
 
 ### Việc còn phải làm bằng tay
 
-- [ ] Chụp 2 email quanh 09:58–09:59 ngày 2026-11-20 (giờ VN) lưu thành `email-recovered.png`.
+- [x] Chụp 2 email "is DOWN"/"is UP (recovered)" — `email-recovered.png`. Mốc thật **10:52
+  giờ VN**, Period 1 phút (không phải 09:58–09:59 như dự đoán ban đầu ở trên).
 - [ ] Chụp trang Healthchecks cho thấy sự kiện `fail` lúc 02:58:10 UTC.
 
 ### Giới hạn
