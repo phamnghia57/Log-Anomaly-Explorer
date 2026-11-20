@@ -64,19 +64,96 @@ trên volume `opensearch-data` nên **không mất**, nhưng chọn lúc không 
 
 ## Kết quả sau khi deploy
 
-_Chưa điền — chạy `verify-logging.sh` sau khi merge và deploy, rồi lưu output thành
-`logconfig-sau.txt` và điền bảng dưới._
+Đã chạy `verify-logging.sh` lúc **2026-11-20T03:34:20Z** trên bản deploy `38defc3`; output đầy đủ
+ở [logconfig-sau.txt](logconfig-sau.txt). **Cả 8 container đều đạt** tiêu chí
+`max-size=10m, max-file=3`, và dung lượng log tụt từ **4,8 MB** xuống **436 KB** sau khi recreate.
 
-| Container | `LogConfig` sau khi deploy |
-|---|---|
-| opensearch | |
-| ingestion | |
-| jaeger-init | |
-| jaeger | |
-| demo-app | |
-| clustering | |
-| query-api | |
-| gateway | |
+| Container   | `LogConfig` sau khi deploy                                     |
+| ----------- | ---------------------------------------------------------------- |
+| opensearch  | {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}  |
+| ingestion   | {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}  |
+| jaeger-init | {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}  |
+| jaeger      | {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}  |
+| demo-app    | {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}  |
+| clustering  | {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}  |
+| query-api   | {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}  |
+| gateway     | {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}  |
+
+# Evidence #109 - SAU khi dat logging driver
+
+# 2026-11-20T03:34:20Z tren VM log-anomaly-vps
+
+# GIT_SHA deployed = 38defc3
+
+# HEAD cua repo tren VM = 38defc3
+
+## docker compose config - khoi logging sau khi mo rong anchor
+
+so service co driver json-file tuong minh: 9
+
+## docker inspect LogConfig cua tung container (tieu chi nghiem thu)
+
+/prj2-clustering-1       OK             {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+/prj2-demo-app-1         OK             {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+/prj2-gateway-1          OK             {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+/prj2-ingestion-1        OK             {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+/prj2-jaeger-1           OK             {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+/prj2-opensearch-1       OK             {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+/prj2-query-api-1        OK             {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+
+## Ket luan: moi container da co max-size=10m max-file=3
+
+## Kich thuoc file log sau khi recreate
+
+412K    /var/lib/docker/containers
+
+## Jaeger dang chay dung image da ghim digest?
+
+jaegertracing/all-in-one:1.76.0@sha256:ab6f1a1f0fb49ea08bcd19f6b84f6081d0d44b364b6de148e1798eb5816bacac
+grep -c ':latest' docker-compose.yml -> 0
+
+## Health
+
+/health            : {"status":"ok","service":"query-api","storage":"opensearch","version":"38defc3"}
+/clustering/health : {"status":"ok","reason":null,"last_processed_at":"2026-11-20T03:34:10.024724+00:00"}
+
+# Evidence #109 - SAU khi dat logging driver
+
+# 2026-11-20T03:34:20Z tren VM log-anomaly-vps
+
+# GIT_SHA deployed = 38defc3
+
+# HEAD cua repo tren VM = 38defc3
+
+## docker compose config - khoi logging sau khi mo rong anchor
+
+so service co driver json-file tuong minh: 9
+
+## docker inspect LogConfig cua tung container (tieu chi nghiem thu)
+
+/prj2-clustering-1       OK             {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+/prj2-demo-app-1         OK             {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+/prj2-gateway-1          OK             {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+/prj2-ingestion-1        OK             {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+/prj2-jaeger-1           OK             {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+/prj2-opensearch-1       OK             {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+/prj2-query-api-1        OK             {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+
+## Ket luan: moi container da co max-size=10m max-file=3
+
+## Kich thuoc file log sau khi recreate
+
+412K    /var/lib/docker/containers
+
+## Jaeger dang chay dung image da ghim digest?
+
+jaegertracing/all-in-one:1.76.0@sha256:ab6f1a1f0fb49ea08bcd19f6b84f6081d0d44b364b6de148e1798eb5816bacac
+grep -c ':latest' docker-compose.yml -> 0
+
+## Health
+
+/health            : {"status":"ok","service":"query-api","storage":"opensearch","version":"38defc3"}
+/clustering/health : {"status":"ok","reason":null,"last_processed_at":"2026-11-20T03:34:10.024724+00:00"}
 
 Tiêu chí nghiệm thu của #109 cho phần này: `docker inspect <container> | grep -A3 LogConfig`
 cho thấy `max-size=10m`.
@@ -96,12 +173,12 @@ Hạ `RETENTION_DAYS` xuống để tạo ra `deleted > 0` sẽ **xoá dữ li�
 `delete_history_before` dùng (`range recorded_at < cutoff`) — xem
 [retention-count.txt](retention-count.txt):
 
-| `RETENTION_DAYS` | cutoff | Số điểm sẽ bị xoá | Trên tổng |
-|---|---|---|---|
-| 30 (đang chạy) | 2026-10-21 | **0** | 384 |
-| 20 | 2026-10-31 | 0 | 384 |
-| 10 | 2026-11-10 | **305** | 384 |
-| 5 | 2026-11-15 | **381** | 384 |
+| `RETENTION_DAYS` | cutoff     | Số điểm sẽ bị xoá | Trên tổng |
+| ------------------ | ---------- | ----------------------- | ----------- |
+| 30 (đang chạy)   | 2026-10-21 | **0**             | 384         |
+| 20                 | 2026-10-31 | 0                       | 384         |
+| 10                 | 2026-11-10 | **305**           | 384         |
+| 5                  | 2026-11-15 | **381**           | 384         |
 
 Kết luận: câu truy vấn **chọn đúng theo tuổi** — nó đang trả 0 vì chưa có điểm nào quá hạn, chứ
 không phải vì sai. `cluster-history` hiện 384 điểm / **118,3 kB**; với `WINDOW_SECONDS=60` và

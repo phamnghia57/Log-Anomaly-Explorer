@@ -1,0 +1,23 @@
+{
+  "status": "prepared_not_measured",
+  "verified_at": "2026-11-20T03:46:50.747267+00:00",
+  "base_url": "http://query-api:8002",
+  "bindings": {
+    "value-422": "a78b058d489d25cb",
+    "connection-502": "d096e58268883c9d",
+    "timeout-504": "bc2fad362a48590a",
+    "runtime-500": "bca2eea604629975"
+  },
+  "question_count": 20,
+  "sample_logs_limit": 5,
+  "catalog_sha256": "55cae32acac568be7a7c07180c838b53de84d4dfd208f264b3245c3c8c5581b8",
+  "catalog_hash_format": "UTF-8, ensure_ascii=False, indent=2, trailing LF",
+  "bad_schema": "runtime-500 anchor; no quarantine evidence was collected",
+  "files": {
+    "questions.json": "44478c94c13af28c0df039aaa46a1747bb09e81ef18c0d24687019d7ac4950ac",
+    "clusters/value-422.json": "95708a7443e71f015050855b87c8ba6a88a90cce6b5f5d831bfda0d92ad87bca",
+    "clusters/connection-502.json": "bd8e4cdd96fe21fc5414a796c92938518119fbb951b7681a2a34d1d731625aea",
+    "clusters/timeout-504.json": "16dcc864665da65d42f5738a0bb216b080da8766f1aeb0a5cf1f02457d21837e",
+    "clusters/runtime-500.json": "55d6a2d18a889b65aa2757b7256b96fa7f500ac051150af458821fe5a2892606"
+  }
+}

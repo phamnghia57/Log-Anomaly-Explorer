@@ -1,0 +1,3 @@
+config,so_cau,so_cau_loi_api,so_cau_co_telemetry,coverage,so_generation,generation_khong_ghep_duoc,tokens_in_tb,tokens_out_tb,tokens_total_tb,cost_tb_usd,cost_tong_usd,so_cau_co_cost,model_latency_tb_s,model_latency_p95_s,api_latency_tb_s,api_latency_p95_s,currency,cua_so_tu,cua_so_den
+MAX_TOOL_ROUNDS=1,20,0,20,20/20,20,0,1059.05,784.1,1843.15,0.001718,0.03435525,20,7.72655,10.075,7.7615,10.11,USD,2026-11-20T03:53:47.960354+00:00,2026-11-20T03:59:33.460484+00:00
+MAX_TOOL_ROUNDS=2,20,0,20,20/20,24,0,1714.0,889.6,2603.6,0.001979,0.0395748,20,8.3309,10.492,8.3645,10.53,USD,2026-11-20T03:59:37.906960+00:00,2026-11-20T04:05:35.476779+00:00

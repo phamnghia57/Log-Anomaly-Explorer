@@ -1,6 +1,12 @@
 # #108 — Assistant golden set: bàn giao phần Mạnh
 
-**Trạng thái: chuẩn bị câu hỏi/quy trình; chưa có kết quả runtime hoặc chấm điểm.**
+**Trạng thái: phần chạy đo đã xong (Nghĩa, 2026-11-20) — xem
+[measurement-nghia.md](measurement-nghia.md). Phần chấm điểm vẫn chưa làm.**
+
+> Tài liệu dưới đây là bản bàn giao gốc của Mạnh, giữ nguyên để đối chiếu. Các ô "pending" về
+> token/chi phí/độ trễ/coverage đã có số thật trong [langfuse-summary.csv](langfuse-summary.csv)
+> và [measurement-nghia.md](measurement-nghia.md); các ô về **điểm/60 và số câu lệch giữa hai
+> người chấm vẫn pending** vì rubric đòi hai người thật chấm độc lập.
 
 ## Đã chuẩn bị
 
