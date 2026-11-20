@@ -1,7 +1,20 @@
 # #108 — Assistant golden set: bàn giao phần Mạnh
 
 **Trạng thái: phần chạy đo đã xong (Nghĩa, 2026-11-20) — xem
-[measurement-nghia.md](measurement-nghia.md). Phần chấm điểm vẫn chưa làm.**
+[measurement-nghia.md](measurement-nghia.md). Đã có chấm AI tham khảo; chấm chính thức
+của hai người thật và adjudication vẫn pending.**
+
+## Tiến độ chấm tham khảo (2026-11-20)
+
+- [x] Codex (AI) đọc 40 câu và ghi điểm, lý do, dẫn chứng ở [ai-review/](ai-review/README.md).
+  Điểm AI: rounds=1 **55/60**, rounds=2 **56/60**; chưa phải điểm hai người chấm.
+- [x] Kiểm tra SHA-256 của 5 prepared artifacts, các ID/binding, tổng điểm và Langfuse.
+- [x] Xác nhận `connection-502-04` rỗng ở cả hai lượt từ Git blob gốc: mỗi lượt chỉ
+  **19/20 câu có nội dung** dù vẫn 0 lỗi API. Nguyên nhân rỗng chưa được xác nhận.
+- [ ] Hai người thật nộp bảng độc lập, đối chiếu và chốt adjudication; điểm/60 chính thức
+  và số câu lệch giữa hai người tiếp tục pending.
+
+Hai người nên hoàn tất bảng của mình trước khi xem bản AI tham khảo để hạn chế ảnh hưởng.
 
 > Tài liệu dưới đây là bản bàn giao gốc của Mạnh, giữ nguyên để đối chiếu. Các ô "pending" về
 > token/chi phí/độ trễ/coverage đã có số thật trong [langfuse-summary.csv](langfuse-summary.csv)
