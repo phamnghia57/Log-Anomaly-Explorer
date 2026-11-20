@@ -16,23 +16,25 @@ from __future__ import annotations
 
 import logging
 import time
-import uuid
 from collections import deque
 from threading import Lock
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 
-from fastapi import Body, Depends, FastAPI, HTTPException, Query
+from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query
 from fastapi.responses import JSONResponse
 
 from . import config
+from .idempotency import IdempotencyStore
+from .ingest_core import Result, handle_ingest, handle_ingest_batch
 from .retention import start_scheduler
 from .storage import LogStore, StorageError, build_store
-from .validator import validate_log
 
 logger = logging.getLogger("ingestion")
 
 store: LogStore = build_store()
+# VT-014: cache idempotency trong process (xem src/idempotency.py ve gioi han nhieu replica)
+idempotency = IdempotencyStore(config.IDEMPOTENCY_TTL_SECONDS)
 
 
 class SlidingWindowRateLimiter:
@@ -92,42 +94,27 @@ def health():
 
 
 @app.post("/ingest", status_code=202, dependencies=[Depends(allow_ingest_request)])
-def ingest(payload: dict = Body(...)):
-    errors = validate_log(payload)
-    if errors:
-        store.write_quarantine(payload, errors)
-        # api-contract.md: log sai schema -> 400, vao quarantine, khong vao index chinh
-        return JSONResponse(
-            status_code=400,
-            content={"accepted": False, "reason": "schema_validation_failed", "details": errors},
-        )
-
-    log_id = str(uuid.uuid4())
-    store.write_log(log_id, payload)
-    return {"accepted": True, "log_id": log_id}
+def ingest(payload: dict = Body(...),
+           idempotency_key: str | None = Header(None, alias="Idempotency-Key")):
+    return _to_response(handle_ingest(store, idempotency, payload, idempotency_key))
 
 
 @app.post("/ingest/batch", status_code=202, dependencies=[Depends(allow_ingest_request)])
-def ingest_batch(payload: list[dict] = Body(...)):
+def ingest_batch(payload: list[dict] = Body(...),
+                 idempotency_key: str | None = Header(None, alias="Idempotency-Key")):
     """Batch la JSON array; validate TOAN BO truoc khi ghi, invalid -> quarantine.
 
     Loi storage sau khi ghi co the la partial write (OpenSearch Bulk API),
     client can retry co kiem soat. Khong trung endpoint /ingest/bulk cua nhanh ca nhan.
     """
-    if not payload or len(payload) > config.INGEST_MAX_BATCH_SIZE:
-        raise HTTPException(status_code=400, detail=f"batch must contain 1..{config.INGEST_MAX_BATCH_SIZE} logs")
-    invalid = [{"index": i, "details": errors} for i, item in enumerate(payload)
-               if (errors := validate_log(item))]
-    if invalid:
-        for entry in invalid:
-            store.write_quarantine(payload[entry["index"]], entry["details"])
-        return JSONResponse(status_code=400, content={
-            "accepted": False, "reason": "schema_validation_failed", "errors": invalid,
-        })
-    items = [(str(uuid.uuid4()), log) for log in payload]
-    store.write_logs_batch(items)
-    return {"accepted": True, "accepted_count": len(items),
-            "log_ids": [log_id for log_id, _ in items]}
+    return _to_response(handle_ingest_batch(store, idempotency, payload, idempotency_key,
+                                            config.INGEST_MAX_BATCH_SIZE))
+
+
+def _to_response(result: Result) -> JSONResponse:
+    """Map Result (doc lap framework) -> HTTP response, giu nguyen status/body cu."""
+    return JSONResponse(status_code=result.status, content=result.body,
+                        headers=result.headers or None)
 
 
 def _parse_dt(value: str | None, name: str) -> str | None:

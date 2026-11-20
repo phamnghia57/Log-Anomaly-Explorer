@@ -1,0 +1,27 @@
+E        +      where {} = Result(status=400, body={'accepted': False, 'reason': 'schema_validation_failed', 'details': ["<root>: 'timestamp' is ...quired property", "<root>: 'span_id' is a required property", "<root>: 'message' is a required property"]}, headers={}).headers
+PASSED tests/test_idempotency.py::test_tc01_no_key_keeps_legacy_behavior
+PASSED tests/test_idempotency.py::test_tc02_new_valid_key_writes_once_and_maps_log_id
+PASSED tests/test_idempotency.py::test_tc07_boundary_valid_keys_accepted[len1]
+PASSED tests/test_idempotency.py::test_tc07_boundary_valid_keys_accepted[len128]
+PASSED tests/test_idempotency.py::test_tc07_boundary_valid_keys_accepted[charset]
+PASSED tests/test_idempotency.py::test_tc08_storage_failure_is_not_remembered_and_retry_writes_once
+PASSED tests/test_idempotency.py::test_timestamp_is_not_now_dependent
+FAILED tests/test_idempotency.py::test_tc03_replay_same_payload_returns_identical_response
+FAILED tests/test_idempotency.py::test_tc04_same_payload_different_key_order_is_same_request
+FAILED tests/test_idempotency.py::test_tc05_same_key_different_payload_is_409_without_write
+FAILED tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[empty]
+FAILED tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[blank]
+FAILED tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[len129]
+FAILED tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[space]
+FAILED tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[non-ascii]
+FAILED tests/test_idempotency.py::test_tc06_invalid_key_rejected_before_any_write[html]
+FAILED tests/test_idempotency.py::test_tc09_invalid_payload_replay_does_not_duplicate_quarantine
+FAILED tests/test_idempotency.py::test_tc10_batch_replay_writes_batch_once
+FAILED tests/test_idempotency.py::test_tc11_same_key_on_other_endpoint_is_409
+FAILED tests/test_idempotency.py::test_tc12_expired_key_is_processed_again_but_still_no_duplicate
+FAILED tests/test_idempotency.py::test_tc12b_key_still_valid_just_before_ttl
+FAILED tests/test_idempotency.py::test_tc13_150_concurrent_identical_requests_write_once
+FAILED tests/test_idempotency.py::test_tc14_restart_loses_cache_but_log_id_is_deterministic
+FAILED tests/test_idempotency.py::test_tc15_opensearch_receives_same_document_id_on_retry
+FAILED tests/test_idempotency.py::test_expired_records_are_purged_to_bound_memory
+18 failed, 7 passed in 0.26s

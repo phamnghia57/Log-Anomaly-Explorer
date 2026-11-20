@@ -1,0 +1,22 @@
+[order] 35 test id
+[order] reversed   rc=0  35 passed in 0.15s  (first=test_get_treats_expired_record_as_absent)
+[order] seed=1     rc=0  35 passed in 0.16s  (first=test_ttl_must_be_positive)
+[order] seed=2     rc=0  35 passed in 0.15s  (first=test_tc07_boundary_valid_keys_accepted[len1])
+[order] seed=3     rc=0  35 passed in 0.14s  (first=test_tc06_invalid_key_rejected_before_any_write[html])
+[order] seed=4     rc=0  35 passed in 0.15s  (first=test_ttl_must_be_positive)
+[order] seed=5     rc=0  35 passed in 0.18s  (first=test_tc13_150_concurrent_identical_requests_write_once)
+[order] seed=6     rc=0  35 passed in 0.15s  (first=test_get_treats_expired_record_as_absent)
+[order] seed=7     rc=0  35 passed in 0.14s  (first=test_tc01_no_key_keeps_legacy_behavior)
+[order] seed=8     rc=0  35 passed in 0.15s  (first=test_tc06_invalid_key_rejected_before_any_write[len129])
+[order] seed=9     rc=0  35 passed in 0.15s  (first=test_timestamp_is_not_now_dependent)
+[order] seed=10    rc=0  35 passed in 0.15s  (first=test_tc07_boundary_valid_keys_accepted[charset])
+[time] TZ=UTC                  rc=0  35 passed in 0.15s
+[time] TZ=Asia/Ho_Chi_Minh     rc=0  35 passed in 0.13s
+[time] TZ=Pacific/Kiritimati   rc=0  35 passed in 0.14s
+[time] TZ=America/Adak         rc=0  35 passed in 0.15s
+[concurrency] test_tc13_150_concurrent_identical_requests_write_once: 200 lan, fail=0, 7.1s
+[concurrency] test_tc13b_first_concurrent_request_fails_waiters_are_not_stuck: 200 lan, fail=0, 5.2s
+35 passed in 0.10s
+[network] socket.connect bi chan -> pytest rc=0
+
+KET QUA: order=OK, time=OK, concurrency=OK, network=OK

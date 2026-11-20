@@ -1,0 +1,12 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.18, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python3
+rootdir: /home/claude/src/Log-Anomaly-Explorer/ingestion
+plugins: platformdirs-4.13.5, anyio-4.15.1
+collecting ... collected 4 items
+
+tests/test_ingest_core.py::test_single_valid_is_202_and_stored PASSED    [ 25%]
+tests/test_ingest_core.py::test_single_invalid_is_400_and_quarantined_only PASSED [ 50%]
+tests/test_ingest_core.py::test_batch_all_or_nothing_and_size_limit PASSED [ 75%]
+tests/test_ingest_core.py::test_baseline_resubmit_creates_duplicate PASSED [100%]
+
+============================== 4 passed in 0.06s ===============================

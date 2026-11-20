@@ -1,0 +1,5 @@
+35 passed in 0.32s
+
+file                             line %   branch %  missing lines / partial branches
+idempotency.py                   100.0%      95.0%  missing=[] partial@[38]
+ingest_core.py                   100.0%      96.7%  missing=[] partial@[83]
