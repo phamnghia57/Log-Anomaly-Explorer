@@ -24,3 +24,7 @@ Thumbs.db
 load-tests/*.csv
 load-tests/*.html
 !load-tests/ket-qua-load-test*_stats.csv
+# File binding cluster cua golden set #108: chi ton tai tren VM (ID cum that),
+# va neu commit thi lan deploy sau se that bai o `git checkout` vi tren VM da
+# co mot ban untracked cung duong dan. Manifest trong prepared/ da luu bindings.
+docs/evidence/11-assistant-golden-set/cluster-bindings.local.json
