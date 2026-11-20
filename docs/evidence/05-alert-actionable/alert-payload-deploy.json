@@ -1,0 +1,36 @@
+{
+  "_ghi_chu": "Payload THAT ma worker tren ban deploy f21d294 gui cho webhook alert, bat luc 2026-11-20T03:11:xxZ tren VM log-anomaly-vps. Cach bat: tro RIENG container clustering vao mot HTTP server tam trong chinh container (ALERT_WEBHOOK_URL=http://localhost:8099/hook), nen KHONG co email nao duoc gui ra Make.com. Xem README.md muc 'Payload that tren ban deploy'.",
+  "headers": {
+    "Host": "localhost:8099",
+    "Accept": "*/*",
+    "Accept-Encoding": "gzip, deflate",
+    "Connection": "keep-alive",
+    "User-Agent": "python-httpx/0.28.1",
+    "Content-Length": "1044",
+    "Content-Type": "application/json"
+  },
+  "payload": {
+    "cluster_id": "37b7d10c238806e5",
+    "score": 45.0,
+    "service": "alert-payload-test",
+    "first_seen": "2026-11-20T03:10:00Z",
+    "signature": "simulated alert path check: deliberate webhook failure drill",
+    "incident_url": "https://log-anomaly-explorer.vercel.app/clusters/37b7d10c238806e5",
+    "trace_id": "01b1c7eda9684e89be51181af7bd4be8",
+    "alerts": [
+      {
+        "cluster_id": "37b7d10c238806e5",
+        "score": 45.0,
+        "service": "alert-payload-test",
+        "first_seen": "2026-11-20T03:10:00Z",
+        "signature": "simulated alert path check: deliberate webhook failure drill",
+        "incident_url": "https://log-anomaly-explorer.vercel.app/clusters/37b7d10c238806e5",
+        "trace_id": "01b1c7eda9684e89be51181af7bd4be8"
+      }
+    ],
+    "count": 1,
+    "window_to": "2026-11-20T03:11:00+00:00",
+    "subject": "Log Anomaly Explorer: 1 alerts",
+    "message": "Service: alert-payload-test\nCluster: 37b7d10c238806e5\nScore: 45.0\nSignature: simulated alert path check: deliberate webhook failure drill\nIncident: https://log-anomaly-explorer.vercel.app/clusters/37b7d10c238806e5\nFirst seen: 2026-11-20T03:10:00Z\nTrace: 01b1c7eda9684e89be51181af7bd4be8"
+  }
+}
