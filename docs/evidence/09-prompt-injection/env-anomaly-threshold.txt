@@ -1,0 +1,5 @@
+# docker compose exec query-api env | grep ANOMALY_THRESHOLD
+# tren VM 23.98.41.222, 2026-11-20T02:52:12Z, GIT_SHA deployed = 6d3e3bd
+ANOMALY_THRESHOLD=3.0
+# so sanh voi service clustering (phai BANG nhau):
+clustering ANOMALY_THRESHOLD=3.0
