@@ -178,14 +178,43 @@ Bộ câu hỏi gồm 4 câu mỗi nhóm value/422, connection/502, timeout/504,
 bad_schema. Nhóm bad_schema kiểm tra việc AI nêu thiếu dữ liệu quarantine; chưa đo khả
 năng điều tra quarantine trực tiếp.
 
-- `MAX_TOOL_ROUNDS=1` (không có tool): điểm/60, token, chi phí trung bình/câu, latency
-  trung bình/p95, số câu lệch giữa hai người chấm — **pending**.
-- `MAX_TOOL_ROUNDS=2` (tối đa một vòng tool rồi trả lời): các số đo trên — **pending**.
-- Khuyến nghị giữ 1 hay 2 và 2–3 dạng câu trả lời yếu nhất — **pending** đến khi Nghĩa
-  chạy Azure/Langfuse thật và hai người chấm độc lập, đối chiếu rồi chốt điểm.
+Đã chạy đo thật trên bản deploy `38defc3` ngày **2026-11-20** (`gpt-5-mini`, reasoning effort
+`low`, output cap 1200, ngữ cảnh đóng băng bằng cách stop `demo-app`). Cả hai lượt **20/20 câu,
+0 lỗi API**, coverage telemetry **20/20**. Chi tiết và cách đo:
+[measurement-nghia.md](../docs/evidence/11-assistant-golden-set/measurement-nghia.md).
 
-Đây là phần chuẩn bị của Mạnh, chưa chứng minh chất lượng hay chi phí thực tế. PR không
-đổi cấu hình mặc định 2; dữ liệu runtime và bảng chấm cuối sẽ được bổ sung sau.
+| Chỉ số | `MAX_TOOL_ROUNDS=1` | `MAX_TOOL_ROUNDS=2` | Chênh |
+|---|---|---|---|
+| Điểm/60 (hai người chấm) | **pending** | **pending** | |
+| Số câu lệch giữa hai người chấm | **pending** | **pending** | |
+| Lần gọi model / câu | 1,0 | 1,2 (4/20 câu dùng vòng tool) | +4 lần |
+| Token vào / câu | 1 059 | 1 714 | +61,8 % |
+| Token ra / câu | 784 | 890 | +13,5 % |
+| **Chi phí trung bình / câu** | **0,001718 USD** | **0,001979 USD** | **+15,2 %** |
+| **Độ trễ p95 (model, Langfuse)** | **10,08 s** | **10,49 s** | +4,1 % |
+| Độ trễ p95 (API đầu-cuối) | 10,11 s | 10,53 s | +4,2 % |
+
+**Khuyến nghị: giữ `ASSISTANT_MAX_TOOL_ROUNDS = 2`** (tức giữ mặc định hiện tại). Giá phải trả là
++0,000261 USD/câu và +0,41 s ở p95; đổi lại, những câu cần dữ liệu ngoài 5 log mẫu chỉ trả lời
+được ở cấu hình 2. Trên một cụm có trace còn sống, `rounds=2` nêu **đúng** HTTP status lấy từ
+trace **2/2 lần**, `rounds=1` **0/2 lần**. `rounds=2` cũng không gây gọi tool tràn lan: 16/20 câu
+vẫn trả lời thẳng từ log mẫu.
+
+Lưu ý khi đọc hai cột trên: ở hai lượt chính, **cả 4 lần gọi `get_trace` đều trả `trace not
+found`** vì 4 cụm golden có từ 2026-11-14 còn volume Badger của Jaeger mới tạo ở Task 10
+(`BADGER_SPAN_STORE_TTL=168h`). Khuyến nghị ở trên dựa vào một **phép đo bổ sung** trên cụm có
+trace sống, không dựa vào hai lượt đó. Hệ quả cần biết trước khi demo: `get_trace` luôn vô dụng
+với cụm cũ hơn 7 ngày.
+
+Ba dạng câu trả lời yếu nhất (bản đọc sơ bộ, chưa phải điểm chính thức): câu cần đọc trace/HTTP
+status; câu mà mô hình tự mô tả sai năng lực của nó (`rounds=1` nói "không có quyền truy cập
+tracing" dù hệ thống có tool `get_trace`); và câu về HTTP status nói chung — log của `demo-app`
+không ghi `http.status_code` (span có, log không), nên thêm trường đó vào `metadata` lúc
+`emit_log` sẽ đáng giá hơn mọi tinh chỉnh prompt. Nhóm `bad_schema` ngược lại trả lời **tốt**:
+4/4 câu từ chối khẳng định đã có sự kiện quarantine và không bịa `trace_id`.
+
+Điểm/60 còn **pending**: rubric đòi hai người thật chấm độc lập, bốn file `rater-*.csv` vẫn để
+trống có chủ đích. PR không đổi cấu hình mặc định 2.
 
 ## Evidence sở hữu
 

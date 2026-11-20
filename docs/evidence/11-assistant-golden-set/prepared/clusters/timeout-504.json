@@ -1,0 +1,119 @@
+{
+  "cluster_id": "bc2fad362a48590a",
+  "signature": "simulated downstream timeout",
+  "score": 5.616841128925527,
+  "status": "alerted",
+  "first_seen": "2026-11-14T08:24:00.340354+00:00",
+  "last_seen": "2026-11-14T08:24:26.732508+00:00",
+  "log_ids": [
+    "f5f2b37b-f66c-499d-a351-ea22b929c487",
+    "45a7f450-b12c-4760-8e67-f13b79699b9d",
+    "ec2547ae-53fa-4f93-a49f-3ee3bf4216e4",
+    "3e4ccd98-a0a7-4117-9972-31f86e3c6fc1",
+    "c14104d6-b4c5-4cf0-8112-9d90635c6076",
+    "ae7271a8-dd4b-453e-84f7-cebb02019b21",
+    "2a54248a-4675-432b-a19c-6c78a425c167",
+    "d0df8631-58a3-4434-985d-b4dc1b529335",
+    "68661a55-0761-4d25-b561-9eb23e03f674",
+    "62770088-e4a6-4222-ac6a-80a58694c4bf",
+    "9c345bc5-5ad7-44d0-bd1f-8d9606ffe6b4",
+    "b66df0c2-32ab-44b7-87b8-692145d9a6de",
+    "e9d5e7fa-2d14-4632-a40f-31505ea53c86",
+    "35d3f361-99cb-4d7c-95de-9db59f84845a",
+    "712af598-42ba-4728-8276-581c0df6c69c",
+    "89593daf-9cb8-49a3-9b2a-b7e98bda8ff8",
+    "a8571ce2-ac6f-4dbd-9d3d-43e05b19a37d",
+    "c89d51c8-30f2-49bf-9707-b5b66eb59184",
+    "7460d0a3-7b17-48e7-888e-abf0a66f16f9",
+    "923ec977-028b-4022-990b-10c781fcc3bb",
+    "2ce4d40a-c578-4eba-bbe4-b3123f1c240b",
+    "4a2be7b3-bbf6-45e1-8043-415cd510b311",
+    "3a7f2141-570c-4169-917a-5572721ca142",
+    "89802839-f1ba-43bc-9d2f-5f0e8b6c363c",
+    "64a93481-4872-457f-899f-43074dbea1b4",
+    "9660ed24-22d6-40ca-90aa-d4749a8da69b",
+    "b3c85828-8af1-424d-aea2-fa7d4461286c",
+    "4f9f7757-3b69-4da9-af4b-63bc56e22184",
+    "0d88d604-1f44-4e02-bbb2-6ad1bd21d162",
+    "10f896e8-bf50-48f8-862f-b09b500e1713",
+    "3f94bcf4-063a-4cbd-a1c6-c7f861d32cc7",
+    "315d5f56-ed29-4bba-a02b-efc476b52e7b",
+    "6ff40348-5450-46e9-972a-0fce5ea9bb57",
+    "41783830-6fb7-4df0-adfd-5ae622bd27bb",
+    "0e3a8725-cec6-4c95-8e45-d9f12bb28295",
+    "56f87e2b-25ce-4f02-90b9-bfc67cfb2372"
+  ],
+  "logs": [
+    {
+      "timestamp": "2026-11-14T08:24:00.340354+00:00",
+      "level": "ERROR",
+      "service": "demo-web",
+      "trace_id": "ba3b49cc8ef20431d92138caaba0cc98",
+      "span_id": "f25cf7135be73258",
+      "message": "Simulated downstream timeout",
+      "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+      "metadata": {
+        "platform": "web",
+        "error_type": "runtime"
+      },
+      "log_id": "f5f2b37b-f66c-499d-a351-ea22b929c487"
+    },
+    {
+      "timestamp": "2026-11-14T08:24:01.160671+00:00",
+      "level": "ERROR",
+      "service": "demo-web",
+      "trace_id": "500cd5f03131427a227c9b162ae93be7",
+      "span_id": "82fd38c2b6f9262f",
+      "message": "Simulated downstream timeout",
+      "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+      "metadata": {
+        "platform": "web",
+        "error_type": "runtime"
+      },
+      "log_id": "45a7f450-b12c-4760-8e67-f13b79699b9d"
+    },
+    {
+      "timestamp": "2026-11-14T08:24:01.955841+00:00",
+      "level": "ERROR",
+      "service": "demo-web",
+      "trace_id": "9e4dbdc0993fbd1aafdee561cfbf297b",
+      "span_id": "5b5e5eddc35f91be",
+      "message": "Simulated downstream timeout",
+      "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+      "metadata": {
+        "platform": "web",
+        "error_type": "runtime"
+      },
+      "log_id": "ec2547ae-53fa-4f93-a49f-3ee3bf4216e4"
+    },
+    {
+      "timestamp": "2026-11-14T08:24:02.599575+00:00",
+      "level": "ERROR",
+      "service": "demo-web",
+      "trace_id": "5649e02efeb073870bfaf335b2cd8e1c",
+      "span_id": "ede03c28248a5980",
+      "message": "Simulated downstream timeout",
+      "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+      "metadata": {
+        "platform": "web",
+        "error_type": "runtime"
+      },
+      "log_id": "3e4ccd98-a0a7-4117-9972-31f86e3c6fc1"
+    },
+    {
+      "timestamp": "2026-11-14T08:24:03.354194+00:00",
+      "level": "ERROR",
+      "service": "demo-web",
+      "trace_id": "73f083da36c2254bf9792d7c122a3458",
+      "span_id": "eff1b692a1709eb4",
+      "message": "Simulated downstream timeout",
+      "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 107, in _inject_fault\n    raise TimeoutError(\"Simulated downstream timeout\")\nTimeoutError: Simulated downstream timeout\n",
+      "metadata": {
+        "platform": "web",
+        "error_type": "runtime"
+      },
+      "log_id": "c14104d6-b4c5-4cf0-8112-9d90635c6076"
+    }
+  ],
+  "logs_total": 36
+}

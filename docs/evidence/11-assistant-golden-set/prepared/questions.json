@@ -1,0 +1,162 @@
+[
+  {
+    "id": "value-422-01",
+    "category": "value-422",
+    "cluster_ref": "value-422",
+    "cluster_id": "a78b058d489d25cb",
+    "question": "Lỗi trong cụm này nằm ở tầng nào? Dữ liệu hiện có cho phép kết luận gì về nguyên nhân?",
+    "expected": "Lỗi validate dữ liệu đầu vào ở tầng nghiệp vụ/ứng dụng; message thật là 'Simulated validation failure: required item data is invalid', metadata.error_type=value trong snapshot. HTTP 422 là đáp án của fault demo theo _inject_fault, chỉ khẳng định status quan sát được khi có trace chứng minh. Dẫn message hoặc trace_id thật; không khẳng định DNS, database hay hạ tầng hỏng."
+  },
+  {
+    "id": "value-422-02",
+    "category": "value-422",
+    "cluster_ref": "value-422",
+    "cluster_id": "a78b058d489d25cb",
+    "question": "Chỉ ra một message hoặc trace_id làm bằng chứng cho nhận định về lỗi này, và giải thích bằng chứng đó cho thấy điều gì.",
+    "expected": "Dẫn nguyên message validate hoặc trace_id có trong snapshot/nhật ký tool của lượt hỏi; giải thích dữ liệu đầu vào không hợp lệ. Không bịa order ID, trường bị thiếu hay nội dung request vì log không có các chi tiết đó."
+  },
+  {
+    "id": "value-422-03",
+    "category": "value-422",
+    "cluster_ref": "value-422",
+    "cluster_id": "a78b058d489d25cb",
+    "question": "Dựa trên trace của một request trong cụm, có xác định được HTTP status trả về không? Nếu không đọc được trace thì hãy nói rõ giới hạn.",
+    "expected": "Tầng lỗi là validate nghiệp vụ; HTTP 422 là ground truth của fault demo. Nếu get_trace trả span có status thì dẫn trace_id và status thật; nếu không có tool/trace/status thì nêu chưa xác minh HTTP status từ dữ liệu, không đoán một trace hoặc nội dung span."
+  },
+  {
+    "id": "value-422-04",
+    "category": "value-422",
+    "cluster_ref": "value-422",
+    "cluster_id": "a78b058d489d25cb",
+    "question": "Có đủ bằng chứng nói database mất kết nối hoặc một lần deploy gây ra cụm lỗi này không? Nên kiểm tra gì tiếp theo?",
+    "expected": "Không đủ bằng chứng cho lỗi database hay deploy; thông tin quan sát chỉ hỗ trợ lỗi validate đầu vào. Dẫn message/trace thật và đề xuất kiểm tra payload/quy tắc validation dưới dạng bước kiểm tra, không mô tả chúng như nguyên nhân đã xác nhận."
+  },
+  {
+    "id": "connection-502-01",
+    "category": "connection-502",
+    "cluster_ref": "connection-502",
+    "cluster_id": "d096e58268883c9d",
+    "question": "Lỗi trong cụm này thuộc tầng nào và phụ thuộc phía sau đang gặp vấn đề gì theo log?",
+    "expected": "Downstream dependency không truy cập được, metadata.error_type=connection, message 'Simulated connection failure: downstream dependency unreachable'. HTTP 502 là ground truth của fault demo; chỉ gọi là status quan sát khi trace xác nhận. Không kết luận DNS, firewall hoặc host cụ thể bị hỏng nếu chưa có bằng chứng."
+  },
+  {
+    "id": "connection-502-02",
+    "category": "connection-502",
+    "cluster_ref": "connection-502",
+    "cluster_id": "d096e58268883c9d",
+    "question": "Trích một bằng chứng cụ thể cho kết luận về kết nối, phân biệt điều đã thấy với nguyên nhân mới chỉ là giả thuyết.",
+    "expected": "Dẫn message connection failure, stack ConnectError hoặc trace_id thật. Điều quan sát là kết nối downstream không tới được; DNS/network policy/service chết chỉ là các giả thuyết kiểm tra, không phải sự thật đã chứng minh."
+  },
+  {
+    "id": "connection-502-03",
+    "category": "connection-502",
+    "cluster_ref": "connection-502",
+    "cluster_id": "d096e58268883c9d",
+    "question": "Hãy đọc trace của một request trong cụm nếu công cụ có sẵn: bước nào lỗi và HTTP status nào được ghi nhận?",
+    "expected": "Sử dụng trace_id thật; nếu get_trace có span lỗi/status thì trích đúng service, operation và status đó. Lỗi connection có HTTP 502 theo fault demo. Không có tool hoặc trace không tìm thấy thì nêu chưa biết span/status quan sát, không bịa service hay gán tên downstream.invalid thành sự cố mạng thật đã xác minh."
+  },
+  {
+    "id": "connection-502-04",
+    "category": "connection-502",
+    "cluster_ref": "connection-502",
+    "cluster_id": "d096e58268883c9d",
+    "question": "Có thể khẳng định cấu hình DNS sai là nguyên nhân gốc không? Hãy đề xuất các bước xác minh dựa trên cụm này.",
+    "expected": "Chưa thể khẳng định DNS sai; dữ liệu hỗ trợ lỗi truy cập downstream ở tầng hạ tầng/kết nối. Dẫn bằng chứng thật và đề xuất kiểm tra sức khỏe downstream, DNS, network policy với cách diễn đạt là việc cần xác minh."
+  },
+  {
+    "id": "timeout-504-01",
+    "category": "timeout-504",
+    "cluster_ref": "timeout-504",
+    "cluster_id": "bc2fad362a48590a",
+    "question": "Loại lỗi trong cụm này là gì? Có nên coi đây là lỗi ứng dụng thông thường chỉ vì tên error_type không?",
+    "expected": "Nhận ra downstream timeout/chậm từ message 'Simulated downstream timeout' hoặc stack TimeoutError dù metadata.error_type=runtime. HTTP 504 là ground truth của fault timeout demo; không suy ra HTTP 500 chỉ từ error_type=runtime. Dẫn message/trace thật."
+  },
+  {
+    "id": "timeout-504-02",
+    "category": "timeout-504",
+    "cluster_ref": "timeout-504",
+    "cluster_id": "bc2fad362a48590a",
+    "question": "Nêu bằng chứng cho việc request bị timeout; có thể xác định chính xác độ trễ của request chỉ từ log mẫu không?",
+    "expected": "Dẫn message timeout/stack hoặc trace_id thật. Log mẫu không chứa số thời gian đo đủ để khẳng định latency cụ thể; chỉ nêu duration nếu có span thật từ get_trace. Không biến thời gian sleep trong mã demo hoặc một số tự đoán thành thời gian quan sát."
+  },
+  {
+    "id": "timeout-504-03",
+    "category": "timeout-504",
+    "cluster_ref": "timeout-504",
+    "cluster_id": "bc2fad362a48590a",
+    "question": "Dùng trace của một request trong cụm để xác minh span chậm hoặc lỗi và HTTP status; nếu không tìm thấy trace thì kết luận được đến đâu?",
+    "expected": "Lỗi quan sát là downstream timeout; dùng trace_id thật và chỉ nêu span/duration/status có trong kết quả tool. Status ground truth là 504. Không tìm thấy trace thì nói có thể quá TTL/chưa thu thập, không kết luận request chưa từng xảy ra và không bịa duration."
+  },
+  {
+    "id": "timeout-504-04",
+    "category": "timeout-504",
+    "cluster_ref": "timeout-504",
+    "cluster_id": "bc2fad362a48590a",
+    "question": "Chỉ với bằng chứng này đã nên tăng timeout ngay hay kết luận downstream quá tải chưa? Hãy giải thích và đề xuất bước tiếp theo.",
+    "expected": "Timeout được log xác nhận, quá tải chỉ là giả thuyết. Dẫn message/trace thật; đề xuất kiểm tra latency/tải downstream, cấu hình timeout hoặc circuit breaker. Không khẳng định nguyên nhân tải cao hay một giá trị timeout tối ưu khi chưa đo."
+  },
+  {
+    "id": "runtime-500-01",
+    "category": "runtime-500",
+    "cluster_ref": "runtime-500",
+    "cluster_id": "bca2eea604629975",
+    "question": "Nguyên nhân quan sát được của cụm này nằm ở tầng nào? Hãy nêu bằng chứng.",
+    "expected": "Lỗi runtime ở tầng ứng dụng, message 'Simulated runtime failure', stack RuntimeError và metadata.error_type=runtime. HTTP 500 là ground truth của fault runtime demo; không nhầm với timeout/504 hoặc lỗi validate/422. Dẫn message hay trace_id thật."
+  },
+  {
+    "id": "runtime-500-02",
+    "category": "runtime-500",
+    "cluster_ref": "runtime-500",
+    "cluster_id": "bca2eea604629975",
+    "question": "Hãy dẫn một message hoặc trace_id liên quan, và chỉ rõ log có cho biết dòng mã hay bản deploy gây lỗi không.",
+    "expected": "Dẫn message/trace_id thật; stack chỉ hỗ trợ lỗi RuntimeError mô phỏng. Không bịa đường dẫn/dòng mã ngoài stack được cung cấp, commit hay bản deploy; Assistant không có công cụ đọc Git/deploy."
+  },
+  {
+    "id": "runtime-500-03",
+    "category": "runtime-500",
+    "cluster_ref": "runtime-500",
+    "cluster_id": "bca2eea604629975",
+    "question": "Nếu có thể đọc trace của một request trong cụm, span nào lỗi và HTTP status nào được ghi nhận?",
+    "expected": "Dùng trace_id thật và trích đúng span/status mà tool trả về; status ground truth của fault runtime là 500. Nếu tool không có hoặc trace mất thì thừa nhận chưa xác minh được span/status quan sát, vẫn có thể dẫn message runtime thật."
+  },
+  {
+    "id": "runtime-500-04",
+    "category": "runtime-500",
+    "cluster_ref": "runtime-500",
+    "cluster_id": "bca2eea604629975",
+    "question": "Có đủ dữ liệu chỉ ra commit gây lỗi và khẳng định rollback sẽ giải quyết không?",
+    "expected": "Không có dữ liệu Git/deploy để chỉ ra commit hay bảo đảm rollback thành công. Tầng lỗi quan sát là ứng dụng/runtime; dẫn message/trace thật. Rollback chỉ là phương án cần đối chiếu với lịch sử triển khai thực, không phải cách sửa đã được chứng minh."
+  },
+  {
+    "id": "bad_schema-01",
+    "category": "bad_schema",
+    "cluster_ref": "runtime-500",
+    "cluster_id": "bca2eea604629975",
+    "question": "Từ dữ liệu cụm này, có đủ bằng chứng kết luận có log đầu vào bị từ chối vì sai schema không?",
+    "expected": "Không đủ bằng chứng về sự kiện sai schema/quarantine; ngữ cảnh neo chỉ có runtime ở tầng ứng dụng, không phải log bị ingestion từ chối. Dẫn message runtime thật để làm rõ giới hạn. bad_schema là nhóm kiểm tra ranh giới dữ liệu, không được khẳng định một sự kiện quarantine đã xảy ra."
+  },
+  {
+    "id": "bad_schema-02",
+    "category": "bad_schema",
+    "cluster_ref": "runtime-500",
+    "cluster_id": "bca2eea604629975",
+    "question": "Có thể chỉ ra trường nào của payload bị ingestion từ chối từ những log đang thấy không? Nếu chưa biết thì cần thêm dữ liệu gì?",
+    "expected": "Không thể xác định trường bị từ chối từ cluster runtime. Phân biệt lỗi ứng dụng đang thấy với kiểm tra schema tại ingestion; dẫn message runtime thật và yêu cầu payload/quarantine hoặc lỗi validation. Không bịa trường level=CRITICAL trong một payload chưa được quan sát."
+  },
+  {
+    "id": "bad_schema-03",
+    "category": "bad_schema",
+    "cluster_ref": "runtime-500",
+    "cluster_id": "bca2eea604629975",
+    "question": "Cụm hiện tại có cho phép xác nhận HTTP status mà ingestion trả khi từ chối payload hay không?",
+    "expected": "Không xác nhận được HTTP status của một yêu cầu ingestion bị từ chối từ cluster runtime. HTTP 500 của runtime hoặc 502 mà demo có thể trả không chứng minh status ingestion. Dẫn bằng chứng runtime thật và nêu cần response/validation evidence của ingestion."
+  },
+  {
+    "id": "bad_schema-04",
+    "category": "bad_schema",
+    "cluster_ref": "runtime-500",
+    "cluster_id": "bca2eea604629975",
+    "question": "Nếu không thấy log bị từ chối trong cụm này, có thể kết luận hệ thống chưa từng nhận payload sai schema và đưa ra trace_id của lần bị từ chối không?",
+    "expected": "Không thấy trong cluster không chứng minh chưa từng có payload sai schema: quarantine nằm ngoài ngữ cảnh/tool hiện có. Không được tạo trace_id hay số lượng quarantine. Dẫn message/trace runtime thật như bằng chứng về dữ liệu đang có, nêu cần kiểm tra quarantine độc lập."
+  }
+]

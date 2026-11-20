@@ -1,0 +1,127 @@
+{
+  "cluster_id": "d096e58268883c9d",
+  "signature": "simulated connection failure: downstream dependency unreachable",
+  "score": 9.086576787329294,
+  "status": "alerted",
+  "first_seen": "2026-11-14T08:22:00.395436+00:00",
+  "last_seen": "2026-11-14T08:22:22.488733+00:00",
+  "log_ids": [
+    "be4e2642-40f0-4426-93af-e87b568afbc2",
+    "f89c06fa-346a-4ca7-85a0-c0c96e924046",
+    "fccccbc5-127b-4bb0-866d-91ec6eed7437",
+    "abc0ea22-422d-4031-8d52-508144cb45d5",
+    "f47e9d22-33fe-4fdf-98ca-b5df8d53be39",
+    "81a06763-ed92-4332-9d03-19dfce85a27e",
+    "8a7e4ae1-9b03-4606-a2f4-acdd92189dd8",
+    "449a6ec9-708c-46fe-b31b-f3304e20a211",
+    "8ce09fdd-bf0e-4300-a623-9dc13e635d73",
+    "95f96946-568f-47ce-828f-181c67277ff7",
+    "0a8dfb42-6832-4b2b-874b-c834effd68d1",
+    "d094f0fb-df58-4257-a118-3b844a90eaed",
+    "dea73694-3dc8-4941-9865-02eed5ea4fc4",
+    "2bf95558-8000-40e0-9f0c-5beab5e3c890",
+    "0c4e5c88-af6e-46de-aa36-fadb292bd120",
+    "4314baed-1d51-4c08-95a4-105648979041",
+    "e7dd147a-32d7-4023-8a27-0846b7381207",
+    "abb433b6-a22c-45af-a11e-468af172eaf5",
+    "aef4fa9c-0926-4c32-a0ea-bc686bd03ed5",
+    "0e68c9d7-4e4a-40f5-bcb5-50c962749857",
+    "3d2cf3cb-afe8-48d4-879e-b4bccfd2ee17",
+    "684d3558-76b5-44a3-8af2-2f4fc86186e9",
+    "19f003b5-9ba5-4093-a74d-e072841e0082",
+    "a06ab791-8d8a-42e8-925e-40fae5735ca5",
+    "9ccf59c6-ba57-4bd5-ace5-f488869193f2",
+    "9de900e5-6a08-4d03-8f56-d214ba55a3f2",
+    "02989966-0cc8-401b-94f3-c6906ac36dc7",
+    "6b380276-84b5-4cd9-a83c-f56cd67ac512",
+    "3538088c-7eeb-482d-a4ad-6e130d7015db",
+    "6e04c29b-b47c-41a9-a7d3-2a9915df9b47",
+    "dcb29c07-6217-4423-9263-316ad87ebb18",
+    "d447481b-2b49-4326-a745-8f2f7ccf5b7f",
+    "ef62a549-7af9-4a3a-9377-40a84715c727",
+    "75e683e4-4aa0-4ee7-82b6-9d76288c1687",
+    "1280a78e-a342-4954-80e2-2b33a995b81b",
+    "7ac4a966-efc8-4cb1-ba52-20f67066b843",
+    "bbf1bac5-f9aa-430b-9080-b78415423ad0",
+    "51e1de51-026b-43f5-81f7-f5ae97ebb80b",
+    "f48cf7e6-6e59-4435-a41d-7d47aa837bc4",
+    "5e473701-1e8a-4f28-ae0a-3b0b6075d063",
+    "a9da4932-c450-400a-a904-36a4651268dc",
+    "a35ef224-eacf-4b8b-b620-fb0cca4fd21c",
+    "543fb51e-e605-4788-a485-3bab169debf5",
+    "adc0c771-af72-4392-80e9-f46ef9960d1d"
+  ],
+  "logs": [
+    {
+      "timestamp": "2026-11-14T08:22:20.000961+00:00",
+      "level": "ERROR",
+      "service": "demo-web",
+      "trace_id": "68f37a1b1ffa7cea45785437c1aae5ae",
+      "span_id": "0e6d461a81e26b7b",
+      "message": "Simulated connection failure: downstream dependency unreachable",
+      "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+      "metadata": {
+        "platform": "web",
+        "error_type": "connection"
+      },
+      "log_id": "be4e2642-40f0-4426-93af-e87b568afbc2"
+    },
+    {
+      "timestamp": "2026-11-14T08:22:20.433246+00:00",
+      "level": "ERROR",
+      "service": "demo-web",
+      "trace_id": "33aef6c0a76a76f2dbb9080003f9cb6b",
+      "span_id": "6354d9a626999edc",
+      "message": "Simulated connection failure: downstream dependency unreachable",
+      "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+      "metadata": {
+        "platform": "web",
+        "error_type": "connection"
+      },
+      "log_id": "f89c06fa-346a-4ca7-85a0-c0c96e924046"
+    },
+    {
+      "timestamp": "2026-11-14T08:22:21.111913+00:00",
+      "level": "ERROR",
+      "service": "demo-web",
+      "trace_id": "ded7dcc69e02e80ca9025622c652589d",
+      "span_id": "ef9bcabd4a0dde69",
+      "message": "Simulated connection failure: downstream dependency unreachable",
+      "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+      "metadata": {
+        "platform": "web",
+        "error_type": "connection"
+      },
+      "log_id": "fccccbc5-127b-4bb0-866d-91ec6eed7437"
+    },
+    {
+      "timestamp": "2026-11-14T08:22:21.549533+00:00",
+      "level": "ERROR",
+      "service": "demo-web",
+      "trace_id": "54e2da120d96b7e3356f32a87b65d9b8",
+      "span_id": "7f64bee91979345e",
+      "message": "Simulated connection failure: downstream dependency unreachable",
+      "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+      "metadata": {
+        "platform": "web",
+        "error_type": "connection"
+      },
+      "log_id": "abc0ea22-422d-4031-8d52-508144cb45d5"
+    },
+    {
+      "timestamp": "2026-11-14T08:22:22.062668+00:00",
+      "level": "ERROR",
+      "service": "demo-web",
+      "trace_id": "e711fb6cd5465d9c688e464d0733c9b0",
+      "span_id": "05b3036ba6981f49",
+      "message": "Simulated connection failure: downstream dependency unreachable",
+      "stack_trace": "Traceback (most recent call last):\n  File \"/app/demo-app/src/main.py\", line 94, in _inject_fault\n    raise httpx.ConnectError(\nhttpx.ConnectError: Simulated connection refused by downstream dependency\n",
+      "metadata": {
+        "platform": "web",
+        "error_type": "connection"
+      },
+      "log_id": "f47e9d22-33fe-4fdf-98ca-b5df8d53be39"
+    }
+  ],
+  "logs_total": 44
+}
