@@ -28,3 +28,9 @@ load-tests/*.html
 # va neu commit thi lan deploy sau se that bai o `git checkout` vi tren VM da
 # co mot ban untracked cung duong dan. Manifest trong prepared/ da luu bindings.
 docs/evidence/11-assistant-golden-set/cluster-bindings.local.json
+
+# Backup OpenSearch snapshot + tar clustering-data (deploy/backup.sh): chua hash
+# mat khau va du lieu that, nang vai tram MB -> khong bao gio commit.
+backups/
+# Cau hinh rieng cua job backup tren VM (dich rsync, URL ping)
+deploy/backup.env

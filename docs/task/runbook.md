@@ -291,7 +291,8 @@ service nào), nạp lại gateway, rồi chờ tối đa 60 giây để `/healt
 Ba điều cần biết:
 
 - Script **không** đụng tới `jaeger` và `opensearch`. Jaeger giữ trace trong RAM nên recreate là
-  mất hết; deploy không được phép xoá dữ liệu điều tra.
+  mất hết; deploy không được phép xoá dữ liệu điều tra. Hệ quả: khi `docker-compose.yml` đổi cấu
+  hình OpenSearch (vd. `path.repo`), phải recreate tay — xem mục "Khi mất dữ liệu / restore".
 - Sau khi chạy, repo ở trạng thái **detached HEAD** tại đúng commit đã deploy. Đó là cố ý: VM không
   phải chỗ để code, và nó loại luôn bẫy "`git checkout main` nhưng local `main` đang cũ". Muốn
   xem đang ở đâu: `git rev-parse --short HEAD`.
@@ -369,6 +370,136 @@ nếu đúng mật khẩu mà vẫn 401, kiểm tra `docker exec <gateway> env |
 Đổi mật khẩu: tạo hash mới (lệnh trong `.env.example`), sửa `.env` — hash phải bọc **nháy đơn**
 vì có ký tự `$` — rồi `docker compose up -d --force-recreate gateway` (đổi biến môi trường cần
 recreate, `restart` không đủ).
+
+## Khi mất dữ liệu / restore
+
+Volume `opensearch-data` và `clustering-data` là bản duy nhất của dữ liệu **không tái tạo được**.
+`docker compose down -v`, đĩa hỏng hay mất VM mà không có backup là mất toàn bộ lịch sử sự cố và
+tài khoản. Backup hằng đêm bằng [`deploy/backup.sh`](../../deploy/backup.sh).
+
+| Dữ liệu | Có trong backup | Mất thì sao |
+|---|---|---|
+| `users` | snapshot | không đăng nhập được, phải seed lại |
+| `clusters-incidents` | snapshot | mất trạng thái tiếp nhận/đóng + nhãn "sự cố thật / báo động giả" (precision/recall) |
+| `cluster-history`, `clusters` | snapshot | mất biểu đồ xu hướng, danh sách cụm |
+| `assistant-conversations` | snapshot | mất lịch sử điều tra |
+| `auth-sessions`, `auth-login-limits`, `clusters-heartbeat`, `clusters-alert-state` | snapshot (nhỏ) | bị đăng xuất / cooldown reset — chấp nhận được |
+| `clustering-data/ml_templates.json` | tar `backups/clustering-data/` | `cluster_id` của các cụm đã gộp bị đổi |
+| `logs`, `logs-*` (gồm `logs-quarantine`) | **không** — cố ý | log demo sinh lại được, là phần nặng nhất. Sau restore, Incident View của cụm cũ có trạng thái incident nhưng danh sách log gốc rỗng |
+| Jaeger Badger, `caddy-data` | **không** | trace demo tạo lại được; Caddy tự xin lại chứng chỉ |
+
+Snapshot dùng pattern `*,-.*,-logs,-logs-*,-storm-*` và `include_global_state=false`. Lưu ý
+`*,-logs-*` như mô tả ban đầu của issue **vẫn lấy index `logs` cũ** (legacy, trước khi tách theo
+ngày), nên phải loại thêm `-logs`. Script tự kiểm và báo lỗi nếu snapshot có index log.
+
+### Cài lần đầu trên VM (ngoài giờ demo — phải restart OpenSearch)
+
+```bash
+cd ~/prj2
+git pull --ff-only     # hoac ./deploy/deploy.sh main
+mkdir -p backups/os backups/clustering-data
+sudo chown -R 1000:1000 backups/os          # UID cua user `opensearch` trong image
+docker compose up -d --no-deps --force-recreate opensearch
+docker compose exec opensearch curl -s localhost:9200/_nodes/settings?filter_path=**.path.repo
+#   -> phai thay "repo":["/snapshots"]
+docker compose exec opensearch curl -XPUT localhost:9200/_snapshot/nightly \
+  -H 'Content-Type: application/json' \
+  -d '{"type":"fs","settings":{"location":"/snapshots"}}'
+bash deploy/backup.sh                       # lan dau, xem output
+du -sh backups/os                           # gia dinh < 1 GB, ghi so that vao evidence
+bash deploy/backup.sh --list                # danh sach snapshot + indices
+```
+
+- Không `chown` mà để Docker tự tạo `backups/os` thì thư mục thuộc root và đăng ký repo báo
+  `location is not accessible` / `AccessDeniedException`.
+- `deploy.sh` **không** recreate OpenSearch, nên thêm/đổi `path.repo` phải chạy tay lệnh
+  `--force-recreate opensearch` ở trên. OpenSearch down ~30–60 giây; ingestion trả 503 trong lúc đó.
+- Sau `--force-recreate opensearch`, container `ingestion` / `query-api` tự kết nối lại; kiểm tra
+  bằng `curl -s localhost:9002/health`.
+
+Cron (VM chạy UTC; 19:17 UTC = 02:17 giờ VN, ngoài giờ demo):
+
+```bash
+crontab -e
+# them dong (doi /home/azureuser theo user that):
+17 19 * * * bash /home/azureuser/prj2/deploy/backup.sh >> /home/azureuser/prj2/backups/backup.log 2>&1
+```
+
+Cấu hình riêng (đích rsync, URL Healthchecks cho job backup) đặt trong `deploy/backup.env`
+(copy từ `deploy/backup.env.example`, không commit). Không có `BACKUP_REMOTE` thì bản backup chỉ
+nằm trên VM — chống được `down -v` nhưng **không** chống mất VM; khi đó máy một thành viên phải
+kéo về hằng ngày:
+
+```bash
+deploy/pull-backup.sh azureuser@<vm-ip> prj2 ./backups   # in ls -la + du -sh tren may dich
+```
+
+Kiểm tra hằng ngày: `tail -20 backups/backup.log`, `bash deploy/backup.sh --list`. Snapshot cũ hơn
+7 ngày bị xoá tự động nhưng luôn giữ ít nhất 2 bản mới nhất — bước xoá là **bắt buộc**, không phải
+tuỳ chọn, vì snapshot chiếm đĩa chung với OpenSearch (xem Task 12).
+
+### Restore trên VM khi mất dữ liệu
+
+Chỉ làm khi đã chắc dữ liệu hiện tại hỏng/mất. **Không** restore đè lên index đang mở.
+
+```bash
+cd ~/prj2
+# 0. VM moi: clone repo, cai .env, chep backup tu ban ngoai VM vao ~/prj2/backups
+#    (scp -r backups azureuser@<vm-moi>:prj2/), roi sudo chown -R 1000:1000 backups/os
+# 1. Dung moi thu ghi vao OpenSearch
+docker compose stop demo-app ingestion clustering query-api
+# 2. OpenSearch (volume moi hoac cu)
+docker compose up -d opensearch
+docker compose exec opensearch curl -XPUT localhost:9200/_snapshot/nightly \
+  -H 'Content-Type: application/json' -d '{"type":"fs","settings":{"location":"/snapshots"}}'
+bash deploy/backup.sh --list                       # chon ban SUCCESS moi nhat
+# 3. Index nao con ton tai (vd. users rong do query-api vua tao) phai xoa truoc:
+docker compose exec opensearch curl -s 'localhost:9200/_cat/indices?v'
+docker compose exec opensearch curl -XDELETE 'localhost:9200/users,auth-sessions'   # CHI cac index se restore
+# 4. Restore
+docker compose exec opensearch curl -XPOST \
+  'localhost:9200/_snapshot/nightly/<ten-snapshot>/_restore?wait_for_completion=true' \
+  -H 'Content-Type: application/json' -d '{"indices":"*","include_global_state":false}'
+# 5. State TF-IDF
+vol=$(docker volume ls -q | grep -E '(^|_)clustering-data$')
+docker run --rm -v "$vol:/data" -v "$PWD/backups/clustering-data:/in:ro" caddy:2.8-alpine \
+  sh -ec 'tar xzf /in/<clustering-data-...tar.gz> -C /data && chown -R 1000:1000 /data'
+# 6. Bat lai (VM moi: ./deploy/deploy.sh main de build image)
+docker compose up -d
+```
+
+Kiểm tra: đăng nhập bằng tài khoản cũ, mở một `cluster_id` cũ thấy đúng trạng thái incident,
+`/clustering/health` xanh sau ~2 phút. Log demo cũ không quay lại (không backup); gọi `demo-app`
+để có log mới.
+
+### Diễn tập restore trên máy khác
+
+Chạy trên laptop (Docker Desktop; Windows dùng Git Bash/WSL), **không** trên VM:
+
+```bash
+deploy/pull-backup.sh azureuser@<vm-ip> prj2 ./backups
+DRILL_USERNAME=<admin-cu> DRILL_CLUSTER_ID=<cluster_id-cu> deploy/restore-drill.sh
+#   -> OpenSearch trong -> restore snapshot moi nhat -> bung tar -> query-api :18002
+#   -> dang nhap thu + in trang thai incident cua cluster cu
+#   -> ghi docs/evidence/04-backup-restore/restore-log.txt (gom so giay tung buoc)
+cd web && npm ci && API_PROXY_TARGET=http://localhost:18002 npm run dev
+#   -> http://localhost:5173, dang nhap, mo Incident View cua cluster cu, chup anh
+deploy/restore-drill.sh --down
+```
+
+Stack diễn tập dùng project `lae-restore-drill`, volume và cổng riêng (19200, 18002), repo snapshot
+đăng ký `readonly` — không đụng tới dữ liệu khác trên máy.
+
+### RTO / RPO
+
+| Chỉ số | Giá trị | Cách đo |
+|---|---|---|
+| RPO (bản backup cũ nhất có thể mất) | **chưa đo** — điền: ≤ 24 h trên VM; ngoài VM = 24 h + độ trễ lần kéo/rsync gần nhất | cron 1 lần/đêm; tuổi snapshot in trong `restore-log.txt` ("cách đây … giờ") |
+| RTO (từ lúc bắt đầu đến đăng nhập được) | **chưa đo** — điền từ dòng `RTO do duoc` trong `restore-log.txt` | `deploy/restore-drill.sh` |
+| Dung lượng snapshot | **chưa đo** — điền `du -sh backups/os` | sau snapshot đầu tiên |
+
+Ghi số thật và ngày diễn tập vào bảng trên và vào
+[`docs/evidence/04-backup-restore/README.md`](../evidence/04-backup-restore/README.md).
 
 ## Liên hệ
 
