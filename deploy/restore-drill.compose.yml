@@ -1,0 +1,76 @@
+# Dien tap restore tren MAY KHAC (laptop thanh vien), KHONG chay tren VM deploy.
+# Project rieng (lae-restore-drill), volume rieng, cong rieng -> khong dung toi
+# stack that du co chay chung may. Duong dan tuong doi tinh tu thu muc deploy/.
+#
+# Dung qua deploy/restore-drill.sh (dung thu tu: OpenSearch -> restore ->
+# query-api). Khong `up` ca file mot lan: query-api khoi dong se tu tao index
+# users/auth-sessions rong, restore sau do bi tu choi vi index da ton tai.
+#
+#   DRILL_BACKUP_DIR  thu muc backup da keo ve (mac dinh ../backups = <repo>/backups)
+#   DRILL_JWT_SECRET  secret tam cho dien tap (>= 32 byte). Khac secret that ->
+#                     refresh cookie cu vo hieu (bi dang xuat, chap nhan duoc),
+#                     mat khau Argon2id van dung -> dang nhap lai binh thuong.
+name: lae-restore-drill
+
+services:
+  opensearch:
+    image: opensearchproject/opensearch:2.17.1
+    environment:
+      - discovery.type=single-node
+      - DISABLE_SECURITY_PLUGIN=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - path.repo=/snapshots
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    volumes:
+      - drill-opensearch:/usr/share/opensearch/data
+      - ${DRILL_BACKUP_DIR:-../backups}/os:/snapshots
+    ports:
+      - "127.0.0.1:19200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+
+  query-api:
+    build:
+      context: ..
+      dockerfile: query-api/Dockerfile
+      args:
+        GIT_SHA: restore-drill
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    environment:
+      OPENSEARCH_URL: http://opensearch:9200
+      LOG_INDEX: logs
+      CLUSTER_INDEX: clusters
+      HISTORY_INDEX: cluster-history
+      USERS_INDEX: users
+      JWT_SECRET: ${DRILL_JWT_SECRET:-restore-drill-only-0123456789abcdef0123456789abcdef}
+      # Dien tap chay HTTP tren localhost: cookie Secure se khong duoc trinh duyet gui.
+      AUTH_COOKIE_SECURE: "false"
+      AUTH_ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      # Khong dat OTEL_EXPORTER_OTLP_ENDPOINT -> query-api tat tracing (khong co Jaeger).
+    ports:
+      - "127.0.0.1:18002:8002"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen('http://localhost:8002/health')\""]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  # Bung tar clustering-data vao volume rieng de kiem tar dung + co ml_templates.json.
+  tools:
+    image: caddy:2.8-alpine
+    profiles: ["tools"]
+    volumes:
+      - drill-clustering-data:/data
+      - ${DRILL_BACKUP_DIR:-../backups}/clustering-data:/in:ro
+
+volumes:
+  drill-opensearch:
+  drill-clustering-data:
