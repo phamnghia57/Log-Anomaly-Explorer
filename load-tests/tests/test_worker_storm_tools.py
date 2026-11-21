@@ -153,3 +153,48 @@ def test_prefill_retries_429_then_reports(monkeypatch, tmp_path):
     assert code == 0
     assert data["accepted"] == 600 and data["rejected"] == 0 and data["retries_429"] == 1
     assert calls == [500, 500, 100]
+
+
+def test_prefill_gui_theo_batch_khong_dung_san_ca_list(monkeypatch):
+    """Review PR #127: o --rate 100 --minutes 30 build_payloads cu dung 180.000 dict
+    truoc batch dau (~200-400 MB tren VM 4 GB). Gio main() phai sinh lazy: luc gui
+    batch dau tien, generator moi sinh toi da 1 batch."""
+    produced = {"n": 0}
+    real_iter = prefill.iter_payloads
+
+    def counting_iter(*args, **kwargs):
+        for item in real_iter(*args, **kwargs):
+            produced["n"] += 1
+            yield item
+
+    seen_at_post = []
+
+    def fake_post(host, batch, timeout=30.0):
+        seen_at_post.append(produced["n"])
+        return 202, {"accepted": True, "accepted_count": len(batch)}
+
+    monkeypatch.setattr(prefill, "iter_payloads", counting_iter)
+    monkeypatch.setattr(prefill, "post_batch", fake_post)
+    assert prefill.main(["--rate", "100", "--minutes", "2", "--batch-size", "500"]) == 0
+    assert len(seen_at_post) == 24  # 100 * 60 * 2 / 500
+    assert seen_at_post[0] <= 501  # islice co the keo them toi da 1 phan tu
+    assert all(n <= (i + 1) * 500 + 1 for i, n in enumerate(seen_at_post))
+
+
+def test_iter_batches_cat_dung_kich_thuoc_va_phan_du():
+    batches = list(prefill.iter_batches(iter(range(1203)), 500))
+    assert [len(b) for b in batches] == [500, 500, 203]
+    assert batches[-1][-1] == 1202
+    assert list(prefill.iter_batches(iter(()), 500)) == []
+
+
+def test_prefill_report_giu_first_last_timestamp(monkeypatch, tmp_path):
+    monkeypatch.setattr(prefill, "post_batch",
+                        lambda host, batch, timeout=30.0: (202, {"accepted": True, "accepted_count": len(batch)}))
+    report = tmp_path / "r.json"
+    assert prefill.main(["--rate", "10", "--minutes", "1", "--report", str(report)]) == 0
+    data = json.loads(report.read_text(encoding="utf-8"))
+    first = datetime.fromisoformat(data["first_timestamp"])
+    last = datetime.fromisoformat(data["last_timestamp"])
+    assert data["planned"] == 600
+    assert (last - first).total_seconds() == pytest.approx(59.9, abs=0.01)

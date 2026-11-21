@@ -22,7 +22,9 @@ import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
+from itertools import islice
 from pathlib import Path
+from typing import Iterable, Iterator
 from uuid import uuid4
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,18 +39,32 @@ def load_templates(seed: int) -> list[dict]:
     return logs
 
 
-def build_payloads(templates: list[dict], *, rate: int, minutes: int, end: datetime) -> list[dict]:
-    """``rate * 60 * minutes`` log, cach deu 1/rate giay, ket thuc ngay truoc ``end``."""
+def iter_payloads(templates: list[dict], *, rate: int, minutes: int, end: datetime) -> Iterator[dict]:
+    """``rate * 60 * minutes`` log, cach deu 1/rate giay, ket thuc ngay truoc ``end``.
+
+    Generator: KHONG dung san ca list. O ``--rate 100 --minutes 30`` la 180.000 dict
+    (~200-400 MB) tren VM 4 GB dang chay OpenSearch + 7 container - OOM giua chung
+    se phai chay lai ca muc tai."""
     total = rate * 60 * minutes
     start = end - timedelta(minutes=minutes)
     step = 1.0 / rate
-    payloads = []
     for i in range(total):
         original = templates[i % len(templates)]
         ts = start + timedelta(seconds=i * step)
-        payloads.append({**original, "timestamp": ts.isoformat(),
-                         "trace_id": uuid4().hex, "span_id": uuid4().hex[:16]})
-    return payloads
+        yield {**original, "timestamp": ts.isoformat(),
+               "trace_id": uuid4().hex, "span_id": uuid4().hex[:16]}
+
+
+def iter_batches(payloads: Iterable[dict], batch_size: int) -> Iterator[list[dict]]:
+    """Cat ``payloads`` thanh tung batch <= ``batch_size``; chi giu 1 batch trong bo nho."""
+    iterator = iter(payloads)
+    while batch := list(islice(iterator, batch_size)):
+        yield batch
+
+
+def build_payloads(templates: list[dict], *, rate: int, minutes: int, end: datetime) -> list[dict]:
+    """Ban list cua ``iter_payloads`` - CHI de test/debug voi so nho, main() khong dung."""
+    return list(iter_payloads(templates, rate=rate, minutes=minutes, end=end))
 
 
 def post_batch(host: str, batch: list[dict], *, timeout: float = 30.0) -> tuple[int, dict]:
@@ -76,11 +92,16 @@ def main(argv=None) -> int:
         parser.error("--minutes >= 1 va 1 <= --batch-size <= 500")
 
     end = datetime.now(timezone.utc)
-    payloads = build_payloads(load_templates(args.seed), rate=args.rate, minutes=args.minutes, end=end)
+    templates = load_templates(args.seed)
     started = time.monotonic()
-    accepted = rejected = retries_429 = 0
-    for offset in range(0, len(payloads), args.batch_size):
-        batch = payloads[offset:offset + args.batch_size]
+    planned = accepted = rejected = retries_429 = 0
+    first_ts = last_ts = None
+    for batch in iter_batches(iter_payloads(templates, rate=args.rate, minutes=args.minutes, end=end),
+                              args.batch_size):
+        offset = planned
+        planned += len(batch)
+        first_ts = first_ts or batch[0]["timestamp"]
+        last_ts = batch[-1]["timestamp"]
         for attempt in range(args.max_retries + 1):
             status, body = post_batch(args.host, batch)
             if status == 429 and attempt < args.max_retries:
@@ -96,8 +117,8 @@ def main(argv=None) -> int:
 
     report = {
         "rate": args.rate, "minutes": args.minutes, "seed": args.seed,
-        "first_timestamp": payloads[0]["timestamp"], "last_timestamp": payloads[-1]["timestamp"],
-        "planned": len(payloads), "accepted": accepted, "rejected": rejected,
+        "first_timestamp": first_ts, "last_timestamp": last_ts,
+        "planned": planned, "accepted": accepted, "rejected": rejected,
         "retries_429": retries_429, "elapsed_seconds": round(time.monotonic() - started, 2),
         "host": args.host,
     }
