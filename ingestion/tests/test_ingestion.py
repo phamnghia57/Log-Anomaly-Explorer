@@ -5,6 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from ingestion.src import main
+from ingestion.src.idempotency import IdempotencyStore
 from ingestion.src.retention import run_retention
 from ingestion.src.storage import InMemoryLogStore, OpenSearchLogStore, StorageError
 from ingestion.src.validator import validate_log
@@ -24,6 +25,7 @@ def make_log(**over):
 @pytest.fixture
 def client():
     main.store = InMemoryLogStore()
+    main.idempotency = IdempotencyStore(ttl_seconds=60)  # VT-014: reset, tranh ro trang thai giua test
     main.limiter = main.SlidingWindowRateLimiter(1000)
     with TestClient(main.app) as c:
         yield c

@@ -1,0 +1,6 @@
+Moi truong: {'python': '3.13.18', 'cpu': 2, 'platform': 'Linux-6.18.44-fc-v378-x86_64-with-glibc2.39', 'seed': 14, 'target_p95_s': 4.0}
+Kich ban                        req  loi     p50     p95     p99     max task p95     rps   docs/ky vong  ket luan
+S1 unique key + 2 retry        9000    0     50ms     75ms     97ms    346ms     188ms    2482      3000/3000  PASS
+S2 hot key (cung key)          3000    0     47ms     61ms    126ms    219ms      61ms    2550            1/1  PASS
+S3 baseline khong key          3000    0     59ms     79ms    101ms    153ms      79ms    2162      3000/3000  PASS
+S4 batch 50 log + 1 retry      1500    0     76ms    935ms   1882ms   1996ms    1504ms     578    37500/37500  PASS

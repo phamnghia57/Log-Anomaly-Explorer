@@ -1,0 +1,8 @@
+S1 unique key + 2 retry        9000    0     49ms     76ms    104ms    199ms     195ms    2658      3000/3000  PASS
+S2 hot key (cung key)          3000    0     47ms     64ms    111ms    138ms      64ms    2682            1/1  PASS
+S3 baseline khong key          3000    0     58ms     84ms    125ms    202ms      84ms    2158      3000/3000  PASS
+S4 batch 50 log + 1 retry      1500    0     76ms    899ms   1766ms   1932ms    1490ms     593    37500/37500  PASS
+S1 unique key + 2 retry        9000    0     49ms     72ms     93ms    314ms     182ms    2593      3000/3000  PASS
+S2 hot key (cung key)          3000    0     47ms     66ms     79ms     96ms      66ms    2786            1/1  PASS
+S3 baseline khong key          3000    0     59ms     82ms    114ms    175ms      82ms    2179      3000/3000  PASS
+S4 batch 50 log + 1 retry      1500    0     76ms    926ms   1886ms   2061ms    1560ms     566    37500/37500  PASS
