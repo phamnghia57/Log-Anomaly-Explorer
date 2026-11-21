@@ -21,7 +21,9 @@
 #   BACKUP_PING_URL   (tuy chon) URL Healthchecks rieng cho job backup
 #
 # Vi sao loai `logs` + `logs-*`: log demo sinh lai duoc va la phan nang nhat.
-# `logs-quarantine` khop `logs-*` nen cung bi loai. `.*` (index he thong/plugin)
+# `logs-quarantine` khop `logs-*` nen cung bi loai - CO Y: log sai schema khong can
+# khoi phuc; tran dia cua no la QUARANTINE_RETENTION_DAYS (ingestion/src/retention.py).
+# `.*` (index he thong/plugin)
 # khong can va restore de bi xung dot. include_global_state=false: khong ghi de
 # template/settings cua cluster dich khi restore.
 set -Eeuo pipefail

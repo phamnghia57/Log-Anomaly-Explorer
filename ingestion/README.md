@@ -38,6 +38,7 @@ Nhận structured log từ demo-app, validate schema, ghi vào kho dữ liệu. 
 | `RETENTION_DAYS` | `30` |
 | `RETENTION_INTERVAL_SECONDS` | `3600` (`0` = tắt, dùng cron) |
 | `RETENTION_DROP_LEGACY_INDEX` | `true` — drop index `logs` cũ khi log mới nhất trong đó đã quá `RETENTION_DAYS` (`false` = giữ lại) |
+| `QUARANTINE_RETENTION_DAYS` | bằng `RETENTION_DAYS` (compose: `30`) — xoá bản ghi `logs-quarantine` có `received_at` cũ hơn số ngày này (`>= 1`) |
 | `INGEST_RATE_LIMIT_RPS` | `100` request/giây/process, chung `/ingest` và `/ingest/batch` |
 | `INGEST_MAX_BATCH_SIZE` | `500` log/request |
 
@@ -85,6 +86,9 @@ Invoke-RestMethod -Method Post -Uri 'http://localhost:8000/ingest/batch' -Conten
 - **Legacy index `logs`** (trước khi tách theo ngày) được retention dọn theo cùng nguyên tắc "chỉ drop khi toàn bộ đã quá hạn": mỗi lần chạy, job lấy `max(timestamp)` trong `logs`; nếu log **mới nhất** đã cũ hơn cutoff (hoặc index rỗng) thì drop cả index, ngược lại giữ nguyên (không `delete_by_query` từng phần). Vì `logs` không còn nhận ghi mới, nó sẽ tự bị drop trong tối đa `RETENTION_DAYS` kể từ lúc migrate — không cần xoá tay và không mất log còn trong hạn.
   - Chỉ drop đúng index vật lý tên `LOG_INDEX`; nếu `logs` là **alias** thì bỏ qua.
   - Cần backup/migrate dữ liệu cũ trước khi nó hết hạn: đặt `RETENTION_DROP_LEGACY_INDEX=false`, làm xong rồi bật lại.
+- **Quarantine `logs-quarantine`** là MỘT index (không theo ngày) và bị `deploy/backup.sh` loại khỏi snapshot (khớp `-logs-*`; log sai schema không cần khôi phục). Vì thế retention xoá theo **document**: mỗi lượt chạy gọi `delete_by_query` với `range received_at < now - QUARANTINE_RETENTION_DAYS` (`conflicts=proceed`, `refresh=true`); có `failures` thì báo lỗi, không im lặng. Đây là trần đĩa duy nhất của index này. Kết quả là **số document đã xoá** (log job nền: `quarantine: deleted N docs`). Lỗi ở phần quarantine không chặn phần drop index ngày và ngược lại.
+  - Chạy tay một lượt trong container: `docker compose exec -T ingestion python -m ingestion.src.retention` → in `deleted=<số index> ... quarantine_deleted=<số document> ...`.
+  - Đo trước/sau trên VM: `docs/evidence/12-disk-bounds/quarantine-retention.sh`.
 - Tránh client phụ thuộc trực tiếp vào tên index `logs` mà không dùng `LogStore.read_indices`; xem thay đổi `clustering/src/storage.py`.
 
 ### Histogram & facets
