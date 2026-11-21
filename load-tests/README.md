@@ -39,6 +39,8 @@ Cách đọc bảng:
   trống chỉ có ~5 cửa sổ dữ liệu → `logs_read` và chi phí TF-IDF thấp hơn nhiều so với bão lỗi
   kéo dài. Vì vậy script nạp trước 30 phút log lùi thời gian cùng tốc độ
   ([`prefill_error_storm.py`](prefill_error_storm.py), cùng bộ sinh 03a, cùng seed).
+  Script sinh log bằng generator và gửi theo từng batch (`--batch-size`, mặc định 500), nên
+  bộ nhớ chỉ giữ một batch — ở mức 100 không dựng sẵn 180.000 dict (~200–400 MB) trên VM 4 GB.
 
 ### Vì sao chạy kiểu này
 
@@ -88,7 +90,10 @@ Cách đọc bảng:
    ```bash
    # 1. ingestion + clustering -> index rieng, tat webhook/ping (+ state TF-IDF rieng)
    docker compose stop ingestion clustering
-   docker compose exec -T opensearch curl -s -XDELETE 'localhost:9200/storm-*'
+   # xoa TUNG index storm-* theo ten (khong DELETE wildcard), in response, roi kiem
+   # _cat/indices/storm-* phai rong - con sot thi script dung lai (exit 1)
+   docker compose exec -T opensearch curl -s 'localhost:9200/_cat/indices/storm-*?h=index&expand_wildcards=all'
+   docker compose exec -T opensearch curl -s -XDELETE 'localhost:9200/<tung-ten-index>'
    LOG_INDEX=storm-logs CLUSTER_INDEX=storm-clusters HISTORY_INDEX=storm-cluster-history \
    ALERT_WEBHOOK_URL= HEALTHCHECK_PING_URL= INGEST_RATE_LIMIT_RPS=<max(100,2*RATE)> \
    ML_STATE_PATH=clustering/data/storm-ml_templates-<RATE>.json \
@@ -119,12 +124,22 @@ Cách đọc bảng:
    ```bash
    load-tests/run_worker_storm.sh restore
    # = docker compose up -d --no-deps --force-recreate ingestion clustering
-   #   docker compose exec -T opensearch curl -s -XDELETE 'localhost:9200/storm-*'
+   #   + kiem CLUSTER_INDEX=clusters, LOG_INDEX != storm-logs, va neu .env co
+   #     ALERT_WEBHOOK_URL / HEALTHCHECK_PING_URL thi clustering phai co lai gia tri
+   #   + xoa tung index storm-* theo ten, kiem _cat/indices/storm-* rong
    #   + xoa clustering/data/storm-ml_templates-*.json
+   #   + in banner "RESUME Healthchecks + UptimeRobot" va BAT go `resumed` (YES=1 de bo qua)
    ```
 
-   Rồi **resume** Healthchecks + UptimeRobot, chờ ~2 phút, xác nhận
-   `docker compose logs clustering --tail 5` có `Processed ...` mới và check xanh lại.
+   Lúc đo, ingestion thật bị trỏ sang `storm-logs` và **cả** `ALERT_WEBHOOK_URL` lẫn
+   `HEALTHCHECK_PING_URL` bị tắt: 3 mức là gần 2 giờ không có alert và dead-man switch không
+   ping. Quên resume là hệ thống tắt giám sát **âm thầm**. Vì vậy `run` in banner nhắc mỗi khi
+   thoát (kể cả Ctrl-C) và ghi thời điểm bắt đầu vào `STORM_MARKER`
+   (`/tmp/lae-worker-storm.active`); `restore` in lại đã tắt từ lúc nào và chỉ xoá marker sau khi
+   bạn gõ `resumed`. Có cảnh báo nào ở trên thì `restore` thoát mã khác 0.
+
+   Sau đó chờ ~2 phút, xác nhận `docker compose logs clustering --tail 5` có `Processed ...`
+   mới và check xanh lại.
 
 5. Điền bảng và commit evidence:
 
