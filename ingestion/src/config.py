@@ -30,6 +30,12 @@ RETENTION_INTERVAL_SECONDS = int(os.environ.get("RETENTION_INTERVAL_SECONDS", "3
 # index khi log MOI NHAT trong do da qua RETENTION_DAYS. false = giu nguyen (dung
 # khi can backup/migrate truoc) - xem ingestion/README.md.
 RETENTION_DROP_LEGACY_INDEX = _bool("RETENTION_DROP_LEGACY_INDEX", True)
+# Retention cho QUARANTINE_INDEX (log sai schema): delete_by_query theo
+# `received_at`. Mac dinh bang RETENTION_DAYS. Index nay KHONG nam trong
+# snapshot (deploy/backup.sh loai `logs-*`), nen day la tran dia duy nhat cua no.
+QUARANTINE_RETENTION_DAYS = int(os.environ.get("QUARANTINE_RETENTION_DAYS", str(RETENTION_DAYS)))
+if QUARANTINE_RETENTION_DAYS < 1:
+    raise ValueError("QUARANTINE_RETENTION_DAYS must be >= 1")
 
 DEFAULT_SEARCH_LIMIT = int(os.environ.get("SEARCH_DEFAULT_LIMIT", "100"))
 MAX_SEARCH_LIMIT = int(os.environ.get("SEARCH_MAX_LIMIT", "1000"))

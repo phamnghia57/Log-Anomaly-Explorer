@@ -26,7 +26,8 @@
 #   ERROR_STORM_SEED  (98)
 #   LOCUST_USERS      (10->1, 50->2, 100->4)  moi user nham RATE/LOCUST_USERS req/s
 #   STORM_INGEST_RATE_LIMIT  (max(100, 2*RATE)) gioi han ingest CHI trong luc do
-#   YES=1             bo qua cau hoi xac nhan da pause uptime check
+#   YES=1             bo qua cau hoi xac nhan pause (run) / resume (restore) monitor
+#   STORM_MARKER      (/tmp/lae-worker-storm.active) thoi diem bat dau tat giam sat
 #   FORCE=1           cho phep ghi de evidence cua muc tai da co
 set -euo pipefail
 
@@ -61,6 +62,51 @@ confirm_monitors() {
 	[ "$ans" = "y" ] || [ "$ans" = "Y" ] || { echo "huy"; exit 1; }
 }
 
+# Xoa index storm-* theo TUNG TEN roi kiem lai. KHONG dung wildcard DELETE: neu
+# cluster bat action.destructive_requires_name=true, `DELETE storm-*` bi tu choi -
+# truoc day loi do bi nuot (>/dev/null || true) va du lieu storm cua muc truoc
+# lan vao phep do sau (logs_read sai). Con sot index nao -> dung lai, exit 1.
+storm_indices() {
+	os_curl 'localhost:9200/_cat/indices/storm-*?h=index&expand_wildcards=all' | tr -d '\r' | sed '/^[[:space:]]*$/d'
+}
+
+delete_storm_indices() {
+	local name resp left
+	for name in $(storm_indices); do
+		resp="$(os_curl -XDELETE "localhost:9200/$name")"
+		echo "  DELETE $name -> $resp"
+		grep -Eq '"acknowledged" *: *true' <<<"$resp" \
+			|| { echo "OpenSearch tu choi xoa $name - dung lai" >&2; exit 1; }
+	done
+	left="$(storm_indices)"
+	if [ -n "$left" ]; then
+		echo "VAN CON index storm-* sau khi xoa - dung lai de khong lan du lieu muc truoc:" >&2
+		echo "$left" >&2
+		exit 1
+	fi
+	echo "  _cat/indices/storm-*: rong"
+}
+
+# Trong luc do: ingestion that tro sang storm-logs, ALERT_WEBHOOK_URL va
+# HEALTHCHECK_PING_URL bi TAT. 3 muc x (30' prefill + 5' load) ~ 2 gio khong co
+# alert va dead-man switch khong ping. Marker ghi luc bat dau de restore nhac
+# lai da tat bao lau; quen restore/resume = he thong tat giam sat AM THAM.
+STORM_MARKER="${STORM_MARKER:-${TMPDIR:-/tmp}/lae-worker-storm.active}"
+
+monitors_banner() {
+	{
+		echo
+		echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+		echo "!! $1"
+		echo '!!   - Healthchecks: RESUME check dead-man switch (dang pause)'
+		echo '!!   - UptimeRobot : RESUME monitor (dang pause)'
+		echo '!!   - ALERT_WEBHOOK_URL / HEALTHCHECK_PING_URL cua clustering dang TAT'
+		echo "!!     cho den khi chay: $0 restore"
+		echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+		echo
+	} >&2
+}
+
 cmd_run() {
 	local rate="${1:-}"
 	case "$rate" in 10|50|100) ;; *) echo "dung: $0 run 10|50|100" >&2; exit 2;; esac
@@ -81,12 +127,13 @@ cmd_run() {
 	[ "${FORCE:-}" = "1" ] && rm -f "$EVIDENCE_DIR"/{cycle-$rate.csv,storm-${rate}_*.csv,docker-stats-$rate.txt,worker-$rate.log,locust-$rate.txt,prefill-$rate.json,run-$rate.json}
 
 	confirm_monitors
+	trap 'monitors_banner "GIAM SAT DANG TAT - nho chay: $0 restore, roi resume monitor"' EXIT
 	log "RATE=$rate users=$users x ${per_user} req/s, INGEST_RATE_LIMIT_RPS=$limit, prefill=${PREFILL_MINUTES}m, seed=$ERROR_STORM_SEED"
 
 	log "dung ingestion + clustering, xoa index storm-* cu"
+	[ -f "$STORM_MARKER" ] || date -u +%Y-%m-%dT%H:%M:%SZ > "$STORM_MARKER"
 	docker compose stop ingestion clustering
-	os_curl -XDELETE 'localhost:9200/storm-*?expand_wildcards=all' >/dev/null || true
-	echo
+	delete_storm_indices
 
 	log "bat ingestion + clustering voi index storm-*"
 	LOG_INDEX=storm-logs CLUSTER_INDEX=storm-clusters HISTORY_INDEX=storm-cluster-history \
@@ -182,15 +229,36 @@ cmd_restore() {
 	unset $STORM_ENV_KEYS
 	docker compose up -d --no-deps --force-recreate ingestion clustering
 	wait_ingestion
+	local bad=0 key
 	[ "$(svc_env clustering CLUSTER_INDEX)" = "clusters" ] \
-		|| echo "CANH BAO: clustering khong chay voi CLUSTER_INDEX=clusters, kiem tra .env" >&2
+		|| { echo "CANH BAO: clustering khong chay voi CLUSTER_INDEX=clusters, kiem tra .env" >&2; bad=1; }
+	[ "$(svc_env ingestion LOG_INDEX)" != "storm-logs" ] \
+		|| { echo "CANH BAO: ingestion VAN ghi vao storm-logs" >&2; bad=1; }
+	# .env that co dat webhook/ping thi sau restore container PHAI co lai gia tri.
+	for key in ALERT_WEBHOOK_URL HEALTHCHECK_PING_URL; do
+		if [ -f .env ] && grep -Eq "^${key}=.+" .env && [ -z "$(svc_env clustering "$key")" ]; then
+			echo "CANH BAO: .env co $key nhung clustering dang de TRONG - alert/ping van tat" >&2
+			bad=1
+		fi
+	done
 	log "xoa index storm-* va state TF-IDF storm"
-	os_curl -XDELETE 'localhost:9200/storm-*?expand_wildcards=all'; echo
+	delete_storm_indices
 	docker compose exec -T clustering sh -c 'rm -f clustering/data/storm-ml_templates-*.json' || true
-	os_curl 'localhost:9200/_cat/indices/storm-*?v' || true
 	echo
-	log "da khoi phuc. CON PHAI: resume check Healthchecks + UptimeRobot, sau ~2 phut kiem tra"
-	echo "  docker compose logs clustering --tail 5   # phai thay 'Processed ...' moi"
+
+	[ -f "$STORM_MARKER" ] && log "giam sat da TAT tu $(cat "$STORM_MARKER") (UTC) den bay gio"
+	monitors_banner "CON PHAI LAM TAY NGAY BAY GIO: resume monitor"
+	if [ "${YES:-}" != "1" ]; then
+		local ans=""
+		while [ "$ans" != "resumed" ]; do
+			read -r -p "Go 'resumed' sau khi DA resume Healthchecks + UptimeRobot: " ans \
+				|| { echo; echo "CHUA xac nhan resume monitor - nho lam ngay!" >&2; exit 1; }
+		done
+	fi
+	rm -f "$STORM_MARKER"
+	log "da khoi phuc. Sau ~2 phut kiem tra:"
+	echo "  docker compose logs clustering --tail 5   # phai thay 'Processed ...' moi tren index that"
+	[ "$bad" = "0" ] || { echo "Co CANH BAO o tren - kiem tra truoc khi bao xong" >&2; exit 1; }
 }
 
 cmd_summary() {

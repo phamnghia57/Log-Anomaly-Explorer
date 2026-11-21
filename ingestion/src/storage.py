@@ -68,6 +68,12 @@ class LogStore:
         (index ngay + index legacy `logs` neu no da het han hoan toan)."""
         raise NotImplementedError
 
+    def delete_quarantine_older_than(self, cutoff_iso: str) -> int:
+        """Retention cho log sai schema: xoa ban ghi quarantine co
+        `received_at` < cutoff. Tra so DOCUMENT da xoa. Mac dinh 0 cho store
+        khong co quarantine."""
+        return 0
+
     def ping(self) -> bool:
         return True
 
@@ -406,7 +412,8 @@ class OpenSearchLogStore(LogStore):
         try:
             # `*` chu khong phai `?` - xem read_indices. `logs-*` co the tra ve
             # ca logs-quarantine, nhung pattern regex ben duoi chi khop dung
-            # dang logs-YYYY.MM.DD nen quarantine khong bao gio bi xoa.
+            # dang logs-YYYY.MM.DD nen quarantine khong bao gio bi DROP o day
+            # (quarantine co retention rieng: delete_quarantine_older_than).
             found = self.client.indices.get(index=f"{self.log_index}-*",
                                             ignore_unavailable=True, allow_no_indices=True)
             dropped = 0
@@ -420,6 +427,33 @@ class OpenSearchLogStore(LogStore):
             return dropped
         except Exception as exc:  # noqa: BLE001
             raise StorageError(f"retention index deletion failed: {exc}") from exc
+
+    def delete_quarantine_older_than(self, cutoff_iso: str) -> int:
+        """delete_by_query theo `received_at` tren index quarantine.
+
+        Khac log chinh (drop ca index ngay), quarantine la MOT index duy nhat
+        nen phai xoa theo document. `logs-quarantine` khop `logs-*` va bi
+        deploy/backup.sh loai khoi snapshot (log sai schema khong can khoi
+        phuc), nen day la tran dia DUY NHAT cua no.
+
+        Moi document quarantine deu co `received_at` (write_quarantine luon
+        gan, mapping `strict`), nen range query nay phu het index.
+        """
+        try:
+            if not self.client.indices.exists(index=self.quarantine_index):
+                return 0
+            resp = self.client.delete_by_query(
+                index=self.quarantine_index,
+                body={"query": {"range": {"received_at": {"lt": cutoff_iso}}}},
+                conflicts="proceed",
+                refresh=True,
+            )
+        except Exception as exc:  # noqa: BLE001
+            raise StorageError(f"quarantine retention failed: {exc}") from exc
+        if resp.get("failures"):
+            # Co the da xoa mot phan; khong im lang coi la thanh cong.
+            raise StorageError(f"quarantine retention partially failed: {resp['failures'][:3]}")
+        return int(resp.get("deleted", 0))
 
 
 # --------------------------------------------------------------------------- In-memory (dev/test)
@@ -496,6 +530,12 @@ class InMemoryLogStore(LogStore):
         before = len(self._logs)
         self._logs = {k: v for k, v in self._logs.items() if self._ts(v["timestamp"]) >= cutoff}
         return before - len(self._logs)
+
+    def delete_quarantine_older_than(self, cutoff_iso: str) -> int:
+        cutoff = self._ts(cutoff_iso)
+        before = len(self._quarantine)
+        self._quarantine = [q for q in self._quarantine if self._ts(q["received_at"]) >= cutoff]
+        return before - len(self._quarantine)
 
 
 def build_store() -> LogStore:
