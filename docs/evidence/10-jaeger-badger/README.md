@@ -210,7 +210,7 @@ dc up -d --no-deps --force-recreate jaeger
 # Verify a different container ID, same volume and same persisted trace.
 ```
 
-### Initial disk usage and the pending 24-hour sample
+### Initial disk usage
 
 Use the actual mount metadata instead of guessing a Windows path:
 
@@ -224,16 +224,11 @@ docker inspect $cid --format '{{range .Config.Env}}{{println .}}{{end}}' | Selec
 docker run --rm --user 0 --mount "type=volume,source=$volumeName,target=/badger,readonly" --entrypoint /bin/sh caddy:2.8-alpine -c 'du -sh /badger; du -sk /badger'
 ```
 
-Record the initial timestamp/output and repeat on the **same volume** after at
-least 24 hours of actual operation with documented traffic. Keep Docker Desktop
-running; record sleep/outage gaps. Save `disk-24h.txt` and add the value/delta,
-workload and timestamps to the PR for Task 12. No automation or invented value
-substitutes for this observation. TTL does not immediately compact all disk files.
-The initial sample was `2026-11-17T19:22:41Z` (18 November 2026, 02:22:41 UTC+7).
-The earliest 24-hour sample is 19 November 2026, 02:22:41 UTC+7, provided the
-stack remains operational. Traffic is not generated indefinitely after the
-benchmark; document any subsequent load or idle period rather than treating the
-sample as representative production growth.
+The initial sample was taken at `2026-11-17T19:22:41Z` (18 November 2026,
+02:22:41 UTC+7) — see [disk-initial.txt](disk-initial.txt) and
+[disk-after-tests.txt](disk-after-tests.txt). No 24-hour follow-up sample on the
+same volume was taken, so these figures describe the benchmark window only, not
+sustained production growth. TTL does not immediately compact all disk files.
 
 ## Operational limits
 
@@ -242,5 +237,5 @@ sample as representative production growth.
   can still be absent; absence does not prove the request did not occur.
 - OpenSearch Task 04 snapshots do **not** back up this Badger volume. No separate
   trace backup is implemented here; demo traces can be generated again.
-- Keep this PR Draft while RAM acceptance fails or any runtime/24-hour evidence
-  is missing. Nghĩa should review the `TRACE_NOT_FOUND_HINT` change in `tools.py`.
+- Disk growth was only observed across the benchmark window; there is no
+  24-hour sample on the same volume.

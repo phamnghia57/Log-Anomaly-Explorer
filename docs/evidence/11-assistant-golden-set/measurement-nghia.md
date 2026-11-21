@@ -3,9 +3,9 @@
 **Đã làm:** chạy bộ 20 câu của Mạnh trên bản deploy thật, hai cấu hình, lấy token/chi phí/độ trễ
 từ Langfuse, và một phép đo bổ sung để trả lời được câu "giữ `MAX_TOOL_ROUNDS` ở 1 hay 2".
 
-**Chưa làm (không thuộc phần này):** chấm điểm. Rubric đòi **2 người thật chấm độc lập** và ghi rõ
-*"điểm để trống nghĩa là chưa chấm"*, nên bốn file `rater-*.csv` vẫn trống. Điểm/60 của cả hai cấu
-hình là **pending**.
+**Không thuộc phần này:** chấm điểm. Nhóm quyết định dùng bản chấm của Codex (AI) ở
+[ai-review/](ai-review/README.md) làm kết quả cuối thay cho hai người thật — rounds=1 **55/60**,
+rounds=2 **56/60**. Bốn file `rater-*.template.csv` giữ nguyên làm template.
 
 ## 1. Cấu hình lúc đo
 
@@ -182,6 +182,7 @@ dẫn message runtime thật, và **không** bịa `trace_id` hay số lượng 
   khác biệt về *khả năng* (có/không đọc được trace) nhưng không đủ để kết luận về *tỉ lệ đúng*.
 - Tool chỉ gọi được khi `JAEGER_QUERY_URL` trỏ đúng và trace còn trong TTL **7 ngày**. Với dữ liệu
   demo cũ hơn 7 ngày, `get_trace` sẽ luôn vô dụng — **cần biết trước khi demo**.
-- Điểm/60, số câu 3/3 và số câu lệch giữa hai người chấm: **pending**, chờ Mạnh + 1 người.
+- Điểm/60 và số câu 3/3 lấy từ bản chấm AI ([ai-review/](ai-review/README.md)), không phải hai
+  người thật chấm độc lập như rubric mô tả — nên không có số câu lệch giữa hai người chấm.
 - 60 log `simulated downstream failure` của mục 5 đã cập nhật cụm `583498fff9a5c679` (không phải
   cụm golden). Snapshot của 4 cụm golden trong `prepared/clusters/` vẫn là bản lúc đo.

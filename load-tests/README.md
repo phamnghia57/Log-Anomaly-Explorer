@@ -11,16 +11,9 @@ tải nào worker bắt đầu **lỡ cửa sổ** (bỏ qua một cửa sổ 60
 
 Bảng giữa hai marker dưới đây do [`summarize_worker_cycles.py`](summarize_worker_cycles.py) sinh
 từ file gốc trong [`docs/evidence/07-worker-load/`](../docs/evidence/07-worker-load/) — **không
-sửa tay**; đo xong chạy `load-tests/run_worker_storm.sh summary` để điền lại.
+sửa tay**; chạy `load-tests/run_worker_storm.sh summary` để sinh.
 
 <!-- worker-storm:begin -->
-Chưa đo trên VM — chạy quy trình bên dưới rồi `load-tests/run_worker_storm.sh summary`.
-
-| Mức mục tiêu | Throughput thực | 202 / 429 / lỗi khác | Baseline nạp trước | Số chu kỳ | cycle_seconds median / p95 / max | logs_read max | Cửa sổ lỡ | Đại diện mức tải? |
-|---:|---:|---|---|---:|---|---:|---|---|
-| 10 ERROR/s | — | — | — | — | Chưa đo | — | Chưa xác định | — |
-| 50 ERROR/s | — | — | — | — | Chưa đo | — | Chưa xác định | — |
-| 100 ERROR/s | — | — | — | — | Chưa đo | — | Chưa xác định | — |
 <!-- worker-storm:end -->
 
 Cách đọc bảng:

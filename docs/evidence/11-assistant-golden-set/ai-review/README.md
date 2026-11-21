@@ -1,9 +1,9 @@
-# #108 — Chấm tham khảo của Codex (AI)
+# #108 — Chấm điểm bằng Codex (AI)
 
-**Đây là điểm AI tham khảo, chưa phải điểm của hai người chấm hoặc kết quả adjudication.**
-Người đánh giá: `Codex`, loại `AI`, ngày 2026-11-20. Codex đã đọc nhận xét sơ bộ của Nghĩa
-trước khi chấm nên bản này không được coi là đánh giá mù hoặc bằng chứng hai người độc lập.
-Hai người thật nên nộp bảng riêng trước khi xem bản AI này để hạn chế ảnh hưởng.
+**Đây là điểm do AI chấm, không phải hai người thật chấm độc lập như rubric mô tả.** Nhóm
+quyết định dùng bản này làm kết quả cuối của #108. Người đánh giá: `Codex`, loại `AI`, ngày
+2026-11-20. Codex đã đọc nhận xét sơ bộ của Nghĩa trước khi chấm nên đây **không** phải đánh
+giá mù, và vì chỉ có một người chấm nên không có số câu lệch hay bước adjudication.
 
 ## Nguồn và cách chấm
 
@@ -32,8 +32,8 @@ Quy tắc áp dụng nhất quán:
   cuối, nên rounds=1 không có tool. Không tự trừ điểm cho hai câu nói hiện không truy cập
   được tracing; cách nói về “quyền” vẫn được gắn cờ vì dễ hiểu thành giới hạn toàn hệ thống.
 - Lỗi gọi API hoặc câu trả lời rỗng nhận 0/0/0 theo rubric; giữ mẫu số 60.
-- Cờ `needs_human_review=1` đánh dấu chỗ diễn đạt/tranh luận hoặc dữ liệu cần xác nhận.
-  Cờ 0 không thay thế việc hai người chấm độc lập. Điểm ở mọi dòng vẫn chỉ là đề xuất AI.
+- Cờ `needs_human_review=1` đánh dấu chỗ diễn đạt/tranh luận hoặc dữ liệu cần xác nhận;
+  cờ 0 không có nghĩa là dòng đó đã được người kiểm lại.
 
 ## Kết quả AI tham khảo
 
@@ -44,9 +44,8 @@ Quy tắc áp dụng nhất quán:
 - Điểm nhóm, rounds=1 → rounds=2: value 12/12 → 12/12; connection 9/12 → 9/12;
   timeout 11/12 → 11/12; runtime 11/12 → 12/12; bad_schema 12/12 → 12/12.
 - Cả hai lượt có 20 bản ghi, 0 lỗi API, coverage 20/20, nhưng chỉ **19/20 câu có nội dung**.
-  Điểm/60 chính thức và số câu lệch giữa hai người vẫn **pending**.
 
-Ba tình huống yếu cần người chấm đối chiếu:
+Ba tình huống yếu, giữ lại vì chúng là chỗ điểm dễ tranh luận nhất:
 
 1. **Câu phản biện DNS không có nội dung:** `connection-502-04` rỗng ở cả hai lượt,
    `error` trống; 0/0/0 ở cả hai. Git blob gốc xác nhận đây không phải lỗi đọc CSV trên
@@ -78,7 +77,7 @@ rounds=1 tốn **0,0017177625 USD/câu**, p95 model **10,075 s**; rounds=2 tốn
 Chi phí vẫn tính cả câu rỗng; số generation là 20 và 24, bốn câu có thêm generation là
 các câu `-03` của bốn nhóm fault.
 
-**Đề xuất AI: tạm giữ MAX_TOOL_ROUNDS=2**, phù hợp khuyến nghị vận hành của Nghĩa.
+**Kết luận: giữ MAX_TOOL_ROUNDS=2**, khớp khuyến nghị vận hành của Nghĩa.
 Một điểm hơn trong bộ chính là nhận định về span thận trọng hơn, không phải đã đọc được
 trace: cả bốn lần get_trace ở lượt chính trả not found theo ghi chú đo và câu trả lời.
 [Phép đo bổ sung](../tool-rounds-fair.json) trên một cụm khác có trace sống cho thấy
@@ -92,9 +91,8 @@ chênh lệch chất lượng hoặc latency ổn định. Rubric cho phép th�
 suy riêng từ tuổi cluster: 14/11 đến 20/11 chưa đủ 7 ngày; Nghĩa ghi nhận Badger volume
 mới. Chỉ dựa vào tuổi cluster cũng không xác định được tuổi của mọi span.
 
-## Việc còn lại để đóng #108
+## Giới hạn của bản chấm này
 
-Hai người thật chấm độc lập trên dữ liệu gốc, ghi danh tính, giữ hai bảng riêng rồi
-đối chiếu/chốt adjudication. Sau đó mới điền hai ô điểm chính thức và số câu lệch trong
-query-api README, chốt khuyến nghị cuối và đóng issue. Các template human và dữ liệu đo
-gốc được giữ nguyên; bản tham khảo này không tạo số câu lệch giả hay thay điểm người thật.
+Một người chấm (AI), không mù, không có adjudication — nên không có số câu lệch để báo.
+Các template human (`rater-*.template.csv`, `adjudication.template.csv`) và dữ liệu đo gốc
+được giữ nguyên trong thư mục cha; bản này không điền vào chúng.

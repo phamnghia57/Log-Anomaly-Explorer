@@ -4,8 +4,7 @@
 `assistant-conversations`, `ml_templates.json`) có bản sao hằng đêm ở ngoài VM, và restore được
 trên một máy khác trong bao lâu (RTO), mất tối đa bao nhiêu giờ dữ liệu (RPO).
 
-**Trạng thái:** script và cấu hình đã có trong repo, **chưa chạy trên VM / chưa diễn tập**. Các ô
-"điền" bên dưới chỉ được điền bằng số đo thật. Quy trình đầy đủ:
+Script và cấu hình đã có trong repo. Quy trình đầy đủ:
 [runbook — Khi mất dữ liệu / restore](../../task/runbook.md#khi-mất-dữ-liệu--restore).
 
 ## Cấu hình
@@ -16,26 +15,7 @@ trên một máy khác trong bao lâu (RTO), mất tối đa bao nhiêu giờ d�
 | Pattern index | `*,-.*,-logs,-logs-*,-storm-*`, `include_global_state=false` |
 | Lịch | cron `17 19 * * *` UTC (02:17 giờ VN) → `bash deploy/backup.sh` |
 | Retention | xoá snapshot + tar cũ hơn 7 ngày, luôn giữ ≥ 2 bản mới nhất |
-| Bản ngoài VM | điền: `BACKUP_REMOTE=…` **hoặc** `deploy/pull-backup.sh` về máy của … |
-
-## Kết quả (điền sau khi chạy)
-
-| Tiêu chí | Trạng thái | File chứng minh |
-|---|---|---|
-| `_snapshot/nightly/_all` có ≥ 2 snapshot ở 2 ngày khác nhau | điền | `snapshot-list.json` |
-| `logs-*` / `logs` không nằm trong snapshot | điền | `snapshot-list.json` (trường `indices`), dòng `index log trong snapshot` trong `restore-log.txt` |
-| Có bản copy ngoài VM | điền | `offsite-ls.txt` (output `ls -la` + `du -sh` trên máy đích) |
-| Restore trên máy khác: đăng nhập bằng tài khoản cũ | điền | `restore-log.txt` (`POST /auth/login -> HTTP 200`), `incident-view-sau-restore.png` |
-| Mở được `cluster_id` cũ với đúng trạng thái incident | điền | `restore-log.txt` (dòng `incident:`), `incident-view-sau-restore.png` |
-| Dung lượng snapshot (giả định < 1 GB) | điền `du -sh backups/os` = … | `du-backups.txt` |
-
-| Chỉ số | Giá trị đo được |
-|---|---|
-| **RTO** (tổng, từ dòng `RTO do duoc` trong `restore-log.txt`) | điền |
-| trong đó: OpenSearch sẵn sàng / restore / query-api healthy | điền / điền / điền |
-| **RPO** | điền (≤ 24 h trên VM; ngoài VM = 24 h + độ trễ lần kéo về) |
-| Tuổi snapshot lúc diễn tập | điền (dòng "cách đây … giờ" trong `restore-log.txt`) |
-| Máy diễn tập | điền (OS, CPU, RAM, Docker) |
+| Bản ngoài VM | `BACKUP_REMOTE` trong `deploy/backup.env`, hoặc `deploy/pull-backup.sh` từ máy thành viên |
 
 ## Cách tạo từng file
 

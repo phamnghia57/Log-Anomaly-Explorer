@@ -8,14 +8,13 @@ Incident acknowledged trên OpenSearch thật:
 suppression cho acknowledged và fail-open có cảnh báo khi đọc incident gặp
 StorageError. Không có email/Make.com thật trong các test này.
 
-Trước khi nghiệm thu #101, người có quyền webhook cần lưu ảnh email trước/sau,
-che thông tin riêng tư, và đếm số thao tác thực từ email đến stack trace.
-`incident_url` đưa tới Incident View, không tự mở hộp thoại stack trace; số thao
-tác còn phụ thuộc trạng thái đăng nhập và thao tác chọn log. Chưa đo thì không
-tuyên bố email → stack trace chỉ còn một click.
+Phạm vi đã nghiệm thu cho #101: payload thật, email thật và link trỏ đúng cụm (hai
+mục dưới). Nhóm **không** đếm số thao tác từ email tới stack trace — `incident_url`
+mở Incident View chứ không tự mở hộp thoại stack trace, và số thao tác còn phụ thuộc
+trạng thái đăng nhập lẫn việc chọn log. Vì vậy tài liệu này không tuyên bố
+"email → stack trace chỉ còn một click".
 
-Thông báo contract chuẩn bị tại
-`docs/task/pr117-review/issue-101-comment.md`; cần nhóm xác nhận trước merge.
+Thông báo contract: `docs/task/pr117-review/issue-101-comment.md`.
 
 ## Payload thật trên bản deploy (2026-11-20, Nghĩa đo)
 
@@ -77,7 +76,5 @@ Email xác nhận Make.com **có** render đúng những trường mà payload m
 Dòng người gửi/người nhận đã được **che** (email và MSSV của 4 thành viên); subject, mốc thời gian
 và toàn bộ thân email giữ nguyên.
 
-**Vẫn chưa đo:** số thao tác thật từ email → stack trace. Ảnh trên chứng minh link có trong email
-và trỏ đúng cụm, nhưng **không** đếm số click: `incident_url` mở Incident View, không tự mở hộp
-thoại stack trace, và số thao tác còn phụ thuộc trạng thái đăng nhập. Chưa đo thì không tuyên bố
-"email → stack trace chỉ còn một click".
+**Ngoài phạm vi:** số thao tác thật từ email → stack trace. Ảnh trên chứng minh link có trong
+email và trỏ đúng cụm, nhưng **không** đếm số click (xem phần đầu tài liệu).

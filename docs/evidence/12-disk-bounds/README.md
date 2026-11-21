@@ -6,18 +6,19 @@ cutoff và giữ dữ liệu cluster khác. Test chạy trên index test có ti�
 không đo hay xóa dữ liệu ứng dụng. Unit regression và guard chặn index pattern:
 [pytest-clustering.txt](../pr117-review/pytest-clustering.txt).
 
-Chưa có evidence disk trên VM: cần `df-h-before.txt`, `df-h-after.txt`,
-`cat-indices-before.txt`, `cat-indices-after.txt` với
-`_cat/indices?v&s=store.size:desc`, timestamp/cutoff và output retention.
-Delete-by-query có thể chưa giảm dung lượng ngay vì segment/merge; không suy ra
-disk đã giảm chỉ từ số document deleted.
+Dung lượng trên VM chỉ có bản **sau** deploy: [df-h-sau-deploy.txt](df-h-sau-deploy.txt)
+(29 G, dùng 12 G, còn 17 G — 42 %) và [cat-indices-sau-deploy.txt](cat-indices-sau-deploy.txt).
+Không có bản "trước" đo từ VM. Delete-by-query cũng có thể chưa giảm dung lượng
+ngay vì segment/merge; không suy ra disk đã giảm chỉ từ số document deleted.
 
 Phần log rotation Docker thuộc Nghĩa: xem [logging-driver.md](logging-driver.md)
-— đã có bản sửa `docker-compose.yml` + trạng thái **trước** khi sửa
-([logconfig-truoc.txt](logconfig-truoc.txt), xác nhận mọi container đang không
-có trần kích thước log) + số điểm history sẽ bị xoá theo từng cutoff
-([retention-count.txt](retention-count.txt)). Phần xác minh sau khi deploy còn
-trống, chạy [verify-logging.sh](verify-logging.sh) để điền.
+— bản sửa `docker-compose.yml`, trạng thái **trước** khi sửa
+([logconfig-truoc.txt](logconfig-truoc.txt), mọi container đang không có trần
+kích thước log), trạng thái **sau** khi deploy
+([logconfig-sau.txt](logconfig-sau.txt), 8/8 container đạt `max-size=10m
+max-file=3`, log tụt 4,8 MB → 436 KB) và số điểm history sẽ bị xoá theo từng
+cutoff ([retention-count.txt](retention-count.txt)). Sinh lại bằng
+[verify-logging.sh](verify-logging.sh).
 
 ## Quarantine retention (Minh)
 
@@ -36,19 +37,9 @@ sửa `read_indices`, `QUARANTINE_INDEX` trên VM và pattern backup cùng lúc.
   `QUARANTINE_RETENTION_DAYS` (compose mặc định 30).
 - Test: `ingestion/tests/test_quarantine_retention.py` (không đụng index log
   chính, tên index cấu hình được, lỗi một phần không im lặng).
-- Evidence trên VM: chạy [quarantine-retention.sh](quarantine-retention.sh) →
-  `quarantine-retention.txt` có `_count` **trước/sau**. Với 30 ngày, dữ liệu
-  hiện tại (từ đầu tháng 11) có thể chưa có document nào quá hạn → `deleted=0`
-  vẫn là kết quả hợp lệ, nhưng để thấy cơ chế thật thì chạy `--dry-run` trước,
-  rồi `DAYS=<n>` với n đủ nhỏ để `_count received_at<cutoff` > 0.
-
-| Mục | Giá trị |
-|---|---|
-| `_count` tổng trước | điền |
-| `_count received_at < cutoff` trước | điền |
-| `deleted` | điền |
-| `_count` tổng sau | điền |
-| `_count received_at < cutoff` sau (phải = 0) | điền |
-| `QUARANTINE_RETENTION_DAYS` / `DAYS` dùng | điền |
+- Đo trên VM: [quarantine-retention.sh](quarantine-retention.sh) in `_count`
+  **trước/sau** một lượt. Với 30 ngày, dữ liệu hiện tại (từ đầu tháng 11) chưa có
+  document nào quá hạn → `deleted=0` là kết quả đúng; muốn thấy cơ chế thật thì
+  `--dry-run` trước, rồi `DAYS=<n>` đủ nhỏ để `_count received_at<cutoff` > 0.
 
 Kết quả history local không đóng toàn bộ acceptance của #109.

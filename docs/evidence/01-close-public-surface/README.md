@@ -7,10 +7,8 @@
 |---|---|---|---|
 | `config-before-after.txt` | Máy dev, Caddy 2.8.4 + Docker | 2026-11-15 | Đã có — **số liệu trước/sau** |
 | `caddy-local.txt` | Máy dev | 2026-11-15 | Đã có — chi tiết lần đo đầu |
-| `portscan-after.txt` | Máy **ngoài** VM → `23.98.41.222` | Sau deploy | Nghĩa điền |
-| `nsg-probe.txt` | Máy ngoài VM, cổng 9009 tạm | Sau deploy | Nghĩa điền |
-| `curl-after.txt` | Máy ngoài VM → `https://23-98-41-222.sslip.io` | Sau deploy | Nghĩa điền |
-| `compose-ps-after.txt` | Trên VM | Sau deploy | Nghĩa điền |
+| `portscan-after.txt` | Máy **ngoài** VM → `23.98.41.222` | Sau deploy | Đã có — quét 6 cổng |
+| `curl-after.txt` | Máy ngoài VM → `https://23-98-41-222.sslip.io` | Sau deploy | Đã có — 7 route |
 
 ## Lưu ý về số liệu "trước"
 
@@ -24,9 +22,9 @@ trọng nhất: compose cũ bind `0.0.0.0` + `[::]` cho cả 4 cổng, và Caddy
 `/demo/*`, `/docs` đi thẳng tới upstream mà không qua lớp auth nào.
 
 Điều phần này **không** chứng minh được là các cổng đó có thật sự tới được từ Internet hay không —
-Azure NSG có thể đã chặn sẵn. Đó là mục đích của `nsg-probe.txt`: mở một cổng rỗng chưa dùng
-(9009) trên VM rồi thử từ máy ngoài. Thông được nghĩa là NSG không chặn cổng cao, tức là trước
-Task 01 bốn cổng kia thật sự hở ra Internet.
+Azure NSG có thể đã chặn sẵn. Muốn biết thì phải mở một cổng rỗng chưa dùng (9009) trên VM rồi
+thử từ máy ngoài; nhóm không làm phép thử đó, nên kết luận dưới đây chỉ nói về trạng thái **sau**
+khi vá, không định lượng được mức độ hở trước đó.
 
 ## Lệnh đo
 
@@ -54,4 +52,9 @@ và `80` **phải** `OPEN` (đối chứng: nếu cả 443 cũng không thông t
 outbound, kết quả không nói được gì về VM). `/jaeger/` và `/demo/simulate-error` trả 401; ba route
 health trả 200; `/docs` trả 200 nhưng chỉ có text, không phải Swagger.
 
-**Kết luận trên VM:** _(điền sau khi có portscan-after.txt)_
+**Kết luận trên VM:** đạt. [portscan-after.txt](portscan-after.txt) — `9000`, `9001`, `9002`,
+`16686` đều `filtered (timeout 5s)`, còn `443` và `80` `OPEN` (đối chứng thông, nên kết quả nói
+về VM chứ không phải mạng của máy đo). [curl-after.txt](curl-after.txt) — `/jaeger/` và
+`/demo/simulate-error` trả **401**; `/demo/health`, `/ingestion/health`, `/health` trả 200;
+`/docs` và `/openapi.json` trả 200 nhưng thân chỉ là text điều hướng
+(`Log Anomaly Explorer - xem /health, /search, /clusters, ...`), không phải Swagger UI.
