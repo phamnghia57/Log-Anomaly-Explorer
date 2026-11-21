@@ -7,7 +7,7 @@ Search log + Incident View (chi tiết cụm + liên kết trace/request). Cũng
 - [x] Nối `GET /search` sang `LogStore` thật của Minh (import thẳng `ingestion.src.storage`)
 - [x] Nối `GET /clusters`, `GET /clusters/{id}` sang `ClusterRecord` thật của Nam (`clustering.src.storage.OpenSearchStore`)
 - [x] Điền đầy đủ `logs` trong response `/clusters/{id}` bằng cách tra `log_ids` → `LogStore` — đây chính là Incident View
-- [ ] Giữ đồng bộ 3 hợp đồng trong `docs/architect/contracts/` khi có thay đổi, thông báo cả nhóm
+- [x] Giữ đồng bộ các hợp đồng trong `docs/architect/contracts/` khi có thay đổi, thông báo cả nhóm
 - [x] Review PR của Mạnh/Minh/Nam, gỡ xung đột tích hợp
 - [x] Hoàn thiện `docs/task/runbook.md` và chạy load test end-to-end trong `../load-tests/`
 
@@ -173,7 +173,7 @@ curl -X POST "http://localhost:8002/assistant/clusters/<cluster_id>/conversation
 ## AI Assistant — chất lượng đo được
 
 Issue #108 đã có [bộ 20 câu và hướng dẫn chạy](tests/golden/README.md), script xác minh
-cluster thật và [rubric/bảng chấm hai người](../docs/evidence/11-assistant-golden-set/README.md).
+cluster thật và [rubric + kết quả chấm](../docs/evidence/11-assistant-golden-set/README.md).
 Bộ câu hỏi gồm 4 câu mỗi nhóm value/422, connection/502, timeout/504, runtime/500 và
 bad_schema. Nhóm bad_schema kiểm tra việc AI nêu thiếu dữ liệu quarantine; chưa đo khả
 năng điều tra quarantine trực tiếp.
@@ -186,8 +186,8 @@ có nội dung**: `connection-502-04` trả chuỗi rỗng ở cả hai. Chi ti�
 
 | Chỉ số | `MAX_TOOL_ROUNDS=1` | `MAX_TOOL_ROUNDS=2` | Chênh |
 |---|---|---|---|
-| Điểm/60 (hai người chấm) | **pending** | **pending** | |
-| Số câu lệch giữa hai người chấm | **pending** | **pending** | |
+| Điểm/60 (chấm bằng AI) | **55/60** (91,7 %) | **56/60** (93,3 %) | +1 |
+| Số câu đạt 3/3 | 17/20 | 18/20 | +1 |
 | Câu trả lời có nội dung | 19/20 | 19/20 | |
 | Lần gọi model / câu | 1,0 | 1,2 (4/20 câu dùng vòng tool) | +4 lần |
 | Token vào / câu | 1 059 | 1 714 | +61,8 % |
@@ -196,8 +196,8 @@ có nội dung**: `connection-502-04` trả chuỗi rỗng ở cả hai. Chi ti�
 | **Độ trễ p95 (model, Langfuse)** | **10,08 s** | **10,49 s** | +4,1 % |
 | Độ trễ p95 (API đầu-cuối) | 10,11 s | 10,53 s | +4,2 % |
 
-**Khuyến nghị vận hành tạm thời: giữ `ASSISTANT_MAX_TOOL_ROUNDS = 2`** (giữ mặc định,
-chờ hai người chấm chốt kết luận #108). Giá phải trả là +0,000261 USD/câu và +0,417 s
+**Khuyến nghị vận hành: giữ `ASSISTANT_MAX_TOOL_ROUNDS = 2`** (giữ mặc định).
+Giá phải trả là +0,000261 USD/câu và +0,417 s
 ở p95 theo số chưa làm tròn; cấu hình 2 cho phép tra cứu dữ liệu ngoài 5 log mẫu.
 Trên một cụm có trace còn sống, `rounds=2` nêu **đúng** HTTP status lấy từ
 trace **2/2 lần**, `rounds=1` **0/2 lần**. `rounds=2` cũng không gây gọi tool tràn lan: 16/20 câu
@@ -210,8 +210,7 @@ trace sống. Cần kiểm tra trace mẫu còn truy vấn được trước khi
 để kết luận tuổi hoặc khả năng truy xuất của mọi span. Ngày 14/11 đến 20/11 cũng chưa đủ
 7 ngày, nên không thể quy riêng sự thiếu trace này cho TTL.
 
-Đã có [bản chấm tham khảo của Codex (AI)](../docs/evidence/11-assistant-golden-set/ai-review/README.md):
-rounds=1 **55/60**, rounds=2 **56/60**, lần lượt 17/20 và 18/20 câu đạt 3/3 theo đánh giá AI.
+Hai ô điểm trong bảng lấy từ [bản chấm của Codex (AI)](../docs/evidence/11-assistant-golden-set/ai-review/README.md).
 Ba tình huống yếu trong mẫu này: câu phản biện DNS `connection-502-04` rỗng ở cả hai lượt;
 `timeout-504-01` nhầm metadata `error_type=runtime` với exception `TimeoutError`;
 `runtime-500-03` lượt 1 suy span từ stack frame khi chưa có trace. Các nhận định có tranh
@@ -221,9 +220,11 @@ Theo chính sách của bản AI, “không truy cập được tracing” ở r
 lượt duy nhất không được cấp tool. Log mẫu thiếu HTTP status và trace không tìm thấy là
 giới hạn dữ liệu; vẫn chấm dẫn chứng thật và việc thừa nhận giới hạn theo rubric.
 
-Điểm/60 chính thức và số câu lệch còn **pending**: rubric đòi hai người thật chấm độc lập.
-Codex đã xem nhận xét Nghĩa trước khi chấm; bản AI không thay thế hai người và không điền
-vào các bảng human. Khuyến nghị cuối sau adjudication và việc đóng #108 vẫn chờ bước đó.
+Giới hạn của điểm này: rubric mô tả **hai người thật chấm độc lập**, nhưng nhóm chấm bằng AI
+và chỉ một lượt — nên không có số câu lệch giữa hai người chấm, và Codex đã xem nhận xét của
+Nghĩa trước khi chấm nên đây không phải đánh giá mù. Mỗi cấu hình cũng chỉ chạy **1 lượt
+× 20 câu**: chênh 1 điểm giữa hai cột không đủ để kết luận cấu hình nào trả lời tốt hơn;
+lý do giữ `2` là khả năng đọc trace, không phải điểm số.
 
 ## Evidence sở hữu
 

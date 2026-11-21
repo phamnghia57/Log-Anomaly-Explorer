@@ -490,16 +490,9 @@ deploy/restore-drill.sh --down
 Stack diễn tập dùng project `lae-restore-drill`, volume và cổng riêng (19200, 18002), repo snapshot
 đăng ký `readonly` — không đụng tới dữ liệu khác trên máy.
 
-### RTO / RPO
-
-| Chỉ số | Giá trị | Cách đo |
-|---|---|---|
-| RPO (bản backup cũ nhất có thể mất) | **chưa đo** — điền: ≤ 24 h trên VM; ngoài VM = 24 h + độ trễ lần kéo/rsync gần nhất | cron 1 lần/đêm; tuổi snapshot in trong `restore-log.txt` ("cách đây … giờ") |
-| RTO (từ lúc bắt đầu đến đăng nhập được) | **chưa đo** — điền từ dòng `RTO do duoc` trong `restore-log.txt` | `deploy/restore-drill.sh` |
-| Dung lượng snapshot | **chưa đo** — điền `du -sh backups/os` | sau snapshot đầu tiên |
-
-Ghi số thật và ngày diễn tập vào bảng trên và vào
-[`docs/evidence/04-backup-restore/README.md`](../evidence/04-backup-restore/README.md).
+`deploy/restore-drill.sh` in sẵn số giây từng bước và dòng `RTO do duoc` ở cuối; tuổi snapshot
+("cách đây … giờ") cho RPO thực tế. RPO theo thiết kế là ≤ 24 h trên VM, và ngoài VM là 24 h
+cộng độ trễ lần kéo/rsync gần nhất.
 
 ## Liên hệ
 

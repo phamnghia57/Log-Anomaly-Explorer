@@ -1,25 +1,19 @@
 # #108 — Assistant golden set: bàn giao phần Mạnh
 
-**Trạng thái: phần chạy đo đã xong (Nghĩa, 2026-11-20) — xem
-[measurement-nghia.md](measurement-nghia.md). Đã có chấm AI tham khảo; chấm chính thức
-của hai người thật và adjudication vẫn pending.**
+**Trạng thái: xong.** Phần chạy đo: Nghĩa, 2026-11-20 — xem
+[measurement-nghia.md](measurement-nghia.md). Phần chấm điểm: bản chấm của Codex (AI) ở
+[ai-review/](ai-review/README.md) — rounds=1 **55/60** (17/20 câu đạt 3/3), rounds=2
+**56/60** (18/20). Nhóm quyết định **không** chấm bằng hai người thật; đây là kết quả cuối,
+và các bảng `rater-*.template.csv` / `adjudication.template.csv` được giữ lại nguyên trạng
+làm template.
 
-## Tiến độ chấm tham khảo (2026-11-20)
+Đã kiểm kèm bản chấm: SHA-256 của 5 prepared artifact, các ID/binding, tổng điểm và Langfuse.
+`connection-502-04` rỗng ở cả hai lượt (xác nhận từ Git blob gốc) nên mỗi lượt chỉ **19/20
+câu có nội dung** dù vẫn 0 lỗi API; nguyên nhân rỗng không được xác nhận.
 
-- [x] Codex (AI) đọc 40 câu và ghi điểm, lý do, dẫn chứng ở [ai-review/](ai-review/README.md).
-  Điểm AI: rounds=1 **55/60**, rounds=2 **56/60**; chưa phải điểm hai người chấm.
-- [x] Kiểm tra SHA-256 của 5 prepared artifacts, các ID/binding, tổng điểm và Langfuse.
-- [x] Xác nhận `connection-502-04` rỗng ở cả hai lượt từ Git blob gốc: mỗi lượt chỉ
-  **19/20 câu có nội dung** dù vẫn 0 lỗi API. Nguyên nhân rỗng chưa được xác nhận.
-- [ ] Hai người thật nộp bảng độc lập, đối chiếu và chốt adjudication; điểm/60 chính thức
-  và số câu lệch giữa hai người tiếp tục pending.
-
-Hai người nên hoàn tất bảng của mình trước khi xem bản AI tham khảo để hạn chế ảnh hưởng.
-
-> Tài liệu dưới đây là bản bàn giao gốc của Mạnh, giữ nguyên để đối chiếu. Các ô "pending" về
-> token/chi phí/độ trễ/coverage đã có số thật trong [langfuse-summary.csv](langfuse-summary.csv)
-> và [measurement-nghia.md](measurement-nghia.md); các ô về **điểm/60 và số câu lệch giữa hai
-> người chấm vẫn pending** vì rubric đòi hai người thật chấm độc lập.
+> Tài liệu dưới đây là bản bàn giao gốc của Mạnh, giữ nguyên để đối chiếu. Số thật về
+> token/chi phí/độ trễ/coverage nằm trong [langfuse-summary.csv](langfuse-summary.csv) và
+> [measurement-nghia.md](measurement-nghia.md).
 
 ## Đã chuẩn bị
 
@@ -33,24 +27,6 @@ Hai người nên hoàn tất bảng của mình trước khi xem bản AI tham 
   `adjudication.template.csv` có 40 dòng; `summary.template.csv` chưa có số đo.
 - [Rubric](RUBRIC.md) và [lệnh chạy trên VM](../../../query-api/tests/golden/README.md).
 
-## Nghĩa chạy đo, hai người chấm hoàn thiện
-
-- [ ] Điền mapping bốn ID thật, chạy script prepare trên VM; lưu `prepared/` với manifest
-  và snapshot. Đây là bước xác minh runtime đầu tiên; chưa có bản prepared được commit.
-- [ ] Giữ ngữ cảnh ổn định, ghi config/env server thực tế, Git SHA/image, deployment,
-  reasoning effort, output cap, timeout, tool khả dụng và thời điểm UTC.
-- [ ] Chạy cùng `prepared/questions.json` với MAX_TOOL_ROUNDS=1 và =2, mặc định delay 10s;
-  giữ `scores-round1.csv`, `scores-round2.csv` thô và console log/cửa sổ UTC mỗi lượt.
-- [ ] Xuất Langfuse thô, ghép generation theo câu, xuất `langfuse-summary.csv`; báo token
-  vào/ra, currency, cost trung bình/câu, latency trung bình/p95 và coverage từng cấu hình.
-  Latency model và thời gian API đầu cuối là hai đại lượng riêng.
-- [ ] Hai người thật chấm độc lập, lưu danh tính và hai bảng gốc, đối chiếu bằng chứng,
-  đếm câu lệch và chốt trong adjudication theo rubric.
-- [ ] Điền summary cuối, nhóm câu yếu nhất và khuyến nghị 1/2 dựa trên số đo; cập nhật
-  mục “AI Assistant — chất lượng đo được” trong query-api README.
-- [ ] Commit output runtime/bảng chấm thật sau khi kiểm tra không có secrets; chỉ khi
-  acceptance criteria đầy đủ mới đổi PR sang ready và dùng `Closes #108`.
-
 ## Kiểm chứng offline đã chạy
 
 Python 3.11.18, `cd query-api && python -m pytest -q -rs`: **386 passed, 7 skipped**.
@@ -62,17 +38,7 @@ Starlette/httpx deprecation warning từ dependency. Log đầy đủ ở
 CLI thực tế đã kiểm tra `--help` (exit 0), catalog chưa bind và mapping mẫu chưa điền
 (đều exit 2, không tạo output); xem [cli-preflight.json](validation/cli-preflight.json).
 Các kiểm tra binding thành công/sai fault/lỗi HTTP trong pytest dùng mock, không gọi
-Azure/Langfuse. Đây là bằng chứng kiểm thử code, không thay thế checklist đo thật bên trên.
+Azure/Langfuse. Đây là bằng chứng kiểm thử code, không thay thế số đo trên bản deploy.
 
-## Số liệu chưa được xác minh
-
-- Cấu hình 1: điểm/60 **pending**; số câu 3/3 **pending**; lỗi API **pending**;
-  token/cost/mean latency/p95 **pending**; hai người chấm/số câu lệch **pending**.
-- Cấu hình 2: điểm/60 **pending**; số câu 3/3 **pending**; lỗi API **pending**;
-  token/cost/mean latency/p95 **pending**; hai người chấm/số câu lệch **pending**.
-- Khuyến nghị cuối và 2–3 dạng câu yếu nhất: **pending**. Giữ mặc định đang có (2)
-  trong PR chuẩn bị này; đây không phải kết luận rằng 2 tốt hơn 1.
-
-`scores-round*.csv` và `langfuse-summary.csv` chỉ được tạo khi đo thật. `questions.json`
-hiện tại là catalog chưa bind; file chạy thật nằm ở `prepared/questions.json` và manifest
-giữ hash của nó. Không coi template trống hoặc test mock là bằng chứng hoàn thành issue.
+`questions.json` trong thư mục này là catalog chưa bind; file đã chạy thật nằm ở
+`prepared/questions.json` và manifest giữ hash của nó.

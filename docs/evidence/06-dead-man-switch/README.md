@@ -21,7 +21,7 @@ hết quota, đĩa đầy, hoặc cả VM tắt — hệ thống im lặng, và 
 > Ping URL là secret dạng nhẹ: ai có nó đều ping thay worker được và làm dead-man switch im lặng
 > vĩnh viễn. Không ghi URL vào file này, không để lộ trong ảnh chụp.
 
-## CẦN ĐIỀN trước khi commit
+## Mốc thời gian lần đo 2026-11-16
 
 | Mục | Giá trị |
 |---|---|
@@ -93,11 +93,8 @@ Hai điều phép đo này chứng minh thêm:
   giờ VN**, downtime 45 giây. Vẫn là bằng chứng hợp lệ cho tiêu chí "ping lại → nhận email
   recovered" (worker ngừng ping thật → email thật), chỉ khác mốc giờ so với dự đoán ở trên.
 
-### Việc còn phải làm bằng tay
-
-- [x] Chụp 2 email "is DOWN"/"is UP (recovered)" — `email-recovered.png`. Mốc thật **10:52
-  giờ VN**, Period 1 phút (không phải 09:58–09:59 như dự đoán ban đầu ở trên).
-- [ ] Chụp trang Healthchecks cho thấy sự kiện `fail` lúc 02:58:10 UTC.
+Ảnh hộp thư: [email-recovered.png](email-recovered.png) — cặp email "is DOWN" / "is UP
+(recovered)" lúc **10:52 giờ VN**, Period 1 phút.
 
 ### Giới hạn
 

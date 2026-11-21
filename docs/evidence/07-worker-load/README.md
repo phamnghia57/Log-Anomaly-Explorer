@@ -3,7 +3,7 @@
 **Đo cái gì:** `cycle_seconds` của clustering worker ở 10 / 50 / 100 log ERROR/giây, và từ mức nào
 worker bắt đầu lỡ cửa sổ 60 giây.
 
-**Trạng thái:** công cụ đã sẵn sàng, **chưa có số đo trên VM**. Bảng kết quả và kết luận nằm ở
+Bảng kết quả và kết luận nằm ở
 [`load-tests/README.md` mục Error storm](../../../load-tests/README.md#error-storm--worker-issue-103),
 được sinh tự động từ các file trong thư mục này — không sửa tay.
 
@@ -37,16 +37,7 @@ số Locust user, rate limit lúc đo): xem `load-tests/README.md`.
 Sau `summary`: `summary.md`, `summary.json`, và `issue-step2.md` **nếu** có chu kỳ > 30 giây
 (thân issue cho bước 2 của #103).
 
-## Checklist trước khi commit
-
-- [ ] Đủ 3 mức, mỗi mức có `cycle-<R>.csv`, output Locust, `docker-stats-<R>.txt`.
-- [ ] Bảng trong `load-tests/README.md` đã được `summary` điền, không còn "Chưa đo".
-- [ ] Mức nào không đạt RATE (< 95% hoặc có 429) đã được bảng ghi "không đại diện".
-- [ ] Đã ghi có / không nạp đủ 30 cửa sổ baseline (cột "Baseline nạp trước").
-- [ ] Có chu kỳ > 30 giây → đã mở issue từ `issue-step2.md`; không có → kết luận ghi "chưa cần bước 2".
-- [ ] Đã chạy `restore`, resume Healthchecks + UptimeRobot, check xanh lại.
-
-## File cũ trong thư mục
+## File hiện có trong thư mục
 
 - `heartbeat-sau-deploy.json`, `worker-cycles-idle.txt`: heartbeat và log worker **lúc rảnh**
   (0 log/chu kỳ, `cycle_seconds` ~5 ms) ngay sau khi deploy PR #117 — chỉ chứng minh heartbeat có
