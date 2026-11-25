@@ -109,7 +109,9 @@ class OpenSearchStore:
         try:
             page = self.client.search(index=self.logs, scroll="2m",
                                       ignore_unavailable=True, allow_no_indices=True, body={
-                "size": 1000, "sort": ["_doc"], "query": {"bool": {"filter": [
+                "size": 1000, "sort": ["_doc"],
+                "_source": ["timestamp", "level", "service", "message", "trace_id"],
+                "query": {"bool": {"filter": [
                     {"range": {"timestamp": {"gte": start, "lt": end}}},
                     {"terms": {"level": ["ERROR", "FATAL"]}},
                 ]}},
@@ -138,15 +140,34 @@ class OpenSearchStore:
         except Exception as exc:
             raise StorageError(f"write_cluster failed: {exc}") from exc
 
-    def write_history(self, record, recorded_at):
-        """Append one score point for a cluster at the cycle's window_to."""
+    @staticmethod
+    def _history_point(record, recorded_at):
         point = {name: record[name] for name in ("cluster_id", "score", "status")}
         point.update({name: record[name] for name in ("first_seen", "last_seen") if name in record})
         point["recorded_at"] = recorded_at
+        return point
+
+    def write_history(self, record, recorded_at):
+        """Append one score point for a cluster at the cycle's window_to."""
         try:
-            self.client.index(index=self.history, body=point, refresh="wait_for")
+            self.client.index(index=self.history, body=self._history_point(record, recorded_at),
+                              refresh="wait_for")
         except Exception as exc:
             raise StorageError(f"write_history failed: {exc}") from exc
+
+    def write_cycle(self, records, recorded_at):
+        body = []
+        for record in records:
+            body.extend(({"index": {"_index": self.clusters, "_id": record["cluster_id"]}}, record,
+                         {"index": {"_index": self.history}}, self._history_point(record, recorded_at)))
+        if not body:
+            return
+        try:
+            response = self.client.bulk(body=body, refresh="wait_for")
+            if response.get("errors"):
+                raise RuntimeError("Incomplete cycle write")
+        except Exception as exc:
+            raise StorageError(f"write_cycle failed: {exc}") from exc
 
     def delete_history_before(self, cutoff):
         """Delete only history points strictly older than an ISO-8601 cutoff."""

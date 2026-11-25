@@ -22,8 +22,8 @@ Cách đọc bảng:
   collector poll 1 giây/lần nên có thể lỡ một heartbeat dù worker không bỏ cửa sổ. Các `window_to`
   liên tiếp phải cách nhau **đúng 60 giây**; khoảng 120 giây = 1 cửa sổ bị bỏ.
 - `cycle_seconds` đo từ đầu xử lý đến sau khi ghi cluster/history, trước khi ghi heartbeat và
-  ping ngoài, không gồm sleep. Vượt 30 giây **chưa chắc** đã bỏ cửa sổ (worker có ~50 giây trước
-  cửa sổ kế tiếp), nhưng là ngưỡng mở bước 2 của #103 (lấy mẫu TF-IDF, chặn trần `log_ids`).
+  ping ngoài, không gồm sleep. Vượt 30 giây **chưa chắc** đã bỏ cửa sổ (worker có ~60 giây, tức
+  `WINDOW_SECONDS`, trước cửa sổ kế tiếp; xem `time.sleep` cuối vòng lặp trong `clustering/src/worker.py`), nhưng là ngưỡng mở bước 2 của #103 (lấy mẫu TF-IDF, chặn trần `log_ids`).
   Có chu kỳ > 30 giây thì `summary` sinh sẵn `issue-step2.md` để mở issue:
   `gh issue create --title "perf(clustering): buoc 2 cua #103 - lay mau TF-IDF, chan tran log_ids" --body-file docs/evidence/07-worker-load/issue-step2.md`.
 - **Đại diện mức tải?** = Locust đạt ≥ 95% RATE và không có 429. Không đạt thì số đo **không

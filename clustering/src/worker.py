@@ -63,9 +63,7 @@ def main():
                               history_windows=history, threshold=get_threshold(), augmenter=augmenter)
             check_and_alert_batch(records, window_to=end.isoformat(), store=store, incidents=incidents,
                                   on_delivery=report_delivery)
-            for _, record in records:
-                store.write_cluster(record)
-                store.write_history(record, end.isoformat())
+            store.write_cycle([record for _, record in records], end.isoformat())
             cycle_seconds = time.perf_counter() - cycle_start
             if args.window_to is None:
                 store.write_heartbeat(datetime.now(timezone.utc).isoformat(), cycle_seconds=cycle_seconds,

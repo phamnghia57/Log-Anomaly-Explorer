@@ -1,6 +1,6 @@
-import { Suspense, lazy, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import type { ClusterStatus } from "@/lib/api";
-import { useClusters } from "@/lib/queries";
+import { useClusteringHeartbeat, useClusters } from "@/lib/queries";
 import { AppShell } from "@/components/layout/AppShell";
 import { StatCards } from "@/components/dashboard/StatCards";
 import { ClusterGrid } from "@/components/dashboard/ClusterGrid";
@@ -31,6 +31,13 @@ export function DashboardPage() {
   // nay). useMemo khoa `since` lai, chi tinh lai khi NGUOI DUNG doi `range`.
   const since = useMemo(() => sinceFromRange(range), [range]);
   const { data, isLoading, isFetching, isError, error, refetch } = useClusters(since, autoRefreshMs);
+  const { data: lastProcessedAt } = useClusteringHeartbeat(autoRefreshMs === false || !data ? false : 5_000);
+  const seenHeartbeat = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    if (lastProcessedAt === undefined) return;
+    if (seenHeartbeat.current !== undefined && seenHeartbeat.current !== lastProcessedAt) void refetch();
+    seenHeartbeat.current = lastProcessedAt;
+  }, [lastProcessedAt, refetch]);
 
   // Loc hien thi theo status + service o client (data da tai day du trong
   // khoang thoi gian). Cross-filter: moi facet dem tren tap DA LOC BOI FACET
