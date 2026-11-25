@@ -97,6 +97,32 @@ describe("frontend authentication integration", () => {
     expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeVisible();
   });
 
+  it("refetches dashboard clusters within 5 seconds of a new clustering heartbeat", async () => {
+    vi.useFakeTimers();
+    saveSession(session());
+    let heartbeat = "2026-11-25T00:00:10Z";
+    fetchMock.mockImplementation((url: string) => Promise.resolve(url.endsWith("/clustering/health")
+      ? new Response(JSON.stringify({ status: "ok", reason: null, last_processed_at: heartbeat }))
+      : new Response(JSON.stringify({ total: 0, clusters: [] }))));
+    renderApp();
+    const calls = (path: string) => fetchMock.mock.calls.filter(([url]) => new URL(url, "http://x").pathname.endsWith(path));
+    await act(async () => { await vi.advanceTimersByTimeAsync(1); });
+    expect(calls("/clusters")).toHaveLength(1);
+    expect(calls("/clustering/health")).toHaveLength(1);
+    expect(calls("/clustering/health")[0][1].headers).toBeUndefined();
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
+    expect(calls("/clustering/health")).toHaveLength(2);
+    expect(calls("/clusters")).toHaveLength(1);
+
+    heartbeat = "2026-11-25T00:01:10Z";
+    await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
+    expect(calls("/clusters")).toHaveLength(2);
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
+    expect(calls("/clusters")).toHaveLength(2);
+  });
+
   it("keeps polling public system health when startup refresh returns 503", async () => {
     vi.useFakeTimers();
     fetchMock.mockImplementation((url) => Promise.resolve(url.endsWith("/auth/refresh")

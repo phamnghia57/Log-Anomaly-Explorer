@@ -7,6 +7,7 @@ import {
   getAssistantConversation,
   getCluster,
   getClusterHistory,
+  getClusteringHeartbeat,
   listClusters,
   searchLogs,
   searchAggregations,
@@ -25,6 +26,16 @@ export function useClusters(since?: string, refetchIntervalMs: number | false = 
     queryKey: ["clusters", since],
     queryFn: ({ signal }) => listClusters({ since }, signal),
     refetchInterval: refetchIntervalMs, // du lieu "song" - cum co the doi status/score giua cac lan clustering chay
+  });
+}
+
+export function useClusteringHeartbeat(refetchIntervalMs: number | false) {
+  return useQuery({
+    queryKey: ["clustering-heartbeat"],
+    queryFn: ({ signal }) => getClusteringHeartbeat(signal),
+    refetchInterval: refetchIntervalMs,
+    enabled: refetchIntervalMs !== false,
+    retry: false,
   });
 }
 

@@ -26,9 +26,9 @@ hết quota, đĩa đầy, hoặc cả VM tắt — hệ thống im lặng, và 
 | Mục | Giá trị |
 |---|---|
 | Period / Grace đã đặt trên Healthchecks | `5 phút / 3 phút` |
-| Ping cuối cùng `(09:52)` | `5` |
-| Nhận email "is DOWN" `(10:00)` | `3` |
-| **Chênh lệch thật** | ** `0 phút` ** |
+| Ping cuối cùng (giờ VN) | `09:52` — [stop-at.txt](stop-at.txt): `2026-11-16T02:52:40+00:00` |
+| Nhận email "is DOWN" (giờ VN) | `10:00` — xem [email-down.png](email-down.png) |
+| **Chênh lệch thật** | **`8 phút`** = Period 5 + Grace 3 |
 
 ## Kết quả
 
@@ -79,7 +79,7 @@ status `anomalous`.
 | 02:59:10.755 | chu kỳ kế tiếp yên tĩnh → ping **thành công** trở lại | `GET https://hc-ping.com/<token> "HTTP/1.1 200 OK"` |
 | 03:01:43 | trả `clustering` về webhook thật | — |
 
-Hai điều phép đo này chứng minh thêm:
+Phép đo này chứng minh thêm:
 
 - **`/fail` tới được dịch vụ ngoài**: HTTP 200, không phải suy luận từ việc "không thấy lỗi".
 - **Một lần gửi thất bại không làm worker im lặng mãi**: chu kỳ 02:59 ping lại bình thường. Đây

@@ -11,10 +11,8 @@ def test_cycle_batches_alerts_then_appends_final_status(monkeypatch):
     class Store:
         def ensure_ready(self): pass
         def read_logs(self, start, end): return []
-        def write_cluster(self, record):
-            calls.append(("cluster", record["cluster_id"], record["status"]))
-        def write_history(self, record, end):
-            calls.append(("history", record["cluster_id"], record["status"], end))
+        def write_cycle(self, cycle, end):
+            calls.append(("cycle", [(r["cluster_id"], r["status"]) for r in cycle], end))
         def close(self): calls.append(("close",))
     def send(batch, *, window_to, store, incidents, on_delivery):
         assert isinstance(store, Store)
@@ -28,13 +26,9 @@ def test_cycle_batches_alerts_then_appends_final_status(monkeypatch):
     monkeypatch.setattr(worker, "analyze", lambda *a, **kw: records)
     monkeypatch.setattr(worker, "check_and_alert_batch", send)
     worker.main()
-    assert [c for c in calls if c[0] == "digest"] == [("digest", "2026-10-26T00:01:00+00:00")]
-    assert [c for c in calls if c[0] == "cluster"] == [("cluster", "c1", "alerted"),
-                                                        ("cluster", "c2", "normal")]
-    assert [c for c in calls if c[0] == "history"] == [
-        ("history", "c1", "alerted", "2026-10-26T00:01:00+00:00"),
-        ("history", "c2", "normal", "2026-10-26T00:01:00+00:00")]
-    assert calls[-1] == ("close",)
+    assert calls == [("digest", "2026-10-26T00:01:00+00:00"),
+                     ("cycle", [("c1", "alerted"), ("c2", "normal")], "2026-10-26T00:01:00+00:00"),
+                     ("close",)]
 
 
 def test_live_cycle_without_clusters_still_writes_heartbeat(monkeypatch):
@@ -54,7 +48,7 @@ def test_live_cycle_without_clusters_still_writes_heartbeat(monkeypatch):
     metrics = store.write_heartbeat.call_args.kwargs
     assert metrics["cycle_seconds"] >= 0
     assert metrics["logs_read"] == 0 and metrics["clusters_out"] == 0
-    store.write_history.assert_not_called()
+    store.write_cycle.assert_called_once_with([], metrics["window_to"])
 
 
 @pytest.mark.parametrize("outcomes, expected_signals", [
@@ -119,8 +113,8 @@ def test_incident_storage_failure_does_not_interrupt_live_cycle(monkeypatch, cap
 
     post.assert_called_once()
     store.write_alert_times.assert_called_once()
-    store.write_cluster.assert_called_once_with(cluster)
-    store.write_history.assert_called_once()
+    store.write_cycle.assert_called_once()
+    assert store.write_cycle.call_args.args[0] == [cluster]
     store.write_heartbeat.assert_called_once()
     store.close.assert_called_once()
     ping.assert_called_once_with()

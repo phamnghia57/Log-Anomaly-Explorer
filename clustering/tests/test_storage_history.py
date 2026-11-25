@@ -201,6 +201,74 @@ def test_write_history_appends_only_schema_fields(store):
     assert client.calls[0][1]["body"]["recorded_at"] != client.calls[1][1]["body"]["recorded_at"]
 
 
+def test_read_logs_fetches_only_fields_the_pipeline_uses(store):
+    from clustering.src.pipeline import analyze
+    s, client = store
+    stored = [{"timestamp": f"2026-10-26T00:{minute:02d}:{n:02d}Z", "level": level, "service": "web",
+               "message": f"Timeout after {n} ms calling payments", "trace_id": f"t{n}",
+               "span_id": f"s{n}", "stack_trace": "Traceback (most recent call last): ...",
+               "attributes": {"route": "/checkout"}}
+              for n, (minute, level) in enumerate([(5, "ERROR")] + [(30, "ERROR")] * 4 + [(30, "FATAL")])]
+    def search(**kw):
+        client.calls.append(("search", kw))
+        fields = kw["body"]["_source"]
+        return {"_scroll_id": "s1", "hits": {"hits": [
+            {"_id": f"l{n}", "_source": {k: v for k, v in log.items() if k in fields}}
+            for n, log in enumerate(stored)]}}
+    client.search = search
+    client.scroll = lambda **kw: {"_scroll_id": "s1", "hits": {"hits": []}}
+    client.clear_scroll = lambda **kw: client.calls.append(("clear_scroll", kw))
+    logs = list(s.read_logs("2026-10-26T00:00:00Z", "2026-10-26T00:31:00Z"))
+    assert client.calls[-1] == ("clear_scroll", {"body": {"scroll_id": ["s1"]}})
+    assert all("stack_trace" not in log and "attributes" not in log for log in logs)
+    full = [{**log, "log_id": f"l{n}"} for n, log in enumerate(stored)]
+    window = {"window_seconds": 60, "history_windows": 30, "threshold": 3.0}
+    assert analyze(logs, "2026-10-26T00:31:00Z", **window) == analyze(full, "2026-10-26T00:31:00Z", **window)
+    assert analyze(logs, "2026-10-26T00:31:00Z", **window)[0][1]["status"] == "anomalous"
+
+
+def test_write_cycle_upserts_clusters_and_appends_history_in_one_bulk(store):
+    s, client = store
+    calls = []
+    def bulk(**kw):
+        calls.append(kw)
+        return {"errors": False}
+    client.bulk = bulk
+    records = [{"cluster_id": "c1", "score": 5.0, "status": "alerted", "log_ids": ["l1"],
+                "first_seen": "2026-10-26T00:00:01Z", "last_seen": "2026-10-26T00:00:59Z"},
+               {"cluster_id": "c2", "score": 0.0, "status": "normal", "log_ids": ["l2"]}]
+    s.write_cycle(records, "2026-10-26T00:01:00Z")
+    assert len(calls) == 1 and calls[0]["refresh"] == "wait_for"
+    body = calls[0]["body"]
+    assert body[0] == {"index": {"_index": "clusters", "_id": "c1"}} and body[1] is records[0]
+    assert body[2] == {"index": {"_index": "cluster-history"}}
+    assert body[3] == {"cluster_id": "c1", "score": 5.0, "status": "alerted",
+                       "first_seen": "2026-10-26T00:00:01Z", "last_seen": "2026-10-26T00:00:59Z",
+                       "recorded_at": "2026-10-26T00:01:00Z"}
+    assert body[4] == {"index": {"_index": "clusters", "_id": "c2"}} and body[5] is records[1]
+    assert body[7] == {"cluster_id": "c2", "score": 0.0, "status": "normal",
+                       "recorded_at": "2026-10-26T00:01:00Z"}
+    assert len(body) == 8
+
+
+def test_write_cycle_skips_empty_cycle(store):
+    s, client = store
+    client.bulk = lambda **kw: pytest.fail("empty cycle must not issue a bulk request")
+    s.write_cycle([], "2026-10-26T00:01:00Z")
+
+
+def _offline_bulk(**kw):
+    raise RuntimeError("offline")
+
+
+@pytest.mark.parametrize("bulk", [lambda **kw: {"errors": True}, _offline_bulk])
+def test_write_cycle_rejects_partial_or_failed_bulk(store, bulk):
+    s, client = store
+    client.bulk = bulk
+    with pytest.raises(StorageError, match="write_cycle failed"):
+        s.write_cycle([{"cluster_id": "c1", "score": 1, "status": "normal"}], "2026-10-26T00:01:00Z")
+
+
 def test_write_history_wraps_client_failure(store):
     s, client = store
     def fail(**kw):

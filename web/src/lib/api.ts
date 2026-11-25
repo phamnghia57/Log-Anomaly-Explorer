@@ -233,6 +233,12 @@ export async function getSystemHealth(signal?: AbortSignal): Promise<ServiceHeal
   }));
 }
 
+export async function getClusteringHeartbeat(signal?: AbortSignal): Promise<string | null> {
+  const response = await fetch(`${API_BASE_URL}/clustering/health`, { signal, cache: "no-store" });
+  const body = await response.json().catch(() => null) as { last_processed_at?: string | null } | null;
+  return body?.last_processed_at ?? null;
+}
+
 export function listClusters(params: { status?: ClusterStatus | ""; since?: string }, signal?: AbortSignal) {
   return queryJson<{ total: number; clusters: ClusterRecord[] }>("/clusters", {
     status: params.status || undefined,
